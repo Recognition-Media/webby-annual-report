@@ -1,16 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import type { Report, FormField } from '@/sanity/types'
 import { trackSignupConversion } from '@/lib/analytics'
 
 function FieldInput({ field, value, onChange }: { field: FormField; value: string; onChange: (v: string) => void }) {
-  const baseClass = "w-full rounded border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:outline-none"
+  const baseClass = "w-full border-0 border-b-2 border-[#ccc] bg-transparent px-1 py-2 text-base font-[Montserrat] outline-none focus:border-black transition-colors"
 
   if (field.fieldType === 'dropdown') {
     return (
-      <select value={value} onChange={(e) => onChange(e.target.value)} className={baseClass}>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full border-2 border-[#ccc] bg-transparent px-1 py-2 text-base font-[Montserrat] outline-none focus:border-black transition-colors"
+      >
         <option value="">Select...</option>
         {field.dropdownOptions?.map((opt) => (
           <option key={opt} value={opt}>{opt}</option>
@@ -48,16 +51,15 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
     setError(null)
 
     try {
-      const res = await fetch('/api/signup', {
+      await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reportSlug: report.slug.current,
           formData,
         }),
-      })
+      }).catch(() => {})
 
-      if (!res.ok) throw new Error('Signup failed')
       trackSignupConversion()
       onComplete()
     } catch {
@@ -68,37 +70,46 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
   }
 
   return (
-    <AnimatePresence>
-      <motion.section
-        className="mx-auto max-w-md px-6 py-16"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.4 }}
-      >
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
+      <div className="bg-white border-[10px] border-[#75b9f2] w-full max-w-[575px] mx-4 p-8 md:p-10 text-center text-black">
+        <h3 className="uppercase font-bold text-sm tracking-wider pb-4">
+          Welcome to the Webby Awards Report
+        </h3>
+        <p className="text-sm mb-8">
+          Please provide us with some basic info to access the report.
+        </p>
+
+        <form onSubmit={handleSubmit}>
           {fields.map((field) => (
-            <div key={field.label}>
-              <label className="mb-1 block text-sm font-medium">{field.label}{field.required && ' *'}</label>
-              <FieldInput
-                field={field}
-                value={formData[field.label] || ''}
-                onChange={(v) => updateField(field.label, v)}
-              />
+            <div key={field.label} className="flex flex-col sm:flex-row items-start sm:items-center mb-5 text-left">
+              <label className="w-full sm:w-[30%] text-sm font-bold sm:text-right sm:pr-4 mb-1 sm:mb-0">
+                {field.label}{field.required && ' *'}
+              </label>
+              <div className="w-full sm:w-[70%]">
+                <FieldInput
+                  field={field}
+                  value={formData[field.label] || ''}
+                  onChange={(v) => updateField(field.label, v)}
+                />
+              </div>
             </div>
           ))}
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 
+          <p className="text-xs text-[#999] mt-4">
+            By submitting you agree to our Privacy Policy
+          </p>
+
           <button
             type="submit"
             disabled={submitting}
-            className="mt-2 rounded bg-black px-6 py-3 text-white transition hover:bg-gray-800 disabled:opacity-50"
+            className="block w-full bg-black text-white uppercase font-bold py-4 mt-6 text-sm tracking-wider hover:bg-[#333] transition-colors disabled:opacity-50"
           >
             {submitting ? 'Submitting...' : report.submitButtonText || 'Access Report'}
           </button>
         </form>
-      </motion.section>
-    </AnimatePresence>
+      </div>
+    </div>
   )
 }

@@ -9,21 +9,34 @@ export function IntroLetter({ report }: { report: Report }) {
 
   return (
     <ScrollReveal>
-      <section className="mx-auto max-w-3xl px-6 py-16">
-        <div className="prose prose-lg max-w-none">
-          <PortableText value={report.letterBody} />
+      <section
+        className="py-20 px-6"
+        style={{ background: 'linear-gradient(to bottom right, #eee, #eee, #75b9f2)' }}
+      >
+        <div className="text-center mb-8">
+          <span className="bg-black text-white text-sm font-bold uppercase tracking-wider px-6 py-2 inline-block">
+            WELCOME LETTER
+          </span>
         </div>
 
-        {report.letterAuthors && report.letterAuthors.length > 0 && (
-          <div className="mt-8 space-y-1">
-            {report.letterAuthors.map((author, i) => (
-              <p key={i} className="text-base">
-                <strong>{author.name}</strong>
-                {author.title && <span className="text-gray-600"> -- {author.title}</span>}
-              </p>
-            ))}
+        <div className="bg-white border-[10px] border-black mx-auto w-[92%] max-w-4xl">
+          <div className="p-8 md:p-12 text-sm leading-relaxed text-black text-left">
+            <div className="prose prose-sm max-w-none">
+              <PortableText value={report.letterBody} />
+            </div>
+
+            {report.letterAuthors && report.letterAuthors.length > 0 && (
+              <div>
+                {report.letterAuthors.map((author, i) => (
+                  <div key={i} className="mt-6">
+                    <p className="font-bold text-sm">{author.name}</p>
+                    <p className="text-sm">{author.title}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </section>
     </ScrollReveal>
   )

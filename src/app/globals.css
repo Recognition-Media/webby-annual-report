@@ -2,26 +2,80 @@
 @plugin "@tailwindcss/typography";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-primary-blue: #85CEFF;
+  --color-primary-green: #7ACA6C;
+  --color-lime-accent: #a7f076;
+  --color-blue-gradient: #75b9f2;
+  --color-light-gray: #eee;
+  --color-dark-gray: #333;
+  --color-author-gray: #555;
+  --color-copyright-gray: #999;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary-blue: var(--color-primary-blue);
+  --color-primary-green: var(--color-primary-green);
+  --color-lime-accent: var(--color-lime-accent);
+  --color-blue-gradient: var(--color-blue-gradient);
+  --color-light-gray: var(--color-light-gray);
+  --color-dark-gray: var(--color-dark-gray);
+  --color-author-gray: var(--color-author-gray);
+  --color-copyright-gray: var(--color-copyright-gray);
+  --font-sans: var(--font-montserrat), 'Montserrat', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  line-height: 26px;
+  background: #fff;
+  color: #000;
+}
+
+/* Vertical text for trend section titles */
+.vertical-title {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+/* Divider between trend sections */
+.trend-divider {
+  position: relative;
+  height: 1px;
+  background-color: #eee;
+  margin: 80px 0;
+}
+
+.trend-divider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 72px;
+  height: 1px;
+  background-color: #000;
+}
+
+/* Squiggle divider between quotes */
+.squiggle-divider {
+  width: 60px;
+  height: 8px;
+  margin: 16px 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='8' viewBox='0 0 60 8'%3E%3Cpath d='M0 4 Q5 0 10 4 Q15 8 20 4 Q25 0 30 4 Q35 8 40 4 Q45 0 50 4 Q55 8 60 4' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* Typography overrides for prose in trend sections */
+.prose a {
+  color: inherit;
+  font-weight: 700;
+}
+
+.prose a:hover {
+  text-decoration: underline;
 }

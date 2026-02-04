@@ -1,43 +1,50 @@
 'use client'
 
 import Image from 'next/image'
-import { PortableText } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
 
 export function ReportFooter({ report }: { report: Report }) {
   return (
-    <footer className="border-t border-gray-200 px-6 py-16">
-      <div className="mx-auto max-w-3xl">
-        {report.ceremonyDetails && (
-          <div className="prose mb-8">
-            <PortableText value={report.ceremonyDetails} />
+    <footer className="bg-black px-6 py-10">
+      <div className="mx-auto max-w-3xl text-center">
+        {/* Logo - white version using invert filter */}
+        {report.headerImage && (
+          <div className="mb-8">
+            <Image
+              src={urlFor(report.headerImage).width(240).url()}
+              alt="Webby Awards"
+              width={120}
+              height={40}
+              className="mx-auto brightness-0 invert"
+            />
           </div>
         )}
 
-        {report.sponsorLogos && report.sponsorLogos.length > 0 && (
-          <div className="mb-8 flex flex-wrap items-center justify-center gap-8">
-            {report.sponsorLogos.map((logo, i) => (
-              <Image
-                key={i}
-                src={urlFor(logo).height(40).url()}
-                alt="Sponsor"
-                width={120}
-                height={40}
-              />
-            ))}
-          </div>
-        )}
-
+        {/* Navigation links */}
         {report.footerLinks && report.footerLinks.length > 0 && (
-          <nav className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
-            {report.footerLinks.map((link, i) => (
-              <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                {link.label}
-              </a>
-            ))}
+          <nav className="mb-6">
+            <ul className="flex flex-wrap justify-center gap-0 list-none p-0 m-0">
+              {report.footerLinks.map((link, i) => (
+                <li key={i}>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white text-sm no-underline hover:underline px-4"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </nav>
         )}
+
+        {/* Copyright */}
+        <p className="text-xs" style={{ color: '#999' }}>
+          &copy; {new Date().getFullYear()} The Webby Awards. All rights reserved.
+        </p>
       </div>
     </footer>
   )

@@ -1,26 +1,35 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import type { ExpertQuote } from '@/sanity/types'
 
-export function ExpertQuoteCard({ quote }: { quote: ExpertQuote }) {
+interface Props {
+  quote: ExpertQuote
+  showDivider?: boolean
+}
+
+export function ExpertQuoteCard({ quote, showDivider = false }: Props) {
   return (
-    <motion.blockquote
-      className="border-l-4 border-gray-300 pl-6 py-2"
-      whileHover={{ x: 4 }}
-      transition={{ duration: 0.2 }}
-    >
-      <p className="text-lg italic">&ldquo;{quote.quoteText}&rdquo;</p>
-      <footer className="mt-2 text-sm text-gray-600">
+    <div className="mb-4">
+      <div className="text-base leading-relaxed">
+        &ldquo;{quote.quoteText}&rdquo;
+      </div>
+      <div className="text-xs mt-3" style={{ color: '#555' }}>
+        {'- '}
         {quote.linkedInUrl ? (
-          <a href={quote.linkedInUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
-            <strong>{quote.name}</strong>
+          <a
+            href={quote.linkedInUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-inherit hover:underline"
+          >
+            {quote.name}
           </a>
         ) : (
-          <strong>{quote.name}</strong>
+          <span>{quote.name}</span>
         )}
-        {quote.title && <span> — {quote.title}</span>}
-      </footer>
-    </motion.blockquote>
+        {quote.title && `, ${quote.title}`}
+      </div>
+      {showDivider && <div className="squiggle-divider my-4" />}
+    </div>
   )
 }

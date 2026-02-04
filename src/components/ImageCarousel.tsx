@@ -1,14 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { CarouselImage } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
 import { ScrollReveal } from './ScrollReveal'
 
-export function ImageCarousel({ images }: { images: CarouselImage[] }) {
+interface ImageCarouselProps {
+  images: CarouselImage[]
+  variant?: 'hero' | 'standalone'
+}
+
+export function ImageCarousel({ images, variant = 'standalone' }: ImageCarouselProps) {
   const [current, setCurrent] = useState(0)
+
+  useEffect(() => {
+    if (variant !== 'hero') return
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % images.length)
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [variant, images.length])
 
   function next() {
     setCurrent((prev) => (prev + 1) % images.length)
@@ -16,6 +29,31 @@ export function ImageCarousel({ images }: { images: CarouselImage[] }) {
 
   function prev() {
     setCurrent((prev) => (prev - 1 + images.length) % images.length)
+  }
+
+  if (variant === 'hero') {
+    return (
+      <div className="absolute inset-0">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={current}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={urlFor(images[current].image).width(1600).height(900).url()}
+              alt={images[current].caption || ''}
+              fill
+              className="object-cover"
+              priority
+            />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    )
   }
 
   return (

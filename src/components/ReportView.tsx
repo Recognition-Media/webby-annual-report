@@ -1,14 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PortableText } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
 import { HeroSection } from './HeroSection'
 import { SignupGate } from './SignupGate'
 import { IntroLetter } from './IntroLetter'
 import { TrendSection } from './TrendSection'
-import { ImageCarousel } from './ImageCarousel'
 import { ReportFooter } from './ReportFooter'
 import { AnalyticsScripts } from './AnalyticsScripts'
+import { ScrollReveal } from './ScrollReveal'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -39,7 +40,7 @@ export function ReportView({ report }: { report: Report }) {
   return (
     <main>
       <AnalyticsScripts report={report} />
-      <HeroSection report={report} />
+      <HeroSection report={report} carouselImages={report.carouselImages} />
 
       {!hasAccess ? (
         <SignupGate report={report} onComplete={handleSignupComplete} />
@@ -49,9 +50,24 @@ export function ReportView({ report }: { report: Report }) {
           {report.trendSections?.map((section, i) => (
             <TrendSection key={i} section={section} index={i} />
           ))}
-          {report.carouselImages && report.carouselImages.length > 0 && (
-            <ImageCarousel images={report.carouselImages} />
-          )}
+
+          {/* Thank You section */}
+          <ScrollReveal>
+            <section className="px-6 py-[60px]" style={{ backgroundColor: '#333' }}>
+              <div className="mx-auto max-w-3xl bg-white p-10 shadow-lg">
+                <p className="text-center text-4xl mb-2">🙏</p>
+                <h2 className="text-center text-2xl font-bold mb-6" style={{ color: '#75b9f2' }}>
+                  Thank you
+                </h2>
+                {report.ceremonyDetails && (
+                  <div className="prose max-w-none">
+                    <PortableText value={report.ceremonyDetails} />
+                  </div>
+                )}
+              </div>
+            </section>
+          </ScrollReveal>
+
           <ReportFooter report={report} />
         </>
       )}
