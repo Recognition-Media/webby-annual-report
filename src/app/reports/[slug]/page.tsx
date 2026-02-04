@@ -4,6 +4,8 @@ import { reportBySlugQuery } from '@/sanity/queries'
 import type { Report } from '@/sanity/types'
 import { ReportView } from '@/components/ReportView'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{ slug: string }>
 }
