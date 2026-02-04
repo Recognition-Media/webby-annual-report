@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Report, FormField } from '@/sanity/types'
+import { trackSignupConversion } from '@/lib/analytics'
 
 function FieldInput({ field, value, onChange }: { field: FormField; value: string; onChange: (v: string) => void }) {
   const baseClass = "w-full rounded border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:outline-none"
@@ -57,6 +58,7 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
       })
 
       if (!res.ok) throw new Error('Signup failed')
+      trackSignupConversion()
       onComplete()
     } catch {
       setError('Something went wrong. Please try again.')
