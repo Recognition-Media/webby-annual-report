@@ -3,6 +3,7 @@ import { structureTool } from 'sanity/structure'
 import { visionTool } from '@sanity/vision'
 import { schemaTypes } from './schemas'
 import { projectId, dataset } from './config'
+import { signupExportPlugin } from './plugins/signupExport'
 
 export default defineConfig({
   name: 'webby-annual-report',
@@ -10,6 +11,6 @@ export default defineConfig({
   projectId,
   dataset,
   basePath: '/studio',
-  plugins: [structureTool(), visionTool()],
+  plugins: [structureTool(), visionTool(), signupExportPlugin()],
   schema: { types: schemaTypes },
 })
