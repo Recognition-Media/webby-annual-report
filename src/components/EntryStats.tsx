@@ -34,7 +34,7 @@ function ScrollNumber({ value, progress }: { value: string; progress: MotionValu
   const prefix = match ? match[1] : ''
   const suffix = match ? match[3] : ''
 
-  const count = useTransform(progress, [0.15, 0.7], [0, num])
+  const count = useTransform(progress, [0.1, 0.42], [0, num])
   const display = useTransform(count, (v) =>
     Math.round(v).toLocaleString('en-US')
   )

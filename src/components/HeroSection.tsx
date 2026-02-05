@@ -23,6 +23,15 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           <div className="absolute inset-0 bg-black" />
         )}
 
+        {/* Webby spiral overlay */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <img
+            src="/webby-spiral.png"
+            alt=""
+            className="absolute object-contain opacity-10"
+            style={{ top: '50%', left: '50%', width: '200%', height: '200%', transform: 'translate(-50%, -50%) rotate(-45deg)' }}
+          />
+        </div>
       </div>
 
       {/* Right panel — 1/3 width, three stacked rows */}
