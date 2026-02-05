@@ -21,7 +21,8 @@ function SignupExportTool() {
     setLoading(true)
     try {
       const params = slugFilter ? `?reportSlug=${encodeURIComponent(slugFilter)}` : ''
-      const res = await fetch(`/api/signups${params}`)
+      const apiUrl = process.env.NEXT_PUBLIC_SIGNUP_API_URL || ''
+      const res = await fetch(`${apiUrl}/signups${params}`)
       const data = await res.json()
       setSignups(data.signups || [])
     } catch (err) {
@@ -58,23 +59,59 @@ function SignupExportTool() {
     URL.revokeObjectURL(url)
   }
 
+  const allKeys = signups.length > 0
+    ? Array.from(new Set(signups.flatMap((s) => Object.keys(s.formData))))
+    : []
+
+  const sorted = [...signups].sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+
   return (
     <Card padding={4}>
       <Stack space={4}>
         <Text size={3} weight="bold">Report Signups</Text>
 
-        <Select value={slugFilter} onChange={(e) => setSlugFilter((e.target as HTMLSelectElement).value)}>
-          <option value="">All Reports</option>
-        </Select>
-
-        <Button onClick={fetchSignups} text="Refresh" tone="primary" disabled={loading} />
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <Select value={slugFilter} onChange={(e) => setSlugFilter((e.target as HTMLSelectElement).value)} style={{ maxWidth: 300 }}>
+            <option value="">All Reports</option>
+          </Select>
+          <Button onClick={fetchSignups} text="Refresh" tone="primary" disabled={loading} />
+          <Button onClick={exportCsv} text="Export CSV" tone="positive" disabled={signups.length === 0} />
+        </div>
 
         {loading ? (
           <Spinner />
         ) : (
           <>
             <Text size={1} muted>{signups.length} signups found</Text>
-            <Button onClick={exportCsv} text="Export CSV" tone="positive" disabled={signups.length === 0} />
+
+            {sorted.length > 0 && (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid #ddd', textAlign: 'left' }}>
+                      <th style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>Date</th>
+                      <th style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>Report</th>
+                      {allKeys.map((k) => (
+                        <th key={k} style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>{k}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sorted.map((s) => (
+                      <tr key={s.id} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: '6px 12px', whiteSpace: 'nowrap' }}>
+                          {new Date(s.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        </td>
+                        <td style={{ padding: '6px 12px' }}>{s.reportSlug}</td>
+                        {allKeys.map((k) => (
+                          <td key={k} style={{ padding: '6px 12px' }}>{s.formData[k] || ''}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </>
         )}
       </Stack>

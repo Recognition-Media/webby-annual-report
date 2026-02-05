@@ -53,7 +53,7 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
     setError(null)
 
     try {
-      await fetch('/api/signup', {
+      await fetch(`${process.env.NEXT_PUBLIC_SIGNUP_API_URL}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
