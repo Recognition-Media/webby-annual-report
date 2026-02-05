@@ -79,6 +79,12 @@ export interface Report {
   shareImage?: SanityImage
   headerImage?: SanityImage
   heroStats?: HeroStat[]
+  globalStats?: HeroStat[]
+  entryStats?: HeroStat[]
+  webbyHistory?: string
+  iadasDescription?: string
+  iadasStats?: HeroStat[]
+  iadasLogo?: SanityImage
   letterBody?: PortableTextBlock[]
   letterAuthors?: LetterAuthor[]
   carouselImages?: CarouselImage[]

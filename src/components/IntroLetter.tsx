@@ -13,13 +13,13 @@ export function IntroLetter({ report }: { report: Report }) {
         className="py-20 px-6"
         style={{ background: 'linear-gradient(to bottom right, #eee, #eee, #75b9f2)' }}
       >
-        <div className="text-center mb-8">
-          <span className="bg-black text-white text-sm font-bold uppercase tracking-wider px-6 py-2 inline-block">
-            WELCOME LETTER
-          </span>
-        </div>
-
-        <div className="bg-white border-[10px] border-black mx-auto w-[92%] max-w-4xl">
+        <div className="relative bg-white border-[8px] border-black mx-auto w-[92%] max-w-4xl">
+          {/* Label sits on the top border */}
+          <div className="absolute -top-[18px] left-1/2 -translate-x-1/2">
+            <span className="bg-black text-white text-xs font-normal uppercase tracking-[0.25em] px-6 py-2 inline-block">
+              WELCOME LETTER
+            </span>
+          </div>
           <div className="p-8 md:p-12 text-sm leading-relaxed text-black text-left">
             <div className="prose prose-sm max-w-none">
               <PortableText value={report.letterBody} />

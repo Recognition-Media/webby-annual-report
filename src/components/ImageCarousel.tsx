@@ -44,7 +44,7 @@ export function ImageCarousel({ images, variant = 'standalone' }: ImageCarouselP
             className="absolute inset-0"
           >
             <Image
-              src={urlFor(images[current].image).width(1600).height(900).url()}
+              src={urlFor(images[current].image).width(1600).url()}
               alt={images[current].caption || ''}
               fill
               className="object-cover"

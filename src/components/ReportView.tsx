@@ -5,11 +5,15 @@ import { PortableText } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
 import { HeroSection } from './HeroSection'
 import { SignupGate } from './SignupGate'
+import { TimelineSection } from './TimelineSection'
+import { EntryStats } from './EntryStats'
+import { IadasSection } from './IadasSection'
 import { IntroLetter } from './IntroLetter'
 import { TrendSection } from './TrendSection'
 import { ReportFooter } from './ReportFooter'
 import { AnalyticsScripts } from './AnalyticsScripts'
 import { ScrollReveal } from './ScrollReveal'
+import { StickyNav } from './StickyNav'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -42,11 +46,27 @@ export function ReportView({ report }: { report: Report }) {
       <AnalyticsScripts report={report} />
       <HeroSection report={report} carouselImages={report.carouselImages} />
 
+      <div id="report-content" />
+
       {!hasAccess ? (
         <SignupGate report={report} onComplete={handleSignupComplete} />
       ) : (
         <>
+          <StickyNav report={report} />
+
+          {/* Welcome letter */}
           <IntroLetter report={report} />
+
+          {/* Webby intro + Stats + Year slider */}
+          <TimelineSection report={report} />
+
+          {/* Entry stats (entries received, countries, flags) */}
+          <EntryStats stats={report.entryStats} />
+
+          {/* IADAS section */}
+          <IadasSection report={report} />
+
+          {/* Trend sections */}
           {report.trendSections?.map((section, i) => (
             <TrendSection key={i} section={section} index={i} />
           ))}

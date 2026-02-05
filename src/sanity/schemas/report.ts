@@ -33,6 +33,17 @@ export default defineType({
     // Carousel
     { name: 'carouselImages', title: 'Image Carousel', type: 'array', of: [{ type: 'carouselImage' }] },
 
+    // Global stats (4-quadrant: population, internet users, etc.)
+    { name: 'globalStats', title: 'Global Stats', type: 'array', of: [{ type: 'heroStat' }] },
+    // Entry stats (entries received, countries, states)
+    { name: 'entryStats', title: 'Entry Stats', type: 'array', of: [{ type: 'heroStat' }] },
+    // Webby history blurb (shown in blue year-info panel)
+    { name: 'webbyHistory', title: 'Webby History Text', type: 'text', rows: 5 },
+    // IADAS section
+    { name: 'iadasLogo', title: 'IADAS Logo', type: 'image' },
+    { name: 'iadasDescription', title: 'IADAS Description', type: 'text', rows: 8 },
+    { name: 'iadasStats', title: 'IADAS Stats', type: 'array', of: [{ type: 'heroStat' }] },
+
     // Trends
     { name: 'trendSections', title: 'Trend Sections', type: 'array', of: [{ type: 'trendSection' }] },
 
