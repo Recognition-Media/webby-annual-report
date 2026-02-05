@@ -39,7 +39,7 @@ export interface FeaturedProject {
 export interface ExpertQuote {
   name: string
   title?: string
-  quoteText: string
+  quoteText: PortableTextBlock[]
   linkedInUrl?: string
 }
 

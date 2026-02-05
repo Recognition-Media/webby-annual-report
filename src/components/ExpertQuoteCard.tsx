@@ -1,5 +1,6 @@
 'use client'
 
+import { PortableText } from '@portabletext/react'
 import type { ExpertQuote } from '@/sanity/types'
 
 interface Props {
@@ -11,7 +12,7 @@ export function ExpertQuoteCard({ quote, showDivider = false }: Props) {
   return (
     <div className="mb-4">
       <div className="text-base leading-relaxed">
-        &ldquo;{quote.quoteText}&rdquo;
+        &ldquo;<PortableText value={quote.quoteText} />&rdquo;
       </div>
       <div className="text-xs mt-3" style={{ color: '#555' }}>
         {'- '}
