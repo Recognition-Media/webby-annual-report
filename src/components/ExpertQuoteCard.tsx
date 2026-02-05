@@ -11,7 +11,7 @@ interface Props {
 export function ExpertQuoteCard({ quote, showDivider = false }: Props) {
   return (
     <div className="mb-4">
-      <div className="text-base leading-relaxed">
+      <div className="text-base leading-relaxed [&_p]:inline">
         &ldquo;<PortableText value={quote.quoteText} />&rdquo;
       </div>
       <div className="text-xs mt-3" style={{ color: '#555' }}>
