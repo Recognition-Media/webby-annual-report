@@ -10,11 +10,11 @@ const FALLBACK_TEXT =
 
 export function WebbyIntro({ report, progress }: { report: Report; progress: MotionValue<number> }) {
   const text = report.webbyHistory || FALLBACK_TEXT
-  const x = useTransform(progress, [0, 0.2], ['-100%', '0%'])
+  const x = useTransform(progress, [0, 0.25], ['-100%', '0%'])
 
   return (
     <motion.section
-      className="bg-[#a7f076] text-black px-8 md:px-16 h-full flex flex-col justify-center"
+      className="bg-[#a7f076] text-black px-8 md:px-16 py-12 h-full flex flex-col justify-center"
       style={{ x }}
     >
       {/* Logo centered */}
@@ -32,7 +32,7 @@ export function WebbyIntro({ report, progress }: { report: Report; progress: Mot
       </div>
 
       {/* History text — left aligned */}
-      <p className="text-base leading-[1.8] max-w-[900px] mt-4">
+      <p className="text-base leading-[1.7] max-w-[900px] -mt-1">
         {text}
       </p>
     </motion.section>

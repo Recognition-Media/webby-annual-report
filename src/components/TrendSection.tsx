@@ -8,26 +8,36 @@ import { ExpertQuoteCard } from './ExpertQuoteCard'
 import { ScrollReveal } from './ScrollReveal'
 
 export function TrendSection({ section, index }: { section: TrendSectionType; index: number }) {
-  const bgColor = index % 2 === 0 ? '#85CEFF' : '#7ACA6C'
+  const bgColor = index % 2 === 0 ? '#76B9F2' : '#7ACA6C'
 
   return (
     <ScrollReveal>
       {/* Divider before section (except first) */}
       {index > 0 && <div className="trend-divider" />}
 
-      <section className="px-6 md:px-[60px]">
+      <section className={`pl-6 md:pl-[60px] pr-0 ${index === 0 ? 'pt-[100px]' : ''}`}>
         <div className="flex flex-col lg:flex-row">
-          {/* Vertical title on left — rotates on lg screens */}
-          <div className="text-2xl lg:text-[32px] font-bold uppercase mb-6 lg:mb-0 lg:shrink-0 lg:flex lg:items-center text-center lg:text-left lg:pr-6 lg:[writing-mode:vertical-rl] lg:[transform:rotate(180deg)]">
-            {section.trendTitle}
+          {/* Vertical title on left — rotates on lg screens, vertically centered */}
+          <div className="text-2xl lg:text-[32px] font-bold uppercase mb-6 lg:mb-0 lg:w-[80px] lg:shrink-0 flex flex-col items-center justify-center lg:pr-[8px] lg:ml-[-10px] lg:[writing-mode:vertical-rl] lg:[transform:rotate(180deg)]">
+            {section.trendTitle.split('\n').map((line, lineIndex) => (
+              <div key={lineIndex} className="text-center">
+                {line.split(/([\p{Emoji_Presentation}\p{Extended_Pictographic}])/gu).map((part, i) =>
+                  /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(part) ? (
+                    <span key={i} style={{ display: 'inline-block', transform: 'rotate(90deg)', margin: '0 4px' }}>{part}</span>
+                  ) : (
+                    <span key={i}>{part}</span>
+                  )
+                )}
+              </div>
+            ))}
           </div>
 
-          {/* Content area — two columns */}
-          <div className="flex-1 flex flex-col md:flex-row">
-            {/* Left column — article text + section image */}
-            <div className="w-full md:w-1/2 p-6 md:p-10">
+          {/* Content area — two columns, pushed right */}
+          <div className="flex-1 flex flex-col md:flex-row md:ml-[42px]">
+            {/* Left column — article text, vertically centered */}
+            <div className="w-full md:w-[48%] p-6 md:p-10 md:pr-[50px] flex flex-col justify-center">
               {section.trendBody && (
-                <div className="prose prose-sm max-w-none">
+                <div className="max-w-none text-base font-normal leading-[26px] [&>p]:mb-4">
                   <PortableText value={section.trendBody} />
                 </div>
               )}
@@ -71,14 +81,14 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
               )}
             </div>
 
-            {/* Right column — colored quote panel */}
+            {/* Right column — colored quote panel, extends to browser edge */}
             {section.expertQuotes && section.expertQuotes.length > 0 && (
               <div
-                className="w-full md:w-1/2 relative overflow-hidden p-8 md:p-10"
+                className="w-full md:flex-1 relative overflow-hidden p-8 md:p-10 md:pl-[50px] md:pr-[60px]"
                 style={{ backgroundColor: bgColor }}
               >
                 {/* Large decorative quote mark */}
-                <div className="absolute top-[-40px] left-[-10px] text-[20rem] md:text-[25rem] opacity-20 leading-none select-none pointer-events-none font-bold text-black">
+                <div className="absolute top-[-30px] md:top-[-40px] left-[10px] text-[12rem] md:text-[16rem] opacity-20 leading-none select-none pointer-events-none font-bold text-black">
                   &ldquo;
                 </div>
 

@@ -1,10 +1,13 @@
 import { notFound } from 'next/navigation'
 import { client } from '@/sanity/client'
-import { reportBySlugQuery } from '@/sanity/queries'
+import { reportBySlugQuery, allReportSlugsQuery } from '@/sanity/queries'
 import type { Report } from '@/sanity/types'
 import { ReportView } from '@/components/ReportView'
 
-export const dynamic = 'force-dynamic'
+export async function generateStaticParams() {
+  const slugs = await client.fetch<{ slug: string }[]>(allReportSlugsQuery)
+  return slugs.map((s) => ({ slug: s.slug }))
+}
 
 interface Props {
   params: Promise<{ slug: string }>

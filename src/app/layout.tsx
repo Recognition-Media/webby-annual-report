@@ -16,6 +16,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="stylesheet" href="https://use.typekit.net/ona0hkt.css" />
+      </head>
       <body className={`${montserrat.className} bg-white text-black`}>{children}</body>
     </html>
   )

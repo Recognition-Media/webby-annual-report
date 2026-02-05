@@ -11,6 +11,17 @@ export default defineConfig({
   projectId,
   dataset,
   basePath: '/studio',
-  plugins: [structureTool(), visionTool(), signupExportPlugin()],
+  plugins: [
+    structureTool(),
+    signupExportPlugin(),
+    visionTool({
+      defaultApiVersion: '2024-01-01',
+    }),
+  ],
   schema: { types: schemaTypes },
+  tools: (prev, { currentUser }) => {
+    const isAdmin = currentUser?.roles?.some((r) => r.name === 'administrator')
+    if (isAdmin) return prev
+    return prev.filter((tool) => tool.name !== 'vision')
+  },
 })

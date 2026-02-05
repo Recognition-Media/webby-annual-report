@@ -11,8 +11,11 @@ export function YearProgress({ progress }: { progress: MotionValue<number> }) {
   const tooltipTop = useTransform(progress, [0.1, 0.85], ['0%', '100%'])
   const yearDisplay = useTransform(currentYear, (v) => Math.round(v).toString())
 
+  // Fade in as green/black sections slide in (progress 0 to 0.35)
+  const opacity = useTransform(progress, [0, 0.35], [0, 1])
+
   return (
-    <div className="flex flex-col items-center py-8 h-full">
+    <motion.div className="flex flex-col items-center py-8 h-full" style={{ opacity }}>
       <span className="text-sm text-black/30 mb-2">{START_YEAR}</span>
 
       {/* Full-height track — thin gray line, thicker gradient fill */}
@@ -41,6 +44,6 @@ export function YearProgress({ progress }: { progress: MotionValue<number> }) {
       </div>
 
       <span className="text-sm text-black/30 mt-2">{END_YEAR}</span>
-    </div>
+    </motion.div>
   )
 }

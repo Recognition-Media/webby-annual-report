@@ -9,9 +9,10 @@ import { ImageCarousel } from './ImageCarousel'
 interface HeroSectionProps {
   report: Report
   carouselImages?: CarouselImage[]
+  onSeeReport?: () => void
 }
 
-export function HeroSection({ report, carouselImages }: HeroSectionProps) {
+export function HeroSection({ report, carouselImages, onSeeReport }: HeroSectionProps) {
   return (
     <section className="flex flex-col md:flex-row w-full h-screen">
       {/* Left panel — 2/3 width, image carousel with trophy overlay */}
@@ -73,16 +74,16 @@ export function HeroSection({ report, carouselImages }: HeroSectionProps) {
             A deeper look at the 29th Annual Webby Awards.
           </motion.p>
 
-          <motion.a
-            href="#report-content"
-            className="inline-flex items-center justify-between w-full max-w-[280px] bg-black text-white uppercase font-bold py-4 px-6 mt-8 text-sm tracking-wider hover:bg-gray-900 transition-colors"
+          <motion.button
+            onClick={onSeeReport}
+            className="inline-flex items-center justify-between w-full max-w-[280px] bg-black text-white uppercase font-bold py-4 px-6 mt-8 text-sm tracking-wider hover:bg-gray-900 transition-colors cursor-pointer"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <span>See The Report</span>
             <span className="text-lg">→</span>
-          </motion.a>
+          </motion.button>
         </div>
 
         {/* Bottom row — trophy photo (25%) */}

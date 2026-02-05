@@ -1,14 +1,12 @@
-import { redirect } from 'next/navigation'
 import { client } from '@/sanity/client'
 import { latestReportSlugQuery } from '@/sanity/queries'
-
-export const dynamic = 'force-dynamic'
+import { redirect } from 'next/navigation'
 
 export default async function HomePage() {
   const result = await client.fetch<{ slug: { current: string } } | null>(latestReportSlugQuery)
 
   if (result?.slug?.current) {
-    redirect(`/reports/${result.slug.current}`)
+    redirect(`/${result.slug.current}`)
   }
 
   return (

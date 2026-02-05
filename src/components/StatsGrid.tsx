@@ -50,7 +50,7 @@ function AnimatedNumber({ value, progress }: { value: string; progress: MotionVa
   )
 
   return (
-    <span className="text-4xl md:text-5xl font-bold text-white">
+    <span className="text-[28px] md:text-[34px] font-bold text-white">
       {prefix}<motion.span>{display}</motion.span>{suffix}
     </span>
   )
@@ -59,8 +59,11 @@ function AnimatedNumber({ value, progress }: { value: string; progress: MotionVa
 export function StatsGrid({ stats, progress }: { stats?: HeroStat[]; progress: MotionValue<number> }) {
   const data = stats && stats.length > 0 ? stats : FALLBACK_STATS
 
+  // Slide in from left, starting when green is ~50% done and finishing after
+  const x = useTransform(progress, [0.12, 0.35], ['-100%', '0%'])
+
   return (
-    <section className="bg-black text-white h-full flex items-center">
+    <motion.section className="bg-black text-white h-full flex items-center" style={{ x }}>
       <div className="grid grid-cols-1 sm:grid-cols-2 w-full">
         {data.map((stat, i) => (
           <div
@@ -77,6 +80,6 @@ export function StatsGrid({ stats, progress }: { stats?: HeroStat[]; progress: M
           </div>
         ))}
       </div>
-    </section>
+    </motion.section>
   )
 }

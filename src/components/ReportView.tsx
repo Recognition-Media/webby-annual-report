@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
 import { HeroSection } from './HeroSection'
@@ -29,6 +30,7 @@ function setCookie(name: string, value: string, days: number) {
 export function ReportView({ report }: { report: Report }) {
   const cookieKey = `report-access-${report.slug.current}`
   const [hasAccess, setHasAccess] = useState(false)
+  const [showGate, setShowGate] = useState(false)
 
   useEffect(() => {
     if (getCookie(cookieKey)) {
@@ -36,22 +38,52 @@ export function ReportView({ report }: { report: Report }) {
     }
   }, [cookieKey])
 
+  function handleSeeReport() {
+    if (hasAccess) {
+      // Already has access, scroll to content
+      document.getElementById('report-content')?.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      setShowGate(true)
+    }
+  }
+
   function handleSignupComplete() {
     setCookie(cookieKey, 'true', 365)
+    setShowGate(false)
     setHasAccess(true)
+    // Scroll to welcome letter after a brief delay for content to render
+    setTimeout(() => {
+      document.getElementById('report-content')?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
   }
 
   return (
     <main>
       <AnalyticsScripts report={report} />
-      <HeroSection report={report} carouselImages={report.carouselImages} />
+      <HeroSection report={report} carouselImages={report.carouselImages} onSeeReport={handleSeeReport} />
 
-      <div id="report-content" />
+      {/* Signup gate modal — only shown when triggered */}
+      <AnimatePresence>
+        {showGate && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <SignupGate report={report} onComplete={handleSignupComplete} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {!hasAccess ? (
-        <SignupGate report={report} onComplete={handleSignupComplete} />
-      ) : (
-        <>
+      {/* Report content — revealed after access */}
+      {hasAccess && (
+        <motion.div
+          id="report-content"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
           <StickyNav report={report} />
 
           {/* Welcome letter */}
@@ -84,12 +116,14 @@ export function ReportView({ report }: { report: Report }) {
                     <PortableText value={report.ceremonyDetails} />
                   </div>
                 )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/bye.gif" alt="Bye" className="mx-auto mt-6 w-48" />
               </div>
             </section>
           </ScrollReveal>
 
           <ReportFooter report={report} />
-        </>
+        </motion.div>
       )}
     </main>
   )

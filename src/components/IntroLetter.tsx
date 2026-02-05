@@ -37,6 +37,23 @@ export function IntroLetter({ report }: { report: Report }) {
             )}
           </div>
         </div>
+
+        {/* Bouncing scroll indicator */}
+        <div className="flex justify-center mt-10">
+          <svg
+            width="24"
+            height="14"
+            viewBox="0 0 24 14"
+            fill="none"
+            stroke="black"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="animate-bounce"
+          >
+            <path d="M2 2l10 10L22 2" />
+          </svg>
+        </div>
       </section>
     </ScrollReveal>
   )
