@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, PutCommand, ScanCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { randomUUID } from 'crypto';
 
 const ddbClient = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-east-1' });
@@ -16,7 +16,7 @@ function corsHeaders(origin) {
   const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
     'Access-Control-Allow-Origin': allowed,
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
 }
@@ -73,6 +73,18 @@ export async function handler(event) {
 
       const result = await docClient.send(new ScanCommand(scanParams));
       return response(200, { signups: result.Items || [] }, origin);
+    }
+
+    if (method === 'DELETE' && path.endsWith('/signup')) {
+      const params = event.queryStringParameters || {};
+      if (!params.id) {
+        return response(400, { error: 'Missing id parameter' }, origin);
+      }
+      await docClient.send(new DeleteCommand({
+        TableName: TABLE_NAME,
+        Key: { id: params.id },
+      }));
+      return response(200, { success: true }, origin);
     }
 
     return response(404, { error: 'Not found' }, origin);

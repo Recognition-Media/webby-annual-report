@@ -70,6 +70,18 @@ function SignupExportTool() {
     URL.revokeObjectURL(url)
   }
 
+  async function deleteSignup(id: string) {
+    if (!confirm('Delete this signup?')) return
+    try {
+      const res = await fetch(`${API_URL}/signup?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      setSignups((prev) => prev.filter((s) => s.id !== id))
+    } catch (err) {
+      console.error('Failed to delete signup', err)
+      alert('Failed to delete signup')
+    }
+  }
+
   const allKeys = signups.length > 0
     ? Array.from(new Set(signups.flatMap((s) => Object.keys(s.formData))))
     : []
@@ -124,6 +136,7 @@ function SignupExportTool() {
                       {allKeys.map((k) => (
                         <th key={k} style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>{k}</th>
                       ))}
+                      <th style={{ padding: '8px 12px' }}></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -136,6 +149,14 @@ function SignupExportTool() {
                         {allKeys.map((k) => (
                           <td key={k} style={{ padding: '6px 12px' }}>{s.formData[k] || ''}</td>
                         ))}
+                        <td style={{ padding: '6px 12px' }}>
+                          <button
+                            onClick={() => deleteSignup(s.id)}
+                            style={{ background: 'none', border: 'none', color: '#d00', cursor: 'pointer', fontSize: 13 }}
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
