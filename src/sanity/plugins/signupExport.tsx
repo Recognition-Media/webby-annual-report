@@ -3,7 +3,9 @@
 import { definePlugin } from 'sanity'
 import { UsersIcon } from '@sanity/icons'
 import { useState, useEffect, useCallback } from 'react'
-import { Card, Stack, Button, Select, Text, Spinner } from '@sanity/ui'
+import { Card, Stack, Button, Text, Spinner } from '@sanity/ui'
+
+const API_URL = process.env.NEXT_PUBLIC_SIGNUP_API_URL || ''
 
 interface Signup {
   id: string
@@ -14,25 +16,34 @@ interface Signup {
 
 function SignupExportTool() {
   const [signups, setSignups] = useState<Signup[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [slugFilter, setSlugFilter] = useState('')
+  const [error, setError] = useState('')
 
   const fetchSignups = useCallback(async () => {
     setLoading(true)
+    setError('')
     try {
+      if (!API_URL) {
+        setError('Signup API URL not configured')
+        return
+      }
       const params = slugFilter ? `?reportSlug=${encodeURIComponent(slugFilter)}` : ''
-      const apiUrl = process.env.NEXT_PUBLIC_SIGNUP_API_URL || ''
-      const res = await fetch(`${apiUrl}/signups${params}`)
+      const res = await fetch(`${API_URL}/signups${params}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       setSignups(data.signups || [])
     } catch (err) {
       console.error('Failed to fetch signups', err)
+      setError(`Failed to load signups: ${err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
   }, [slugFilter])
 
   useEffect(() => { fetchSignups() }, [fetchSignups])
+
+  const uniqueSlugs = Array.from(new Set(signups.map((s) => s.reportSlug))).sort()
 
   function exportCsv() {
     if (signups.length === 0) return
@@ -63,26 +74,45 @@ function SignupExportTool() {
     ? Array.from(new Set(signups.flatMap((s) => Object.keys(s.formData))))
     : []
 
-  const sorted = [...signups].sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+  const filtered = slugFilter
+    ? signups.filter((s) => s.reportSlug === slugFilter)
+    : signups
+  const sorted = [...filtered].sort((a, b) => b.timestamp.localeCompare(a.timestamp))
 
   return (
     <Card padding={4}>
       <Stack space={4}>
         <Text size={3} weight="bold">Report Signups</Text>
 
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Select value={slugFilter} onChange={(e) => setSlugFilter((e.target as HTMLSelectElement).value)} style={{ maxWidth: 300 }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+          <select
+            value={slugFilter}
+            onChange={(e) => setSlugFilter(e.target.value)}
+            style={{
+              padding: '8px 12px',
+              fontSize: 14,
+              border: '1px solid #ccc',
+              borderRadius: 4,
+              background: 'white',
+              minWidth: 200,
+            }}
+          >
             <option value="">All Reports</option>
-          </Select>
+            {uniqueSlugs.map((slug) => (
+              <option key={slug} value={slug}>{slug}</option>
+            ))}
+          </select>
           <Button onClick={fetchSignups} text="Refresh" tone="primary" disabled={loading} />
           <Button onClick={exportCsv} text="Export CSV" tone="positive" disabled={signups.length === 0} />
         </div>
+
+        {error && <Text size={1} style={{ color: '#d00' }}>{error}</Text>}
 
         {loading ? (
           <Spinner />
         ) : (
           <>
-            <Text size={1} muted>{signups.length} signups found</Text>
+            <Text size={1} muted>{sorted.length} signups{slugFilter ? ` for ${slugFilter}` : ''}</Text>
 
             {sorted.length > 0 && (
               <div style={{ overflowX: 'auto' }}>
