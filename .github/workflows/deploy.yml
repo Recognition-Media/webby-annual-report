@@ -38,7 +38,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Deploy to S3
-        run: aws s3 sync out/ s3://webbyawards-com-assets --delete
+        run: aws s3 sync out/ s3://webbyawards-com-assets --delete --exact-timestamps
 
       - name: Invalidate CloudFront cache
         run: aws cloudfront create-invalidation --distribution-id E120I5KFQNYFYO --paths "/*"
