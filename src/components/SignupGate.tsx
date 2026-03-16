@@ -7,14 +7,14 @@ import { urlFor } from '@/sanity/image'
 import { trackSignupConversion } from '@/lib/analytics'
 
 function FieldInput({ field, value, onChange }: { field: FormField; value: string; onChange: (v: string) => void }) {
-  const baseClass = "w-full border-0 border-b-2 border-[#ccc] bg-transparent px-1 py-2 text-base font-[Montserrat] outline-none focus:border-black transition-colors"
+  const baseClass = "w-full border-0 border-b-2 border-[#ccc] bg-transparent px-1 py-2 text-base font-['Aktiv_Grotesk'] outline-none focus:border-black transition-colors"
 
   if (field.fieldType === 'dropdown') {
     return (
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border-2 border-[#ccc] bg-transparent px-1 py-2 text-base font-[Montserrat] outline-none focus:border-black transition-colors"
+        className="w-full border-2 border-[#ccc] bg-transparent px-1 py-2 text-base font-['Aktiv_Grotesk'] outline-none focus:border-black transition-colors"
       >
         <option value="">Select...</option>
         {field.dropdownOptions?.map((opt) => (
@@ -73,7 +73,21 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center px-4">
-      <div className="bg-white border-[10px] border-[#75b9f2] w-full max-w-[575px] p-8 md:p-10 text-center text-black">
+      <div
+        className="w-full max-w-[575px] p-[10px] text-center text-black"
+        style={{
+          background: 'linear-gradient(270deg, #80D064, #FFDE67, #82D8EB, #559DDF, #8B70D1, #FF67CB, #FF7F63, #FFB763, #80D064)',
+          backgroundSize: '300% 300%',
+          animation: 'gradientBorder 6s linear infinite',
+        }}
+      >
+        <style>{`
+          @keyframes gradientBorder {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+          }
+        `}</style>
+        <div className="bg-white p-8 md:p-10" style={{ fontFamily: "'Aktiv Grotesk', -apple-system, sans-serif" }}>
         {/* Logo */}
         {report.headerImage && (
           <div className="mb-6">
@@ -124,12 +138,13 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
           <button
             type="submit"
             disabled={submitting}
-            className="flex items-center justify-between w-full max-w-[280px] mx-auto bg-black text-white uppercase font-bold py-4 px-6 mt-6 text-sm tracking-wider hover:bg-[#333] transition-colors disabled:opacity-50 cursor-pointer"
+            className="flex items-center justify-between w-full max-w-[280px] mx-auto bg-black text-white uppercase font-medium py-4 px-6 mt-6 text-sm tracking-wider hover:bg-[#333] transition-colors disabled:opacity-50 cursor-pointer"
           >
             <span>{submitting ? 'Submitting...' : 'Login'}</span>
             <span className="text-lg">→</span>
           </button>
         </form>
+        </div>
       </div>
     </div>
   )

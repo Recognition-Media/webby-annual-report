@@ -6,7 +6,6 @@ import { PortableText } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
 import { HeroSection } from './HeroSection'
 import { SignupGate } from './SignupGate'
-import { TimelineSection } from './TimelineSection'
 import { EntryStats } from './EntryStats'
 import { IadasSection } from './IadasSection'
 import { IntroLetter } from './IntroLetter'
@@ -14,7 +13,6 @@ import { TrendSection } from './TrendSection'
 import { ReportFooter } from './ReportFooter'
 import { AnalyticsScripts } from './AnalyticsScripts'
 import { ScrollReveal } from './ScrollReveal'
-import { StickyNav } from './StickyNav'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -33,6 +31,12 @@ export function ReportView({ report }: { report: Report }) {
   const [showGate, setShowGate] = useState(false)
 
   useEffect(() => {
+    // Dev shortcut: add ?reset to the URL to clear the signup cookie and test the gate
+    if (window.location.search.includes('reset')) {
+      document.cookie = `${cookieKey}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+      window.location.replace(window.location.pathname)
+      return
+    }
     if (getCookie(cookieKey)) {
       setHasAccess(true)
     }
@@ -84,16 +88,14 @@ export function ReportView({ report }: { report: Report }) {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
-          <StickyNav report={report} />
-
           {/* Welcome letter */}
           <IntroLetter report={report} />
 
-          {/* Webby intro + Stats + Year slider */}
-          <TimelineSection report={report} />
-
-          {/* Entry stats (entries received, countries, flags) */}
+          {/* Entry stats (scroll-driven timeline + animated numbers) */}
           <EntryStats stats={report.entryStats} />
+
+          {/* Section divider */}
+          <div style={{ height: 1, background: '#272727' }} />
 
           {/* IADAS section */}
           <IadasSection report={report} />

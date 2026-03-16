@@ -2,59 +2,101 @@
 
 import { PortableText } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
-import { ScrollReveal } from './ScrollReveal'
 
 export function IntroLetter({ report }: { report: Report }) {
   if (!report.letterBody) return null
 
   return (
-    <ScrollReveal>
-      <section
-        className="py-20 px-6"
-        style={{ background: 'linear-gradient(to bottom right, #eee, #eee, #75b9f2)' }}
+    <section
+      className="flex items-center justify-center relative overflow-hidden"
+      style={{
+        background: '#191919',
+        minHeight: '80vh',
+        padding: '80px 40px 160px',
+      }}
+    >
+      {/* Subtle "WELCOME" watermark */}
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+        aria-hidden="true"
       >
-        <div className="relative bg-white border-[8px] border-black mx-auto w-[92%] max-w-4xl">
-          {/* Label sits on the top border */}
-          <div className="absolute -top-[18px] left-1/2 -translate-x-1/2">
-            <span className="bg-black text-white text-xs font-normal uppercase tracking-[0.25em] px-6 py-2 inline-block">
-              WELCOME LETTER
-            </span>
-          </div>
-          <div className="p-8 md:p-12 text-sm leading-relaxed text-black text-left">
-            <div className="prose prose-sm max-w-none">
+        <span
+          style={{
+            fontSize: 'clamp(200px, 25vw, 400px)',
+            fontWeight: 400,
+            color: 'rgba(255,255,255,0.018)',
+            lineHeight: 1,
+          }}
+        >
+          WELCOME
+        </span>
+      </div>
+
+      {/* Card */}
+      <div className="relative z-10" style={{ maxWidth: 760, width: '100%' }}>
+        {/* Gradient bar */}
+        <div
+          className="gradient-bar"
+          style={{ width: 80, marginBottom: 40 }}
+        />
+
+        {/* Label */}
+        <p
+          className="uppercase font-medium"
+          style={{
+            fontSize: 10,
+            letterSpacing: 4,
+            color: '#555',
+            marginBottom: 32,
+          }}
+        >
+          Welcome Letter
+        </p>
+
+        {/* Body with purple left border */}
+        <div
+          style={{
+            borderLeft: '3px solid #8B70D1',
+            paddingLeft: 40,
+          }}
+        >
+          <div
+            className="font-normal"
+            style={{
+              color: '#BABABA',
+              fontSize: 16,
+              lineHeight: 1.85,
+            }}
+          >
+            <div className="prose prose-sm max-w-none [&_p]:mb-5 [&_p]:text-[#BABABA] [&_p]:leading-[1.85] [&_a]:text-[#BABABA] [&_a]:underline [&_a]:decoration-[#555] [&_a]:underline-offset-2 [&_strong]:text-[#BABABA] [&_em]:text-[#BABABA] [&_li]:text-[#BABABA] [&_span]:text-[#BABABA]">
               <PortableText value={report.letterBody} />
             </div>
-
-            {report.letterAuthors && report.letterAuthors.length > 0 && (
-              <div>
-                {report.letterAuthors.map((author, i) => (
-                  <div key={i} className="mt-6">
-                    <p className="font-bold text-sm">{author.name}</p>
-                    <p className="text-sm">{author.title}</p>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
-        </div>
 
-        {/* Bouncing scroll indicator */}
-        <div className="flex justify-center mt-10">
-          <svg
-            width="24"
-            height="14"
-            viewBox="0 0 24 14"
-            fill="none"
-            stroke="black"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="animate-bounce"
-          >
-            <path d="M2 2l10 10L22 2" />
-          </svg>
+          {/* Authors */}
+          {report.letterAuthors && report.letterAuthors.length > 0 && (
+            <div
+              className="flex gap-12"
+              style={{
+                marginTop: 48,
+                paddingTop: 32,
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
+              {report.letterAuthors.map((author, i) => (
+                <div key={i}>
+                  <p className="font-medium" style={{ fontSize: 14, color: '#fff' }}>
+                    {author.name}
+                  </p>
+                  <p className="font-normal" style={{ fontSize: 12, color: '#666' }}>
+                    {author.title}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </section>
-    </ScrollReveal>
+      </div>
+    </section>
   )
 }

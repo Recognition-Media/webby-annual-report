@@ -1,7 +1,30 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('/fonts/AktivGrotesk_Rg.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('/fonts/AktivGrotesk_Md.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
 :root {
+  --webby-black: #191919;
+  --color-websites: #8B70D1;
+  --color-video: #FF7F63;
+  --color-ads: #82D8EB;
+  --color-apps: #559DDF;
+  --color-social: #FFDE67;
+  --color-podcasts: #FF67CB;
+  --color-games: #80D064;
+  --color-special: #FFB763;
   --color-primary-blue: #85CEFF;
   --color-primary-green: #7ACA6C;
   --color-lime-accent: #a7f076;
@@ -21,7 +44,7 @@
   --color-dark-gray: var(--color-dark-gray);
   --color-author-gray: var(--color-author-gray);
   --color-copyright-gray: var(--color-copyright-gray);
-  --font-sans: var(--font-montserrat), 'Montserrat', sans-serif;
+  --font-sans: 'Aktiv Grotesk', -apple-system, sans-serif;
 }
 
 html {
@@ -29,13 +52,22 @@ html {
 }
 
 body {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Aktiv Grotesk', -apple-system, sans-serif;
   font-size: 16px;
   line-height: 26px;
   background: #fff;
   color: #000;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* Gradient bar utility */
+.gradient-bar {
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--color-websites), var(--color-video), var(--color-social),
+    var(--color-podcasts), var(--color-apps), var(--color-games));
+  border-radius: 2px;
+}
 
 /* Divider between trend sections */
 .trend-divider {

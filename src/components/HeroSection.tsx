@@ -36,8 +36,8 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
 
       {/* Right panel — 1/3 width, three stacked rows */}
       <div className="w-full md:w-1/3 flex flex-col h-full">
-        {/* Top row — logo on black (25%) */}
-        <div className="h-1/4 bg-black flex items-center justify-center px-8">
+        {/* Top row — logo on black (20%) */}
+        <div className="h-[20%] bg-black flex items-center justify-center px-8">
           {report.headerImage && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -56,36 +56,38 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           )}
         </div>
 
-        {/* Middle row — CTA on lime green (50%) */}
-        <div className="h-1/2 bg-[#a7f076] flex flex-col items-center justify-center px-8 text-center text-black">
+        {/* Middle row — CTA on light blue (55%) */}
+        <div className="h-[55%] bg-[#82D8EB] flex flex-col items-center justify-center px-8 text-center text-black">
           <motion.h1
-            className="text-xl md:text-2xl font-bold leading-tight"
+            className="text-[28px] font-medium leading-tight"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {report.title}
+            Webby 30:<br />In Review
           </motion.h1>
 
           <motion.div
-            className="squiggle-divider mx-auto my-4"
+            className="mx-auto mb-4 mt-4"
+            style={{ width: 40, height: 1, backgroundColor: 'black' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           />
 
           <motion.p
-            className="text-sm"
+            className="text-[15px] font-normal"
+            style={{ color: 'rgba(0,0,0,0.65)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            A deeper look at the 29th Annual Webby Awards.
+            A deeper look into the 30th Annual Webby Awards
           </motion.p>
 
           <motion.button
             onClick={onSeeReport}
-            className="inline-flex items-center justify-between w-full max-w-[280px] bg-black text-white uppercase font-bold py-4 px-6 mt-8 text-sm tracking-wider hover:bg-gray-900 transition-colors cursor-pointer"
+            className="inline-flex items-center justify-between w-full max-w-[300px] bg-black text-white uppercase font-medium py-[22px] px-7 mt-8 text-sm tracking-wider hover:bg-gray-900 transition-colors cursor-pointer"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
@@ -96,7 +98,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         </div>
 
         {/* Bottom row — trophy photo (25%) */}
-        <div className="h-1/4 bg-black relative overflow-hidden">
+        <div className="h-[25%] bg-black relative overflow-hidden">
           <Image
             src="/webby-trophy.png"
             alt="Webby Award Trophy"
