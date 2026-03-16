@@ -104,12 +104,15 @@ function TimelineStrip({
   return (
     <div
       style={{
-        padding: '20px 60px',
+        padding: '20px 0',
         display: 'flex',
         alignItems: 'center',
         gap: 16,
-        borderTop: '1px solid #272727',
-        borderBottom: '1px solid #272727',
+        maxWidth: 1000,
+        width: '100%',
+        margin: '0 auto',
+        borderTop: '1px solid #3d3d3d',
+        borderBottom: '1px solid #3d3d3d',
       }}
     >
       {/* 1996 label */}
@@ -118,7 +121,7 @@ function TimelineStrip({
           fontSize: 11,
           fontWeight: 500,
           letterSpacing: 1,
-          color: '#555',
+          color: '#999',
           opacity: labelOpacity,
           whiteSpace: 'nowrap',
         }}
@@ -132,7 +135,7 @@ function TimelineStrip({
           flex: 1,
           height: 3,
           borderRadius: 2,
-          background: 'rgba(255,255,255,0.06)',
+          background: 'rgba(255,255,255,0.14)',
           position: 'relative',
         }}
       >
@@ -197,7 +200,7 @@ function TimelineStrip({
           fontSize: 11,
           fontWeight: 500,
           letterSpacing: 1,
-          color: '#555',
+          color: '#999',
           opacity: labelOpacity,
           whiteSpace: 'nowrap',
         }}
@@ -232,8 +235,9 @@ function StatBlock({
       transition={{ duration: 0.6, delay: index * 0.12, ease: 'easeOut' }}
       style={{
         flex: 1,
-        padding: '0 24px',
-        borderLeft: index > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+        paddingLeft: index > 0 ? 24 : 0,
+        paddingRight: 24,
+        borderLeft: index > 0 ? '1px solid rgba(255,255,255,0.14)' : 'none',
       }}
     >
       <CountUpNumber
@@ -249,7 +253,7 @@ function StatBlock({
           fontWeight: 500,
           textTransform: 'uppercase',
           letterSpacing: '0.08em',
-          color: '#555',
+          color: '#999',
         }}
       >
         {stat.label}
@@ -258,7 +262,7 @@ function StatBlock({
         style={{
           marginTop: 4,
           fontSize: 13,
-          color: '#666',
+          color: '#999',
         }}
       >
         {stat.description}
@@ -293,11 +297,18 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
 
   return (
     <section
+      id="entry-stats"
+      data-snap
       ref={ref}
       style={{
         background: '#191919',
+        minHeight: '100vh',
+        padding: '0 60px',
         overflow: 'hidden',
         position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
       }}
     >
       {/* 1. Scroll-driven timeline strip */}
@@ -305,9 +316,11 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
 
       {/* 2. Big typography statement */}
       <motion.div
+        data-content
         style={{
-          padding: '80px 60px 20px',
-          maxWidth: 1100,
+          padding: '80px 0 20px',
+          maxWidth: 1000,
+          width: '100%',
           margin: '0 auto',
           opacity: statementOpacity,
           y: statementY,
@@ -333,10 +346,12 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
 
       {/* 3. Four stat blocks */}
       <div
+        data-content
         style={{
-          maxWidth: 1100,
+          maxWidth: 1000,
+          width: '100%',
           margin: '0 auto',
-          padding: 60,
+          padding: '60px 0',
           display: 'flex',
         }}
       >

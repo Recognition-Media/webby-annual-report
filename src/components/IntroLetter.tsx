@@ -8,11 +8,16 @@ export function IntroLetter({ report }: { report: Report }) {
 
   return (
     <section
-      className="flex items-center justify-center relative overflow-hidden"
+      id="welcome-letter"
+      data-snap
+      className="relative overflow-hidden"
       style={{
         background: '#191919',
-        minHeight: '80vh',
-        padding: '80px 40px 160px',
+        minHeight: '100vh',
+        padding: '0 60px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
       {/* Subtle "WELCOME" watermark */}
@@ -33,7 +38,7 @@ export function IntroLetter({ report }: { report: Report }) {
       </div>
 
       {/* Card */}
-      <div className="relative z-10" style={{ maxWidth: 760, width: '100%' }}>
+      <div className="relative z-10" style={{ maxWidth: 1000, margin: '0 auto', width: '100%' }}>
         {/* Gradient bar */}
         <div
           className="gradient-bar"
@@ -44,9 +49,9 @@ export function IntroLetter({ report }: { report: Report }) {
         <p
           className="uppercase font-medium"
           style={{
-            fontSize: 10,
+            fontSize: 11,
             letterSpacing: 4,
-            color: '#555',
+            color: '#8B70D1',
             marginBottom: 32,
           }}
         >
@@ -55,6 +60,7 @@ export function IntroLetter({ report }: { report: Report }) {
 
         {/* Body with purple left border */}
         <div
+          data-content
           style={{
             borderLeft: '3px solid #8B70D1',
             paddingLeft: 40,
@@ -63,12 +69,12 @@ export function IntroLetter({ report }: { report: Report }) {
           <div
             className="font-normal"
             style={{
-              color: '#BABABA',
+              color: '#D4D4D4',
               fontSize: 16,
-              lineHeight: 1.85,
+              lineHeight: '28px',
             }}
           >
-            <div className="prose prose-sm max-w-none [&_p]:mb-5 [&_p]:text-[#BABABA] [&_p]:leading-[1.85] [&_a]:text-[#BABABA] [&_a]:underline [&_a]:decoration-[#555] [&_a]:underline-offset-2 [&_strong]:text-[#BABABA] [&_em]:text-[#BABABA] [&_li]:text-[#BABABA] [&_span]:text-[#BABABA]">
+            <div className="prose max-w-none [&_p]:mb-5 [&_p]:text-[16px] [&_p]:text-[#D4D4D4] [&_p]:leading-[28px] [&_a]:text-[#D4D4D4] [&_a]:underline [&_a]:decoration-[#555] [&_a]:underline-offset-2 [&_strong]:text-[#D4D4D4] [&_em]:text-[#D4D4D4] [&_li]:text-[#D4D4D4] [&_span]:text-[#D4D4D4]">
               <PortableText value={report.letterBody} />
             </div>
           </div>
@@ -80,7 +86,7 @@ export function IntroLetter({ report }: { report: Report }) {
               style={{
                 marginTop: 48,
                 paddingTop: 32,
-                borderTop: '1px solid rgba(255,255,255,0.08)',
+                borderTop: '1px solid rgba(255,255,255,0.12)',
               }}
             >
               {report.letterAuthors.map((author, i) => (
@@ -88,7 +94,7 @@ export function IntroLetter({ report }: { report: Report }) {
                   <p className="font-medium" style={{ fontSize: 14, color: '#fff' }}>
                     {author.name}
                   </p>
-                  <p className="font-normal" style={{ fontSize: 12, color: '#666' }}>
+                  <p className="font-normal" style={{ fontSize: 12, color: '#999' }}>
                     {author.title}
                   </p>
                 </div>

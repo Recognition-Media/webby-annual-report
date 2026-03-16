@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
@@ -13,6 +13,8 @@ import { TrendSection } from './TrendSection'
 import { ReportFooter } from './ReportFooter'
 import { AnalyticsScripts } from './AnalyticsScripts'
 import { ScrollReveal } from './ScrollReveal'
+import { ReportScroll } from './SmoothScroll'
+import { CursorArrow } from './CursorArrow'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -29,11 +31,15 @@ export function ReportView({ report }: { report: Report }) {
   const cookieKey = `report-access-${report.slug.current}`
   const [hasAccess, setHasAccess] = useState(false)
   const [showGate, setShowGate] = useState(false)
+  const [entered, setEntered] = useState(false)
+  const reportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Dev shortcut: add ?reset to the URL to clear the signup cookie and test the gate
     if (window.location.search.includes('reset')) {
       document.cookie = `${cookieKey}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+      document.cookie = `${cookieKey}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${window.location.pathname}`
+      document.cookie = `${cookieKey}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`
       window.location.replace(window.location.pathname)
       return
     }
@@ -42,10 +48,21 @@ export function ReportView({ report }: { report: Report }) {
     }
   }, [cookieKey])
 
+  // Once access is granted, scroll to report and hide hero
+  useEffect(() => {
+    if (!hasAccess) return
+    // Small delay to let report content render
+    setTimeout(() => {
+      reportRef.current?.scrollIntoView({ behavior: 'smooth' })
+      // After scroll animation completes, hide the hero
+      setTimeout(() => setEntered(true), 800)
+    }, 100)
+  }, [hasAccess])
+
   function handleSeeReport() {
     if (hasAccess) {
-      // Already has access, scroll to content
-      document.getElementById('report-content')?.scrollIntoView({ behavior: 'smooth' })
+      reportRef.current?.scrollIntoView({ behavior: 'smooth' })
+      setTimeout(() => setEntered(true), 800)
     } else {
       setShowGate(true)
     }
@@ -55,18 +72,18 @@ export function ReportView({ report }: { report: Report }) {
     setCookie(cookieKey, 'true', 365)
     setShowGate(false)
     setHasAccess(true)
-    // Scroll to welcome letter after a brief delay for content to render
-    setTimeout(() => {
-      document.getElementById('report-content')?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
   }
 
   return (
     <main>
       <AnalyticsScripts report={report} />
-      <HeroSection report={report} carouselImages={report.carouselImages} onSeeReport={handleSeeReport} />
 
-      {/* Signup gate modal — only shown when triggered */}
+      {/* Hero — hidden once you've entered the report */}
+      {!entered && (
+        <HeroSection report={report} carouselImages={report.carouselImages} onSeeReport={handleSeeReport} />
+      )}
+
+      {/* Signup gate modal */}
       <AnimatePresence>
         {showGate && (
           <motion.div
@@ -80,52 +97,55 @@ export function ReportView({ report }: { report: Report }) {
         )}
       </AnimatePresence>
 
-      {/* Report content — revealed after access */}
+      {/* Custom cursor arrow */}
+      <CursorArrow active={entered} trendCount={report.trendSections?.length ?? 0} />
+
+      {/* Report content — snap scrolling + nav dots activate after entry */}
       {hasAccess && (
-        <motion.div
-          id="report-content"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Welcome letter */}
-          <IntroLetter report={report} />
+        <div ref={reportRef}>
+          <ReportScroll active={entered} trendCount={report.trendSections?.length ?? 0}>
+            <IntroLetter report={report} />
 
-          {/* Entry stats (scroll-driven timeline + animated numbers) */}
-          <EntryStats stats={report.entryStats} />
+            <div style={{ height: 1, background: '#3d3d3d' }} />
 
-          {/* Section divider */}
-          <div style={{ height: 1, background: '#272727' }} />
+            <EntryStats stats={report.entryStats} />
 
-          {/* IADAS section */}
-          <IadasSection report={report} />
+            <div style={{ height: 1, background: '#3d3d3d' }} />
 
-          {/* Trend sections */}
-          {report.trendSections?.map((section, i) => (
-            <TrendSection key={i} section={section} index={i} />
-          ))}
+            <IadasSection report={report} />
 
-          {/* Thank You section */}
-          <ScrollReveal>
-            <section className="px-6 py-[60px]" style={{ backgroundColor: '#333' }}>
-              <div className="mx-auto max-w-3xl bg-white p-10 shadow-lg">
-                <p className="text-center text-4xl mb-2">🙏</p>
-                <h2 className="text-center text-2xl font-bold mb-6" style={{ color: '#75b9f2' }}>
-                  Thank you
-                </h2>
-                {report.ceremonyDetails && (
-                  <div className="prose max-w-none">
-                    <PortableText value={report.ceremonyDetails} />
-                  </div>
-                )}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/bye.gif" alt="Bye" className="mx-auto mt-6 w-48" />
-              </div>
-            </section>
-          </ScrollReveal>
+            {/* Trend sections */}
+            {report.trendSections?.map((section, i) => (
+              <TrendSection key={i} section={section} index={i} />
+            ))}
 
-          <ReportFooter report={report} />
-        </motion.div>
+            {/* Thank You section */}
+            <ScrollReveal>
+              <section
+                id="thank-you"
+                data-snap
+                className="px-6"
+                style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#191919' }}
+              >
+                <div className="mx-auto max-w-3xl bg-white p-10 shadow-lg">
+                  <p className="text-center text-4xl mb-2">🙏</p>
+                  <h2 className="text-center text-2xl font-bold mb-6" style={{ color: '#75b9f2' }}>
+                    Thank you
+                  </h2>
+                  {report.ceremonyDetails && (
+                    <div className="prose max-w-none">
+                      <PortableText value={report.ceremonyDetails} />
+                    </div>
+                  )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/bye.gif" alt="Bye" className="mx-auto mt-6 w-48" />
+                </div>
+              </section>
+            </ScrollReveal>
+
+            <ReportFooter report={report} />
+          </ReportScroll>
+        </div>
       )}
     </main>
   )

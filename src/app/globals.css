@@ -47,8 +47,20 @@
   --font-sans: 'Aktiv Grotesk', -apple-system, sans-serif;
 }
 
-html {
-  scroll-behavior: smooth;
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
 }
 
 body {
@@ -105,4 +117,48 @@ body {
 
 .prose a:hover {
   text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Top-left: peeks in from corner, retreats */
+@keyframes blobDrift1 {
+  0%, 100% { transform: translate(-70%, -70%) rotate(45deg); }
+  50% { transform: translate(-30%, -30%) rotate(45deg); }
+}
+
+/* Top-right: peeks in from corner, retreats */
+@keyframes blobDrift2 {
+  0%, 100% { transform: translate(70%, -70%) rotate(45deg); }
+  50% { transform: translate(30%, -30%) rotate(45deg); }
+}
+
+/* Bottom-left: peeks in from corner, retreats */
+@keyframes blobDrift3 {
+  0%, 100% { transform: translate(-70%, 70%) rotate(45deg); }
+  50% { transform: translate(-30%, 30%) rotate(45deg); }
+}
+
+/* Bottom-right: peeks in from corner, retreats */
+@keyframes blobDrift4 {
+  0%, 100% { transform: translate(70%, 70%) rotate(45deg); }
+  50% { transform: translate(30%, 30%) rotate(45deg); }
+}
+
+@keyframes cursorRotateDown {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(90deg); }
+}
+
+/* Scroll snap for report sections */
+html.snap-active {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+html.snap-active section[data-snap] {
+  scroll-snap-align: start;
 }

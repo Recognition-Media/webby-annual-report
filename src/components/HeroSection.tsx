@@ -14,7 +14,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ report, carouselImages, onSeeReport }: HeroSectionProps) {
   return (
-    <section className="flex flex-col md:flex-row w-full h-screen">
+    <section id="hero" className="flex flex-col md:flex-row w-full h-screen">
       {/* Left panel — 2/3 width, image carousel with trophy overlay */}
       <div className="w-full md:w-2/3 relative overflow-hidden">
         {carouselImages && carouselImages.length > 0 ? (

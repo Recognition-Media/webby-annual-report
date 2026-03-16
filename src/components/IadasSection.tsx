@@ -4,6 +4,8 @@ import { useRef, useEffect, useState } from 'react'
 import { motion, useInView, animate } from 'framer-motion'
 import type { Report, HeroStat } from '@/sanity/types'
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
+
 const FALLBACK_DESCRIPTION =
   'An invitation-only body of 3,300+ innovators and visionaries across 77 countries, with the mission to drive the creative, technical, and professional growth of the Internet and evolving forms of digital media.'
 
@@ -64,33 +66,39 @@ export function IadasSection({ report }: { report: Report }) {
 
   return (
     <section
+      id="how-judged"
+      data-snap
       ref={ref}
       style={{
         background: '#191919',
-        padding: '60px 60px 30px',
+        minHeight: '100vh',
+        padding: '0 60px',
         position: 'relative',
         overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
       {/* Background watermark */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/iadas-shape.png"
+        src={`${basePath}/iadas-logo.png`}
         alt=""
         aria-hidden
         style={{
           position: 'absolute',
-          right: '-5%',
+          right: '-2%',
           top: '50%',
           transform: 'translateY(-50%)',
-          opacity: 0.04,
-          width: 500,
-          height: 500,
+          opacity: 0.035,
+          width: 400,
+          height: 'auto',
           pointerEvents: 'none',
         }}
       />
 
-      <div style={{ maxWidth: 1000, margin: '0 auto', position: 'relative' }}>
+      <div data-content style={{ maxWidth: 1000, width: '100%', position: 'relative' }}>
         {/* Section label */}
         <p
           style={{
@@ -113,8 +121,8 @@ export function IadasSection({ report }: { report: Report }) {
             color: '#FFFFFF',
             lineHeight: 1.2,
             letterSpacing: '-0.5px',
-            marginBottom: 24,
             maxWidth: 850,
+            marginBottom: 24,
           }}
         >
           All work is reviewed by the International Academy of Digital Arts &amp; Sciences.
@@ -125,7 +133,7 @@ export function IadasSection({ report }: { report: Report }) {
           style={{
             fontSize: 16,
             lineHeight: 1.75,
-            color: '#BABABA',
+            color: '#D4D4D4',
             fontWeight: 400,
             maxWidth: 750,
             marginBottom: 40,
@@ -146,7 +154,7 @@ export function IadasSection({ report }: { report: Report }) {
                 padding: '20px 0',
                 paddingRight: i < stats.length - 1 ? 40 : 0,
                 marginRight: i < stats.length - 1 ? 40 : 0,
-                borderRight: i < stats.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                borderRight: i < stats.length - 1 ? '1px solid rgba(255,255,255,0.14)' : 'none',
               }}
             >
               <div style={{ marginBottom: 8 }}>
@@ -157,7 +165,7 @@ export function IadasSection({ report }: { report: Report }) {
                   fontSize: 12,
                   textTransform: 'uppercase',
                   letterSpacing: 2,
-                  color: '#555',
+                  color: '#999',
                   fontWeight: 500,
                   marginBottom: 4,
                 }}
@@ -168,36 +176,60 @@ export function IadasSection({ report }: { report: Report }) {
           ))}
         </div>
 
-        {/* KPMG Banner */}
-        <div
-          style={{
-            border: '1px solid rgba(255,255,255,0.08)',
-            padding: '24px 32px',
-            display: 'flex',
-            gap: 16,
-            maxWidth: 700,
-          }}
-        >
-          <div style={{ flexShrink: 0 }}>
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <rect width="28" height="28" rx="6" fill="#559DDF" />
-              <path
-                d="M7 14l5 5 9-9"
-                stroke="white"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+        {/* Credential cards */}
+        <div style={{ display: 'flex', gap: 24, marginTop: 16 }}>
+          {/* IADAS card */}
+          <div
+            style={{
+              flex: 1,
+              border: '1px solid rgba(255,255,255,0.12)',
+              padding: '28px 32px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 24,
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${basePath}/iadas-logo.png`}
+              alt="IADAS"
+              style={{ width: 48, height: 'auto', opacity: 0.9, flexShrink: 0 }}
+            />
+            <div>
+              <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
+                International Academy of Digital Arts &amp; Sciences
+              </h4>
+              <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
+                The judging body responsible for selecting all Webby Award Winners and Nominees.
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
-              Official Tabulation Consultant: KPMG
-            </h4>
-            <p style={{ fontSize: 12, color: '#666', lineHeight: 1.6, margin: '4px 0 0' }}>
-              KPMG serves as the official Webby Awards vote tabulation consultant, ensuring the
-              accuracy and quality of the voting process.
-            </p>
+
+          {/* KPMG card */}
+          <div
+            style={{
+              flex: 1,
+              border: '1px solid rgba(255,255,255,0.12)',
+              padding: '28px 32px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 24,
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${basePath}/kpmg-logo.svg`}
+              alt="KPMG"
+              style={{ width: 72, height: 'auto', opacity: 0.9, flexShrink: 0 }}
+            />
+            <div>
+              <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
+                Official Tabulation Consultant
+              </h4>
+              <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
+                KPMG ensures the accuracy and integrity of the Webby Awards voting process.
+              </p>
+            </div>
           </div>
         </div>
 
