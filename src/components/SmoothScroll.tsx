@@ -4,9 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react'
 
 function buildSectionIds(trendCount: number) {
   const ids = ['welcome-letter', 'entry-stats', 'how-judged']
-  for (let i = 0; i < trendCount; i++) {
-    ids.push(`trend-${i}`)
-  }
+  if (trendCount > 0) ids.push('trends')
   ids.push('thank-you')
   return ids
 }

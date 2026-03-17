@@ -4,9 +4,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 
 function buildSectionIds(trendCount: number) {
   const ids = ['welcome-letter', 'entry-stats', 'how-judged']
-  for (let i = 0; i < trendCount; i++) {
-    ids.push(`trend-${i}`)
-  }
+  if (trendCount > 0) ids.push('trends')
   ids.push('thank-you')
   return ids
 }
@@ -125,7 +123,7 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
 
     const scrollY = window.scrollY
 
-    // If in a trend section, advance or retreat based on mouse position
+    // If in a trend section with active phases, advance/retreat phases
     const activeTrend = document.querySelector('[data-trend-active]')
     if (activeTrend) {
       if (mouseOnLeft) {
@@ -134,6 +132,20 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
         window.dispatchEvent(new Event('trend-advance'))
       }
       return
+    }
+
+    // If in the trends container (completed trend), move between trends
+    const trendsContainer = document.getElementById('trends')
+    if (trendsContainer) {
+      const rect = trendsContainer.getBoundingClientRect()
+      if (rect.top <= 50 && rect.bottom >= window.innerHeight - 50) {
+        if (mouseOnLeft) {
+          window.dispatchEvent(new Event('trend-prev'))
+        } else {
+          window.dispatchEvent(new Event('trend-next'))
+        }
+        return
+      }
     }
 
     // Unlock scroll if it was locked by a trend section
@@ -171,7 +183,14 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
       const trendPhase = document.querySelector('[data-trend-phase]')?.getAttribute('data-trend-phase')
       rotation = (mouseOnLeft && trendPhase !== '0') ? 180 : 0
     } else {
-      rotation = 90
+      // Check if we're in the trends container (completed trend)
+      const trendsContainer = document.getElementById('trends')
+      const rect = trendsContainer?.getBoundingClientRect()
+      if (rect && rect.top <= 50 && rect.bottom >= window.innerHeight - 50) {
+        rotation = mouseOnLeft ? 180 : 0
+      } else {
+        rotation = 90
+      }
     }
   }
 

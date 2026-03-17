@@ -10,6 +10,7 @@ import { EntryStats } from './EntryStats'
 import { IadasSection } from './IadasSection'
 import { IntroLetter } from './IntroLetter'
 import { TrendSection } from './TrendSection'
+import { TrendContainer } from './TrendContainer'
 import { ReportFooter } from './ReportFooter'
 import { AnalyticsScripts } from './AnalyticsScripts'
 import { ScrollReveal } from './ScrollReveal'
@@ -114,10 +115,14 @@ export function ReportView({ report }: { report: Report }) {
 
             <IadasSection report={report} />
 
-            {/* Trend sections */}
-            {report.trendSections?.map((section, i) => (
-              <TrendSection key={i} section={section} index={i} />
-            ))}
+            {/* Trends — horizontal container */}
+            {report.trendSections && report.trendSections.length > 0 && (
+              <TrendContainer trendCount={report.trendSections.length}>
+                {report.trendSections.map((section, i) => (
+                  <TrendSection key={i} section={section} index={i} />
+                ))}
+              </TrendContainer>
+            )}
 
             {/* Thank You section */}
             <ScrollReveal>

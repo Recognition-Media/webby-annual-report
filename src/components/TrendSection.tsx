@@ -17,7 +17,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   const [phase, setPhase] = useState(0)
   const [isActive, setIsActive] = useState(false)
   const [completed, setCompleted] = useState(false)
-  const sectionRef = useRef<HTMLElement>(null)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const lockRef = useRef(false)
   const enterCooldownRef = useRef(false)
 
@@ -70,16 +70,13 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   useEffect(() => {
     if (!isActive) return
 
-    // Only lock scrolling if this trend hasn't been completed yet
-    if (!completed) {
-      document.body.style.overflow = 'hidden'
-    }
+    // Let the snap scroll finish, then lock
     document.documentElement.classList.remove('snap-active')
     const lockTimeout = setTimeout(() => {
-      if (sectionRef.current) {
-        sectionRef.current.scrollIntoView({ behavior: 'auto' })
+      if (!completed) {
+        document.body.style.overflow = 'hidden'
       }
-    }, 100)
+    }, 600)
 
     function handleWheel(e: WheelEvent) {
       if (Math.abs(e.deltaY) < 5) return
@@ -123,15 +120,14 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   }, [isActive, advancePhase, retreatPhase])
 
   return (
-    <section
-      id={`trend-${index}`}
-      data-snap
+    <div
       data-trend-active={isActive && !completed ? 'true' : undefined}
       data-trend-phase={phase}
       ref={sectionRef}
       style={{
+        width: '100vw',
         height: '100vh',
-        background: '#191919',
+        flexShrink: 0,
         display: 'flex',
         alignItems: 'center',
         padding: '0 60px',
@@ -238,7 +234,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
           <PhaseVideo key="video" />
         )}
       </AnimatePresence>
-    </section>
+    </div>
   )
 }
 
