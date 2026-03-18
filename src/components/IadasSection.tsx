@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
+import { AnimatedBg } from './AnimatedBg'
 import { motion, useInView, animate } from 'framer-motion'
 import type { Report, HeroStat } from '@/sanity/types'
 
@@ -41,7 +42,7 @@ function AnimatedNumber({ value, color, inView }: { value: string; color: string
   return (
     <span
       style={{
-        fontSize: 'clamp(48px, 6vw, 72px)',
+        fontSize: 'clamp(56px, 8vw, 88px)',
         fontWeight: 400,
         fontVariantNumeric: 'tabular-nums',
         color,
@@ -80,23 +81,6 @@ export function IadasSection({ report }: { report: Report }) {
         justifyContent: 'center',
       }}
     >
-      {/* Background watermark */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`${basePath}/iadas-logo.png`}
-        alt=""
-        aria-hidden
-        style={{
-          position: 'absolute',
-          right: '-2%',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          opacity: 0.035,
-          width: 400,
-          height: 'auto',
-          pointerEvents: 'none',
-        }}
-      />
 
       <div data-content style={{ maxWidth: 1000, width: '100%', position: 'relative' }}>
         {/* Section label */}
@@ -117,7 +101,7 @@ export function IadasSection({ report }: { report: Report }) {
         <h2
           style={{
             fontSize: 'clamp(32px, 4vw, 48px)',
-            fontWeight: 500,
+            fontWeight: 400,
             color: '#FFFFFF',
             lineHeight: 1.2,
             letterSpacing: '-0.5px',
@@ -234,7 +218,6 @@ export function IadasSection({ report }: { report: Report }) {
         </div>
 
         {/* Bottom gradient bar */}
-        <div className="gradient-bar" style={{ maxWidth: 200, marginTop: 60 }} />
       </div>
     </section>
   )

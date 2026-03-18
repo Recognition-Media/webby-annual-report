@@ -42,6 +42,24 @@ export function ReportScroll({
       { threshold: 0.5 }
     )
 
+    // Prevent scrolling past the trends section until goodbye is shown
+    let goodbyeUnlocked = false
+    function clampScroll() {
+      if (goodbyeUnlocked) return
+      const trends = document.getElementById('trends')
+      if (trends) {
+        const maxScroll = trends.offsetTop
+        if (window.scrollY > maxScroll + 10) {
+          window.scrollTo(0, maxScroll)
+        }
+      }
+    }
+    function unlockGoodbye() {
+      goodbyeUnlocked = true
+    }
+    window.addEventListener('scroll', clampScroll)
+    window.addEventListener('trend-next-or-exit', unlockGoodbye)
+
     setTimeout(() => {
       sectionIds.forEach((id) => {
         const el = document.getElementById(id)
@@ -59,6 +77,8 @@ export function ReportScroll({
 
     return () => {
       document.documentElement.classList.remove('snap-active')
+      window.removeEventListener('scroll', clampScroll)
+      window.removeEventListener('trend-next-or-exit', unlockGoodbye)
       observer.disconnect()
       mutObserver.disconnect()
     }
@@ -89,18 +109,7 @@ export function ReportScroll({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [active, activeIndex, scrollTo, sectionIds])
 
-  return (
-    <>
-      {children}
-      {active && dotsVisible && !inTrend && (
-        <NavDots
-          sections={sectionIds}
-          activeIndex={activeIndex}
-          onNavigate={scrollTo}
-        />
-      )}
-    </>
-  )
+  return <>{children}</>
 }
 
 function NavDots({

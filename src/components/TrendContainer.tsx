@@ -1,13 +1,16 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { TrendSubnav } from './TrendSubnav'
 
 export function TrendContainer({
   trendCount,
+  trendTitles,
   children,
 }: {
   trendCount: number
+  trendTitles: string[]
   children: React.ReactNode
 }) {
   const [activeTrend, setActiveTrend] = useState(0)
@@ -26,7 +29,7 @@ export function TrendContainer({
     return () => observer.disconnect()
   }, [])
 
-  // Listen for trend completion — move to next trend horizontally
+  // Listen for trend-next/trend-prev events
   useEffect(() => {
     if (!isActive) return
 
@@ -36,18 +39,41 @@ export function TrendContainer({
     function handlePrevTrend() {
       setActiveTrend((t) => Math.max(t - 1, 0))
     }
+    function handleNextOrExit() {
+      setActiveTrend((t) => {
+        if (t >= trendCount - 1) {
+          // Last trend — exit to thank-you
+          document.body.style.overflow = ''
+          document.documentElement.classList.add('snap-active')
+          const thankYou = document.getElementById('thank-you')
+          if (thankYou) {
+            thankYou.scrollIntoView({ behavior: 'smooth' })
+          }
+          return t
+        }
+        return t + 1
+      })
+    }
 
     window.addEventListener('trend-next', handleNextTrend)
     window.addEventListener('trend-prev', handlePrevTrend)
+    window.addEventListener('trend-next-or-exit', handleNextOrExit)
     return () => {
       window.removeEventListener('trend-next', handleNextTrend)
       window.removeEventListener('trend-prev', handlePrevTrend)
+      window.removeEventListener('trend-next-or-exit', handleNextOrExit)
     }
   }, [isActive, trendCount])
+
+  function navigateToTrend(index: number) {
+    setActiveTrend(index)
+  }
 
   return (
     <section
       id="trends"
+      data-active-trend={activeTrend}
+      data-trend-count={trendCount}
       data-snap
       ref={containerRef}
       style={{
@@ -68,6 +94,15 @@ export function TrendContainer({
       >
         {children}
       </motion.div>
+
+      {/* Subnav — only when trends are in view */}
+      {isActive && (
+        <TrendSubnav
+          titles={trendTitles}
+          activeTrend={activeTrend}
+          onNavigate={navigateToTrend}
+        />
+      )}
     </section>
   )
 }

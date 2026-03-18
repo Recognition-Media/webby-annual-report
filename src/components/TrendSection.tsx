@@ -5,15 +5,26 @@ import Image from 'next/image'
 import { PortableText } from '@portabletext/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { TrendSection as TrendSectionType } from '@/sanity/types'
+import { AnimatedBg } from './AnimatedBg'
 import { urlFor } from '@/sanity/image'
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
 
+export const TREND_COLORS = [
+  '#8B70D1', // purple
+  '#82D8EB', // cyan
+  '#FF7F63', // coral
+  '#80D064', // green
+  '#FFB763', // orange
+]
+
 export function TrendSection({ section, index }: { section: TrendSectionType; index: number }) {
+  const trendColor = TREND_COLORS[index % TREND_COLORS.length]
   const allQuotes = section.expertQuotes || []
   const quotes = allQuotes.slice(0, 3) // Max 3 quotes
-  // Phases: 0 = title+copy, 1..3 = quotes, 4 = video
-  const totalPhases = 1 + quotes.length + 1
+  // Phases: 0 = title+copy, 1..3 = quotes, +video for trend 1 only
+  const hasVideo = index === 0
+  const totalPhases = 1 + quotes.length + (hasVideo ? 1 : 0)
   const [phase, setPhase] = useState(0)
   const [isActive, setIsActive] = useState(false)
   const [completed, setCompleted] = useState(false)
@@ -31,9 +42,15 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
         if (entry.isIntersecting) {
           enterCooldownRef.current = true
           setTimeout(() => { enterCooldownRef.current = false }, 800)
+          // If already completed, show the last phase
+          if (completed) {
+            setPhase(totalPhases - 1)
+          }
         } else {
-          setPhase(0)
-          // Don't reset completed — once unlocked, stays unlocked
+          // Don't reset phase if completed — preserve state
+          if (!completed) {
+            setPhase(0)
+          }
         }
       },
       { threshold: 0.5 }
@@ -63,8 +80,12 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
       setTimeout(() => { lockRef.current = false }, 600)
       return true
     }
+    // At phase 0 — go to previous trend
+    if (index > 0) {
+      window.dispatchEvent(new Event('trend-prev'))
+    }
     return false
-  }, [phase])
+  }, [phase, index])
 
   // Lock scrolling while inside an incomplete trend
   useEffect(() => {
@@ -73,9 +94,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
     // Let the snap scroll finish, then lock
     document.documentElement.classList.remove('snap-active')
     const lockTimeout = setTimeout(() => {
-      if (!completed) {
-        document.body.style.overflow = 'hidden'
-      }
+      document.body.style.overflow = 'hidden'
     }, 600)
 
     function handleWheel(e: WheelEvent) {
@@ -122,6 +141,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   return (
     <div
       data-trend-active={isActive && !completed ? 'true' : undefined}
+      data-trend-index={index}
       data-trend-phase={phase}
       ref={sectionRef}
       style={{
@@ -135,25 +155,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
         overflow: 'hidden',
       }}
     >
-      {/* Animated corner squiggles */}
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        {/* Top-left — purple, tall narrow zigzag */}
-        <svg style={{ position: 'absolute', top: 0, left: 0, width: 400, height: 750, opacity: 0.5, filter: 'blur(60px)', animation: 'blobDrift1 20s ease-in-out infinite' }} viewBox="0 0 80 250" fill="#8B70D1">
-          <path d="M40 0 L75 35 L40 70 L75 105 L40 140 L75 175 L40 210 L40 250 L5 215 L40 180 L5 145 L40 110 L5 75 L40 40 Z" />
-        </svg>
-        {/* Top-right — coral, wide short squiggle */}
-        <svg style={{ position: 'absolute', top: 0, right: 0, width: 700, height: 400, opacity: 0.5, filter: 'blur(55px)', animation: 'blobDrift2 25s ease-in-out infinite' }} viewBox="0 0 120 120" fill="#FF7F63">
-          <path d="M0 60 L30 20 L60 60 L90 20 L120 60 L90 100 L60 60 L30 100 Z" />
-        </svg>
-        {/* Bottom-left — yellow, compact chunky bolt */}
-        <svg style={{ position: 'absolute', bottom: 0, left: 0, width: 350, height: 450, opacity: 0.5, filter: 'blur(50px)', animation: 'blobDrift3 22s ease-in-out infinite' }} viewBox="0 0 100 160" fill="#FFDE67">
-          <path d="M50 0 L95 40 L50 50 L95 90 L50 100 L50 160 L5 120 L50 110 L5 70 L50 60 Z" />
-        </svg>
-        {/* Bottom-right — pink, large sweeping wave */}
-        <svg style={{ position: 'absolute', bottom: 0, right: 0, width: 650, height: 600, opacity: 0.5, filter: 'blur(65px)', animation: 'blobDrift4 18s ease-in-out infinite' }} viewBox="0 0 200 180" fill="#FF67CB">
-          <path d="M0 90 L40 30 L80 90 L120 30 L160 90 L200 30 L200 150 L160 90 L120 150 L80 90 L40 150 L0 90 Z" />
-        </svg>
-      </div>
+      <AnimatedBg variant={index} />
 
       <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '80vh' }}>
         {/* Phase 0: Title + Body */}
@@ -165,6 +167,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
               body={section.trendBody}
               featuredProjects={section.featuredProjects}
               index={index}
+              color={trendColor}
             />
           )}
         </AnimatePresence>
@@ -175,7 +178,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
             {quotes.map((quote, i) => {
               const quotePhase = i + 1
               if (phase < quotePhase) return null
-              const isVideoPhase = phase === totalPhases - 1
+              const isVideoPhase = hasVideo && phase === totalPhases - 1
               const visibleCount = Math.min(phase, quotes.length)
               const position = visibleCount - (i + 1)
               return (
@@ -186,52 +189,19 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
                   visibleCount={visibleCount}
                   isNew={phase === quotePhase}
                   videoActive={isVideoPhase}
+                  color={trendColor}
                 />
               )
             })}
           </div>
         )}
 
-        {/* Phase dots — clickable progress indicator, only when active */}
-        {isActive && (
-          <div
-            style={{
-              position: 'fixed',
-              bottom: 40,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 60,
-              display: 'flex',
-              gap: 10,
-            }}
-          >
-            {Array.from({ length: totalPhases }).map((_, i) => (
-              <button
-                key={i}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setPhase(i)
-                }}
-                style={{
-                  width: i === phase ? 14 : 12,
-                  height: i === phase ? 14 : 12,
-                  borderRadius: '50%',
-                  border: 'none',
-                  background: i === phase ? '#fff' : 'rgba(255,255,255,0.25)',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  padding: 0,
-                }}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Video — centered on full viewport */}
       <AnimatePresence>
-        {phase === totalPhases - 1 && (
-          <PhaseVideo key="video" />
+        {hasVideo && phase === totalPhases - 1 && (
+          <PhaseVideo key="video" onClose={() => setPhase(totalPhases - 2)} />
         )}
       </AnimatePresence>
     </div>
@@ -247,11 +217,13 @@ function PhaseTitle({
   body,
   featuredProjects,
   index,
+  color,
 }: {
   title: string
   body?: any[]
   featuredProjects?: { title: string; url?: string }[]
   index: number
+  color: string
 }) {
   // Strip emojis from title
   const cleanTitle = title.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
@@ -265,7 +237,7 @@ function PhaseTitle({
       transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
       style={{
         position: 'absolute',
-        top: 0,
+        top: -30,
         left: 0,
         right: 0,
         bottom: 0,
@@ -274,23 +246,7 @@ function PhaseTitle({
         justifyContent: 'center',
       }}
     >
-      {/* Large trend number — background element */}
-      <div
-        style={{
-          position: 'absolute',
-          right: -20,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          fontSize: 'clamp(300px, 35vw, 500px)',
-          fontWeight: 500,
-          color: 'rgba(255,255,255,0.025)',
-          lineHeight: 0.85,
-          userSelect: 'none',
-          pointerEvents: 'none',
-        }}
-      >
-        {trendNumber}
-      </div>
+
 
       {/* Content */}
       <div style={{ position: 'relative', zIndex: 1 }}>
@@ -301,22 +257,22 @@ function PhaseTitle({
               fontSize: 11,
               letterSpacing: 4,
               textTransform: 'uppercase',
-              color: '#8B70D1',
+              color: color,
               fontWeight: 500,
             }}
           >
             Trend {trendNumber}
           </span>
-          <div className="gradient-bar" style={{ width: 60, height: 2 }} />
+          <div style={{ width: 60, height: 2, background: color, borderRadius: 2 }} />
         </div>
 
         {/* Title — large, editorial */}
         <h2
           style={{
-            fontSize: 'clamp(44px, 5vw, 64px)',
-            fontWeight: 500,
+            fontSize: 48,
+            fontWeight: 400,
             color: '#fff',
-            lineHeight: 1.08,
+            lineHeight: '58px',
             letterSpacing: '-2px',
             marginBottom: 40,
             maxWidth: 750,
@@ -355,7 +311,7 @@ function PhaseTitle({
               {/* Featured projects */}
               {featuredProjects && featuredProjects.length > 0 && (
                 <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                  <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', color: '#8B70D1', fontWeight: 500, marginBottom: 8 }}>
+                  <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', color: color, fontWeight: 500, marginBottom: 8 }}>
                     Standout Projects
                   </p>
                   <p style={{ fontSize: 14, color: '#999', lineHeight: 1.6 }}>
@@ -425,12 +381,14 @@ function PhaseQuote({
   visibleCount,
   isNew,
   videoActive = false,
+  color,
 }: {
   quote: { name: string; title?: string; quoteText: any[]; linkedInUrl?: string }
   position: number
   visibleCount: number
   isNew: boolean
   videoActive?: boolean
+  color: string
 }) {
   const layout = getQuoteLayout(position, visibleCount)
   const isLatest = position === 0
@@ -490,7 +448,7 @@ function PhaseQuote({
 
       {/* Attribution */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div className="gradient-bar" style={{ width: 40, height: 2 }} />
+        <div style={{ width: 40, height: 2, background: color, borderRadius: 2 }} />
         <div>
           <p style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>
             {quote.linkedInUrl ? (
@@ -519,7 +477,7 @@ function PhaseQuote({
 /*  Phase: Video                                                       */
 /* ------------------------------------------------------------------ */
 
-function PhaseVideo() {
+function PhaseVideo({ onClose }: { onClose: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [muted, setMuted] = useState(false)
 
@@ -573,6 +531,33 @@ function PhaseVideo() {
       transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
       style={{ position: 'relative' }}
     >
+      {/* Close button */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onClose() }}
+        className="no-custom-cursor"
+        style={{
+          position: 'absolute',
+          top: -40,
+          right: 0,
+          width: 32,
+          height: 32,
+          borderRadius: '50%',
+          border: '1px solid rgba(255,255,255,0.3)',
+          background: 'rgba(0,0,0,0.6)',
+          color: '#fff',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 30,
+          pointerEvents: 'auto',
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" strokeWidth="1.5">
+          <line x1="2" y1="2" x2="12" y2="12" />
+          <line x1="12" y1="2" x2="2" y2="12" />
+        </svg>
+      </button>
       <video
         ref={videoRef}
         src={`${basePath}/trend-video-test.mp4`}

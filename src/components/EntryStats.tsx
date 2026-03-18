@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import { AnimatedBg } from './AnimatedBg'
 import {
   motion,
   useScroll,
@@ -311,6 +312,7 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
         justifyContent: 'center',
       }}
     >
+
       {/* 1. Scroll-driven timeline strip */}
       <TimelineStrip progress={scrollYProgress} />
 
@@ -326,6 +328,18 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
           y: statementY,
         }}
       >
+        <p
+          style={{
+            fontSize: 11,
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            color: '#80D064',
+            fontWeight: 500,
+            marginBottom: 24,
+          }}
+        >
+          Webby 30: By The Numbers
+        </p>
         <p
           style={{
             fontSize: 'clamp(32px, 4vw, 52px)',

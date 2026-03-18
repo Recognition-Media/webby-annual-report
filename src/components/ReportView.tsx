@@ -16,6 +16,7 @@ import { AnalyticsScripts } from './AnalyticsScripts'
 import { ScrollReveal } from './ScrollReveal'
 import { ReportScroll } from './SmoothScroll'
 import { CursorArrow } from './CursorArrow'
+import { AnimatedBg } from './AnimatedBg'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -33,7 +34,15 @@ export function ReportView({ report }: { report: Report }) {
   const [hasAccess, setHasAccess] = useState(false)
   const [showGate, setShowGate] = useState(false)
   const [entered, setEntered] = useState(false)
+  const [showGoodbye, setShowGoodbye] = useState(false)
   const reportRef = useRef<HTMLDivElement>(null)
+
+  // Show goodbye only when all trends are complete
+  useEffect(() => {
+    function handleExit() { setShowGoodbye(true) }
+    window.addEventListener('trend-next-or-exit', handleExit)
+    return () => window.removeEventListener('trend-next-or-exit', handleExit)
+  }, [])
 
   useEffect(() => {
     // Dev shortcut: add ?reset to the URL to clear the signup cookie and test the gate
@@ -117,38 +126,86 @@ export function ReportView({ report }: { report: Report }) {
 
             {/* Trends — horizontal container */}
             {report.trendSections && report.trendSections.length > 0 && (
-              <TrendContainer trendCount={report.trendSections.length}>
+              <TrendContainer
+                trendCount={report.trendSections.length}
+                trendTitles={report.trendSections.map((s) =>
+                  s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
+                )}
+              >
                 {report.trendSections.map((section, i) => (
                   <TrendSection key={i} section={section} index={i} />
                 ))}
               </TrendContainer>
             )}
 
-            {/* Thank You section */}
-            <ScrollReveal>
+            {/* Thank You section — only rendered after all trends complete */}
+            {showGoodbye && (
               <section
                 id="thank-you"
                 data-snap
-                className="px-6"
-                style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#191919' }}
+                style={{
+                  minHeight: '100vh',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#191919',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  padding: '0 60px',
+                }}
               >
-                <div className="mx-auto max-w-3xl bg-white p-10 shadow-lg">
-                  <p className="text-center text-4xl mb-2">🙏</p>
-                  <h2 className="text-center text-2xl font-bold mb-6" style={{ color: '#75b9f2' }}>
-                    Thank you
+                {/* Animated background */}
+                <AnimatedBg variant={3} />
+
+                <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+                  {/* Gradient bar */}
+                  <div className="gradient-bar" style={{ width: 120, height: 3, margin: '0 auto 40px' }} />
+
+                  {/* Eyebrow */}
+                  <p style={{
+                    fontSize: 11,
+                    letterSpacing: 4,
+                    textTransform: 'uppercase',
+                    color: '#8B70D1',
+                    fontWeight: 500,
+                    marginBottom: 24,
+                  }}>
+                    Thank You
+                  </p>
+
+                  {/* Heading */}
+                  <h2 style={{
+                    fontSize: 'clamp(36px, 4vw, 56px)',
+                    fontWeight: 400,
+                    color: '#fff',
+                    lineHeight: 1.2,
+                    letterSpacing: '-1px',
+                    marginBottom: 32,
+                    maxWidth: 700,
+                    margin: '0 auto 32px',
+                  }}>
+                    See you at the 30th Annual Webby Awards
                   </h2>
+
+                  {/* Divider */}
+                  <div style={{ width: 60, height: 1, background: 'rgba(255,255,255,0.14)', margin: '0 auto 32px' }} />
+
+                  {/* Body */}
                   {report.ceremonyDetails && (
-                    <div className="prose max-w-none">
+                    <div style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 600, margin: '0 auto 40px' }}>
                       <PortableText value={report.ceremonyDetails} />
                     </div>
                   )}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/bye.gif" alt="Bye" className="mx-auto mt-6 w-48" />
+
+                  {/* CTA-style footer text */}
+                  <p style={{ fontSize: 13, color: '#999', letterSpacing: 1 }}>
+                    webbyawards.com
+                  </p>
                 </div>
               </section>
-            </ScrollReveal>
+            )}
 
-            <ReportFooter report={report} />
+            {showGoodbye && <ReportFooter report={report} />}
           </ReportScroll>
         </div>
       )}

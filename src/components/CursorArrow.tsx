@@ -12,7 +12,8 @@ function buildSectionIds(trendCount: number) {
 export function CursorArrow({ active, trendCount }: { active: boolean; trendCount: number }) {
   const sectionIds = useMemo(() => buildSectionIds(trendCount), [trendCount])
   const cursorRef = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(true)
+  const [visible, setVisible] = useState(false)
+  const [hasMoved, setHasMoved] = useState(false)
   const [rotated, setRotated] = useState(false)
   const [inTrend, setInTrend] = useState(false)
   const [mouseOnLeft, setMouseOnLeft] = useState(false)
@@ -34,10 +35,10 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
 
     function handleMove(e: MouseEvent) {
       mouseXRef.current = e.clientX
+      if (!hasMoved) setHasMoved(true)
       if (cursorRef.current) {
         cursorRef.current.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`
       }
-      // Track which side of screen the mouse is on
       setMouseOnLeft(e.clientX < window.innerWidth / 2)
     }
 
@@ -71,7 +72,7 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
 
     function handleMouseMove(e: MouseEvent) {
       const target = e.target as HTMLElement
-      const isInteractive = target.closest('a, button, input, textarea, select, [role="button"], .no-custom-cursor, .prose, [data-content]')
+      const isInteractive = target.closest('a, button, input, textarea, select, [role="button"], .no-custom-cursor, .prose, [data-content], img, video, svg')
       const nowVisible = !isInteractive
       setVisible((prev) => {
         if (!prev && nowVisible) {
@@ -126,6 +127,18 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
     // If in a trend section with active phases, advance/retreat phases
     const activeTrend = document.querySelector('[data-trend-active]')
     if (activeTrend) {
+      const trendPhase = activeTrend.getAttribute('data-trend-phase')
+      const isFirstTrend = activeTrend.getAttribute('data-trend-index') === '0'
+
+      if (mouseOnLeft && trendPhase === '0' && isFirstTrend) {
+        // Go back to judging page
+        document.body.style.overflow = ''
+        document.documentElement.classList.add('snap-active')
+        const judging = document.getElementById('how-judged')
+        if (judging) judging.scrollIntoView({ behavior: 'smooth' })
+        return
+      }
+
       if (mouseOnLeft) {
         window.dispatchEvent(new Event('trend-retreat'))
       } else {
@@ -134,7 +147,7 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
       return
     }
 
-    // If in the trends container (completed trend), move between trends
+    // If in the trends container (completed trend), move between trends or exit
     const trendsContainer = document.getElementById('trends')
     if (trendsContainer) {
       const rect = trendsContainer.getBoundingClientRect()
@@ -142,7 +155,9 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
         if (mouseOnLeft) {
           window.dispatchEvent(new Event('trend-prev'))
         } else {
-          window.dispatchEvent(new Event('trend-next'))
+          // Try to go to next trend — if already on the last, exit to thank-you
+          const result = new CustomEvent('trend-next-or-exit')
+          window.dispatchEvent(result)
         }
         return
       }
@@ -180,14 +195,29 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
   let rotation = 0
   if (rotated) {
     if (inTrend) {
-      const trendPhase = document.querySelector('[data-trend-phase]')?.getAttribute('data-trend-phase')
-      rotation = (mouseOnLeft && trendPhase !== '0') ? 180 : 0
+      const trendEl = document.querySelector('[data-trend-active]')
+      const trendPhase = trendEl?.getAttribute('data-trend-phase')
+      const trendIndex = trendEl?.getAttribute('data-trend-index')
+      if (mouseOnLeft && trendPhase === '0' && trendIndex === '0') {
+        rotation = -90 // up arrow — back to judging
+      } else if (mouseOnLeft) {
+        rotation = 180 // left arrow — go back
+      } else {
+        rotation = 0 // right arrow — advance
+      }
     } else {
       // Check if we're in the trends container (completed trend)
       const trendsContainer = document.getElementById('trends')
       const rect = trendsContainer?.getBoundingClientRect()
       if (rect && rect.top <= 50 && rect.bottom >= window.innerHeight - 50) {
-        rotation = mouseOnLeft ? 180 : 0
+        const activeTrendIdx = trendsContainer?.getAttribute('data-active-trend')
+        const trendCountStr = trendsContainer?.getAttribute('data-trend-count')
+        const isLastTrend = activeTrendIdx && trendCountStr && parseInt(activeTrendIdx) >= parseInt(trendCountStr) - 1
+        if (isLastTrend && !mouseOnLeft) {
+          rotation = 90 // down — exit to goodbye
+        } else {
+          rotation = mouseOnLeft ? 180 : 0
+        }
       } else {
         rotation = 90
       }
@@ -203,7 +233,7 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
         left: 0,
         zIndex: 9999,
         pointerEvents: 'none',
-        opacity: visible ? 1 : 0,
+        opacity: visible && hasMoved ? 1 : 0,
         transition: 'opacity 0.25s ease',
       }}
     >

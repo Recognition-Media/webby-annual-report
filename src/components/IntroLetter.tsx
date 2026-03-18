@@ -2,6 +2,7 @@
 
 import { PortableText } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
+import { AnimatedBg } from './AnimatedBg'
 
 export function IntroLetter({ report }: { report: Report }) {
   if (!report.letterBody) return null
@@ -20,22 +21,6 @@ export function IntroLetter({ report }: { report: Report }) {
         justifyContent: 'center',
       }}
     >
-      {/* Subtle "WELCOME" watermark */}
-      <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
-        aria-hidden="true"
-      >
-        <span
-          style={{
-            fontSize: 'clamp(200px, 25vw, 400px)',
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.018)',
-            lineHeight: 1,
-          }}
-        >
-          WELCOME
-        </span>
-      </div>
 
       {/* Card */}
       <div className="relative z-10" style={{ maxWidth: 1000, margin: '0 auto', width: '100%' }}>
@@ -74,7 +59,7 @@ export function IntroLetter({ report }: { report: Report }) {
               lineHeight: '28px',
             }}
           >
-            <div className="prose max-w-none [&_p]:mb-5 [&_p]:text-[16px] [&_p]:text-[#D4D4D4] [&_p]:leading-[28px] [&_a]:text-[#D4D4D4] [&_a]:underline [&_a]:decoration-[#555] [&_a]:underline-offset-2 [&_strong]:text-[#D4D4D4] [&_em]:text-[#D4D4D4] [&_li]:text-[#D4D4D4] [&_span]:text-[#D4D4D4]">
+            <div className="prose max-w-none [&_p]:mb-5 [&_p]:text-[16px] [&_p]:text-[#D4D4D4] [&_p]:leading-[28px] [&_a]:text-[#D4D4D4] [&_a]:underline [&_a]:decoration-[#555] [&_a]:underline-offset-2 [&_strong]:text-white [&_strong]:font-medium [&_em]:text-[#D4D4D4] [&_li]:text-[#D4D4D4] [&_span]:text-[#D4D4D4]">
               <PortableText value={report.letterBody} />
             </div>
           </div>
