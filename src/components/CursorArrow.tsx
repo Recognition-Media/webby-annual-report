@@ -124,43 +124,31 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
 
     const scrollY = window.scrollY
 
-    // If in a trend section with active phases, advance/retreat phases
+    // If in a trend section
     const activeTrend = document.querySelector('[data-trend-active]')
     if (activeTrend) {
       const trendPhase = activeTrend.getAttribute('data-trend-phase')
-      const isFirstTrend = activeTrend.getAttribute('data-trend-index') === '0'
-
-      if (mouseOnLeft && trendPhase === '0' && isFirstTrend) {
-        // Go back to judging page
-        document.body.style.overflow = ''
-        document.documentElement.classList.add('snap-active')
-        const judging = document.getElementById('how-judged')
-        if (judging) judging.scrollIntoView({ behavior: 'smooth' })
-        return
-      }
+      const trendIndex = activeTrend.getAttribute('data-trend-index')
+      const isCompleted = activeTrend.getAttribute('data-trend-completed') === 'true'
+      const isFirstTrend = trendIndex === '0'
 
       if (mouseOnLeft) {
-        window.dispatchEvent(new Event('trend-retreat'))
+        // Going back
+        if (trendPhase === '0' && isFirstTrend) {
+          // First trend, first phase — go to judging page
+          document.body.style.overflow = ''
+          document.documentElement.classList.add('snap-active')
+          const judging = document.getElementById('how-judged')
+          if (judging) judging.scrollIntoView({ behavior: 'smooth' })
+        } else {
+          // Retreat within trend (or to previous trend if at phase 0)
+          window.dispatchEvent(new Event('trend-retreat'))
+        }
       } else {
+        // Going forward — try to advance phase first
         window.dispatchEvent(new Event('trend-advance'))
       }
       return
-    }
-
-    // If in the trends container (completed trend), move between trends or exit
-    const trendsContainer = document.getElementById('trends')
-    if (trendsContainer) {
-      const rect = trendsContainer.getBoundingClientRect()
-      if (rect.top <= 50 && rect.bottom >= window.innerHeight - 50) {
-        if (mouseOnLeft) {
-          window.dispatchEvent(new Event('trend-prev'))
-        } else {
-          // Try to go to next trend — if already on the last, exit to thank-you
-          const result = new CustomEvent('trend-next-or-exit')
-          window.dispatchEvent(result)
-        }
-        return
-      }
     }
 
     // Unlock scroll if it was locked by a trend section
@@ -198,29 +186,25 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
       const trendEl = document.querySelector('[data-trend-active]')
       const trendPhase = trendEl?.getAttribute('data-trend-phase')
       const trendIndex = trendEl?.getAttribute('data-trend-index')
+      const isCompleted = trendEl?.getAttribute('data-trend-completed') === 'true'
+      const trendsContainer = document.getElementById('trends')
+      const trendCount = parseInt(trendsContainer?.getAttribute('data-trend-count') || '0')
+      const isLastTrend = parseInt(trendIndex || '0') >= trendCount - 1
+
+      const trendTotalPhases = parseInt(trendEl?.getAttribute('data-trend-total-phases') || '0')
+      const onLastPhase = parseInt(trendPhase || '0') === trendTotalPhases - 1
+
       if (mouseOnLeft && trendPhase === '0' && trendIndex === '0') {
         rotation = -90 // up arrow — back to judging
       } else if (mouseOnLeft) {
         rotation = 180 // left arrow — go back
+      } else if (onLastPhase && isLastTrend) {
+        rotation = 90 // down arrow — exit to goodbye
       } else {
         rotation = 0 // right arrow — advance
       }
     } else {
-      // Check if we're in the trends container (completed trend)
-      const trendsContainer = document.getElementById('trends')
-      const rect = trendsContainer?.getBoundingClientRect()
-      if (rect && rect.top <= 50 && rect.bottom >= window.innerHeight - 50) {
-        const activeTrendIdx = trendsContainer?.getAttribute('data-active-trend')
-        const trendCountStr = trendsContainer?.getAttribute('data-trend-count')
-        const isLastTrend = activeTrendIdx && trendCountStr && parseInt(activeTrendIdx) >= parseInt(trendCountStr) - 1
-        if (isLastTrend && !mouseOnLeft) {
-          rotation = 90 // down — exit to goodbye
-        } else {
-          rotation = mouseOnLeft ? 180 : 0
-        }
-      } else {
-        rotation = 90
-      }
+      rotation = 90
     }
   }
 

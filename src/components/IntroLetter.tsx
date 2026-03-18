@@ -59,7 +59,7 @@ export function IntroLetter({ report }: { report: Report }) {
               lineHeight: '28px',
             }}
           >
-            <div className="prose max-w-none [&_p]:mb-5 [&_p]:text-[16px] [&_p]:text-[#D4D4D4] [&_p]:leading-[28px] [&_a]:text-[#D4D4D4] [&_a]:underline [&_a]:decoration-[#555] [&_a]:underline-offset-2 [&_strong]:text-white [&_strong]:font-medium [&_em]:text-[#D4D4D4] [&_li]:text-[#D4D4D4] [&_span]:text-[#D4D4D4]">
+            <div className="prose max-w-none [&_p]:mb-5 [&_p]:text-[16px] [&_p]:text-[#D4D4D4] [&_p]:leading-[28px] [&_a]:text-[#D4D4D4] [&_strong]:text-white [&_strong]:font-medium [&_em]:text-[#D4D4D4] [&_li]:text-[#D4D4D4] [&_span]:text-[#D4D4D4]">
               <PortableText value={report.letterBody} />
             </div>
           </div>

@@ -101,6 +101,7 @@ function TimelineStrip({
   const yearRaw = useTransform(progress, [0.05, 0.45], [1996, 2026])
   const yearLabel = useTransform(yearRaw, (v) => Math.round(v).toString())
   const labelOpacity = useTransform(progress, [0.05, 0.25], [0.35, 1])
+  const tooltipOpacity = useTransform(progress, [0.05, 0.1, 0.42, 0.45], [0, 1, 1, 0])
 
   return (
     <div
@@ -112,8 +113,6 @@ function TimelineStrip({
         maxWidth: 1000,
         width: '100%',
         margin: '0 auto',
-        borderTop: '1px solid #3d3d3d',
-        borderBottom: '1px solid #3d3d3d',
       }}
     >
       {/* 1996 label */}
@@ -162,6 +161,7 @@ function TimelineStrip({
             left: tooltipLeft,
             transform: 'translateX(-50%)',
             pointerEvents: 'none',
+            opacity: tooltipOpacity,
           }}
         >
           <div

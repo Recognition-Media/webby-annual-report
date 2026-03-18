@@ -17,6 +17,7 @@ import { ScrollReveal } from './ScrollReveal'
 import { ReportScroll } from './SmoothScroll'
 import { CursorArrow } from './CursorArrow'
 import { AnimatedBg } from './AnimatedBg'
+import { IdleArrows } from './IdleArrows'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -109,6 +110,9 @@ export function ReportView({ report }: { report: Report }) {
 
       {/* Custom cursor arrow */}
       <CursorArrow active={entered} trendCount={report.trendSections?.length ?? 0} />
+
+      {/* Idle navigation arrows */}
+      <IdleArrows active={entered} />
 
       {/* Report content — snap scrolling + nav dots activate after entry */}
       {hasAccess && (

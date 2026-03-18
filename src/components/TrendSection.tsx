@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { PortableText } from '@portabletext/react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import type { TrendSection as TrendSectionType } from '@/sanity/types'
 import { AnimatedBg } from './AnimatedBg'
 import { urlFor } from '@/sanity/image'
@@ -28,6 +28,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   const [phase, setPhase] = useState(0)
   const [isActive, setIsActive] = useState(false)
   const [completed, setCompleted] = useState(false)
+  const [videoClosed, setVideoClosed] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
   const lockRef = useRef(false)
   const enterCooldownRef = useRef(false)
@@ -42,16 +43,10 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
         if (entry.isIntersecting) {
           enterCooldownRef.current = true
           setTimeout(() => { enterCooldownRef.current = false }, 800)
-          // If already completed, show the last phase
-          if (completed) {
-            setPhase(totalPhases - 1)
-          }
-        } else {
-          // Don't reset phase if completed — preserve state
-          if (!completed) {
-            setPhase(0)
-          }
+          // Reset video closed state when returning to this trend
+          setVideoClosed(false)
         }
+        // Never reset phase — preserve wherever the user left off
       },
       { threshold: 0.5 }
     )
@@ -64,13 +59,23 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
     if (phase < totalPhases - 1) {
       lockRef.current = true
       const nextPhase = phase + 1
+      // Skip video if it was closed — go straight to next trend
+      if (hasVideo && nextPhase === totalPhases - 1 && videoClosed) {
+        setCompleted(true)
+        setTimeout(() => { lockRef.current = false }, 600)
+        window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
+        return
+      }
       setPhase(nextPhase)
       if (nextPhase === totalPhases - 1) {
         setCompleted(true)
       }
       setTimeout(() => { lockRef.current = false }, 600)
+    } else if (phase === totalPhases - 1) {
+      // Already on last phase — go to next trend or exit
+      window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
     }
-  }, [phase, totalPhases])
+  }, [phase, totalPhases, hasVideo, videoClosed])
 
   const retreatPhase = useCallback(() => {
     if (lockRef.current) return
@@ -140,7 +145,9 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
 
   return (
     <div
-      data-trend-active={isActive && !completed ? 'true' : undefined}
+      data-trend-active={isActive ? 'true' : undefined}
+      data-trend-completed={completed ? 'true' : undefined}
+      data-trend-total-phases={totalPhases}
       data-trend-index={index}
       data-trend-phase={phase}
       ref={sectionRef}
@@ -158,52 +165,78 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
       <AnimatedBg variant={index} />
 
       <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '80vh' }}>
-        {/* Phase 0: Title + Body */}
-        <AnimatePresence>
-          {phase === 0 && (
-            <PhaseTitle
-              key="title"
-              title={section.trendTitle}
-              body={section.trendBody}
-              featuredProjects={section.featuredProjects}
-              index={index}
-              color={trendColor}
-            />
-          )}
-        </AnimatePresence>
 
-        {/* Quotes — accumulate, spread across the page, stay during video */}
-        {phase >= 1 && (
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-            {quotes.map((quote, i) => {
-              const quotePhase = i + 1
-              if (phase < quotePhase) return null
-              const isVideoPhase = hasVideo && phase === totalPhases - 1
-              const visibleCount = Math.min(phase, quotes.length)
-              const position = visibleCount - (i + 1)
-              return (
-                <PhaseQuote
-                  key={`quote-${i}`}
-                  quote={quote}
-                  position={position}
-                  visibleCount={visibleCount}
-                  isNew={phase === quotePhase}
-                  videoActive={isVideoPhase}
-                  color={trendColor}
-                />
-              )
-            })}
-          </div>
-        )}
+        {/* Page 0: Title + Body — always rendered */}
+        <motion.div
+          animate={{ opacity: phase === 0 ? 1 : 0, x: phase === 0 ? 0 : -200 }}
+          transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+          style={{
+            position: 'absolute', top: -30, left: 0, right: 0, bottom: 0,
+            display: 'flex', flexDirection: 'column', justifyContent: 'center',
+            pointerEvents: phase === 0 ? 'auto' : 'none',
+          }}
+        >
+          <PhaseTitle
+            title={section.trendTitle}
+            body={section.trendBody}
+            featuredProjects={section.featuredProjects}
+            index={index}
+            color={trendColor}
+          />
+        </motion.div>
 
+        {/* Quote pages — each always rendered */}
+        {quotes.map((quote, i) => {
+          const quotePhase = i + 1
+          const isCurrentPage = phase === quotePhase
+          const isVisible = phase >= quotePhase && phase < (hasVideo ? totalPhases - 1 : totalPhases)
+          const isVideoPhase = hasVideo && phase === totalPhases - 1
+          const visibleCount = Math.min(phase, quotes.length)
+          const position = visibleCount - (i + 1)
+
+          return (
+            <motion.div
+              key={`quote-wrapper-${i}`}
+              animate={{
+                opacity: isVisible || isVideoPhase ? 1 : 0,
+                x: phase < quotePhase ? 200 : 0,
+              }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              style={{
+                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                pointerEvents: isCurrentPage ? 'auto' : 'none',
+              }}
+            >
+              <PhaseQuote
+                quote={quote}
+                position={position}
+                visibleCount={visibleCount}
+                isNew={false}
+                videoActive={isVideoPhase}
+                color={trendColor}
+              />
+            </motion.div>
+          )
+        })}
       </div>
 
-      {/* Video — centered on full viewport */}
-      <AnimatePresence>
-        {hasVideo && phase === totalPhases - 1 && (
-          <PhaseVideo key="video" onClose={() => setPhase(totalPhases - 2)} />
-        )}
-      </AnimatePresence>
+      {/* Video page — always rendered if trend has video */}
+      {hasVideo && (
+        <motion.div
+          animate={{
+            opacity: phase === totalPhases - 1 ? 1 : 0,
+          }}
+          transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+          style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            pointerEvents: phase === totalPhases - 1 ? 'auto' : 'none',
+            zIndex: 20,
+          }}
+        >
+          <PhaseVideo onClose={() => { setVideoClosed(true); setPhase(totalPhases - 2) }} isActive={isActive && phase === totalPhases - 1} />
+        </motion.div>
+      )}
     </div>
   )
 }
@@ -230,22 +263,7 @@ function PhaseTitle({
   const trendNumber = String(index + 1).padStart(2, '0')
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, x: -200 }}
-      transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-      style={{
-        position: 'absolute',
-        top: -30,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-      }}
-    >
+    <div style={{ position: 'relative' }}>
 
 
       {/* Content */}
@@ -304,7 +322,7 @@ function PhaseTitle({
                 flex: '0 0 auto',
               }}
             >
-              <div className="[&_p]:mb-4">
+              <div className="report-links [&_p]:mb-4">
                 <PortableText value={body} />
               </div>
 
@@ -323,7 +341,7 @@ function PhaseTitle({
                             href={project.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ color: '#D4D4D4', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.14)' }}
+                            className="report-link"
                           >
                             {project.title}
                           </a>
@@ -339,7 +357,7 @@ function PhaseTitle({
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -441,7 +459,7 @@ function PhaseQuote({
           marginBottom: 20,
         }}
       >
-        <div className="[&_p]:inline">
+        <div className="report-links [&_p]:inline">
           <PortableText value={quote.quoteText} />
         </div>
       </div>
@@ -477,22 +495,28 @@ function PhaseQuote({
 /*  Phase: Video                                                       */
 /* ------------------------------------------------------------------ */
 
-function PhaseVideo({ onClose }: { onClose: () => void }) {
+function PhaseVideo({ onClose, isActive }: { onClose: () => void; isActive: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [muted, setMuted] = useState(false)
 
-  // Attempt to play with audio — fall back to muted if browser blocks it
+  // Play with audio when active, pause when not
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-    video.muted = false
-    video.play().catch(() => {
-      // Browser blocked unmuted autoplay — fall back to muted
-      video.muted = true
-      setMuted(true)
-      video.play()
-    })
-  }, [])
+    if (isActive) {
+      video.currentTime = 0
+      video.muted = false
+      video.play().catch(() => {
+        video.muted = true
+        setMuted(true)
+        video.play()
+      })
+      setMuted(false)
+    } else {
+      video.pause()
+      video.currentTime = 0
+    }
+  }, [isActive])
 
   function toggleMute() {
     if (videoRef.current) {
@@ -509,28 +533,7 @@ function PhaseVideo({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        zIndex: 20,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingBottom: 60,
-        pointerEvents: 'none',
-      }}
-    >
-    <motion.div
-      initial={{ opacity: 0, scale: 0.05 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-      style={{ position: 'relative' }}
-    >
+    <div style={{ position: 'relative' }}>
       {/* Close button */}
       <button
         onClick={(e) => { e.stopPropagation(); onClose() }}
@@ -634,7 +637,6 @@ function PhaseVideo({ onClose }: { onClose: () => void }) {
           </svg>
         </button>
       </div>
-    </motion.div>
     </div>
   )
 }

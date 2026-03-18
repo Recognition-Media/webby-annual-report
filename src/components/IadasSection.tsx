@@ -161,7 +161,7 @@ export function IadasSection({ report }: { report: Report }) {
         </div>
 
         {/* Credential cards */}
-        <div style={{ display: 'flex', gap: 24, marginTop: 16 }}>
+        <div style={{ display: 'flex', gap: 24, marginTop: 26 }}>
           {/* IADAS card */}
           <div
             style={{

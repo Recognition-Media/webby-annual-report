@@ -106,9 +106,9 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
           cursor: 'pointer',
         }}
       >
-        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 60px 0 5px' }}>
         <AnimatePresence mode="wait">
           {!expanded && (
+            <div style={{ maxWidth: 1000, margin: '0 auto' }}>
             <motion.div
               key={`collapsed-${activeTrend}`}
               initial={{ opacity: 0, y: 8 }}
@@ -148,6 +148,7 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
                 {activeTrend + 1} / {titles.length}
               </span>
             </motion.div>
+            </div>
           )}
         </AnimatePresence>
 
@@ -161,7 +162,7 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
               style={{ overflow: 'hidden' }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, maxWidth: 1000, margin: '0 auto', marginLeft: 'calc(50% - 550px)' }}>
                 {titles.map((title, i) => {
                   const isActive = i === activeTrend
                   const itemColor = TREND_COLORS[i % TREND_COLORS.length]
@@ -236,7 +237,6 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
             </motion.div>
           )}
         </AnimatePresence>
-        </div>
       </div>
     </motion.nav>
   )
