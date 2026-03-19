@@ -119,8 +119,11 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
   }, [])
 
   // Click handler
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: MouseEvent) => {
     if (!visible) return
+    // Don't navigate when clicking on interactive or content elements
+    const target = e.target as HTMLElement
+    if (target.closest('a, button, input, textarea, select, [role="button"], .no-custom-cursor, .prose, [data-content], img, video, svg')) return
 
     const scrollY = window.scrollY
 
@@ -135,11 +138,8 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
       if (mouseOnLeft) {
         // Going back
         if (trendPhase === '0' && isFirstTrend) {
-          // First trend, first phase — go to judging page
-          document.body.style.overflow = ''
-          document.documentElement.classList.add('snap-active')
-          const judging = document.getElementById('how-judged')
-          if (judging) judging.scrollIntoView({ behavior: 'smooth' })
+          // First trend, first phase — no back action
+          return
         } else {
           // Retreat within trend (or to previous trend if at phase 0)
           window.dispatchEvent(new Event('trend-retreat'))
@@ -153,6 +153,16 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
 
     // Unlock scroll if it was locked by a trend section
     document.body.style.overflow = ''
+
+    // On goodbye page, click scrolls back up to trends
+    const thankYou = document.getElementById('thank-you')
+    const thankYouRect = thankYou?.getBoundingClientRect()
+    const onGoodbye = thankYouRect && thankYouRect.top <= 50 && thankYouRect.bottom >= window.innerHeight - 50
+    if (onGoodbye) {
+      const trends = document.getElementById('trends')
+      if (trends) trends.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
 
     // Find the next section below current scroll position
     for (const id of sectionIds) {
@@ -195,7 +205,7 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
       const onLastPhase = parseInt(trendPhase || '0') === trendTotalPhases - 1
 
       if (mouseOnLeft && trendPhase === '0' && trendIndex === '0') {
-        rotation = -90 // up arrow — back to judging
+        rotation = 0 // first trend, no back — just point forward
       } else if (mouseOnLeft) {
         rotation = 180 // left arrow — go back
       } else if (onLastPhase && isLastTrend) {
@@ -204,7 +214,10 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
         rotation = 0 // right arrow — advance
       }
     } else {
-      rotation = 90
+      // Check if on goodbye page or footer (past trends)
+      const thankYou = document.getElementById('thank-you')
+      const onGoodbyeOrFooter = thankYou && thankYou.getBoundingClientRect().top < window.innerHeight
+      rotation = onGoodbyeOrFooter ? -90 : 90
     }
   }
 

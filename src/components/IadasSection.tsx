@@ -163,7 +163,10 @@ export function IadasSection({ report }: { report: Report }) {
         {/* Credential cards */}
         <div style={{ display: 'flex', gap: 24, marginTop: 26 }}>
           {/* IADAS card */}
-          <div
+          <a
+            href="https://www.iadas.net"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               flex: 1,
               border: '1px solid rgba(255,255,255,0.12)',
@@ -171,6 +174,8 @@ export function IadasSection({ report }: { report: Report }) {
               display: 'flex',
               alignItems: 'center',
               gap: 24,
+              textDecoration: 'none',
+              color: 'inherit',
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -187,10 +192,13 @@ export function IadasSection({ report }: { report: Report }) {
                 The judging body responsible for selecting all Webby Award Winners and Nominees.
               </p>
             </div>
-          </div>
+          </a>
 
           {/* KPMG card */}
-          <div
+          <a
+            href="https://www.kpmg.com"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               flex: 1,
               border: '1px solid rgba(255,255,255,0.12)',
@@ -198,6 +206,8 @@ export function IadasSection({ report }: { report: Report }) {
               display: 'flex',
               alignItems: 'center',
               gap: 24,
+              textDecoration: 'none',
+              color: 'inherit',
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -214,7 +224,7 @@ export function IadasSection({ report }: { report: Report }) {
                 KPMG ensures the accuracy and integrity of the Webby Awards voting process.
               </p>
             </div>
-          </div>
+          </a>
         </div>
 
         {/* Bottom gradient bar */}

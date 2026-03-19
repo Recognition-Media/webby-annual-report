@@ -146,12 +146,10 @@ export function ReportView({ report }: { report: Report }) {
             {showGoodbye && (
               <section
                 id="thank-you"
-                data-snap
                 style={{
                   minHeight: '100vh',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
                   backgroundColor: '#191919',
                   position: 'relative',
                   overflow: 'hidden',
@@ -161,50 +159,87 @@ export function ReportView({ report }: { report: Report }) {
                 {/* Animated background */}
                 <AnimatedBg variant={3} />
 
-                <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                  {/* Gradient bar */}
-                  <div className="gradient-bar" style={{ width: 120, height: 3, margin: '0 auto 40px' }} />
-
+                <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
                   {/* Eyebrow */}
-                  <p style={{
-                    fontSize: 11,
-                    letterSpacing: 4,
-                    textTransform: 'uppercase',
-                    color: '#8B70D1',
-                    fontWeight: 500,
-                    marginBottom: 24,
-                  }}>
-                    Thank You
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
+                    <span style={{
+                      fontSize: 11,
+                      letterSpacing: 4,
+                      textTransform: 'uppercase',
+                      color: '#8B70D1',
+                      fontWeight: 500,
+                    }}>
+                      Thank You
+                    </span>
+                    <div style={{ width: 60, height: 2, background: '#8B70D1', borderRadius: 2 }} />
+                  </div>
 
                   {/* Heading */}
                   <h2 style={{
-                    fontSize: 'clamp(36px, 4vw, 56px)',
+                    fontSize: 48,
                     fontWeight: 400,
                     color: '#fff',
-                    lineHeight: 1.2,
-                    letterSpacing: '-1px',
-                    marginBottom: 32,
-                    maxWidth: 700,
-                    margin: '0 auto 32px',
+                    lineHeight: '58px',
+                    letterSpacing: '-2px',
+                    marginBottom: 40,
+                    maxWidth: 750,
                   }}>
                     See you at the 30th Annual Webby Awards
                   </h2>
 
                   {/* Divider */}
-                  <div style={{ width: 60, height: 1, background: 'rgba(255,255,255,0.14)', margin: '0 auto 32px' }} />
+                  <div style={{ width: 80, height: 1, background: 'rgba(255,255,255,0.14)', marginBottom: 32 }} />
 
                   {/* Body */}
                   {report.ceremonyDetails && (
-                    <div style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 600, margin: '0 auto 40px' }}>
-                      <PortableText value={report.ceremonyDetails} />
+                    <div data-content style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 749 }}>
+                      <div className="report-links [&_p]:mb-4">
+                        <PortableText value={report.ceremonyDetails.filter(
+                          (block: any) => !block.children?.some((child: any) => typeof child.text === 'string' && child.text.includes('evey@webbyawards.com'))
+                        )} />
+                      </div>
                     </div>
                   )}
 
-                  {/* CTA-style footer text */}
-                  <p style={{ fontSize: 13, color: '#999', letterSpacing: 1 }}>
-                    webbyawards.com
-                  </p>
+                  {/* CTA card */}
+                  <a
+                    href="https://www.webbyawards.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-content
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 24,
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      padding: '28px 32px',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      marginTop: 40,
+                    }}
+                  >
+                    <svg
+                      width="36"
+                      height="36"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.9)"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ flexShrink: 0 }}
+                    >
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                    </svg>
+                    <div>
+                      <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
+                        Get in Touch
+                      </h4>
+                      <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
+                        Please feel free to contact Producer Evey Long at evey@webbyawards.com with questions or comments.
+                      </p>
+                    </div>
+                  </a>
                 </div>
               </section>
             )}

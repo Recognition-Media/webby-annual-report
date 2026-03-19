@@ -126,7 +126,13 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
       clearTimeout(lockTimeout)
       window.removeEventListener('wheel', handleWheel, true)
       document.body.style.overflow = ''
-      document.documentElement.classList.add('snap-active')
+      // Only re-enable snap if not on the goodbye page
+      const thankYou = document.getElementById('thank-you')
+      const thankYouRect = thankYou?.getBoundingClientRect()
+      const goingToGoodbye = thankYouRect && thankYouRect.top < window.innerHeight
+      if (!goingToGoodbye) {
+        document.documentElement.classList.add('snap-active')
+      }
     }
   }, [isActive, phase])
 
@@ -171,8 +177,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
           animate={{ opacity: phase === 0 ? 1 : 0, x: phase === 0 ? 0 : -200 }}
           transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
           style={{
-            position: 'absolute', top: -30, left: 0, right: 0, bottom: 0,
-            display: 'flex', flexDirection: 'column', justifyContent: 'center',
+            position: 'absolute', top: 12, left: 0, right: 0, bottom: 0,
             pointerEvents: phase === 0 ? 'auto' : 'none',
           }}
         >
@@ -185,7 +190,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
           />
         </motion.div>
 
-        {/* Quote pages — each always rendered */}
+        {/* Quote pages — each always rendered, accumulating on screen */}
         {quotes.map((quote, i) => {
           const quotePhase = i + 1
           const isCurrentPage = phase === quotePhase
@@ -195,13 +200,8 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
           const position = visibleCount - (i + 1)
 
           return (
-            <motion.div
+            <div
               key={`quote-wrapper-${i}`}
-              animate={{
-                opacity: isVisible || isVideoPhase ? 1 : 0,
-                x: phase < quotePhase ? 200 : 0,
-              }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
               style={{
                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                 pointerEvents: isCurrentPage ? 'auto' : 'none',
@@ -211,11 +211,12 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
                 quote={quote}
                 position={position}
                 visibleCount={visibleCount}
-                isNew={false}
+                isNew={phase === quotePhase}
+                visible={isVisible || isVideoPhase}
                 videoActive={isVideoPhase}
                 color={trendColor}
               />
-            </motion.div>
+            </div>
           )
         })}
       </div>
@@ -398,6 +399,7 @@ function PhaseQuote({
   position,
   visibleCount,
   isNew,
+  visible = false,
   videoActive = false,
   color,
 }: {
@@ -405,6 +407,7 @@ function PhaseQuote({
   position: number
   visibleCount: number
   isNew: boolean
+  visible?: boolean
   videoActive?: boolean
   color: string
 }) {
@@ -412,25 +415,24 @@ function PhaseQuote({
   const isLatest = position === 0
 
   // When video is active, all quotes dim further and the newest shrinks too
-  const finalOpacity = videoActive ? 0.15 : layout.opacity
+  const finalOpacity = !visible ? 0 : videoActive ? 0.15 : layout.opacity
   const finalScale = videoActive && isLatest ? 0.8 : layout.scale
 
   return (
     <motion.div
-      layout
-      initial={isNew ? { opacity: 0, x: 300 } : false}
+      initial={isNew ? { opacity: 0, x: 300, scale: 1 } : false}
       animate={{
         opacity: finalOpacity,
         scale: finalScale,
         x: 0,
+        top: layout.top,
+        left: layout.left,
+        maxWidth: layout.maxWidth,
       }}
       transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
       style={{
         position: 'absolute',
-        top: layout.top,
-        left: layout.left,
         transform: `translate(${layout.xOffset}, ${layout.yOffset})`,
-        maxWidth: layout.maxWidth,
         transformOrigin: 'top left',
       }}
     >

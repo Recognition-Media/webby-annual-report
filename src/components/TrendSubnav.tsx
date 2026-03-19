@@ -14,16 +14,34 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
   const activeColor = TREND_COLORS[activeTrend % TREND_COLORS.length]
   const [expanded, setExpanded] = useState(false)
   const [hintVisible, setHintVisible] = useState(true)
-  const [hasSeenPeek, setHasSeenPeek] = useState(false)
 
-
-  // Hide hint text after 4 seconds
+  // Hide hint when user leaves the first trend page
   useEffect(() => {
-    const timer = setTimeout(() => setHintVisible(false), 4000)
-    return () => clearTimeout(timer)
-  }, [])
+    if (activeTrend !== 0) {
+      setHintVisible(false)
+    }
+  }, [activeTrend])
 
   return (
+    <>
+      {/* Dark scrim behind subnav when expanded */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.6)',
+              zIndex: 54,
+              pointerEvents: 'none',
+            }}
+          />
+        )}
+      </AnimatePresence>
     <motion.nav
       initial={{ y: 80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
@@ -42,7 +60,7 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
     >
       {/* Hint text + chevron — fades away after a few seconds */}
       <AnimatePresence>
-        {hintVisible && (
+        {hintVisible && !expanded && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -239,5 +257,6 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
         </AnimatePresence>
       </div>
     </motion.nav>
+    </>
   )
 }
