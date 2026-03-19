@@ -136,6 +136,8 @@ export function IdleArrows({ active }: { active: boolean }) {
     if (trendActive) {
       window.dispatchEvent(new Event('trend-retreat'))
     } else {
+      // Disable goodbye scroll clamp if on goodbye page
+      window.dispatchEvent(new Event('goodbye-exit'))
       // Vertical: scroll to previous snap section
       const sections = Array.from(document.querySelectorAll('[data-snap]'))
       const scrollY = window.scrollY

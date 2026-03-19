@@ -159,6 +159,7 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
     const thankYouRect = thankYou?.getBoundingClientRect()
     const onGoodbye = thankYouRect && thankYouRect.top <= 50 && thankYouRect.bottom >= window.innerHeight - 50
     if (onGoodbye) {
+      window.dispatchEvent(new Event('goodbye-exit'))
       const trends = document.getElementById('trends')
       if (trends) trends.scrollIntoView({ behavior: 'smooth' })
       return

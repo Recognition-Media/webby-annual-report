@@ -45,6 +45,44 @@ export function ReportView({ report }: { report: Report }) {
     return () => window.removeEventListener('trend-next-or-exit', handleExit)
   }, [])
 
+  // Prevent scrolling up past the goodbye page — only allow down scroll to footer
+  // Listen for 'goodbye-exit' event to disable the clamp when user clicks to go back
+  useEffect(() => {
+    if (!showGoodbye) return
+    let goodbyeTop: number | null = null
+    let clampEnabled = true
+
+    function clampScroll() {
+      if (!clampEnabled) return
+      const thankYou = document.getElementById('thank-you')
+      if (!thankYou) return
+      if (goodbyeTop === null) {
+        goodbyeTop = thankYou.offsetTop
+      }
+      if (window.scrollY < goodbyeTop) {
+        window.scrollTo(0, goodbyeTop)
+      }
+    }
+
+    function disableClamp() {
+      clampEnabled = false
+    }
+
+    function reEnableClamp() {
+      goodbyeTop = null
+      clampEnabled = true
+    }
+
+    window.addEventListener('scroll', clampScroll)
+    window.addEventListener('goodbye-exit', disableClamp)
+    window.addEventListener('trend-next-or-exit', reEnableClamp)
+    return () => {
+      window.removeEventListener('scroll', clampScroll)
+      window.removeEventListener('goodbye-exit', disableClamp)
+      window.removeEventListener('trend-next-or-exit', reEnableClamp)
+    }
+  }, [showGoodbye])
+
   useEffect(() => {
     // Dev shortcut: add ?reset to the URL to clear the signup cookie and test the gate
     if (window.location.search.includes('reset')) {
