@@ -118,6 +118,16 @@ export interface Report {
   letterAuthors?: LetterAuthor[]
   carouselImages?: CarouselImage[]
   trendSections?: TrendSection[]
+  thankYouEyebrow?: string
+  thankYouHeading?: string
+  thankYouBody?: import('@portabletext/types').PortableTextBlock[]
+  thankYouLinkEyebrow?: string
+  thankYouLinkTitle?: string
+  thankYouLinkDescription?: string
+  thankYouLinkUrl?: string
+  thankYouCtaTitle?: string
+  thankYouCtaDescription?: string
+  thankYouCtaUrl?: string
   formFields?: FormField[]
   submitButtonText?: string
   successMessage?: string

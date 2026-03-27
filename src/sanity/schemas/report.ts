@@ -13,6 +13,7 @@ export default defineType({
     { name: 'byTheNumbers', title: 'By the Numbers' },
     { name: 'howWeJudge', title: 'How We Judge' },
     { name: 'trends', title: 'Trends' },
+    { name: 'thankYou', title: 'Thank You' },
     { name: 'signup', title: 'Signup Form' },
     { name: 'analytics', title: 'Analytics' },
     { name: 'footer', title: 'Footer' },
@@ -69,6 +70,18 @@ export default defineType({
 
     // Trends
     { name: 'trendSections', title: 'Trend Sections', type: 'array', of: [{ type: 'trendSection' }], group: 'trends' },
+
+    // Thank You
+    { name: 'thankYouEyebrow', title: 'Eyebrow', type: 'string', group: 'thankYou', description: 'e.g. "Thank You"' },
+    { name: 'thankYouHeading', title: 'Heading', type: 'string', group: 'thankYou' },
+    { name: 'thankYouBody', title: 'Body', type: 'array', of: [{ type: 'block' }], group: 'thankYou' },
+    { name: 'thankYouLinkEyebrow', title: 'Link Card Eyebrow', type: 'string', group: 'thankYou', description: 'e.g. "Learn More"' },
+    { name: 'thankYouLinkTitle', title: 'Link Card Title', type: 'string', group: 'thankYou' },
+    { name: 'thankYouLinkDescription', title: 'Link Card Description', type: 'string', group: 'thankYou' },
+    { name: 'thankYouLinkUrl', title: 'Link Card URL', type: 'url', group: 'thankYou' },
+    { name: 'thankYouCtaTitle', title: 'CTA Card Title', type: 'string', group: 'thankYou', description: 'e.g. "Get in Touch"' },
+    { name: 'thankYouCtaDescription', title: 'CTA Card Description', type: 'string', group: 'thankYou' },
+    { name: 'thankYouCtaUrl', title: 'CTA Card URL', type: 'url', group: 'thankYou' },
 
     // Signup Form
     { name: 'formFields', title: 'Signup Form Fields', type: 'array', of: [{ type: 'formField' }], group: 'signup' },

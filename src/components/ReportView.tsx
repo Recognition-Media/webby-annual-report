@@ -228,7 +228,7 @@ export function ReportView({ report }: { report: Report }) {
                       color: '#8B70D1',
                       fontWeight: 500,
                     }}>
-                      Thank You
+                      {report.thankYouEyebrow || 'Thank You'}
                     </span>
                     <div style={{ width: 60, height: 2, background: '#8B70D1', borderRadius: 2 }} />
                   </div>
@@ -241,21 +241,27 @@ export function ReportView({ report }: { report: Report }) {
                     marginBottom: 40,
                     maxWidth: 750,
                   }}>
-                    You&rsquo;re Part of What Makes the Internet Worth Being On.
+                    {report.thankYouHeading || "You're Part of What Makes the Internet Worth Being On."}
                   </h2>
 
                   {/* Divider */}
                   <div style={{ width: 80, height: 1, background: 'rgba(255,255,255,0.14)', marginBottom: 32 }} />
 
                   {/* Body */}
-                  <div data-content style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 749, marginBottom: 40 }}>
-                    <p style={{ marginBottom: 20 }}>Your participation helps us recognize the best of the Internet each year. As an entrant in the 30th Annual Webby Awards, you are part of the Webby community &mdash; and will continue to receive benefits like this report, access to research, invitations to Webby Talks, and exclusive event invites throughout the year.</p>
-                    <p>Use what you&rsquo;ve read here. The insights in this report come directly from the judges who will evaluate your next entry.</p>
+                  <div data-content style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 749, marginBottom: 40 }} className="[&_p]:mb-5">
+                    {report.thankYouBody ? (
+                      <PortableText value={report.thankYouBody} />
+                    ) : (
+                      <>
+                        <p style={{ marginBottom: 20 }}>Your participation helps us recognize the best of the Internet each year. As an entrant in the 30th Annual Webby Awards, you are part of the Webby community &mdash; and will continue to receive benefits like this report, access to research, invitations to Webby Talks, and exclusive event invites throughout the year.</p>
+                        <p>Use what you&rsquo;ve read here. The insights in this report come directly from the judges who will evaluate your next entry.</p>
+                      </>
+                    )}
                   </div>
 
                   {/* Judging criteria banner */}
                   <a
-                    href="https://www.webbyawards.com/judging-criteria/"
+                    href={report.thankYouLinkUrl || 'https://www.webbyawards.com/judging-criteria/'}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="no-custom-cursor"
@@ -274,13 +280,13 @@ export function ReportView({ report }: { report: Report }) {
                   >
                     <div>
                       <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#8B70D1', fontWeight: 500, marginBottom: 10 }}>
-                        Learn More
+                        {report.thankYouLinkEyebrow || 'Learn More'}
                       </div>
                       <div style={{ fontSize: 18, fontWeight: 400, color: '#fff', lineHeight: 1.3, marginBottom: 6 }}>
-                        How We Judge the Internet&apos;s Best Work
+                        {report.thankYouLinkTitle || "How We Judge the Internet's Best Work"}
                       </div>
                       <div style={{ fontSize: 14, color: '#888', lineHeight: 1.5 }}>
-                        Explore the judging criteria behind every Webby Award.
+                        {report.thankYouLinkDescription || 'Explore the judging criteria behind every Webby Award.'}
                       </div>
                     </div>
                     <div
@@ -303,7 +309,7 @@ export function ReportView({ report }: { report: Report }) {
 
                   {/* CTA card */}
                   <a
-                    href="https://www.webbyawards.com"
+                    href={report.thankYouCtaUrl || 'https://www.webbyawards.com'}
                     target="_blank"
                     rel="noopener noreferrer"
                     data-content
@@ -333,10 +339,10 @@ export function ReportView({ report }: { report: Report }) {
                     </svg>
                     <div>
                       <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
-                        Get in Touch
+                        {report.thankYouCtaTitle || 'Get in Touch'}
                       </h4>
                       <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
-                        Please feel free to contact Producer Evey Long at evey@webbyawards.com with questions or comments.
+                        {report.thankYouCtaDescription || 'Please feel free to contact Producer Evey Long at evey@webbyawards.com with questions or comments.'}
                       </p>
                     </div>
                   </a>
