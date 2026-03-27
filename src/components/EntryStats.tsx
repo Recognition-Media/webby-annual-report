@@ -25,26 +25,26 @@ const FALLBACK_STATS: (HeroStat & {
     value: '13000',
     suffix: '+',
     color: '#80D064',
-    description: 'Across every category',
+    description: 'From every corner of the Internet',
   },
   {
     label: 'Countries',
     value: '71',
     color: '#82D8EB',
-    description: 'Represented worldwide',
+    description: 'Represented',
   },
   {
     label: 'US States',
     value: '50',
     color: '#8B70D1',
-    description: 'Coast to coast',
+    description: 'Represented',
   },
   {
     label: 'Became Nominees',
-    value: '12',
+    value: '11',
     suffix: '%',
     color: '#FFB763',
-    description: 'The best of the best',
+    description: 'Of all entered work',
   },
 ]
 
@@ -338,7 +338,7 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
             marginBottom: 24,
           }}
         >
-          Webby 30: By The Numbers
+          Webby 30: By the Numbers Letter
         </p>
         <p
           style={{
@@ -349,12 +349,11 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
             letterSpacing: -1,
           }}
         >
-          This year,{' '}
-          <span style={{ color: '#80D064' }}>13,000+</span> entries poured in
-          from <span style={{ color: '#82D8EB' }}>71 countries</span> and all{' '}
-          <span style={{ color: '#8B70D1' }}>50 US states</span> — making it the
-          most globally represented year in Webby history. Only{' '}
-          <span style={{ color: '#FFB763' }}>12%</span> became nominees.
+          This year, <span style={{ color: '#80D064' }}>13,000+</span> projects
+          were entered from <span style={{ color: '#82D8EB' }}>71 countries</span> and
+          all <span style={{ color: '#8B70D1' }}>50 US states</span>, making this the
+          most globally represented season in our 30-year history. Only{' '}
+          <span style={{ color: '#FFB763' }}>11%</span> were selected as Nominees.
         </p>
       </motion.div>
 

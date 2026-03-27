@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thank You — Judging Criteria Link</title>
+<link rel="stylesheet" href="https://use.typekit.net/ona0hkt.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Aktiv Grotesk', -apple-system, sans-serif;
+    background: #111;
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .tag {
+    text-align: center;
+    padding: 60px 0 20px;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #666;
+  }
+  .tag span { color: #8B70D1; }
+  .tag small {
+    display: block;
+    margin-top: 8px;
+    color: #555;
+    letter-spacing: 1px;
+    font-size: 11px;
+    text-transform: none;
+    max-width: 550px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #333, transparent);
+  }
+
+  /* Shared thank-you base */
+  .thankyou {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #191919;
+    position: relative;
+    overflow: hidden;
+    padding: 0 60px;
+  }
+
+  .thankyou .inner {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .gradient-bar {
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(90deg, #8B70D1, #82D8EB, #FF7F63);
+    margin: 0 auto 40px;
+    border-radius: 2px;
+  }
+
+  .thankyou .eyebrow {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #8B70D1;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  .thankyou h2 {
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    max-width: 700px;
+    margin: 0 auto 32px;
+  }
+
+  .thankyou .thin-rule {
+    width: 60px;
+    height: 1px;
+    background: rgba(255,255,255,0.14);
+    margin: 0 auto 32px;
+  }
+
+  .thankyou .body {
+    font-size: 16px;
+    line-height: 28px;
+    color: #D4D4D4;
+    max-width: 600px;
+    margin: 0 auto 40px;
+  }
+
+  .thankyou .site-link {
+    font-size: 13px;
+    color: #999;
+    letter-spacing: 1px;
+  }
+
+  /* ============================================ */
+  /*  A — INLINE CARD                              */
+  /*  A bordered card below the thank-you copy     */
+  /*  with headline, description, and arrow link   */
+  /* ============================================ */
+  .criteria-card {
+    max-width: 560px;
+    margin: 0 auto 40px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 36px 40px;
+    text-align: left;
+    background: rgba(255,255,255,0.02);
+    transition: border-color 0.3s ease, background 0.3s ease;
+    text-decoration: none;
+    display: block;
+  }
+  .criteria-card:hover {
+    border-color: rgba(139, 112, 209, 0.3);
+    background: rgba(139, 112, 209, 0.04);
+  }
+
+  .criteria-card .card-eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #8B70D1;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .criteria-card .card-title {
+    font-size: 20px;
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+
+  .criteria-card .card-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #888;
+    margin-bottom: 20px;
+  }
+
+  .criteria-card .card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #8B70D1;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    transition: gap 0.3s ease;
+  }
+  .criteria-card:hover .card-link {
+    gap: 12px;
+  }
+
+  .card-link .arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+  .criteria-card:hover .card-link .arrow {
+    transform: translateX(2px);
+  }
+
+  /* ============================================ */
+  /*  B — FULL-WIDTH BANNER                        */
+  /*  A full-width section between thank-you copy  */
+  /*  and the site link, with left-aligned text     */
+  /*  and right-aligned arrow                      */
+  /* ============================================ */
+  .criteria-banner {
+    max-width: 700px;
+    margin: 0 auto 48px;
+    padding: 32px 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    text-align: left;
+    text-decoration: none;
+  }
+  .criteria-banner:hover .banner-arrow {
+    transform: translateX(4px);
+    border-color: rgba(139, 112, 209, 0.5);
+  }
+
+  .banner-left .banner-eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #8B70D1;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .banner-left .banner-title {
+    font-size: 18px;
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .banner-left .banner-desc {
+    font-size: 14px;
+    color: #888;
+    line-height: 1.5;
+  }
+
+  .banner-arrow {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================ -->
+<!--  A — INLINE CARD                              -->
+<!-- ============================================ -->
+<div class="tag">
+  A — <span>Inline Card</span>
+  <small>A bordered card sits below the thank-you copy. Hoverable with a subtle purple glow on hover. Self-contained and visually distinct from the rest of the page.</small>
+</div>
+
+<section class="thankyou">
+  <div class="inner">
+    <div class="gradient-bar"></div>
+    <p class="eyebrow">Thank You</p>
+    <h2>See you at the 30th Annual Webby Awards</h2>
+    <div class="thin-rule"></div>
+    <p class="body">
+      Join us on May 19, 2025 for the ceremony celebrating the best of the Internet. Tickets and details at webbyawards.com.
+    </p>
+
+    <!-- Judging criteria card -->
+    <a href="https://www.webbyawards.com/judging-criteria/" target="_blank" rel="noopener noreferrer" class="criteria-card">
+      <div class="card-eyebrow">Learn More</div>
+      <div class="card-title">How We Judge the Internet's Best Work</div>
+      <div class="card-desc">Explore the criteria our judges use to evaluate entries across all categories — from content and structure to visual design and overall experience.</div>
+      <div class="card-link">
+        View Judging Criteria <span class="arrow">→</span>
+      </div>
+    </a>
+
+    <p class="site-link">webbyawards.com</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!--  B — FULL-WIDTH BANNER                        -->
+<!-- ============================================ -->
+<div class="tag">
+  B — <span>Full-Width Banner</span>
+  <small>A horizontal band with text on the left and an arrow on the right, framed by thin rules. Integrated into the page flow — feels like a natural next step, not a separate module.</small>
+</div>
+
+<section class="thankyou">
+  <div class="inner">
+    <div class="gradient-bar"></div>
+    <p class="eyebrow">Thank You</p>
+    <h2>See you at the 30th Annual Webby Awards</h2>
+    <div class="thin-rule"></div>
+    <p class="body">
+      Join us on May 19, 2025 for the ceremony celebrating the best of the Internet. Tickets and details at webbyawards.com.
+    </p>
+
+    <!-- Judging criteria banner -->
+    <a href="https://www.webbyawards.com/judging-criteria/" target="_blank" rel="noopener noreferrer" class="criteria-banner">
+      <div class="banner-left">
+        <div class="banner-eyebrow">Learn More</div>
+        <div class="banner-title">How We Judge the Internet's Best Work</div>
+        <div class="banner-desc">Explore the judging criteria behind every Webby Award.</div>
+      </div>
+      <div class="banner-arrow">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B70D1" stroke-width="1.5">
+          <path d="M7 17L17 7M17 7H7M17 7V17" />
+        </svg>
+      </div>
+    </a>
+
+    <p class="site-link">webbyawards.com</p>
+  </div>
+</section>
+
+</body>
+</html>

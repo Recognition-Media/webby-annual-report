@@ -129,18 +129,26 @@ export function ReportView({ report }: { report: Report }) {
             <IadasSection report={report} />
 
             {/* Trends — horizontal container */}
-            {report.trendSections && report.trendSections.length > 0 && (
-              <TrendContainer
-                trendCount={report.trendSections.length}
-                trendTitles={report.trendSections.map((s) =>
-                  s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
-                )}
-              >
-                {report.trendSections.map((section, i) => (
-                  <TrendSection key={i} section={section} index={i} />
-                ))}
-              </TrendContainer>
-            )}
+            {(() => {
+              const cmsTrends = report.trendSections || []
+              // Pad with virtual trend sections for overrides beyond CMS data
+              const totalTrends = Math.max(cmsTrends.length, 7)
+              const allTrends = Array.from({ length: totalTrends }, (_, i) =>
+                cmsTrends[i] || { trendTitle: `Trend ${i + 1}` }
+              )
+              return allTrends.length > 0 ? (
+                <TrendContainer
+                  trendCount={allTrends.length}
+                  trendTitles={allTrends.map((s) =>
+                    s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
+                  )}
+                >
+                  {allTrends.map((section, i) => (
+                    <TrendSection key={i} section={section} index={i} />
+                  ))}
+                </TrendContainer>
+              ) : null
+            })()}
 
             {/* Thank You section — only rendered after all trends complete */}
             {showGoodbye && (
@@ -188,18 +196,66 @@ export function ReportView({ report }: { report: Report }) {
                     maxWidth: 700,
                     margin: '0 auto 32px',
                   }}>
-                    See you at the 30th Annual Webby Awards
+                    You&rsquo;re Part of What Makes the Internet Worth Being On.
                   </h2>
 
                   {/* Divider */}
                   <div style={{ width: 60, height: 1, background: 'rgba(255,255,255,0.14)', margin: '0 auto 32px' }} />
 
                   {/* Body */}
-                  {report.ceremonyDetails && (
-                    <div style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 600, margin: '0 auto 40px' }}>
-                      <PortableText value={report.ceremonyDetails} />
+                  <div style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 600, margin: '0 auto 40px' }}>
+                    <p style={{ marginBottom: 20 }}>Your participation helps us recognize the best of the Internet each year. As an entrant in the 30th Annual Webby Awards, you are part of the Webby community &mdash; and will continue to receive benefits like this report, access to research, invitations to Webby Talks, and exclusive event invites throughout the year.</p>
+                    <p>Use what you&rsquo;ve read here. The insights in this report come directly from the judges who will evaluate your next entry.</p>
+                  </div>
+
+                  {/* Judging criteria banner */}
+                  <a
+                    href="https://www.webbyawards.com/judging-criteria/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-custom-cursor"
+                    style={{
+                      maxWidth: 700,
+                      margin: '0 auto 48px',
+                      padding: '32px 0',
+                      borderTop: '1px solid rgba(255,255,255,0.06)',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 40,
+                      textAlign: 'left',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#8B70D1', fontWeight: 500, marginBottom: 10 }}>
+                        Learn More
+                      </div>
+                      <div style={{ fontSize: 18, fontWeight: 400, color: '#fff', lineHeight: 1.3, marginBottom: 6 }}>
+                        How We Judge the Internet's Best Work
+                      </div>
+                      <div style={{ fontSize: 14, color: '#888', lineHeight: 1.5 }}>
+                        Explore the judging criteria behind every Webby Award.
+                      </div>
                     </div>
-                  )}
+                    <div
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '50%',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B70D1" strokeWidth="1.5">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                      </svg>
+                    </div>
+                  </a>
 
                   {/* CTA-style footer text */}
                   <p style={{ fontSize: 13, color: '#999', letterSpacing: 1 }}>

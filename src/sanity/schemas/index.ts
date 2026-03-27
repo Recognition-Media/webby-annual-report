@@ -4,6 +4,7 @@ import letterAuthor from './objects/letterAuthor'
 import trendSection from './objects/trendSection'
 import featuredProject from './objects/featuredProject'
 import expertQuote from './objects/expertQuote'
+import dataStat from './objects/dataStat'
 import carouselImage from './objects/carouselImage'
 import formField from './objects/formField'
 import footerLink from './objects/footerLink'
@@ -15,6 +16,7 @@ export const schemaTypes = [
   trendSection,
   featuredProject,
   expertQuote,
+  dataStat,
   carouselImage,
   formField,
   footerLink,

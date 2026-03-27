@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { PortableText } from '@portabletext/react'
 import { motion } from 'framer-motion'
-import type { TrendSection as TrendSectionType } from '@/sanity/types'
+import type { TrendSection as TrendSectionType, DataStat } from '@/sanity/types'
 import { AnimatedBg } from './AnimatedBg'
 import { urlFor } from '@/sanity/image'
 
@@ -16,15 +16,286 @@ export const TREND_COLORS = [
   '#FF7F63', // coral
   '#80D064', // green
   '#FFB763', // orange
+  '#FF67CB', // pink
+  '#FFDE67', // yellow
 ]
+
+// Hardcoded trend content overrides (will move to Sanity later)
+const TREND_OVERRIDES: Record<number, {
+  title: string
+  body: React.ReactNode[]
+  featuredProjects: { title: string; url?: string }[]
+  quotes?: { name: string; title?: string; quoteText: any[]; linkedInUrl?: string }[]
+  video?: { type: 'local' | 'youtube'; src: string }
+}> = {
+  0: {
+    title: 'The Best AI Is Invisible',
+    body: [
+      'The strongest AI products this season shared one quality: the technology was invisible. They solved existing problems — tax preparation, health monitoring, wildfire detection, and accessibility — without making users consider the AI layer. The moment they did, Executive Judges noted that the product had already lost users.',
+      'As AI becomes a mainstay, utility and novelty are the bars to meet.',
+    ],
+    featuredProjects: [
+      { title: 'TurboTax AI Concierge', url: 'https://turbotax.intuit.com/lp/webby/' },
+      { title: "Carveco LTD's Beyond Vision - AI for Blind", url: 'http://www.touch-beyond-vision.com' },
+      { title: 'ClimateGPT 3.0', url: 'http://climategpt.ai' },
+      { title: 'MiroMind', url: 'http://www.MiroMind.ai' },
+    ],
+    quotes: [
+      {
+        name: 'Tom Hale',
+        title: 'CEO, Oura',
+        quoteText: [{ _type: 'block', _key: 'q0', children: [{ _type: 'span', _key: 's0', text: '\u201CThe best AI category entrants avoided the trap of \u2018chat shall be its interface\u2019 and leaned more on personalization, interaction, and just-in-time content generation.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Jeanniey Walden',
+        title: 'Founder & CMO, Liftoff Enterprises',
+        quoteText: [{ _type: 'block', _key: 'q1', children: [{ _type: 'span', _key: 's1', text: '\u201CWhat distinguished the best AI products was this: the AI was invisible to the person using it. You didn\u2019t feel like you were \u2018using an AI product.\u2019 You felt like the product finally worked the way it should have always worked. The moment someone has to think about the AI layer, the product has already lost.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Martin Cedergren',
+        title: 'Creative Director, Xnet',
+        quoteText: [{ _type: 'block', _key: 'q2', children: [{ _type: 'span', _key: 's2', text: '\u201CA focus on \u2018invisible\u2019 utility that automates drudgery rather than just adding a chatbot. Also, accessibility tools and real-time translation that solved actual human barriers with zero friction.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+    ],
+    video: { type: 'local', src: `${basePath}/trend-video-test.mp4` },
+  },
+  1: {
+    title: 'The Best AI Integrations Were Unapologetic',
+    body: [
+      <><span style={{ color: '#82D8EB', fontWeight: 500 }}>More than 50% of Executive Judges</span> ranked AI Integration as the craft discipline that showed the most growth in the 30th Annual Webby Awards.</>,
+      'The strongest integrations this season used AI as a means, but not the primary idea. Half of the judges also ranked Executive & Production as the most sophisticated use of AI, by using it to unlock new ways for people to engage or experience an idea.',
+      'Unlike AI products, where invisibility is the goal, the best integrations in Webby 30 were unapologetically AI. The technology wasn\u2019t hidden; it was the point to produce something surreal, personalized, or scalable.',
+    ],
+    featuredProjects: [
+      { title: 'Jeep\u2019s \u201CWild Thoughts\u201D by HighDive', url: 'https://www.youtube.com/watch?v=zKfk5x0PMMs' },
+      { title: 'Find Your Feet by Code and Theory', url: 'https://www.codeandtheory.com/things-we-make/scores-network-find-your-feet' },
+    ],
+    quotes: [
+      {
+        name: 'Robert Slot',
+        title: 'Chief Innovation Officer, TBWA\\NEBOKO',
+        linkedInUrl: 'https://nl.linkedin.com/in/robertslot',
+        quoteText: [{ _type: 'block', _key: 'q1-0', children: [{ _type: 'span', _key: 's1-0', text: '\u201CThe standout work used AI as a means, not the message. The most interesting applications weren\u2019t about showing off the technology, but about unlocking new ways for people to engage, contribute, or experience an idea.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Jeanniey Walden',
+        title: 'Founder, CMO, Liftoff Enterprises',
+        linkedInUrl: 'https://www.linkedin.com/in/jeannieywalden',
+        quoteText: [{ _type: 'block', _key: 'q1-1', children: [{ _type: 'span', _key: 's1-1', text: '\u201CJeep\u2019s \u2018Wild Thoughts\u2019 campaign for the 2026 Grand Cherokee put talking wild animals in front of the camera to give unfiltered reviews of the vehicle\u2026 It\u2019s ridiculous, and it knows it. What makes it work is that the AI isn\u2019t hiding. The absurdity of the concept requires AI to exist.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Kim Larson',
+        title: 'Managing Director, Head of Creators & Gaming, YouTube',
+        linkedInUrl: 'https://www.linkedin.com/in/kim-larson-304486',
+        quoteText: [{ _type: 'block', _key: 'q1-2', children: [{ _type: 'span', _key: 's1-2', text: '\u201CThe best AI integrations were unapologetically AI. They went beyond transitions and used AI to elevate the complete narrative arc.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+    ],
+    video: { type: 'youtube', src: 'https://www.youtube.com/watch?v=zKfk5x0PMMs' },
+  },
+  2: {
+    title: 'The Best Creators Went Deeper, Not Broader',
+    body: [
+      'More than a third of judges named distinct POV as the defining quality of this season\u2019s top Creator and Social projects. The work that stood out dove deeper into a niche, a format, or a community. Intentional, serialized storytelling that committed to a narrative over time outperformed single executions.',
+      <>Executive Judges also flagged <span style={{ color: '#FF7F63', fontWeight: 500 }}>&ldquo;radical humanism&rdquo;</span> as a differentiator amongst social entries. While production quality was important, the best stories leaned into influencer maturity and cultural awareness over a polished product.</>,
+    ],
+    featuredProjects: [
+      { title: 'Stella Artois \u201CWho Is Other David?\u201D', url: 'https://www.youtube.com/watch?v=FQ_pPtV2uWo' },
+      { title: '15 Second Film', url: 'https://www.youtube.com/watch?v=FQ_pPtV2uWo' },
+      { title: 'iPhone Standby Dock by OVERWERK and Scott Yu-Jan', url: 'https://www.instagram.com/reel/C_fwPDqpwXB/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==' },
+    ],
+    quotes: [
+      {
+        name: 'Mary Nittolo',
+        title: 'Founder & CCO, the STUDIO',
+        quoteText: [{ _type: 'block', _key: 'q2-0', children: [{ _type: 'span', _key: 's2-0', text: '\u201CIt\u2019s not the format, it\u2019s the person. Performance and specificity are what make stuff effective.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Olive Mwangi',
+        title: 'Head of Social Media, Dentsu Creative Kenya',
+        quoteText: [{ _type: 'block', _key: 'q2-1', children: [{ _type: 'span', _key: 's2-1', text: '\u201CFor more complex, tech-led products, audiences are not only willing but actively choosing to engage with longer, more detailed storytelling. The most effective work came from creators who understood where their product naturally fits within that spectrum.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Alessandro Bogliari',
+        title: 'Co-Founder & CEO, The Influencer Marketing Factory',
+        quoteText: [{ _type: 'block', _key: 'q2-2', children: [{ _type: 'span', _key: 's2-2', text: '\u201CThe creators doing the most interesting work this season aren\u2019t optimizing for everyone. They\u2019re going deeper on a niche, a format, a community, and the audience loyalty that follows is measurably stronger.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+    ],
+  },
+  3: {
+    title: 'The Best Websites Did Less, To Do More',
+    body: [
+      'Restraint and creative risk. Those themes defined web experiences this season. As AI tools democratize templates and design conventions, UX literacy has risen for both creatives and users. That made standing out amongst the competition more difficult this year.',
+      'For Executive Judges, the top websites and mobile sites scaled back and invested in doing fewer things extremely well.',
+      <><span style={{ color: '#80D064', fontWeight: 500 }}>47% of judges</span> cited intentional motion as a defining quality, followed by broken-grid layouts, kinetic typography, and scroll-based narratives. The throughline was a desire to have websites feel specific.</>,
+    ],
+    featuredProjects: [
+      { title: 'FramLabs', url: 'https://framlabs.com/' },
+      { title: 'GUDEA', url: 'https://www.gudea.ai/' },
+      { title: 'BEA \u2014 Brand Experience Agent', url: 'http://brand-experience-agent.com' },
+    ],
+    quotes: [
+      {
+        name: 'Magnus Östberg',
+        title: 'Chief Software Officer, Mercedes-Benz AG',
+        linkedInUrl: 'https://de.linkedin.com/in/magnus-%C3%B6stberg',
+        quoteText: [{ _type: 'block', _key: 'q3-0', children: [{ _type: 'span', _key: 's3-0', text: '\u201CUX is moving toward quieter intelligence: interfaces that are more adaptive, more context-aware, and less visually noisy. FramLabs is a useful winner example because its proposition is built around clarity, decision support and measurable learning.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Sumin Chou',
+        title: 'Partner, Schema',
+        linkedInUrl: 'https://www.linkedin.com/in/sumin-chou',
+        quoteText: [{ _type: 'block', _key: 'q3-1', children: [{ _type: 'span', _key: 's3-1', text: '\u201CThere was a notable maturity in motion design \u2014 purposeful animation that guided attention and focus for meaningful experience outcomes.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Alex Naghavi',
+        title: 'Creative Director, Block',
+        linkedInUrl: 'https://www.linkedin.com/in/alexnaghavi',
+        quoteText: [{ _type: 'block', _key: 'q3-2', children: [{ _type: 'span', _key: 's3-2', text: '\u201CWith AI lowering the barrier to building more ambitious experiences\u2014and more people vibe\u2011coding on their own\u2014we\u2019re starting to see interfaces that take bigger swings in interaction, motion, and narrative structure. There\u2019s a desire to make sites feel specific again, not just interchangeable layouts with different logos.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+    ],
+  },
+  4: {
+    title: 'Brand Partnerships That Feel Internet Native',
+    body: [
+      <>The benchmark Executive Judges set was simple: would people follow this even without a media buy behind it? This season&rsquo;s top brand partnerships and creator collaborations <span style={{ color: '#FFB763', fontWeight: 500 }}>embedded a brand inside conversations that the Internet would already be having</span>, with creators who would already be leading them.</>,
+      'This was most prevalent in the inaugural Creator Business categories. Standout brand work launched products inside a creator\u2019s ecosystem or channels. Platform fluency was also a consistent marker of success.',
+    ],
+    featuredProjects: [
+      { title: 'Jordan Brand \u201CCan\u2019t Ban Greatness\u201D', url: 'https://www.nike.com/a/air-jordan-banned-history' },
+      { title: 'Bottega Veneta \u201CCreative Rites of Venice\u201D', url: 'https://www.theatlantic.com/sponsored/bottega-veneta-2025/the-creative-rites-of-venice/3991/' },
+      { title: 'Kismet - A Journey with Adrien Brody', url: 'https://www.youtube.com/watch?v=kp4SZAchvgI' },
+      { title: 'Etsy\u2019s The Icon Collection', url: 'https://www.etsy.com/featured/theiconcollection' },
+    ],
+    quotes: [
+      {
+        name: 'Brendan Gahan',
+        title: 'CEO, Creator Authority',
+        linkedInUrl: 'https://www.linkedin.com/in/brendangahan',
+        quoteText: [{ _type: 'block', _key: 'q4-0', children: [{ _type: 'span', _key: 's4-0', text: '\u201CThe standout partnerships involved creators early and gave them real creative ownership. You could feel when a collaboration was culturally additive rather than transactional.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Mees Rutten',
+        title: 'Founder, Merlin',
+        linkedInUrl: 'https://www.linkedin.com/in/mees-rutten/',
+        quoteText: [{ _type: 'block', _key: 'q4-1', children: [{ _type: 'span', _key: 's4-1', text: '\u201CWhen a brand trusts a creator enough to let them shape the message and format, you get something that feels native to the platform and earns real engagement.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Lilah Obregon-Wilson',
+        title: 'Music Supervisor and Multi-Media Producer, Disco Cha Cha',
+        linkedInUrl: 'https://www.linkedin.com/in/lilah-obregon-wilson-475aa43',
+        quoteText: [{ _type: 'block', _key: 'q4-2', children: [{ _type: 'span', _key: 's4-2', text: '\u201CSocial collaborations that had more real people involved, even if a celebrity of sorts was attached was what stood out. Brands seemed to be paying attention to everyday people\u2019s concerns and creating with that in mind.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+    ],
+  },
+  5: {
+    title: 'Podcasts As Full Visual Worlds',
+    body: [
+      <>Video has become the default distribution layer for podcasts, and judges were unanimous: the shift is permanent. The best podcast shows built visual worlds, where <span style={{ color: '#FF67CB', fontWeight: 500 }}>video was a necessary extension of the story</span>&mdash;judges cited production design, more intimate framing, and slower pacing helped video podcasts cut through.</>,
+      'Beyond production, the highest-ranking shows built multiplatform ecosystems that extended the conversation beyond the episode. The emotional connection between hosts and listeners carries weight. The highest-performing shows made listeners feel genuinely seen.',
+    ],
+    featuredProjects: [],
+    quotes: [
+      {
+        name: 'Edmond Huot',
+        title: 'Chief Creative Officer, Forward Studio',
+        linkedInUrl: 'https://www.linkedin.com/in/edmondhuot',
+        quoteText: [{ _type: 'block', _key: 'q5-0', children: [{ _type: 'span', _key: 's5-0', text: '\u201CI noticed that the highest ranking podcast productions treated visuals as an extension of the storytelling\u2014using framing, pacing, and visual context to deepen the conversation rather than simply recording it.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Rob Rasmussen',
+        title: 'ROBRAS Creative Collective',
+        linkedInUrl: 'https://www.linkedin.com/in/robras',
+        quoteText: [{ _type: 'block', _key: 'q5-1', children: [{ _type: 'span', _key: 's5-1', text: '\u201CIt feels up close and personal. Eye contact is made as if those speaking could almost see the viewer watching\u2014it holds attention differently than an audio-only format.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Laci Mosley',
+        title: 'Scam Goddess',
+        linkedInUrl: 'https://www.linkedin.com/in/laci-mosley-29814047',
+        quoteText: [{ _type: 'block', _key: 'q5-2', children: [{ _type: 'span', _key: 's5-2', text: '\u201CPodcasts have always felt like punk rock to me. I think celebrity and social media influence pushed forward a lot of shows this season. That\u2019s not to say that all of those celebrity shows are not worthy of recognition\u2026but there are so many shows that have been steadfast and going for years in smaller markets with a loyal fan base creating consistent, amazing work.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+    ],
+  },
+  6: {
+    title: 'Craft As an Act of AI Defiance',
+    body: [
+      'The strongest ad campaigns and video work operated as systems, spanning multiple channels, but anchored in a single idea. While some entries felt stagnant, branded work that was designed for community participation and centered on real, human stories stood out.',
+      <><span style={{ color: '#FFDE67', fontWeight: 500 }}>Craft made a comeback as an act of defiance against AI</span>, according to several judges. Specificity trumped polish: niche stories, humor, and narratives rooted in empathy and the resilience of the human spirit outperformed generic executions.</>,
+      'Mid-form storytelling (3\u20137 minutes) emerged as a new format preference, prioritizing depth over a quick viral hook.',
+    ],
+    featuredProjects: [
+      { title: 'KLM Recruitment Campaign' },
+      { title: 'Fractional Window Shopping' },
+      { title: 'Ladywell \u201CUncensor Your Health\u201D' },
+      { title: 'Only Murders In the Building \u2014 Digital Playing Cards' },
+      { title: 'Complete the Streets \u2014 Community Biking Campaign' },
+    ],
+    quotes: [
+      {
+        name: 'Marisa Lather',
+        title: 'Marketer Marisa',
+        linkedInUrl: 'https://www.linkedin.com/in/marisalather',
+        quoteText: [{ _type: 'block', _key: 'q6-0', children: [{ _type: 'span', _key: 's6-0', text: '\u201CThe strongest campaigns weren\u2019t single executions\u2014they were systems. Spanning two to three channels, anchored in a single core idea, built for participation from the outset.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Ari Halper',
+        title: 'R/GA',
+        linkedInUrl: 'https://www.linkedin.com/in/ari-halper',
+        quoteText: [{ _type: 'block', _key: 'q6-1', children: [{ _type: 'span', _key: 's6-1', text: '\u201CAs AI continues to disrupt creative industries, craft is starting to make a comeback. Perhaps out of defiance. A nice reminder that while AI is incredible, so are people.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+      {
+        name: 'Mary Nittolo',
+        title: 'Founder & CCO, the STUDIO',
+        linkedInUrl: 'https://www.linkedin.com/in/mary-nittolo-333a064/',
+        quoteText: [{ _type: 'block', _key: 'q6-2', children: [{ _type: 'span', _key: 's6-2', text: '\u201CThe number of AI entries was significant this year, and some were genuinely exciting. Others, however, felt underdeveloped, and in some cases didn\u2019t perform as well as tools already available. The contrasts were clarifying; it\u2019s artistry and ideas, executed with care intention, and dare I say humanism, that really matters.\u201D' }], markDefs: [], style: 'normal' }],
+      },
+    ],
+  },
+}
+
+// Mock data for trend data modules (will move to Sanity later)
+const MOCK_DATA_STATS: Record<number, { headline: string; subheadline: string; stats: DataStat[] }> = {
+  0: {
+    headline: 'What Webby 30 Signals About the Future',
+    subheadline: 'When asked about the competition and future, these are the signals Executive Judges returned to most. AI and storytelling are capturing the industry\u2019s attention right now.',
+    stats: [
+      { value: 79, label: 'AI categories will transform by Webby 31' },
+      { value: 61, label: 'cited storytelling as a recurring theme across categories' },
+      { value: 53, label: 'named AI Integration as the craft showing the most growth' },
+    ],
+  },
+  1: {
+    headline: 'What Set AI Integrations Apart',
+    subheadline: 'Judges weighed in on where AI integrations performed best in this year\u2019s top entries, and where they saw the biggest leaps. Half said execution and production, followed by concept.',
+    stats: [
+      { value: 50, label: 'Execution & Production' },
+      { value: 19, label: 'Concept' },
+      { value: 12, label: 'Audience Interaction' },
+      { value: 12, label: 'Distribution' },
+    ],
+  },
+}
 
 export function TrendSection({ section, index }: { section: TrendSectionType; index: number }) {
   const trendColor = TREND_COLORS[index % TREND_COLORS.length]
-  const allQuotes = section.expertQuotes || []
+  const overrideQuotes = TREND_OVERRIDES[index]?.quotes
+  const allQuotes = overrideQuotes || section.expertQuotes || []
   const quotes = allQuotes.slice(0, 3) // Max 3 quotes
-  // Phases: 0 = title+copy, 1..3 = quotes, +video for trend 1 only
-  const hasVideo = index === 0
-  const totalPhases = 1 + quotes.length + (hasVideo ? 1 : 0)
+
+  // Data module: use CMS data if available, fall back to mock
+  const mockData = MOCK_DATA_STATS[index]
+  const dataStats = section.dataStats && section.dataStats.length > 0
+    ? section.dataStats
+    : mockData?.stats
+  const dataHeadline = section.dataContext || mockData?.headline
+  const dataSubheadline = mockData?.subheadline
+  const hasData = !!dataStats && dataStats.length > 0
+
+  // Phases: 0 = title+copy, (1 = data if hasData), then quotes, then video
+  const videoConfig = TREND_OVERRIDES[index]?.video
+  const hasVideo = !!videoConfig
+  const totalPhases = 1 + (hasData ? 1 : 0) + quotes.length + (hasVideo ? 1 : 0)
+  const dataPhase = hasData ? 1 : -1
+  const quoteStartPhase = 1 + (hasData ? 1 : 0)
   const [phase, setPhase] = useState(0)
   const [isActive, setIsActive] = useState(false)
   const [completed, setCompleted] = useState(false)
@@ -177,21 +448,46 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
           }}
         >
           <PhaseTitle
-            title={section.trendTitle}
+            title={TREND_OVERRIDES[index]?.title || section.trendTitle}
+            bodyOverride={TREND_OVERRIDES[index]?.body}
             body={section.trendBody}
-            featuredProjects={section.featuredProjects}
+            featuredProjects={TREND_OVERRIDES[index]?.featuredProjects || section.featuredProjects}
             index={index}
             color={trendColor}
           />
         </motion.div>
 
+        {/* Data module phase */}
+        {hasData && (
+          <motion.div
+            animate={{
+              opacity: phase === dataPhase ? 1 : 0,
+              x: phase < dataPhase ? 200 : phase > dataPhase ? -200 : 0,
+            }}
+            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            style={{
+              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+              display: 'flex', flexDirection: 'column', justifyContent: 'center',
+              pointerEvents: phase === dataPhase ? 'auto' : 'none',
+            }}
+          >
+            <PhaseData
+              stats={dataStats!}
+              headline={dataHeadline}
+              subheadline={dataSubheadline}
+              color={trendColor}
+              isActive={phase === dataPhase}
+            />
+          </motion.div>
+        )}
+
         {/* Quote pages — each always rendered */}
         {quotes.map((quote, i) => {
-          const quotePhase = i + 1
+          const quotePhase = quoteStartPhase + i
           const isCurrentPage = phase === quotePhase
           const isVisible = phase >= quotePhase && phase < (hasVideo ? totalPhases - 1 : totalPhases)
           const isVideoPhase = hasVideo && phase === totalPhases - 1
-          const visibleCount = Math.min(phase, quotes.length)
+          const visibleCount = Math.max(0, Math.min(phase - quoteStartPhase + 1, quotes.length))
           const position = visibleCount - (i + 1)
 
           return (
@@ -234,7 +530,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
             zIndex: 20,
           }}
         >
-          <PhaseVideo onClose={() => { setVideoClosed(true); setPhase(totalPhases - 2) }} isActive={isActive && phase === totalPhases - 1} />
+          <PhaseVideo video={videoConfig!} onClose={() => { setVideoClosed(true); setPhase(totalPhases - 2) }} isActive={isActive && phase === totalPhases - 1} />
         </motion.div>
       )}
     </div>
@@ -248,12 +544,14 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
 function PhaseTitle({
   title,
   body,
+  bodyOverride,
   featuredProjects,
   index,
   color,
 }: {
   title: string
   body?: any[]
+  bodyOverride?: React.ReactNode[]
   featuredProjects?: { title: string; url?: string }[]
   index: number
   color: string
@@ -310,7 +608,7 @@ function PhaseTitle({
         />
 
         {/* Body — two column feel with narrower text */}
-        {body && (
+        {(bodyOverride || body) && (
           <div style={{ display: 'flex', gap: 60 }}>
             <div
               data-content
@@ -322,9 +620,17 @@ function PhaseTitle({
                 flex: '0 0 auto',
               }}
             >
-              <div className="report-links [&_p]:mb-4">
-                <PortableText value={body} />
-              </div>
+              {bodyOverride ? (
+                <div className="report-links">
+                  {bodyOverride.map((p, i) => (
+                    <p key={i} style={{ marginBottom: 16 }}>{p}</p>
+                  ))}
+                </div>
+              ) : body ? (
+                <div className="report-links [&_p]:mb-4">
+                  <PortableText value={body} />
+                </div>
+              ) : null}
 
               {/* Featured projects */}
               {featuredProjects && featuredProjects.length > 0 && (
@@ -342,6 +648,7 @@ function PhaseTitle({
                             target="_blank"
                             rel="noopener noreferrer"
                             className="report-link"
+                            style={{ color: '#D4D4D4', fontWeight: 500 }}
                           >
                             {project.title}
                           </a>
@@ -492,31 +799,196 @@ function PhaseQuote({
 }
 
 /* ------------------------------------------------------------------ */
+/*  Phase: Data Module — Editorial Spread                              */
+/* ------------------------------------------------------------------ */
+
+function PhaseData({
+  stats,
+  headline,
+  subheadline,
+  color,
+  isActive,
+}: {
+  stats: DataStat[]
+  headline?: string
+  subheadline?: string
+  color: string
+  isActive: boolean
+}) {
+  const [hasAnimated, setHasAnimated] = useState(false)
+  const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set())
+  const [barWidths, setBarWidths] = useState<Record<number, boolean>>({})
+
+  const maxValue = Math.max(...stats.map((s) => s.value))
+
+  useEffect(() => {
+    if (!isActive || hasAnimated) return
+    setHasAnimated(true)
+
+    stats.forEach((_, i) => {
+      const delay = 100 + i * 120
+      setTimeout(() => {
+        setVisibleItems((prev) => new Set(prev).add(i))
+      }, delay)
+      setTimeout(() => {
+        setBarWidths((prev) => ({ ...prev, [i]: true }))
+      }, delay + 200)
+    })
+  }, [isActive, hasAnimated, stats])
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 80,
+        alignItems: 'center',
+      }}
+    >
+      {/* Left — Header + Subheader */}
+      <div>
+        <div
+          style={{
+            fontSize: 11,
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            color: color,
+            fontWeight: 500,
+            marginBottom: 24,
+          }}
+        >
+          What Judges Said
+        </div>
+        {headline && (
+          <h2
+            style={{
+              fontSize: 42,
+              fontWeight: 400,
+              color: '#fff',
+              lineHeight: 1.15,
+              letterSpacing: '-1.5px',
+              marginBottom: 20,
+            }}
+          >
+            {headline}
+          </h2>
+        )}
+        {subheadline && (
+          <p
+            style={{
+              fontSize: 16,
+              lineHeight: 1.6,
+              color: '#888',
+            }}
+          >
+            {subheadline}
+          </p>
+        )}
+      </div>
+
+      {/* Right — Stats with bars */}
+      <div>
+        {stats.map((stat, i) => {
+          const fillPct = (stat.value / maxValue) * 100
+          const isVisible = visibleItems.has(i)
+          const barExpanded = barWidths[i]
+
+          return (
+            <div
+              key={i}
+              style={{
+                padding: '28px 0',
+                borderBottom: i < stats.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
+                transition: 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+            >
+              {/* Number */}
+              <div
+                style={{
+                  fontSize: 64,
+                  fontWeight: 400,
+                  color: '#fff',
+                  lineHeight: 1,
+                  fontVariantNumeric: 'tabular-nums',
+                  letterSpacing: '-0.03em',
+                  marginBottom: 10,
+                }}
+              >
+                {stat.value}%
+              </div>
+
+              {/* Bar */}
+              <div
+                style={{
+                  height: 6,
+                  background: 'rgba(255,255,255,0.06)',
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                  marginBottom: 10,
+                }}
+              >
+                <div
+                  style={{
+                    height: '100%',
+                    borderRadius: 3,
+                    background: color,
+                    width: barExpanded ? `${fillPct}%` : '0%',
+                    transition: 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                  }}
+                />
+              </div>
+
+              {/* Label */}
+              <div
+                style={{
+                  fontSize: 13,
+                  color: '#888',
+                  letterSpacing: 0.5,
+                }}
+              >
+                {stat.label}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /*  Phase: Video                                                       */
 /* ------------------------------------------------------------------ */
 
-function PhaseVideo({ onClose, isActive }: { onClose: () => void; isActive: boolean }) {
+function PhaseVideo({ video, onClose, isActive }: { video: { type: 'local' | 'youtube'; src: string }; onClose: () => void; isActive: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [muted, setMuted] = useState(false)
 
-  // Play with audio when active, pause when not
+  const youtubeId = video.type === 'youtube'
+    ? video.src.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
+    : null
+
+  // Play with audio when active, pause when not (local only)
   useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
+    if (video.type !== 'local') return
+    const el = videoRef.current
+    if (!el) return
     if (isActive) {
-      video.currentTime = 0
-      video.muted = false
-      video.play().catch(() => {
-        video.muted = true
+      el.currentTime = 0
+      el.muted = false
+      el.play().catch(() => {
+        el.muted = true
         setMuted(true)
-        video.play()
+        el.play()
       })
       setMuted(false)
     } else {
-      video.pause()
-      video.currentTime = 0
+      el.pause()
+      el.currentTime = 0
     }
-  }, [isActive])
+  }, [isActive, video.type])
 
   function toggleMute() {
     if (videoRef.current) {
@@ -561,82 +1033,99 @@ function PhaseVideo({ onClose, isActive }: { onClose: () => void; isActive: bool
           <line x1="12" y1="2" x2="2" y2="12" />
         </svg>
       </button>
-      <video
-        ref={videoRef}
-        src={`${basePath}/trend-video-test.mp4`}
-        playsInline
-        style={{
-          maxHeight: '70vh',
-          width: 'auto',
-          borderRadius: 4,
-          border: '1px solid rgba(255,255,255,0.12)',
-        }}
-      />
-      {/* Controls */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 12,
-          right: 12,
-          display: 'flex',
-          gap: 8,
-          pointerEvents: 'auto',
-        }}
-      >
-        <button
-          onClick={toggleMute}
-          className="no-custom-cursor"
+      {youtubeId ? (
+        <iframe
+          src={isActive ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0` : `https://www.youtube.com/embed/${youtubeId}?rel=0`}
+          allow="autoplay; encrypted-media"
+          allowFullScreen
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            border: '1px solid rgba(255,255,255,0.3)',
-            background: 'rgba(0,0,0,0.6)',
-            color: '#fff',
-            cursor: 'pointer',
+            width: '100%',
+            aspectRatio: '16 / 9',
+            maxHeight: '70vh',
+            borderRadius: 4,
+            border: '1px solid rgba(255,255,255,0.12)',
+          }}
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          src={video.src}
+          playsInline
+          style={{
+            maxHeight: '70vh',
+            width: 'auto',
+            borderRadius: 4,
+            border: '1px solid rgba(255,255,255,0.12)',
+          }}
+        />
+      )}
+      {/* Controls — local video only */}
+      {!youtubeId && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 12,
+            right: 12,
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 14,
+            gap: 8,
+            pointerEvents: 'auto',
           }}
         >
-          {muted ? (
+          <button
+            onClick={toggleMute}
+            className="no-custom-cursor"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(0,0,0,0.6)',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+            }}
+          >
+            {muted ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                <line x1="23" y1="9" x2="17" y2="15" />
+                <line x1="17" y1="9" x2="23" y2="15" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={replay}
+            className="no-custom-cursor"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(0,0,0,0.6)',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+            }}
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" />
-              <line x1="23" y1="9" x2="17" y2="15" />
-              <line x1="17" y1="9" x2="23" y2="15" />
+              <polyline points="1 4 1 10 7 10" />
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
             </svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" />
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-            </svg>
-          )}
-        </button>
-        <button
-          onClick={replay}
-          className="no-custom-cursor"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            border: '1px solid rgba(255,255,255,0.3)',
-            background: 'rgba(0,0,0,0.6)',
-            color: '#fff',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 14,
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <polyline points="1 4 1 10 7 10" />
-            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-          </svg>
-        </button>
-      </div>
+          </button>
+        </div>
+      )}
     </div>
   )
 }

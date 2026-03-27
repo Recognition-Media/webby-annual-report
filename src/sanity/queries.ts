@@ -25,6 +25,8 @@ export const reportBySlugQuery = groq`
       trendTitle,
       trendBody,
       featuredProjects,
+      dataContext,
+      dataStats,
       expertQuotes,
       sectionImages
     },

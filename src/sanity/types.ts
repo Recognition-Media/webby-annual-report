@@ -43,10 +43,17 @@ export interface ExpertQuote {
   linkedInUrl?: string
 }
 
+export interface DataStat {
+  value: number
+  label: string
+}
+
 export interface TrendSection {
   trendTitle: string
   trendBody?: PortableTextBlock[]
   featuredProjects?: FeaturedProject[]
+  dataContext?: string
+  dataStats?: DataStat[]
   expertQuotes?: ExpertQuote[]
   sectionImages?: (SanityImage & { alt?: string })[]
 }
