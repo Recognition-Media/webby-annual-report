@@ -7,7 +7,8 @@ import { urlFor } from '@/sanity/image'
 import { trackSignupConversion } from '@/lib/analytics'
 
 function FieldInput({ field, value, onChange }: { field: FormField; value: string; onChange: (v: string) => void }) {
-  const baseClass = "w-full border-0 border-b-2 border-[#ccc] bg-transparent px-1 py-2 text-base font-['Aktiv_Grotesk'] outline-none focus:border-black transition-colors"
+  const baseClass = "w-full border-0 border-b-2 border-[#ccc] bg-transparent px-1 py-2 text-base outline-none focus:border-black transition-colors"
+  const fontStyle = { fontFamily: "'Aktiv Grotesk', -apple-system, sans-serif" }
   const placeholder = field.label
 
   if (field.fieldType === 'dropdown') {
@@ -15,7 +16,8 @@ function FieldInput({ field, value, onChange }: { field: FormField; value: strin
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border-2 border-[#ccc] bg-transparent px-1 py-2 text-base font-['Aktiv_Grotesk'] outline-none focus:border-black transition-colors"
+        className="w-full border-2 border-[#ccc] bg-transparent px-1 py-2 text-base outline-none focus:border-black transition-colors"
+        style={fontStyle}
       >
         <option value="">{placeholder}</option>
         {field.dropdownOptions?.map((opt) => (
@@ -33,6 +35,7 @@ function FieldInput({ field, value, onChange }: { field: FormField; value: strin
       placeholder={placeholder}
       required={field.required}
       className={baseClass}
+      style={fontStyle}
     />
   )
 }
