@@ -9,7 +9,7 @@ import { SignupGate } from './SignupGate'
 import { EntryStats } from './EntryStats'
 import { IadasSection } from './IadasSection'
 import { IntroLetter } from './IntroLetter'
-import { TrendSection } from './TrendSection'
+import { TrendSection, TREND_OVERRIDES } from './TrendSection'
 import { TrendContainer } from './TrendContainer'
 import { ReportFooter } from './ReportFooter'
 import { AnalyticsScripts } from './AnalyticsScripts'
@@ -139,8 +139,8 @@ export function ReportView({ report }: { report: Report }) {
               return allTrends.length > 0 ? (
                 <TrendContainer
                   trendCount={allTrends.length}
-                  trendTitles={allTrends.map((s) =>
-                    s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
+                  trendTitles={allTrends.map((s, i) =>
+                    (TREND_OVERRIDES[i]?.title || s.trendTitle).replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
                   )}
                 >
                   {allTrends.map((section, i) => (

@@ -21,7 +21,7 @@ export const TREND_COLORS = [
 ]
 
 // Hardcoded trend content overrides (will move to Sanity later)
-const TREND_OVERRIDES: Record<number, {
+export const TREND_OVERRIDES: Record<number, {
   title: string
   body: React.ReactNode[]
   featuredProjects: { title: string; url?: string }[]
@@ -413,6 +413,19 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
       window.removeEventListener('trend-retreat', handleRetreat)
     }
   }, [isActive, advancePhase, retreatPhase])
+
+  // Reset to phase 0 when navigating via subnav
+  useEffect(() => {
+    function handleReset(e: Event) {
+      const detail = (e as CustomEvent).detail
+      if (detail?.index === index) {
+        setPhase(0)
+        setVideoClosed(false)
+      }
+    }
+    window.addEventListener('trend-reset-phase', handleReset)
+    return () => window.removeEventListener('trend-reset-phase', handleReset)
+  }, [index])
 
   return (
     <div

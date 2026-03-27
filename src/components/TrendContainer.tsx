@@ -66,6 +66,7 @@ export function TrendContainer({
   }, [isActive, trendCount])
 
   function navigateToTrend(index: number) {
+    window.dispatchEvent(new CustomEvent('trend-reset-phase', { detail: { index } }))
     setActiveTrend(index)
   }
 
