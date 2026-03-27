@@ -42,7 +42,7 @@ function AnimatedNumber({ value, color, inView }: { value: string; color: string
   return (
     <span
       style={{
-        fontSize: 'clamp(56px, 8vw, 88px)',
+        fontSize: 'clamp(36px, 8vw, 88px)',
         fontWeight: 400,
         fontVariantNumeric: 'tabular-nums',
         color,
@@ -70,10 +70,10 @@ export function IadasSection({ report }: { report: Report }) {
       id="how-judged"
       data-snap
       ref={ref}
+      className="px-5 md:px-[60px]"
       style={{
         background: '#191919',
         minHeight: '100vh',
-        padding: '0 60px',
         position: 'relative',
         overflow: 'hidden',
         display: 'flex',
@@ -127,19 +127,14 @@ export function IadasSection({ report }: { report: Report }) {
         </p>
 
         {/* Stats row */}
-        <div style={{ display: 'flex', flexDirection: 'row', marginBottom: 32 }}>
+        <div className="grid grid-cols-2 gap-4 md:flex md:flex-row" style={{ marginBottom: 32 }}>
           {stats.map((stat, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: i * 0.15, ease: 'easeOut' }}
-              style={{
-                padding: '20px 0',
-                paddingRight: i < stats.length - 1 ? 40 : 0,
-                marginRight: i < stats.length - 1 ? 40 : 0,
-                borderRight: i < stats.length - 1 ? '1px solid rgba(255,255,255,0.14)' : 'none',
-              }}
+              className="py-4 md:pr-10 md:mr-10 md:border-r md:border-white/[0.14] last:md:border-r-0 last:md:pr-0 last:md:mr-0"
             >
               <div style={{ marginBottom: 8 }}>
                 <AnimatedNumber value={stat.value} color={stat.color} inView={isInView} />
@@ -161,7 +156,7 @@ export function IadasSection({ report }: { report: Report }) {
         </div>
 
         {/* Credential cards */}
-        <div style={{ display: 'flex', gap: 24, marginTop: 26 }}>
+        <div className="flex flex-col gap-4 md:flex-row md:gap-6" style={{ marginTop: 26 }}>
           {/* IADAS card */}
           <a
             href="https://www.iadas.net"

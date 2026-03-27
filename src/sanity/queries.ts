@@ -22,12 +22,27 @@ export const reportBySlugQuery = groq`
     letterAuthors,
     carouselImages,
     trendSections[] {
+      enabled,
       trendTitle,
       trendBody,
+      showFeaturedProjects,
       featuredProjects,
+      showData,
+      dataHeadline,
+      dataSubheadline,
       dataContext,
       dataStats,
-      expertQuotes,
+      showQuotes,
+      expertQuotes[] {
+        name,
+        title,
+        quoteText,
+        linkedInUrl,
+        headshotUrl
+      },
+      showVideo,
+      videoType,
+      videoUrl,
       sectionImages
     },
     formFields,

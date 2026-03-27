@@ -9,7 +9,7 @@ import { SignupGate } from './SignupGate'
 import { EntryStats } from './EntryStats'
 import { IadasSection } from './IadasSection'
 import { IntroLetter } from './IntroLetter'
-import { TrendSection, TREND_OVERRIDES } from './TrendSection'
+import { TrendSection } from './TrendSection'
 import { TrendContainer } from './TrendContainer'
 import { ReportFooter } from './ReportFooter'
 import { AnalyticsScripts } from './AnalyticsScripts'
@@ -18,6 +18,7 @@ import { ReportScroll } from './SmoothScroll'
 import { CursorArrow } from './CursorArrow'
 import { AnimatedBg } from './AnimatedBg'
 import { IdleArrows } from './IdleArrows'
+import { MobileNav } from './MobileNav'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -38,17 +39,25 @@ export function ReportView({ report }: { report: Report }) {
   const [showGoodbye, setShowGoodbye] = useState(false)
   const reportRef = useRef<HTMLDivElement>(null)
 
-  // Show goodbye only when all trends are complete
+  // Show goodbye only when all trends are complete (desktop)
+  // On mobile, always show it since trends are just vertical scroll
   useEffect(() => {
+    const isMobile = window.matchMedia('(max-width: 768px)').matches
+    if (isMobile) {
+      setShowGoodbye(true)
+      return
+    }
     function handleExit() { setShowGoodbye(true) }
     window.addEventListener('trend-next-or-exit', handleExit)
     return () => window.removeEventListener('trend-next-or-exit', handleExit)
   }, [])
 
-  // Prevent scrolling up past the goodbye page — only allow down scroll to footer
+  // Prevent scrolling up past the goodbye page (desktop only)
   // Listen for 'goodbye-exit' event to disable the clamp when user clicks to go back
   useEffect(() => {
     if (!showGoodbye) return
+    const isMobile = window.matchMedia('(max-width: 768px)').matches
+    if (isMobile) return
     let goodbyeTop: number | null = null
     let clampEnabled = true
 
@@ -152,6 +161,15 @@ export function ReportView({ report }: { report: Report }) {
       {/* Idle navigation arrows */}
       <IdleArrows active={entered} />
 
+      {/* Mobile navigation */}
+      <MobileNav
+        active={entered}
+        trendTitles={(report.trendSections || [])
+          .filter((s) => s.enabled !== false)
+          .map((s) => s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim())
+        }
+      />
+
       {/* Report content — snap scrolling + nav dots activate after entry */}
       {hasAccess && (
         <div ref={reportRef}>
@@ -168,17 +186,12 @@ export function ReportView({ report }: { report: Report }) {
 
             {/* Trends — horizontal container */}
             {(() => {
-              const cmsTrends = report.trendSections || []
-              // Pad with virtual trend sections for overrides beyond CMS data
-              const totalTrends = Math.max(cmsTrends.length, 7)
-              const allTrends = Array.from({ length: totalTrends }, (_, i) =>
-                cmsTrends[i] || { trendTitle: `Trend ${i + 1}` }
-              )
+              const allTrends = (report.trendSections || []).filter((s) => s.enabled !== false)
               return allTrends.length > 0 ? (
                 <TrendContainer
                   trendCount={allTrends.length}
-                  trendTitles={allTrends.map((s, i) =>
-                    (TREND_OVERRIDES[i]?.title || s.trendTitle).replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
+                  trendTitles={allTrends.map((s) =>
+                    s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
                   )}
                 >
                   {allTrends.map((section, i) => (
@@ -192,6 +205,7 @@ export function ReportView({ report }: { report: Report }) {
             {showGoodbye && (
               <section
                 id="thank-you"
+                className="px-5 md:px-[60px]"
                 style={{
                   minHeight: '100vh',
                   display: 'flex',
@@ -199,7 +213,6 @@ export function ReportView({ report }: { report: Report }) {
                   backgroundColor: '#191919',
                   position: 'relative',
                   overflow: 'hidden',
-                  padding: '0 60px',
                 }}
               >
                 {/* Animated background */}
@@ -221,11 +234,9 @@ export function ReportView({ report }: { report: Report }) {
                   </div>
 
                   {/* Heading */}
-                  <h2 style={{
-                    fontSize: 48,
+                  <h2 className="text-[28px] leading-[36px] md:text-[48px] md:leading-[58px]" style={{
                     fontWeight: 400,
                     color: '#fff',
-                    lineHeight: '58px',
                     letterSpacing: '-2px',
                     marginBottom: 40,
                     maxWidth: 750,

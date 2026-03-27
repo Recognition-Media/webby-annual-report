@@ -74,7 +74,7 @@ function CountUpNumber({
   return (
     <span
       style={{
-        fontSize: 'clamp(56px, 8vw, 88px)',
+        fontSize: 'clamp(36px, 8vw, 88px)',
         fontWeight: 400,
         fontVariantNumeric: 'tabular-nums',
         lineHeight: 1,
@@ -234,11 +234,9 @@ function StatBlock({
       initial={{ opacity: 0, y: 20 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.12, ease: 'easeOut' }}
+      className="md:flex-1 md:border-l md:border-white/[0.14] first:md:border-l-0 md:pl-6 md:pr-6 first:md:pl-0 py-4 md:py-0"
       style={{
-        flex: 1,
-        paddingLeft: index > 0 ? 24 : 0,
-        paddingRight: 24,
-        borderLeft: index > 0 ? '1px solid rgba(255,255,255,0.14)' : 'none',
+        borderBottom: index < 2 ? '1px solid rgba(255,255,255,0.08)' : 'none',
       }}
     >
       <CountUpNumber
@@ -301,10 +299,10 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
       id="entry-stats"
       data-snap
       ref={ref}
+      className="px-5 md:px-[60px] pt-24 md:pt-0"
       style={{
         background: '#191919',
         minHeight: '100vh',
-        padding: '0 60px',
         overflow: 'hidden',
         position: 'relative',
         display: 'flex',
@@ -360,12 +358,13 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
       {/* 3. Four stat blocks */}
       <div
         data-content
+        className="grid grid-cols-2 md:flex"
         style={{
           maxWidth: 1000,
           width: '100%',
           margin: '0 auto',
           padding: '60px 0',
-          display: 'flex',
+          gap: 0,
         }}
       >
         {data.map((stat, i) => (

@@ -11,17 +11,19 @@ const arrowPath = {
   chevron2: 'M100,60 L54,106',
 }
 
-function Arrow({ rotation, onClick, position }: {
+function Arrow({ rotation, onClick, position, isTouch }: {
   rotation: number
   onClick: () => void
   position: { top?: string | number; bottom?: string | number; left?: string | number; right?: string | number }
+  isTouch?: boolean
 }) {
   return (
     <motion.button
       initial={{ opacity: 0 }}
-      animate={{ opacity: 0.3 }}
+      animate={{ opacity: isTouch ? 0.5 : 0.3 }}
       exit={{ opacity: 0 }}
-      whileHover={{ opacity: 0.7 }}
+      whileHover={isTouch ? undefined : { opacity: 0.7 }}
+      whileTap={{ opacity: 0.9, scale: 1.1 }}
       transition={{ duration: 0.5 }}
       onClick={(e) => { e.stopPropagation(); onClick() }}
       className="no-custom-cursor"
@@ -32,28 +34,38 @@ function Arrow({ rotation, onClick, position }: {
         background: 'none',
         border: 'none',
         cursor: 'pointer',
-        padding: 20,
+        padding: isTouch ? 24 : 20,
       }}
     >
       <svg
-        width="42"
-        height="42"
+        width={isTouch ? 36 : 42}
+        height={isTouch ? 36 : 42}
         viewBox="0 0 120 120"
         fill="none"
         style={{ transform: `rotate(${rotation}deg)` }}
       >
-        <line x1="-30" y1="60" x2="100" y2="60" stroke="white" strokeWidth="1.5" />
-        <line x1="100" y1="60" x2="54" y2="14" stroke="white" strokeWidth="1.5" />
-        <line x1="100" y1="60" x2="54" y2="106" stroke="white" strokeWidth="1.5" />
+        <line x1="-30" y1="60" x2="100" y2="60" stroke="white" strokeWidth={isTouch ? 2.5 : 1.5} />
+        <line x1="100" y1="60" x2="54" y2="14" stroke="white" strokeWidth={isTouch ? 2.5 : 1.5} />
+        <line x1="100" y1="60" x2="54" y2="106" stroke="white" strokeWidth={isTouch ? 2.5 : 1.5} />
       </svg>
     </motion.button>
   )
 }
 
+function isTouchDevice() {
+  if (typeof window === 'undefined') return false
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0
+}
+
 export function IdleArrows({ active }: { active: boolean }) {
   const [idle, setIdle] = useState(false)
   const [context, setContext] = useState<'vertical' | 'trend' | 'none'>('none')
+  const [isTouch, setIsTouch] = useState(false)
   const timerRef = useRef<any>(null)
+
+  useEffect(() => {
+    setIsTouch(isTouchDevice())
+  }, [])
 
   // Detect context: are we in trends or vertical sections
   useEffect(() => {
@@ -104,7 +116,9 @@ export function IdleArrows({ active }: { active: boolean }) {
     }
   }, [active])
 
-  if (!active || !idle) return null
+  // Hide entirely on touch/mobile — MobileNav handles navigation
+  // On desktop, only show when idle
+  if (!active || !idle || isTouch) return null
 
   function clickDown() {
     // Simulate clicking the right side of screen (forward)
@@ -196,6 +210,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                 rotation={-90}
                 onClick={clickUp}
                 position={{ top: '15px', left: '50%', transform: 'translateX(-50%)' } as any}
+                isTouch={isTouch}
               />
             )}
             {!onGoodbye && (
@@ -203,13 +218,14 @@ export function IdleArrows({ active }: { active: boolean }) {
                 key="down"
                 rotation={90}
                 onClick={clickDown}
-                position={{ bottom: '35px', left: '50%', transform: 'translateX(-50%)' } as any}
+                position={{ bottom: isTouch ? '80px' : '35px', left: '50%', transform: 'translateX(-50%)' } as any}
+                isTouch={isTouch}
               />
             )}
           </>
         )
       })()}
-      {context === 'trend' && (() => {
+      {context === 'trend' && !isTouch && (() => {
         const trendEl = document.querySelector('[data-trend-active]')
         const isFirstTrendStart = trendEl?.getAttribute('data-trend-index') === '0' && trendEl?.getAttribute('data-trend-phase') === '0'
         return (
@@ -220,6 +236,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                 rotation={180}
                 onClick={clickLeft}
                 position={{ top: 'calc(50% - 35px)', left: '15px' }}
+                isTouch={isTouch}
               />
             )}
             <Arrow
@@ -227,6 +244,7 @@ export function IdleArrows({ active }: { active: boolean }) {
               rotation={0}
               onClick={clickRight}
               position={{ top: 'calc(50% - 35px)', right: '15px' }}
+              isTouch={isTouch}
             />
           </>
         )

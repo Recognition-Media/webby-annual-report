@@ -41,6 +41,7 @@ export interface ExpertQuote {
   title?: string
   quoteText: PortableTextBlock[]
   linkedInUrl?: string
+  headshotUrl?: string
 }
 
 export interface DataStat {
@@ -49,12 +50,21 @@ export interface DataStat {
 }
 
 export interface TrendSection {
+  enabled?: boolean
   trendTitle: string
   trendBody?: PortableTextBlock[]
+  showFeaturedProjects?: boolean
   featuredProjects?: FeaturedProject[]
+  showData?: boolean
+  dataHeadline?: string
+  dataSubheadline?: string
   dataContext?: string
   dataStats?: DataStat[]
+  showQuotes?: boolean
   expertQuotes?: ExpertQuote[]
+  showVideo?: boolean
+  videoType?: 'local' | 'youtube'
+  videoUrl?: string
   sectionImages?: (SanityImage & { alt?: string })[]
 }
 

@@ -4,6 +4,18 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { TrendSubnav } from './TrendSubnav'
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return isMobile
+}
+
 export function TrendContainer({
   trendCount,
   trendTitles,
@@ -13,6 +25,7 @@ export function TrendContainer({
   trendTitles: string[]
   children: React.ReactNode
 }) {
+  const isMobile = useIsMobile()
   const [activeTrend, setActiveTrend] = useState(0)
   const [isActive, setIsActive] = useState(false)
   const containerRef = useRef<HTMLElement>(null)
@@ -68,6 +81,18 @@ export function TrendContainer({
   function navigateToTrend(index: number) {
     window.dispatchEvent(new CustomEvent('trend-reset-phase', { detail: { index } }))
     setActiveTrend(index)
+  }
+
+  if (isMobile) {
+    return (
+      <section
+        id="trends"
+        ref={containerRef}
+        style={{ background: '#191919' }}
+      >
+        {children}
+      </section>
+    )
   }
 
   return (

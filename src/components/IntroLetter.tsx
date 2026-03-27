@@ -9,11 +9,10 @@ export function IntroLetter({ report }: { report: Report }) {
     <section
       id="welcome-letter"
       data-snap
-      className="relative overflow-hidden"
+      className="relative overflow-hidden px-5 md:px-[60px] pt-16 md:pt-0"
       style={{
         background: '#191919',
         minHeight: '100vh',
-        padding: '0 60px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -44,9 +43,9 @@ export function IntroLetter({ report }: { report: Report }) {
         {/* Body with purple left border */}
         <div
           data-content
+          className="pl-5 md:pl-10"
           style={{
             borderLeft: '3px solid #8B70D1',
-            paddingLeft: 40,
           }}
         >
           <div
@@ -70,7 +69,7 @@ export function IntroLetter({ report }: { report: Report }) {
 
           {/* Authors */}
           <div
-            className="flex gap-12"
+            className="flex flex-col gap-6 md:flex-row md:gap-12 pb-8 md:pb-0"
             style={{
               marginTop: 48,
               paddingTop: 32,
