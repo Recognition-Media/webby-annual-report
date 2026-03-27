@@ -45,6 +45,44 @@ export function ReportView({ report }: { report: Report }) {
     return () => window.removeEventListener('trend-next-or-exit', handleExit)
   }, [])
 
+  // Prevent scrolling up past the goodbye page — only allow down scroll to footer
+  // Listen for 'goodbye-exit' event to disable the clamp when user clicks to go back
+  useEffect(() => {
+    if (!showGoodbye) return
+    let goodbyeTop: number | null = null
+    let clampEnabled = true
+
+    function clampScroll() {
+      if (!clampEnabled) return
+      const thankYou = document.getElementById('thank-you')
+      if (!thankYou) return
+      if (goodbyeTop === null) {
+        goodbyeTop = thankYou.offsetTop
+      }
+      if (window.scrollY < goodbyeTop) {
+        window.scrollTo(0, goodbyeTop)
+      }
+    }
+
+    function disableClamp() {
+      clampEnabled = false
+    }
+
+    function reEnableClamp() {
+      goodbyeTop = null
+      clampEnabled = true
+    }
+
+    window.addEventListener('scroll', clampScroll)
+    window.addEventListener('goodbye-exit', disableClamp)
+    window.addEventListener('trend-next-or-exit', reEnableClamp)
+    return () => {
+      window.removeEventListener('scroll', clampScroll)
+      window.removeEventListener('goodbye-exit', disableClamp)
+      window.removeEventListener('trend-next-or-exit', reEnableClamp)
+    }
+  }, [showGoodbye])
+
   useEffect(() => {
     // Dev shortcut: add ?reset to the URL to clear the signup cookie and test the gate
     if (window.location.search.includes('reset')) {
@@ -154,12 +192,10 @@ export function ReportView({ report }: { report: Report }) {
             {showGoodbye && (
               <section
                 id="thank-you"
-                data-snap
                 style={{
                   minHeight: '100vh',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
                   backgroundColor: '#191919',
                   position: 'relative',
                   overflow: 'hidden',
@@ -169,41 +205,39 @@ export function ReportView({ report }: { report: Report }) {
                 {/* Animated background */}
                 <AnimatedBg variant={3} />
 
-                <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                  {/* Gradient bar */}
-                  <div className="gradient-bar" style={{ width: 120, height: 3, margin: '0 auto 40px' }} />
-
+                <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
                   {/* Eyebrow */}
-                  <p style={{
-                    fontSize: 11,
-                    letterSpacing: 4,
-                    textTransform: 'uppercase',
-                    color: '#8B70D1',
-                    fontWeight: 500,
-                    marginBottom: 24,
-                  }}>
-                    Thank You
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
+                    <span style={{
+                      fontSize: 11,
+                      letterSpacing: 4,
+                      textTransform: 'uppercase',
+                      color: '#8B70D1',
+                      fontWeight: 500,
+                    }}>
+                      Thank You
+                    </span>
+                    <div style={{ width: 60, height: 2, background: '#8B70D1', borderRadius: 2 }} />
+                  </div>
 
                   {/* Heading */}
                   <h2 style={{
-                    fontSize: 'clamp(36px, 4vw, 56px)',
+                    fontSize: 48,
                     fontWeight: 400,
                     color: '#fff',
-                    lineHeight: 1.2,
-                    letterSpacing: '-1px',
-                    marginBottom: 32,
-                    maxWidth: 700,
-                    margin: '0 auto 32px',
+                    lineHeight: '58px',
+                    letterSpacing: '-2px',
+                    marginBottom: 40,
+                    maxWidth: 750,
                   }}>
                     You&rsquo;re Part of What Makes the Internet Worth Being On.
                   </h2>
 
                   {/* Divider */}
-                  <div style={{ width: 60, height: 1, background: 'rgba(255,255,255,0.14)', margin: '0 auto 32px' }} />
+                  <div style={{ width: 80, height: 1, background: 'rgba(255,255,255,0.14)', marginBottom: 32 }} />
 
                   {/* Body */}
-                  <div style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 600, margin: '0 auto 40px' }}>
+                  <div data-content style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 749, marginBottom: 40 }}>
                     <p style={{ marginBottom: 20 }}>Your participation helps us recognize the best of the Internet each year. As an entrant in the 30th Annual Webby Awards, you are part of the Webby community &mdash; and will continue to receive benefits like this report, access to research, invitations to Webby Talks, and exclusive event invites throughout the year.</p>
                     <p>Use what you&rsquo;ve read here. The insights in this report come directly from the judges who will evaluate your next entry.</p>
                   </div>
@@ -216,7 +250,6 @@ export function ReportView({ report }: { report: Report }) {
                     className="no-custom-cursor"
                     style={{
                       maxWidth: 700,
-                      margin: '0 auto 48px',
                       padding: '32px 0',
                       borderTop: '1px solid rgba(255,255,255,0.06)',
                       borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -233,7 +266,7 @@ export function ReportView({ report }: { report: Report }) {
                         Learn More
                       </div>
                       <div style={{ fontSize: 18, fontWeight: 400, color: '#fff', lineHeight: 1.3, marginBottom: 6 }}>
-                        How We Judge the Internet's Best Work
+                        How We Judge the Internet&apos;s Best Work
                       </div>
                       <div style={{ fontSize: 14, color: '#888', lineHeight: 1.5 }}>
                         Explore the judging criteria behind every Webby Award.
@@ -257,10 +290,45 @@ export function ReportView({ report }: { report: Report }) {
                     </div>
                   </a>
 
-                  {/* CTA-style footer text */}
-                  <p style={{ fontSize: 13, color: '#999', letterSpacing: 1 }}>
-                    webbyawards.com
-                  </p>
+                  {/* CTA card */}
+                  <a
+                    href="https://www.webbyawards.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-content
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 24,
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      padding: '28px 32px',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      marginTop: 40,
+                    }}
+                  >
+                    <svg
+                      width="36"
+                      height="36"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.9)"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ flexShrink: 0 }}
+                    >
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                    </svg>
+                    <div>
+                      <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
+                        Get in Touch
+                      </h4>
+                      <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
+                        Please feel free to contact Producer Evey Long at evey@webbyawards.com with questions or comments.
+                      </p>
+                    </div>
+                  </a>
                 </div>
               </section>
             )}

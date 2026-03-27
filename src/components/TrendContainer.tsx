@@ -44,7 +44,7 @@ export function TrendContainer({
         if (t >= trendCount - 1) {
           // Last trend — exit to thank-you
           document.body.style.overflow = ''
-          document.documentElement.classList.add('snap-active')
+          document.documentElement.classList.remove('snap-active')
           const thankYou = document.getElementById('thank-you')
           if (thankYou) {
             thankYou.scrollIntoView({ behavior: 'smooth' })

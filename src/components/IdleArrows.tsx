@@ -36,8 +36,8 @@ function Arrow({ rotation, onClick, position }: {
       }}
     >
       <svg
-        width="60"
-        height="60"
+        width="42"
+        height="42"
         viewBox="0 0 120 120"
         fill="none"
         style={{ transform: `rotate(${rotation}deg)` }}
@@ -136,6 +136,8 @@ export function IdleArrows({ active }: { active: boolean }) {
     if (trendActive) {
       window.dispatchEvent(new Event('trend-retreat'))
     } else {
+      // Disable goodbye scroll clamp if on goodbye page
+      window.dispatchEvent(new Event('goodbye-exit'))
       // Vertical: scroll to previous snap section
       const sections = Array.from(document.querySelectorAll('[data-snap]'))
       const scrollY = window.scrollY
@@ -182,40 +184,53 @@ export function IdleArrows({ active }: { active: boolean }) {
 
   return (
     <AnimatePresence>
-      {context === 'vertical' && (
-        <>
-          {window.scrollY > 100 && (
+      {context === 'vertical' && (() => {
+        const thankYou = document.getElementById('thank-you')
+        const thankYouRect = thankYou?.getBoundingClientRect()
+        const onGoodbye = thankYouRect && thankYouRect.top <= 50 && thankYouRect.bottom >= window.innerHeight - 50
+        return (
+          <>
+            {window.scrollY > 100 && (
+              <Arrow
+                key="up"
+                rotation={-90}
+                onClick={clickUp}
+                position={{ top: '15px', left: '50%', transform: 'translateX(-50%)' } as any}
+              />
+            )}
+            {!onGoodbye && (
+              <Arrow
+                key="down"
+                rotation={90}
+                onClick={clickDown}
+                position={{ bottom: '35px', left: '50%', transform: 'translateX(-50%)' } as any}
+              />
+            )}
+          </>
+        )
+      })()}
+      {context === 'trend' && (() => {
+        const trendEl = document.querySelector('[data-trend-active]')
+        const isFirstTrendStart = trendEl?.getAttribute('data-trend-index') === '0' && trendEl?.getAttribute('data-trend-phase') === '0'
+        return (
+          <>
+            {!isFirstTrendStart && (
+              <Arrow
+                key="left"
+                rotation={180}
+                onClick={clickLeft}
+                position={{ top: 'calc(50% - 35px)', left: '15px' }}
+              />
+            )}
             <Arrow
-              key="up"
-              rotation={-90}
-              onClick={clickUp}
-              position={{ top: '30px', left: '50%', transform: 'translateX(-50%)' } as any}
+              key="right"
+              rotation={0}
+              onClick={clickRight}
+              position={{ top: 'calc(50% - 35px)', right: '15px' }}
             />
-          )}
-          <Arrow
-            key="down"
-            rotation={90}
-            onClick={clickDown}
-            position={{ bottom: '50px', left: '50%', transform: 'translateX(-50%)' } as any}
-          />
-        </>
-      )}
-      {context === 'trend' && (
-        <>
-          <Arrow
-            key="left"
-            rotation={180}
-            onClick={clickLeft}
-            position={{ top: 'calc(50% - 35px)', left: '30px' }}
-          />
-          <Arrow
-            key="right"
-            rotation={0}
-            onClick={clickRight}
-            position={{ top: 'calc(50% - 35px)', right: '30px' }}
-          />
-        </>
-      )}
+          </>
+        )
+      })()}
     </AnimatePresence>
   )
 }
