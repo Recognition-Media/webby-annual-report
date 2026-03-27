@@ -308,7 +308,10 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
 
   // Video — from CMS, respecting toggle
   const videoConfig = section.showVideo && section.videoUrl
-    ? { type: (section.videoType || 'youtube') as 'local' | 'youtube', src: section.videoUrl }
+    ? {
+        type: (section.videoType || 'youtube') as 'local' | 'youtube',
+        src: section.videoType === 'local' ? `${basePath}${section.videoUrl}` : section.videoUrl,
+      }
     : undefined
   const hasVideo = !!videoConfig
   const totalPhases = 1 + (hasData ? 1 : 0) + quotes.length + (hasVideo ? 1 : 0)
@@ -552,7 +555,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
                     {quote.headshotUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
-                        src={quote.headshotUrl}
+                        src={`${basePath}${quote.headshotUrl}`}
                         alt={quote.name}
                         style={{
                           width: 36,
@@ -943,7 +946,8 @@ function PhaseQuote({
   const finalScale = videoActive && isLatest ? 0.8 : layout.scale
 
   const isNewest = position === 0
-  const hasImage = !!quote.headshotUrl
+  const resolvedHeadshot = quote.headshotUrl ? `${basePath}${quote.headshotUrl}` : undefined
+  const hasImage = !!resolvedHeadshot
 
   // Attribution line (shared)
   const attributionLine = (
@@ -951,7 +955,7 @@ function PhaseQuote({
       {hasImage && !isNewest && !isMobile ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
-          src={quote.headshotUrl}
+          src={resolvedHeadshot}
           alt={quote.name}
           style={{
             width: 40,
@@ -966,7 +970,7 @@ function PhaseQuote({
       ) : hasImage && isMobile ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
-          src={quote.headshotUrl}
+          src={resolvedHeadshot}
           alt={quote.name}
           style={{
             width: 40,
