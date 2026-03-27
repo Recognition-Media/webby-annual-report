@@ -549,6 +549,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
             <div style={{ marginTop: 48 }}>
               <PhaseData
                 stats={dataStats!}
+                eyebrow={section.dataEyebrow}
                 headline={dataHeadline}
                 subheadline={dataSubheadline}
                 color={trendColor}
@@ -1138,6 +1139,7 @@ function PhaseQuote({
 
 function PhaseData({
   stats,
+  eyebrow,
   headline,
   subheadline,
   color,
@@ -1145,6 +1147,7 @@ function PhaseData({
   isMobile,
 }: {
   stats: DataStat[]
+  eyebrow?: string
   headline?: string
   subheadline?: string
   color: string
@@ -1193,7 +1196,7 @@ function PhaseData({
             marginBottom: 24,
           }}
         >
-          What Judges Said
+          {eyebrow || 'What Judges Said'}
         </div>
         {headline && (
           <h2

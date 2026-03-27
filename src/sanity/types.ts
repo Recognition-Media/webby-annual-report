@@ -57,6 +57,7 @@ export interface TrendSection {
   showFeaturedProjects?: boolean
   featuredProjects?: FeaturedProject[]
   showData?: boolean
+  dataEyebrow?: string
   dataHeadline?: string
   dataSubheadline?: string
   dataContext?: string

@@ -15,6 +15,7 @@ export default defineType({
 
     // Data Module
     { name: 'showData', title: 'Show Data Module', type: 'boolean', initialValue: false, description: 'Toggle the data/stats phase' },
+    { name: 'dataEyebrow', title: 'Data Eyebrow', type: 'string', description: 'Small label above the headline (e.g. "What Judges Said")', hidden: ({ parent }) => parent?.showData === false },
     { name: 'dataHeadline', title: 'Data Headline', type: 'string', hidden: ({ parent }) => parent?.showData === false },
     { name: 'dataSubheadline', title: 'Data Subheadline', type: 'text', rows: 2, hidden: ({ parent }) => parent?.showData === false },
     { name: 'dataContext', title: 'Data Context Line (legacy)', type: 'string', hidden: () => true },

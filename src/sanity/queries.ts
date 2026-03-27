@@ -38,6 +38,7 @@ export const reportBySlugQuery = groq`
       showFeaturedProjects,
       featuredProjects,
       showData,
+      dataEyebrow,
       dataHeadline,
       dataSubheadline,
       dataContext,
