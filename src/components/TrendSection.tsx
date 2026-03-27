@@ -1217,7 +1217,7 @@ function PhaseData({
             style={{
               fontSize: 16,
               lineHeight: 1.6,
-              color: '#888',
+              color: '#D4D4D4',
             }}
           >
             {subheadline}
@@ -1283,7 +1283,7 @@ function PhaseData({
               <div
                 style={{
                   fontSize: 13,
-                  color: '#888',
+                  color: '#D4D4D4',
                   letterSpacing: 0.5,
                 }}
               >
