@@ -10,7 +10,7 @@ export default defineConfig({
   title: 'Webby Annual Report',
   projectId,
   dataset,
-  basePath: '/studio',
+  basePath: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/studio`,
   plugins: [
     structureTool(),
     signupExportPlugin(),
