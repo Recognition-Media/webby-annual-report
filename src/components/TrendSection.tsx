@@ -293,10 +293,18 @@ const MOCK_DATA_STATS: Record<number, { headline: string; subheadline: string; s
 }
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') return window.matchMedia('(max-width: 768px)').matches
+    return false
+  })
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)')
     setIsMobile(mq.matches)
+    // If mobile, immediately clear any scroll locks that may have been set
+    if (mq.matches) {
+      document.body.style.overflow = ''
+      document.documentElement.classList.remove('snap-active')
+    }
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)

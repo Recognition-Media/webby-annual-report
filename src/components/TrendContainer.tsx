@@ -5,10 +5,17 @@ import { motion } from 'framer-motion'
 import { TrendSubnav } from './TrendSubnav'
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') return window.matchMedia('(max-width: 768px)').matches
+    return false
+  })
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)')
     setIsMobile(mq.matches)
+    if (mq.matches) {
+      document.body.style.overflow = ''
+      document.documentElement.classList.remove('snap-active')
+    }
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
@@ -30,8 +37,9 @@ export function TrendContainer({
   const [isActive, setIsActive] = useState(false)
   const containerRef = useRef<HTMLElement>(null)
 
-  // Track when container is in view
+  // Track when container is in view (desktop only)
   useEffect(() => {
+    if (isMobile) return
     const el = containerRef.current
     if (!el) return
     const observer = new IntersectionObserver(
@@ -40,11 +48,11 @@ export function TrendContainer({
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [isMobile])
 
-  // Listen for trend-next/trend-prev events
+  // Listen for trend-next/trend-prev events (desktop only)
   useEffect(() => {
-    if (!isActive) return
+    if (!isActive || isMobile) return
 
     function handleNextTrend() {
       setActiveTrend((t) => Math.min(t + 1, trendCount - 1))
