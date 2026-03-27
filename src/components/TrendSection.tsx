@@ -575,10 +575,10 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
                   </div>
                   {/* Attribution */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    {quote.headshotUrl ? (
+                    {(quote.headshot || quote.headshotUrl) ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
-                        src={`${resolvedBasePath}${quote.headshotUrl}`}
+                        src={quote.headshot ? urlFor(quote.headshot).width(100).height(100).fit('crop').url() : `${resolvedBasePath}${quote.headshotUrl}`}
                         alt={quote.name}
                         style={{
                           width: 36,
@@ -952,7 +952,7 @@ function PhaseQuote({
   color,
   isMobile,
 }: {
-  quote: { name: string; title?: string; quoteText: any[]; linkedInUrl?: string; headshotUrl?: string }
+  quote: { name: string; title?: string; quoteText: any[]; linkedInUrl?: string; headshot?: any; headshotUrl?: string }
   position: number
   visibleCount: number
   isNew: boolean
@@ -969,9 +969,13 @@ function PhaseQuote({
   const finalScale = videoActive && isLatest ? 0.8 : layout.scale
 
   const isNewest = position === 0
-  // basePath is passed via the component tree; fall back to module-level
+  // Resolve headshot: prefer Sanity image upload, fall back to URL path
   const bp = typeof window !== 'undefined' ? (window.location.pathname.match(/^(\/preview\/[^/]+)/)?.[1] || basePath) : basePath
-  const resolvedHeadshot = quote.headshotUrl ? `${bp}${quote.headshotUrl}` : undefined
+  const resolvedHeadshot = quote.headshot
+    ? urlFor(quote.headshot).width(250).height(250).fit('crop').url()
+    : quote.headshotUrl
+      ? `${bp}${quote.headshotUrl}`
+      : undefined
   const hasImage = !!resolvedHeadshot
 
   // Attribution line (shared)

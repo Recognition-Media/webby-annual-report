@@ -9,7 +9,8 @@ export default defineType({
     { name: 'title', title: 'Title', type: 'string' },
     { name: 'quoteText', title: 'Quote', type: 'array', of: [{ type: 'block' }], validation: (r) => r.required() },
     { name: 'linkedInUrl', title: 'LinkedIn URL', type: 'url' },
-    { name: 'headshotUrl', title: 'Headshot URL', type: 'string', description: 'Path to headshot image (e.g. /judges/tom_hale_720.jpg)' },
+    { name: 'headshot', title: 'Headshot', type: 'image', options: { hotspot: true }, description: 'Circular headshot shown next to quote' },
+    { name: 'headshotUrl', title: 'Headshot URL (legacy)', type: 'string', hidden: () => true },
   ],
   preview: {
     select: { title: 'name', subtitle: 'title' },

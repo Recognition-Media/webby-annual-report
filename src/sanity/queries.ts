@@ -48,6 +48,7 @@ export const reportBySlugQuery = groq`
         title,
         quoteText,
         linkedInUrl,
+        headshot,
         headshotUrl
       },
       showVideo,

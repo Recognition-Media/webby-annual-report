@@ -41,6 +41,7 @@ export interface ExpertQuote {
   title?: string
   quoteText: PortableTextBlock[]
   linkedInUrl?: string
+  headshot?: SanityImage
   headshotUrl?: string
 }
 
