@@ -1,127 +1,229 @@
 'use client'
 
-import { useRef } from 'react'
-import Image from 'next/image'
-import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion'
+import { useRef, useEffect, useState } from 'react'
+import { AnimatedBg } from './AnimatedBg'
+import { motion, useInView, animate } from 'framer-motion'
 import type { Report, HeroStat } from '@/sanity/types'
-import { urlFor } from '@/sanity/image'
 
-const FALLBACK_TEXT =
-  'The Webby Awards are judged by the International Academy of Digital Arts and Sciences (IADAS), an invitation-only organization made up of Associate and Executive experts representing artists, creators, media companies, brands, agencies, production companies, cultural institutions, podcasts, games, technology, nonprofits, and beyond. The Academy is an intellectually diverse group of former Winners, creatives, organizers, entertainers, leaders and innovators that was founded to help drive the creative, technical, purpose-driven and professional progress of the Internet and evolving forms of digital media.'
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
 
-const FALLBACK_STATS: HeroStat[] = [
-  { label: 'Number of Academy Members', value: '3,300' },
-  { label: 'Countries Represented', value: '77' },
-  { label: 'Year Founded', value: '1998' },
+const FALLBACK_DESCRIPTION =
+  'An invitation-only body of 3,300+ innovators and visionaries across 77 countries, with the mission to drive the creative, technical, and professional growth of the Internet and evolving forms of digital media.'
+
+const FALLBACK_STATS: (HeroStat & { color: string; description?: string })[] = [
+  { label: 'IADAS Members', value: '3,300+', color: '#8B70D1' },
+  { label: 'Countries', value: '77', color: '#82D8EB' },
+  { label: 'Year Founded', value: '1998', color: '#FFB763' },
 ]
 
-function ScrollNumber({ value, progress }: { value: string; progress: MotionValue<number> }) {
+const STAT_COLORS = ['#8B70D1', '#82D8EB', '#FFB763']
+
+function AnimatedNumber({ value, color, inView }: { value: string; color: string; inView: boolean }) {
+  const [display, setDisplay] = useState('0')
   const match = value.match(/^([^0-9]*)([0-9,]+(?:\.\d+)?)(.*)$/)
   const num = match ? parseFloat(match[2].replace(/,/g, '')) : 0
   const prefix = match ? match[1] : ''
   const suffix = match ? match[3] : ''
+  const hasComma = match ? match[2].includes(',') : false
 
-  const count = useTransform(progress, [0.2, 0.6], [0, num])
-  const display = useTransform(count, (v) =>
-    Math.round(v).toLocaleString('en-US')
-  )
+  useEffect(() => {
+    if (!inView) return
+    const controls = animate(0, num, {
+      duration: 1.5,
+      ease: 'easeOut',
+      onUpdate(v) {
+        const rounded = Math.round(v)
+        setDisplay(hasComma ? rounded.toLocaleString('en-US') : rounded.toString())
+      },
+    })
+    return () => controls.stop()
+  }, [inView, num, hasComma])
 
   return (
-    <span className="text-3xl md:text-[36px] font-black text-white leading-none" style={{ fontVariantNumeric: 'tabular-nums' }}>
-      {prefix}<motion.span>{display}</motion.span>{suffix}
+    <span
+      style={{
+        fontSize: 'clamp(36px, 8vw, 88px)',
+        fontWeight: 400,
+        fontVariantNumeric: 'tabular-nums',
+        color,
+        lineHeight: 1,
+      }}
+    >
+      {prefix}{display}{suffix}
     </span>
-  )
-}
-
-/* Large IADAS diamond shape as background watermark */
-function IadasWatermark() {
-  return (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/iadas-shape.png"
-        alt=""
-        width={400}
-        height={400}
-        style={{ opacity: 0.25 }}
-        aria-hidden
-      />
-    </div>
   )
 }
 
 export function IadasSection({ report }: { report: Report }) {
   const ref = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  })
+  const isInView = useInView(ref, { once: true, amount: 0.3 })
 
-  const text = report.iadasDescription || FALLBACK_TEXT
-  const stats = report.iadasStats && report.iadasStats.length > 0 ? report.iadasStats : FALLBACK_STATS
+  const heading = report.howWeJudgeHeading || 'All work is reviewed by the International Academy of Digital Arts & Sciences.'
+  const description = report.iadasDescription || FALLBACK_DESCRIPTION
+  const rawStats = report.iadasStats && report.iadasStats.length > 0 ? report.iadasStats : FALLBACK_STATS
+  const stats = rawStats.map((s, i) => ({
+    ...s,
+    color: STAT_COLORS[i] || STAT_COLORS[0],
+  }))
 
   return (
-    <section ref={ref} className="relative bg-[#1268E3] text-white overflow-hidden h-screen flex flex-col justify-center">
-      <IadasWatermark />
+    <section
+      id="how-judged"
+      data-snap
+      ref={ref}
+      className="px-5 md:px-[60px]"
+      style={{
+        background: '#191919',
+        minHeight: '100vh',
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
 
-      <div className="relative mx-auto max-w-5xl px-8 md:px-16 py-10">
-        {/* IADAS Logo */}
-        <div className="text-center mb-6">
-          <Image
-            src="/iadas-logo.webp"
-            alt="IADAS — International Academy of Digital Arts and Sciences"
-            width={180}
-            height={65}
-            className="mx-auto"
-          />
-        </div>
+      <div data-content style={{ maxWidth: 1000, width: '100%', position: 'relative' }}>
+        {/* Section label */}
+        <p
+          style={{
+            fontSize: 11,
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            color: '#8B70D1',
+            fontWeight: 500,
+            marginBottom: 24,
+          }}
+        >
+          How the Webby Awards Are Judged
+        </p>
+
+        {/* Heading */}
+        <h2
+          style={{
+            fontSize: 'clamp(32px, 4vw, 48px)',
+            fontWeight: 400,
+            color: '#FFFFFF',
+            lineHeight: 1.2,
+            letterSpacing: '-0.5px',
+            maxWidth: 850,
+            marginBottom: 24,
+          }}
+        >
+          {heading}
+        </h2>
 
         {/* Description */}
-        <p className="text-xl md:text-[26px] md:leading-[1.5] font-light">
-          The Webby Awards are judged by the{' '}
-          <a
-            href="https://www.iadas.net"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-4 hover:opacity-80"
-          >
-            International Academy of Digital Arts and Sciences
-          </a>{' '}
-          {text.includes('(IADAS)')
-            ? text.slice(text.indexOf('(IADAS)'))
-            : `(IADAS), ${text.slice(text.indexOf('an invitation-only') >= 0 ? text.indexOf('an invitation-only') : 0)}`}
+        <p
+          style={{
+            fontSize: 16,
+            lineHeight: 1.75,
+            color: '#D4D4D4',
+            fontWeight: 400,
+            maxWidth: 750,
+            marginBottom: 40,
+          }}
+        >
+          {description}
         </p>
 
         {/* Stats row */}
-        <div className="flex flex-col sm:flex-row justify-between mt-8 pt-6">
+        <div className="grid grid-cols-2 gap-4 md:flex md:flex-row" style={{ marginBottom: 32 }}>
           {stats.map((stat, i) => (
-            <div
+            <motion.div
               key={i}
-              className={`text-center flex-1 py-4 ${i > 0 ? 'sm:border-l sm:border-white/30' : ''}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: i * 0.15, ease: 'easeOut' }}
+              className="py-4 md:pr-10 md:mr-10 md:border-r md:border-white/[0.14] last:md:border-r-0 last:md:pr-0 last:md:mr-0"
             >
-              <h3 className="text-xs uppercase tracking-wider font-bold text-white/70 mb-2">
+              <div style={{ marginBottom: 8 }}>
+                <AnimatedNumber value={stat.value} color={stat.color} inView={isInView} />
+              </div>
+              <p
+                style={{
+                  fontSize: 12,
+                  textTransform: 'uppercase',
+                  letterSpacing: 2,
+                  color: '#999',
+                  fontWeight: 500,
+                  marginBottom: 4,
+                }}
+              >
                 {stat.label}
-              </h3>
-              <ScrollNumber value={stat.value} progress={scrollYProgress} />
-            </div>
+              </p>
+            </motion.div>
           ))}
         </div>
 
-        {/* KPMG banner */}
-        <div className="mt-8 bg-[#001a4d] rounded-sm px-6 py-4 flex items-start gap-4">
-          <div className="shrink-0 mt-0.5">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <rect width="28" height="28" rx="4" fill="#4a90d9" />
-              <path d="M7 14l5 5 9-9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-white">Official Tabulation Consultant: KPMG</h4>
-            <p className="text-xs text-white/70 mt-1 leading-relaxed">
-              KPMG serves as the official Webby Awards vote tabulation consultant, ensuring the accuracy and quality of the voting process.
-            </p>
-          </div>
+        {/* Credential cards */}
+        <div className="flex flex-col gap-4 md:flex-row md:gap-6" style={{ marginTop: 26 }}>
+          {/* IADAS card */}
+          <a
+            href={report.iadasCardUrl || 'https://www.iadas.net'}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              flex: 1,
+              border: '1px solid rgba(255,255,255,0.12)',
+              padding: '28px 32px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 24,
+              textDecoration: 'none',
+              color: 'inherit',
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${basePath}/iadas-logo.png`}
+              alt="IADAS"
+              style={{ width: 48, height: 'auto', opacity: 0.9, flexShrink: 0 }}
+            />
+            <div>
+              <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
+                {report.iadasCardTitle || 'International Academy of Digital Arts & Sciences'}
+              </h4>
+              <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
+                {report.iadasCardDescription || 'The judging body responsible for selecting all Webby Award Winners and Nominees.'}
+              </p>
+            </div>
+          </a>
+
+          {/* Auditor card */}
+          <a
+            href={report.auditorCardUrl || 'https://www.kpmg.com'}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              flex: 1,
+              border: '1px solid rgba(255,255,255,0.12)',
+              padding: '28px 32px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 24,
+              textDecoration: 'none',
+              color: 'inherit',
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${basePath}/kpmg-logo.svg`}
+              alt="Auditor"
+              style={{ width: 72, height: 'auto', opacity: 0.9, flexShrink: 0 }}
+            />
+            <div>
+              <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
+                {report.auditorCardTitle || 'Official Tabulation Consultant'}
+              </h4>
+              <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
+                {report.auditorCardDescription || 'KPMG ensures the accuracy and integrity of the Webby Awards voting process.'}
+              </p>
+            </div>
+          </a>
         </div>
+
+        {/* Bottom gradient bar */}
       </div>
     </section>
   )

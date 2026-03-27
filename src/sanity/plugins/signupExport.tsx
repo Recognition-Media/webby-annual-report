@@ -19,10 +19,13 @@ function SignupExportTool() {
   const [loading, setLoading] = useState(true)
   const [slugFilter, setSlugFilter] = useState('')
   const [error, setError] = useState('')
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [deleting, setDeleting] = useState(false)
 
   const fetchSignups = useCallback(async () => {
     setLoading(true)
     setError('')
+    setSelected(new Set())
     try {
       if (!API_URL) {
         setError('Signup API URL not configured')
@@ -76,9 +79,59 @@ function SignupExportTool() {
       const res = await fetch(`${API_URL}/signup?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setSignups((prev) => prev.filter((s) => s.id !== id))
+      setSelected((prev) => { const next = new Set(prev); next.delete(id); return next })
     } catch (err) {
       console.error('Failed to delete signup', err)
       alert('Failed to delete signup')
+    }
+  }
+
+  async function deleteSelected() {
+    if (selected.size === 0) return
+    if (!confirm(`Delete ${selected.size} selected signup${selected.size > 1 ? 's' : ''}?`)) return
+
+    setDeleting(true)
+    const ids = Array.from(selected)
+    let successCount = 0
+    let failCount = 0
+
+    for (const id of ids) {
+      try {
+        const res = await fetch(`${API_URL}/signup?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        successCount++
+      } catch {
+        failCount++
+      }
+    }
+
+    setSignups((prev) => prev.filter((s) => !selected.has(s.id) || failCount > 0))
+    if (failCount === 0) {
+      setSignups((prev) => prev.filter((s) => !ids.includes(s.id)))
+    }
+    setSelected(new Set())
+    setDeleting(false)
+
+    if (failCount > 0) {
+      alert(`Deleted ${successCount}, failed ${failCount}. Refreshing...`)
+      fetchSignups()
+    }
+  }
+
+  function toggleSelect(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    if (selected.size === sorted.length) {
+      setSelected(new Set())
+    } else {
+      setSelected(new Set(sorted.map((s) => s.id)))
     }
   }
 
@@ -116,6 +169,14 @@ function SignupExportTool() {
           </select>
           <Button onClick={fetchSignups} text="Refresh" tone="primary" disabled={loading} />
           <Button onClick={exportCsv} text="Export CSV" tone="positive" disabled={signups.length === 0} />
+          {selected.size > 0 && (
+            <Button
+              onClick={deleteSelected}
+              text={deleting ? `Deleting ${selected.size}...` : `Delete ${selected.size} selected`}
+              tone="critical"
+              disabled={deleting}
+            />
+          )}
         </div>
 
         {error && <Text size={1} style={{ color: '#d00' }}>{error}</Text>}
@@ -131,6 +192,14 @@ function SignupExportTool() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid #ddd', textAlign: 'left' }}>
+                      <th style={{ padding: '8px 6px', width: 32 }}>
+                        <input
+                          type="checkbox"
+                          checked={selected.size === sorted.length && sorted.length > 0}
+                          onChange={toggleSelectAll}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </th>
                       <th style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>Date</th>
                       <th style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>Report</th>
                       {allKeys.map((k) => (
@@ -141,7 +210,21 @@ function SignupExportTool() {
                   </thead>
                   <tbody>
                     {sorted.map((s) => (
-                      <tr key={s.id} style={{ borderBottom: '1px solid #eee' }}>
+                      <tr
+                        key={s.id}
+                        style={{
+                          borderBottom: '1px solid #eee',
+                          background: selected.has(s.id) ? 'rgba(220, 38, 38, 0.06)' : 'transparent',
+                        }}
+                      >
+                        <td style={{ padding: '6px 6px' }}>
+                          <input
+                            type="checkbox"
+                            checked={selected.has(s.id)}
+                            onChange={() => toggleSelect(s.id)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                        </td>
                         <td style={{ padding: '6px 12px', whiteSpace: 'nowrap' }}>
                           {new Date(s.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
                         </td>

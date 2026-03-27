@@ -1,7 +1,30 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('/fonts/AktivGrotesk_Rg.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('/fonts/AktivGrotesk_Md.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
 :root {
+  --webby-black: #191919;
+  --color-websites: #8B70D1;
+  --color-video: #FF7F63;
+  --color-ads: #82D8EB;
+  --color-apps: #559DDF;
+  --color-social: #FFDE67;
+  --color-podcasts: #FF67CB;
+  --color-games: #80D064;
+  --color-special: #FFB763;
   --color-primary-blue: #85CEFF;
   --color-primary-green: #7ACA6C;
   --color-lime-accent: #a7f076;
@@ -21,21 +44,42 @@
   --color-dark-gray: var(--color-dark-gray);
   --color-author-gray: var(--color-author-gray);
   --color-copyright-gray: var(--color-copyright-gray);
-  --font-sans: var(--font-montserrat), 'Montserrat', sans-serif;
+  --font-sans: 'Aktiv Grotesk', -apple-system, sans-serif;
 }
 
-html {
-  scroll-behavior: smooth;
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
 }
 
 body {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Aktiv Grotesk', -apple-system, sans-serif;
   font-size: 16px;
   line-height: 26px;
   background: #fff;
   color: #000;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* Gradient bar utility */
+.gradient-bar {
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--color-websites), var(--color-video), var(--color-social),
+    var(--color-podcasts), var(--color-apps), var(--color-games));
+  border-radius: 2px;
+}
 
 /* Divider between trend sections */
 .trend-divider {
@@ -66,11 +110,105 @@ body {
 }
 
 /* Typography overrides for prose in trend sections */
-.prose a {
+/* Universal report link style */
+.report-link,
+.prose a,
+.report-links a {
   color: inherit;
-  font-weight: 700;
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 1px;
+  transition: border-color 0.3s ease, color 0.3s ease;
+  cursor: pointer;
 }
 
-.prose a:hover {
-  text-decoration: underline;
+.report-link::after,
+.prose a::after,
+.report-links a::after {
+  content: '';
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-left: 4px;
+  vertical-align: middle;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 11 11' fill='none'%3E%3Cline x1='2' y1='9' x2='9' y2='2' stroke='white' stroke-width='1'/%3E%3Cpolyline points='4,2 9,2 9,7' stroke='white' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.4;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.report-link:hover,
+.prose a:hover,
+.report-links a:hover {
+  border-color: rgba(255,255,255,0.5);
+  color: #fff;
+}
+
+.report-link:hover::after,
+.prose a:hover::after,
+.report-links a:hover::after {
+  opacity: 0.8;
+  transform: translate(1px, -1px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Top-left: peeks in from corner, retreats */
+@keyframes blobDrift1 {
+  0%, 100% { transform: translate(-70%, -70%) rotate(45deg); }
+  50% { transform: translate(-30%, -30%) rotate(45deg); }
+}
+
+/* Top-right: peeks in from corner, retreats */
+@keyframes blobDrift2 {
+  0%, 100% { transform: translate(70%, -70%) rotate(45deg); }
+  50% { transform: translate(30%, -30%) rotate(45deg); }
+}
+
+/* Bottom-left: peeks in from corner, retreats */
+@keyframes blobDrift3 {
+  0%, 100% { transform: translate(-70%, 70%) rotate(45deg); }
+  50% { transform: translate(-30%, 30%) rotate(45deg); }
+}
+
+/* Bottom-right: peeks in from corner, retreats */
+@keyframes blobDrift4 {
+  0%, 100% { transform: translate(70%, 70%) rotate(45deg); }
+  50% { transform: translate(30%, 30%) rotate(45deg); }
+}
+
+@keyframes cursorRotateDown {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(90deg); }
+}
+
+/* Scroll snap for report sections */
+html.snap-active {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+html.snap-active section[data-snap] {
+  scroll-snap-align: start;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Mobile overrides — max-width: 768px                                */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 768px) {
+  /* Disable scroll-snap on mobile — let users scroll naturally */
+  html.snap-active {
+    scroll-snap-type: none;
+  }
+
+  /* Hide custom cursor on touch devices */
+  * {
+    cursor: auto !important;
+  }
 }

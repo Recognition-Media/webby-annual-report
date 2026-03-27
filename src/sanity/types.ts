@@ -41,13 +41,32 @@ export interface ExpertQuote {
   title?: string
   quoteText: PortableTextBlock[]
   linkedInUrl?: string
+  headshot?: SanityImage
+  headshotUrl?: string
+}
+
+export interface DataStat {
+  value: number
+  label: string
 }
 
 export interface TrendSection {
+  enabled?: boolean
   trendTitle: string
   trendBody?: PortableTextBlock[]
+  showFeaturedProjects?: boolean
   featuredProjects?: FeaturedProject[]
+  showData?: boolean
+  dataEyebrow?: string
+  dataHeadline?: string
+  dataSubheadline?: string
+  dataContext?: string
+  dataStats?: DataStat[]
+  showQuotes?: boolean
   expertQuotes?: ExpertQuote[]
+  showVideo?: boolean
+  videoType?: 'local' | 'youtube'
+  videoUrl?: string
   sectionImages?: (SanityImage & { alt?: string })[]
 }
 
@@ -80,15 +99,35 @@ export interface Report {
   headerImage?: SanityImage
   heroStats?: HeroStat[]
   globalStats?: HeroStat[]
+  byTheNumbersEyebrow?: string
+  byTheNumbersStatement?: import('@portabletext/types').PortableTextBlock[]
   entryStats?: HeroStat[]
   webbyHistory?: string
+  howWeJudgeHeading?: string
   iadasDescription?: string
   iadasStats?: HeroStat[]
   iadasLogo?: SanityImage
+  iadasCardTitle?: string
+  iadasCardDescription?: string
+  iadasCardUrl?: string
+  auditorLogo?: SanityImage
+  auditorCardTitle?: string
+  auditorCardDescription?: string
+  auditorCardUrl?: string
   letterBody?: PortableTextBlock[]
   letterAuthors?: LetterAuthor[]
   carouselImages?: CarouselImage[]
   trendSections?: TrendSection[]
+  thankYouEyebrow?: string
+  thankYouHeading?: string
+  thankYouBody?: import('@portabletext/types').PortableTextBlock[]
+  thankYouLinkEyebrow?: string
+  thankYouLinkTitle?: string
+  thankYouLinkDescription?: string
+  thankYouLinkUrl?: string
+  thankYouCtaTitle?: string
+  thankYouCtaDescription?: string
+  thankYouCtaUrl?: string
   formFields?: FormField[]
   submitButtonText?: string
   successMessage?: string

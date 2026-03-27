@@ -1,0 +1,254 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+const IDLE_TIMEOUT = 5000
+
+const arrowPath = {
+  shaft: 'M-30,60 L100,60',
+  chevron1: 'M100,60 L54,14',
+  chevron2: 'M100,60 L54,106',
+}
+
+function Arrow({ rotation, onClick, position, isTouch }: {
+  rotation: number
+  onClick: () => void
+  position: { top?: string | number; bottom?: string | number; left?: string | number; right?: string | number }
+  isTouch?: boolean
+}) {
+  return (
+    <motion.button
+      initial={{ opacity: 0 }}
+      animate={{ opacity: isTouch ? 0.5 : 0.3 }}
+      exit={{ opacity: 0 }}
+      whileHover={isTouch ? undefined : { opacity: 0.7 }}
+      whileTap={{ opacity: 0.9, scale: 1.1 }}
+      transition={{ duration: 0.5 }}
+      onClick={(e) => { e.stopPropagation(); onClick() }}
+      className="no-custom-cursor"
+      style={{
+        position: 'fixed',
+        ...position,
+        zIndex: 50,
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        padding: isTouch ? 24 : 20,
+      }}
+    >
+      <svg
+        width={isTouch ? 36 : 42}
+        height={isTouch ? 36 : 42}
+        viewBox="0 0 120 120"
+        fill="none"
+        style={{ transform: `rotate(${rotation}deg)` }}
+      >
+        <line x1="-30" y1="60" x2="100" y2="60" stroke="white" strokeWidth={isTouch ? 2.5 : 1.5} />
+        <line x1="100" y1="60" x2="54" y2="14" stroke="white" strokeWidth={isTouch ? 2.5 : 1.5} />
+        <line x1="100" y1="60" x2="54" y2="106" stroke="white" strokeWidth={isTouch ? 2.5 : 1.5} />
+      </svg>
+    </motion.button>
+  )
+}
+
+function isTouchDevice() {
+  if (typeof window === 'undefined') return false
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0
+}
+
+export function IdleArrows({ active }: { active: boolean }) {
+  const [idle, setIdle] = useState(false)
+  const [context, setContext] = useState<'vertical' | 'trend' | 'none'>('none')
+  const [isTouch, setIsTouch] = useState(false)
+  const timerRef = useRef<any>(null)
+
+  useEffect(() => {
+    setIsTouch(isTouchDevice())
+  }, [])
+
+  // Detect context: are we in trends or vertical sections
+  useEffect(() => {
+    if (!active) return
+
+    function checkContext() {
+      const trendActive = document.querySelector('[data-trend-active]')
+      const trendsContainer = document.getElementById('trends')
+      const trendsRect = trendsContainer?.getBoundingClientRect()
+      const inTrends = trendsRect && trendsRect.top <= 50 && trendsRect.bottom >= window.innerHeight - 50
+
+      if (trendActive || inTrends) {
+        setContext('trend')
+      } else {
+        setContext('vertical')
+      }
+    }
+
+    checkContext()
+    window.addEventListener('scroll', checkContext)
+    const observer = new MutationObserver(checkContext)
+    observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['data-trend-active'] })
+
+    return () => {
+      window.removeEventListener('scroll', checkContext)
+      observer.disconnect()
+    }
+  }, [active])
+
+  // Idle timer — reset on any interaction
+  useEffect(() => {
+    if (!active) return
+
+    function resetIdle() {
+      setIdle(false)
+      clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => setIdle(true), IDLE_TIMEOUT)
+    }
+
+    resetIdle()
+    window.addEventListener('click', resetIdle)
+    window.addEventListener('scroll', resetIdle)
+
+    return () => {
+      clearTimeout(timerRef.current)
+      window.removeEventListener('click', resetIdle)
+      window.removeEventListener('scroll', resetIdle)
+    }
+  }, [active])
+
+  // Hide entirely on touch/mobile — MobileNav handles navigation
+  // On desktop, only show when idle
+  if (!active || !idle || isTouch) return null
+
+  function clickDown() {
+    // Simulate clicking the right side of screen (forward)
+    const trendActive = document.querySelector('[data-trend-active]')
+    if (trendActive) {
+      const isCompleted = trendActive.getAttribute('data-trend-completed') === 'true'
+      if (isCompleted) {
+        window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
+      } else {
+        window.dispatchEvent(new Event('trend-advance'))
+      }
+    } else {
+      // Vertical: scroll to next snap section
+      const sections = document.querySelectorAll('[data-snap]')
+      const scrollY = window.scrollY
+      for (const el of sections) {
+        const top = (el as HTMLElement).offsetTop
+        if (top > scrollY + 50) {
+          el.scrollIntoView({ behavior: 'smooth' })
+          break
+        }
+      }
+    }
+    setIdle(false)
+  }
+
+  function clickUp() {
+    const trendActive = document.querySelector('[data-trend-active]')
+    if (trendActive) {
+      window.dispatchEvent(new Event('trend-retreat'))
+    } else {
+      // Disable goodbye scroll clamp if on goodbye page
+      window.dispatchEvent(new Event('goodbye-exit'))
+      // Vertical: scroll to previous snap section
+      const sections = Array.from(document.querySelectorAll('[data-snap]'))
+      const scrollY = window.scrollY
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const top = (sections[i] as HTMLElement).offsetTop
+        if (top < scrollY - 50) {
+          sections[i].scrollIntoView({ behavior: 'smooth' })
+          break
+        }
+      }
+    }
+    setIdle(false)
+  }
+
+  function clickRight() {
+    const trendActive = document.querySelector('[data-trend-active]')
+    if (trendActive) {
+      const isCompleted = trendActive.getAttribute('data-trend-completed') === 'true'
+      if (isCompleted) {
+        window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
+      } else {
+        window.dispatchEvent(new Event('trend-advance'))
+      }
+    }
+    setIdle(false)
+  }
+
+  function clickLeft() {
+    const trendActive = document.querySelector('[data-trend-active]')
+    if (trendActive) {
+      const trendPhase = trendActive.getAttribute('data-trend-phase')
+      const trendIndex = trendActive.getAttribute('data-trend-index')
+      if (trendPhase === '0' && trendIndex === '0') {
+        // Back to judging
+        document.body.style.overflow = ''
+        document.documentElement.classList.add('snap-active')
+        document.getElementById('how-judged')?.scrollIntoView({ behavior: 'smooth' })
+      } else {
+        window.dispatchEvent(new Event('trend-retreat'))
+      }
+    }
+    setIdle(false)
+  }
+
+  return (
+    <AnimatePresence>
+      {context === 'vertical' && (() => {
+        const thankYou = document.getElementById('thank-you')
+        const thankYouRect = thankYou?.getBoundingClientRect()
+        const onGoodbye = thankYouRect && thankYouRect.top <= 50 && thankYouRect.bottom >= window.innerHeight - 50
+        return (
+          <>
+            {window.scrollY > 100 && (
+              <Arrow
+                key="up"
+                rotation={-90}
+                onClick={clickUp}
+                position={{ top: '15px', left: '50%', transform: 'translateX(-50%)' } as any}
+                isTouch={isTouch}
+              />
+            )}
+            {!onGoodbye && (
+              <Arrow
+                key="down"
+                rotation={90}
+                onClick={clickDown}
+                position={{ bottom: isTouch ? '80px' : '35px', left: '50%', transform: 'translateX(-50%)' } as any}
+                isTouch={isTouch}
+              />
+            )}
+          </>
+        )
+      })()}
+      {context === 'trend' && !isTouch && (() => {
+        const trendEl = document.querySelector('[data-trend-active]')
+        const isFirstTrendStart = trendEl?.getAttribute('data-trend-index') === '0' && trendEl?.getAttribute('data-trend-phase') === '0'
+        return (
+          <>
+            {!isFirstTrendStart && (
+              <Arrow
+                key="left"
+                rotation={180}
+                onClick={clickLeft}
+                position={{ top: 'calc(50% - 35px)', left: '15px' }}
+                isTouch={isTouch}
+              />
+            )}
+            <Arrow
+              key="right"
+              rotation={0}
+              onClick={clickRight}
+              position={{ top: 'calc(50% - 35px)', right: '15px' }}
+              isTouch={isTouch}
+            />
+          </>
+        )
+      })()}
+    </AnimatePresence>
+  )
+}

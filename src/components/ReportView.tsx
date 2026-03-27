@@ -1,20 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
 import { HeroSection } from './HeroSection'
 import { SignupGate } from './SignupGate'
-import { TimelineSection } from './TimelineSection'
 import { EntryStats } from './EntryStats'
 import { IadasSection } from './IadasSection'
 import { IntroLetter } from './IntroLetter'
 import { TrendSection } from './TrendSection'
+import { TrendContainer } from './TrendContainer'
 import { ReportFooter } from './ReportFooter'
 import { AnalyticsScripts } from './AnalyticsScripts'
 import { ScrollReveal } from './ScrollReveal'
-import { StickyNav } from './StickyNav'
+import { ReportScroll } from './SmoothScroll'
+import { CursorArrow } from './CursorArrow'
+import { AnimatedBg } from './AnimatedBg'
+import { IdleArrows } from './IdleArrows'
+import { MobileNav } from './MobileNav'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -31,17 +35,92 @@ export function ReportView({ report }: { report: Report }) {
   const cookieKey = `report-access-${report.slug.current}`
   const [hasAccess, setHasAccess] = useState(false)
   const [showGate, setShowGate] = useState(false)
+  const [entered, setEntered] = useState(false)
+  const [showGoodbye, setShowGoodbye] = useState(false)
+  const reportRef = useRef<HTMLDivElement>(null)
+
+  // Show goodbye only when all trends are complete (desktop)
+  // On mobile, always show it since trends are just vertical scroll
+  useEffect(() => {
+    const isMobile = window.matchMedia('(max-width: 768px)').matches
+    if (isMobile) {
+      setShowGoodbye(true)
+      return
+    }
+    function handleExit() { setShowGoodbye(true) }
+    window.addEventListener('trend-next-or-exit', handleExit)
+    return () => window.removeEventListener('trend-next-or-exit', handleExit)
+  }, [])
+
+  // Prevent scrolling up past the goodbye page (desktop only)
+  // Listen for 'goodbye-exit' event to disable the clamp when user clicks to go back
+  useEffect(() => {
+    if (!showGoodbye) return
+    const isMobile = window.matchMedia('(max-width: 768px)').matches
+    if (isMobile) return
+    let goodbyeTop: number | null = null
+    let clampEnabled = true
+
+    function clampScroll() {
+      if (!clampEnabled) return
+      const thankYou = document.getElementById('thank-you')
+      if (!thankYou) return
+      if (goodbyeTop === null) {
+        goodbyeTop = thankYou.offsetTop
+      }
+      if (window.scrollY < goodbyeTop) {
+        window.scrollTo(0, goodbyeTop)
+      }
+    }
+
+    function disableClamp() {
+      clampEnabled = false
+    }
+
+    function reEnableClamp() {
+      goodbyeTop = null
+      clampEnabled = true
+    }
+
+    window.addEventListener('scroll', clampScroll)
+    window.addEventListener('goodbye-exit', disableClamp)
+    window.addEventListener('trend-next-or-exit', reEnableClamp)
+    return () => {
+      window.removeEventListener('scroll', clampScroll)
+      window.removeEventListener('goodbye-exit', disableClamp)
+      window.removeEventListener('trend-next-or-exit', reEnableClamp)
+    }
+  }, [showGoodbye])
 
   useEffect(() => {
+    // Dev shortcut: add ?reset to the URL to clear the signup cookie and test the gate
+    if (window.location.search.includes('reset')) {
+      document.cookie = `${cookieKey}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+      document.cookie = `${cookieKey}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${window.location.pathname}`
+      document.cookie = `${cookieKey}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+      window.location.replace(window.location.pathname)
+      return
+    }
     if (getCookie(cookieKey)) {
       setHasAccess(true)
     }
   }, [cookieKey])
 
+  // Once access is granted, scroll to report and hide hero
+  useEffect(() => {
+    if (!hasAccess) return
+    // Small delay to let report content render
+    setTimeout(() => {
+      reportRef.current?.scrollIntoView({ behavior: 'smooth' })
+      // After scroll animation completes, hide the hero
+      setTimeout(() => setEntered(true), 800)
+    }, 100)
+  }, [hasAccess])
+
   function handleSeeReport() {
     if (hasAccess) {
-      // Already has access, scroll to content
-      document.getElementById('report-content')?.scrollIntoView({ behavior: 'smooth' })
+      reportRef.current?.scrollIntoView({ behavior: 'smooth' })
+      setTimeout(() => setEntered(true), 800)
     } else {
       setShowGate(true)
     }
@@ -51,18 +130,18 @@ export function ReportView({ report }: { report: Report }) {
     setCookie(cookieKey, 'true', 365)
     setShowGate(false)
     setHasAccess(true)
-    // Scroll to welcome letter after a brief delay for content to render
-    setTimeout(() => {
-      document.getElementById('report-content')?.scrollIntoView({ behavior: 'smooth' })
-    }, 100)
   }
 
   return (
     <main>
       <AnalyticsScripts report={report} />
-      <HeroSection report={report} carouselImages={report.carouselImages} onSeeReport={handleSeeReport} />
 
-      {/* Signup gate modal — only shown when triggered */}
+      {/* Hero — hidden once you've entered the report */}
+      {!entered && (
+        <HeroSection report={report} carouselImages={report.carouselImages} onSeeReport={handleSeeReport} />
+      )}
+
+      {/* Signup gate modal */}
       <AnimatePresence>
         {showGate && (
           <motion.div
@@ -76,54 +155,204 @@ export function ReportView({ report }: { report: Report }) {
         )}
       </AnimatePresence>
 
-      {/* Report content — revealed after access */}
+      {/* Custom cursor arrow */}
+      <CursorArrow active={entered} trendCount={report.trendSections?.length ?? 0} />
+
+      {/* Idle navigation arrows */}
+      <IdleArrows active={entered} />
+
+      {/* Mobile navigation */}
+      <MobileNav
+        active={entered}
+        trendTitles={(report.trendSections || [])
+          .filter((s) => s.enabled !== false)
+          .map((s) => s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim())
+        }
+      />
+
+      {/* Report content — snap scrolling + nav dots activate after entry */}
       {hasAccess && (
-        <motion.div
-          id="report-content"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
-        >
-          <StickyNav report={report} />
+        <div ref={reportRef}>
+          <ReportScroll active={entered} trendCount={report.trendSections?.length ?? 0}>
+            <IntroLetter report={report} />
 
-          {/* Welcome letter */}
-          <IntroLetter report={report} />
+            <div style={{ height: 1, background: '#3d3d3d' }} />
 
-          {/* Webby intro + Stats + Year slider */}
-          <TimelineSection report={report} />
+            <EntryStats stats={report.entryStats} eyebrow={report.byTheNumbersEyebrow} statement={report.byTheNumbersStatement} />
 
-          {/* Entry stats (entries received, countries, flags) */}
-          <EntryStats stats={report.entryStats} />
+            <div style={{ height: 1, background: '#3d3d3d' }} />
 
-          {/* IADAS section */}
-          <IadasSection report={report} />
+            <IadasSection report={report} />
 
-          {/* Trend sections */}
-          {report.trendSections?.map((section, i) => (
-            <TrendSection key={i} section={section} index={i} />
-          ))}
+            {/* Trends — horizontal container */}
+            {(() => {
+              const allTrends = (report.trendSections || []).filter((s) => s.enabled !== false)
+              return allTrends.length > 0 ? (
+                <TrendContainer
+                  trendCount={allTrends.length}
+                  trendTitles={allTrends.map((s) =>
+                    s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
+                  )}
+                >
+                  {allTrends.map((section, i) => (
+                    <TrendSection key={i} section={section} index={i} />
+                  ))}
+                </TrendContainer>
+              ) : null
+            })()}
 
-          {/* Thank You section */}
-          <ScrollReveal>
-            <section className="px-6 py-[60px]" style={{ backgroundColor: '#333' }}>
-              <div className="mx-auto max-w-3xl bg-white p-10 shadow-lg">
-                <p className="text-center text-4xl mb-2">🙏</p>
-                <h2 className="text-center text-2xl font-bold mb-6" style={{ color: '#75b9f2' }}>
-                  Thank you
-                </h2>
-                {report.ceremonyDetails && (
-                  <div className="prose max-w-none">
-                    <PortableText value={report.ceremonyDetails} />
+            {/* Thank You section — only rendered after all trends complete */}
+            {showGoodbye && (
+              <section
+                id="thank-you"
+                className="px-5 md:px-[60px]"
+                style={{
+                  minHeight: '100vh',
+                  display: 'flex',
+                  alignItems: 'center',
+                  backgroundColor: '#191919',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Animated background */}
+                <AnimatedBg variant={3} />
+
+                <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+                  {/* Eyebrow */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
+                    <span style={{
+                      fontSize: 11,
+                      letterSpacing: 4,
+                      textTransform: 'uppercase',
+                      color: '#8B70D1',
+                      fontWeight: 500,
+                    }}>
+                      {report.thankYouEyebrow || 'Thank You'}
+                    </span>
+                    <div style={{ width: 60, height: 2, background: '#8B70D1', borderRadius: 2 }} />
                   </div>
-                )}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/bye.gif" alt="Bye" className="mx-auto mt-6 w-48" />
-              </div>
-            </section>
-          </ScrollReveal>
 
-          <ReportFooter report={report} />
-        </motion.div>
+                  {/* Heading */}
+                  <h2 className="text-[28px] leading-[36px] md:text-[48px] md:leading-[58px]" style={{
+                    fontWeight: 400,
+                    color: '#fff',
+                    letterSpacing: '-2px',
+                    marginBottom: 40,
+                    maxWidth: 750,
+                  }}>
+                    {report.thankYouHeading || "You're Part of What Makes the Internet Worth Being On."}
+                  </h2>
+
+                  {/* Divider */}
+                  <div style={{ width: 80, height: 1, background: 'rgba(255,255,255,0.14)', marginBottom: 32 }} />
+
+                  {/* Body */}
+                  <div data-content style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 749, marginBottom: 40 }} className="[&_p]:mb-5">
+                    {report.thankYouBody ? (
+                      <PortableText value={report.thankYouBody} />
+                    ) : (
+                      <>
+                        <p style={{ marginBottom: 20 }}>Your participation helps us recognize the best of the Internet each year. As an entrant in the 30th Annual Webby Awards, you are part of the Webby community &mdash; and will continue to receive benefits like this report, access to research, invitations to Webby Talks, and exclusive event invites throughout the year.</p>
+                        <p>Use what you&rsquo;ve read here. The insights in this report come directly from the judges who will evaluate your next entry.</p>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Judging criteria banner */}
+                  <a
+                    href={report.thankYouLinkUrl || 'https://www.webbyawards.com/judging-criteria/'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-custom-cursor"
+                    style={{
+                      maxWidth: 700,
+                      padding: '32px 0',
+                      borderTop: '1px solid rgba(255,255,255,0.06)',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 40,
+                      textAlign: 'left',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#8B70D1', fontWeight: 500, marginBottom: 10 }}>
+                        {report.thankYouLinkEyebrow || 'Learn More'}
+                      </div>
+                      <div style={{ fontSize: 18, fontWeight: 400, color: '#fff', lineHeight: 1.3, marginBottom: 6 }}>
+                        {report.thankYouLinkTitle || "How We Judge the Internet's Best Work"}
+                      </div>
+                      <div style={{ fontSize: 14, color: '#888', lineHeight: 1.5 }}>
+                        {report.thankYouLinkDescription || 'Explore the judging criteria behind every Webby Award.'}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '50%',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B70D1" strokeWidth="1.5">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                      </svg>
+                    </div>
+                  </a>
+
+                  {/* CTA card */}
+                  <a
+                    href={report.thankYouCtaUrl || 'https://www.webbyawards.com'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-content
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 24,
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      padding: '28px 32px',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      marginTop: 40,
+                    }}
+                  >
+                    <svg
+                      width="36"
+                      height="36"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.9)"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ flexShrink: 0 }}
+                    >
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                    </svg>
+                    <div>
+                      <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
+                        {report.thankYouCtaTitle || 'Get in Touch'}
+                      </h4>
+                      <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
+                        {report.thankYouCtaDescription || 'Please feel free to contact Producer Evey Long at evey@webbyawards.com with questions or comments.'}
+                      </p>
+                    </div>
+                  </a>
+                </div>
+              </section>
+            )}
+
+            {showGoodbye && <ReportFooter report={report} />}
+          </ReportScroll>
+        </div>
       )}
     </main>
   )

@@ -1,111 +1,395 @@
 'use client'
 
 import { useRef } from 'react'
-import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion'
+import { PortableText } from '@portabletext/react'
+import { AnimatedBg } from './AnimatedBg'
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useInView,
+  type MotionValue,
+} from 'framer-motion'
 import type { HeroStat } from '@/sanity/types'
 
-const FALLBACK_STATS: HeroStat[] = [
-  { label: 'Entries Received', value: '13,000' },
-  { label: 'Countries Represented', value: '71' },
-  { label: 'US States Entering', value: '50' },
+/* ------------------------------------------------------------------ */
+/*  Defaults                                                          */
+/* ------------------------------------------------------------------ */
+
+const FALLBACK_STATS: (HeroStat & {
+  suffix?: string
+  color: string
+  description: string
+})[] = [
+  {
+    label: 'Entries Received',
+    value: '13000',
+    suffix: '+',
+    color: '#80D064',
+    description: 'From every corner of the Internet',
+  },
+  {
+    label: 'Countries',
+    value: '71',
+    color: '#82D8EB',
+    description: 'Represented',
+  },
+  {
+    label: 'US States',
+    value: '50',
+    color: '#8B70D1',
+    description: 'Represented',
+  },
+  {
+    label: 'Became Nominees',
+    value: '11',
+    suffix: '%',
+    color: '#FFB763',
+    description: 'Of all entered work',
+  },
 ]
 
-const FLAG_CODES = [
-  'do', 'at', 'hu', 'ch', 'ge', 'is', 'de', 'it',
-  'fr', 'kr', 'nl', 'us', 'gb', 'ca', 'gr', 'tr',
-  'jp', 'br', 'in', 'ph', 'za', 'pl', 'es', 'ng',
-  'qa', 'cz', 'il', 'fi', 'gy', 'lv', 'ru', 'cn',
-  'tn', 'ro', 'se', 'au',
-]
+/* ------------------------------------------------------------------ */
+/*  Animated counter                                                  */
+/* ------------------------------------------------------------------ */
 
-const FLAG_POSITIONS = FLAG_CODES.map((_, i) => ({
-  top: `${4 + ((i * 37 + 11) % 88)}%`,
-  left: `${1 + ((i * 53 + 7) % 94)}%`,
-  rotate: -20 + ((i * 11) % 40),
-  size: 60 + ((i * 7) % 30),
-  duration: 8 + ((i * 3) % 12),
-  dx: -20 + ((i * 13) % 40),
-  dy: -15 + ((i * 9) % 30),
-}))
-
-function ScrollNumber({ value, progress }: { value: string; progress: MotionValue<number> }) {
-  const match = value.match(/^([^0-9]*)([0-9,]+(?:\.\d+)?)(.*)$/)
-  const num = match ? parseFloat(match[2].replace(/,/g, '')) : 0
-  const prefix = match ? match[1] : ''
-  const suffix = match ? match[3] : ''
-
-  const count = useTransform(progress, [0.1, 0.42], [0, num])
+function CountUpNumber({
+  value,
+  suffix,
+  color,
+  progress,
+}: {
+  value: string
+  suffix?: string
+  color: string
+  progress: MotionValue<number>
+}) {
+  const num = parseFloat(value.replace(/,/g, ''))
+  const count = useTransform(progress, [0.15, 0.5], [0, num])
   const display = useTransform(count, (v) =>
-    Math.round(v).toLocaleString('en-US')
+    num >= 1000
+      ? Math.round(v).toLocaleString('en-US')
+      : Math.round(v).toString()
   )
 
   return (
-    <span className="text-5xl md:text-[80px] font-black text-black leading-none tracking-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>
-      {prefix}<motion.span>{display}</motion.span>{suffix}
+    <span
+      style={{
+        fontSize: 'clamp(36px, 8vw, 88px)',
+        fontWeight: 400,
+        fontVariantNumeric: 'tabular-nums',
+        lineHeight: 1,
+        color,
+      }}
+    >
+      <motion.span>{display}</motion.span>
+      {suffix ?? ''}
     </span>
   )
 }
 
-export function EntryStats({ stats }: { stats?: HeroStat[]; historyText?: string }) {
-  const ref = useRef(null)
+/* ------------------------------------------------------------------ */
+/*  Timeline strip                                                    */
+/* ------------------------------------------------------------------ */
+
+function TimelineStrip({
+  progress,
+}: {
+  progress: MotionValue<number>
+}) {
+  const fillWidth = useTransform(progress, [0.05, 0.45], ['0%', '100%'])
+  const tooltipLeft = useTransform(progress, [0.05, 0.45], ['0%', '100%'])
+  const yearRaw = useTransform(progress, [0.05, 0.45], [1996, 2026])
+  const yearLabel = useTransform(yearRaw, (v) => Math.round(v).toString())
+  const labelOpacity = useTransform(progress, [0.05, 0.25], [0.35, 1])
+  const tooltipOpacity = useTransform(progress, [0.05, 0.1, 0.42, 0.45], [0, 1, 1, 0])
+
+  return (
+    <div
+      style={{
+        padding: '20px 0',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        maxWidth: 1000,
+        width: '100%',
+        margin: '0 auto',
+      }}
+    >
+      {/* 1996 label */}
+      <motion.span
+        style={{
+          fontSize: 11,
+          fontWeight: 500,
+          letterSpacing: 1,
+          color: '#999',
+          opacity: labelOpacity,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        1996
+      </motion.span>
+
+      {/* Track */}
+      <div
+        style={{
+          flex: 1,
+          height: 3,
+          borderRadius: 2,
+          background: 'rgba(255,255,255,0.14)',
+          position: 'relative',
+        }}
+      >
+        {/* Fill */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            height: '100%',
+            width: fillWidth,
+            borderRadius: 2,
+            background:
+              'linear-gradient(to right, #80D064, #559DDF, #FF7F63, #FF67CB)',
+          }}
+        />
+
+        {/* Tooltip */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: -28,
+            left: tooltipLeft,
+            transform: 'translateX(-50%)',
+            pointerEvents: 'none',
+            opacity: tooltipOpacity,
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              color: '#000',
+              fontSize: 10,
+              fontWeight: 600,
+              padding: '3px 8px',
+              borderRadius: 4,
+              whiteSpace: 'nowrap',
+              position: 'relative',
+            }}
+          >
+            <motion.span>{yearLabel}</motion.span>
+            {/* Triangle pointer */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: -4,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 0,
+                height: 0,
+                borderLeft: '4px solid transparent',
+                borderRight: '4px solid transparent',
+                borderTop: '4px solid #fff',
+              }}
+            />
+          </div>
+        </motion.div>
+      </div>
+
+      {/* 2026 label */}
+      <motion.span
+        style={{
+          fontSize: 11,
+          fontWeight: 500,
+          letterSpacing: 1,
+          color: '#999',
+          opacity: labelOpacity,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        2026
+      </motion.span>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Stat block                                                        */
+/* ------------------------------------------------------------------ */
+
+function StatBlock({
+  stat,
+  index,
+  progress,
+}: {
+  stat: (typeof FALLBACK_STATS)[number]
+  index: number
+  progress: MotionValue<number>
+}) {
+  const blockRef = useRef(null)
+  const inView = useInView(blockRef, { once: true, margin: '-60px' })
+
+  return (
+    <motion.div
+      ref={blockRef}
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay: index * 0.12, ease: 'easeOut' }}
+      className="md:flex-1 md:border-l md:border-white/[0.14] first:md:border-l-0 md:pl-6 md:pr-6 first:md:pl-0 py-4 md:py-0"
+      style={{
+        borderBottom: index < 2 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+      }}
+    >
+      <CountUpNumber
+        value={stat.value}
+        suffix={stat.suffix}
+        color={stat.color}
+        progress={progress}
+      />
+      <div
+        style={{
+          marginTop: 12,
+          fontSize: 12,
+          fontWeight: 500,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          color: '#999',
+        }}
+      >
+        {stat.label}
+      </div>
+      <div
+        style={{
+          marginTop: 4,
+          fontSize: 13,
+          color: '#999',
+        }}
+      >
+        {stat.description}
+      </div>
+    </motion.div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main component                                                    */
+/* ------------------------------------------------------------------ */
+
+export function EntryStats({ stats, eyebrow, statement }: { stats?: HeroStat[]; eyebrow?: string; statement?: any[] }) {
+  const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'end start'],
   })
-  const data = stats && stats.length > 0 ? stats : FALLBACK_STATS
+
+  // Merge Sanity data with defaults
+  const data: (typeof FALLBACK_STATS) = stats && stats.length > 0
+    ? stats.map((s, i) => ({
+        ...FALLBACK_STATS[i < FALLBACK_STATS.length ? i : FALLBACK_STATS.length - 1],
+        label: s.label,
+        value: s.value,
+      }))
+    : FALLBACK_STATS
+
+  // Fade-up for the statement
+  const statementOpacity = useTransform(scrollYProgress, [0.05, 0.25], [0, 1])
+  const statementY = useTransform(scrollYProgress, [0.05, 0.25], [24, 0])
 
   return (
     <section
+      id="entry-stats"
+      data-snap
       ref={ref}
-      className="relative bg-[#ddd] overflow-hidden flex items-center justify-center"
-      style={{ height: '100vh' }}
+      className="px-5 md:px-[60px] pt-24 md:pt-0"
+      style={{
+        background: '#191919',
+        minHeight: '100vh',
+        overflow: 'hidden',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
     >
-      {/* Animated scattered flag images */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden>
-        {FLAG_CODES.map((code, i) => (
-          <motion.img
-            key={code}
-            src={`https://flagcdn.com/w80/${code}.png`}
-            alt=""
-            className="absolute rounded-sm shadow-sm"
-            style={{
-              top: FLAG_POSITIONS[i].top,
-              left: FLAG_POSITIONS[i].left,
-              width: FLAG_POSITIONS[i].size,
-              opacity: 0.9,
-            }}
-            animate={{
-              x: [0, FLAG_POSITIONS[i].dx, 0],
-              y: [0, FLAG_POSITIONS[i].dy, 0],
-              rotate: [FLAG_POSITIONS[i].rotate, FLAG_POSITIONS[i].rotate + 5, FLAG_POSITIONS[i].rotate],
-            }}
-            transition={{
-              duration: FLAG_POSITIONS[i].duration,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        ))}
-        {/* Decorative white squiggle ribbons */}
-        <svg className="absolute top-[15%] left-[3%] opacity-80" width="40" height="200" viewBox="0 0 40 200" fill="none">
-          <path d="M20 0 Q35 25 20 50 Q5 75 20 100 Q35 125 20 150 Q5 175 20 200" stroke="white" strokeWidth="6" fill="none" />
-        </svg>
-        <svg className="absolute bottom-[10%] left-[25%] opacity-80" width="40" height="180" viewBox="0 0 40 180" fill="none">
-          <path d="M20 0 Q35 22 20 45 Q5 68 20 90 Q35 112 20 135 Q5 158 20 180" stroke="white" strokeWidth="6" fill="none" />
-        </svg>
-        <svg className="absolute top-[30%] right-[8%] opacity-80" width="40" height="200" viewBox="0 0 40 200" fill="none">
-          <path d="M20 0 Q35 25 20 50 Q5 75 20 100 Q35 125 20 150 Q5 175 20 200" stroke="white" strokeWidth="6" fill="none" />
-        </svg>
-      </div>
 
-      {/* Center card */}
-      <div className="relative mx-auto bg-white border-[10px] border-black py-12 px-10 md:px-14 text-center w-[420px] max-w-[90vw]">
-        {data.map((stat, i) => (
-          <div key={i} className={i > 0 ? 'mt-6' : ''}>
-            {i > 0 && <div className="squiggle-divider mx-auto mb-6" />}
-            <h3 className="text-base font-bold text-black mb-1">{stat.label}</h3>
-            <ScrollNumber value={stat.value} progress={scrollYProgress} />
+      {/* 1. Scroll-driven timeline strip */}
+      <TimelineStrip progress={scrollYProgress} />
+
+      {/* 2. Big typography statement */}
+      <motion.div
+        data-content
+        style={{
+          padding: '80px 0 20px',
+          maxWidth: 1000,
+          width: '100%',
+          margin: '0 auto',
+          opacity: statementOpacity,
+          y: statementY,
+        }}
+      >
+        <p
+          style={{
+            fontSize: 11,
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            color: '#80D064',
+            fontWeight: 500,
+            marginBottom: 24,
+          }}
+        >
+          {eyebrow || 'Webby 30: By the Numbers'}
+        </p>
+        {statement && statement.length > 0 ? (
+          <div
+            style={{
+              fontSize: 'clamp(32px, 4vw, 52px)',
+              fontWeight: 400,
+              color: '#fff',
+              lineHeight: 1.2,
+              letterSpacing: -1,
+            }}
+            className="[&_strong]:text-[#80D064] [&_strong]:font-normal [&_em]:text-[#82D8EB] [&_em]:not-italic [&_em]:font-normal"
+          >
+            <PortableText value={statement} />
           </div>
+        ) : (
+          <p
+            style={{
+              fontSize: 'clamp(32px, 4vw, 52px)',
+              fontWeight: 400,
+              color: '#fff',
+              lineHeight: 1.2,
+              letterSpacing: -1,
+            }}
+          >
+            This year, <span style={{ color: '#80D064' }}>13,000+</span> projects
+            were entered from <span style={{ color: '#82D8EB' }}>71 countries</span> and
+            all <span style={{ color: '#8B70D1' }}>50 US states</span>, making this the
+            most globally represented season in our 30-year history. Only{' '}
+            <span style={{ color: '#FFB763' }}>11%</span> were selected as Nominees.
+          </p>
+        )}
+      </motion.div>
+
+      {/* 3. Four stat blocks */}
+      <div
+        data-content
+        className="grid grid-cols-2 md:flex"
+        style={{
+          maxWidth: 1000,
+          width: '100%',
+          margin: '0 auto',
+          padding: '60px 0',
+          gap: 0,
+        }}
+      >
+        {data.map((stat, i) => (
+          <StatBlock
+            key={i}
+            stat={stat}
+            index={i}
+            progress={scrollYProgress}
+          />
         ))}
       </div>
     </section>

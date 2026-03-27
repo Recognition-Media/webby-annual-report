@@ -10,8 +10,10 @@ export default defineType({
     { name: 'intro', title: 'Intro & Hero' },
     { name: 'letter', title: 'Welcome Letter' },
     { name: 'carousel', title: 'Hero Carousel' },
-    { name: 'stats', title: 'Stats & Timeline' },
+    { name: 'byTheNumbers', title: 'By the Numbers' },
+    { name: 'howWeJudge', title: 'How We Judge' },
     { name: 'trends', title: 'Trends' },
+    { name: 'thankYou', title: 'Thank You' },
     { name: 'signup', title: 'Signup Form' },
     { name: 'analytics', title: 'Analytics' },
     { name: 'footer', title: 'Footer' },
@@ -46,16 +48,40 @@ export default defineType({
     // Carousel
     { name: 'carouselImages', title: 'Image Carousel', type: 'array', of: [{ type: 'carouselImage' }], group: 'carousel' },
 
-    // Stats & Timeline
-    { name: 'globalStats', title: 'Global Stats', type: 'array', of: [{ type: 'heroStat' }], group: 'stats', description: '4-quadrant stats: population, internet users, etc.' },
-    { name: 'entryStats', title: 'Entry Stats', type: 'array', of: [{ type: 'heroStat' }], group: 'stats', description: 'Entries received, countries, states' },
-    { name: 'webbyHistory', title: 'Webby History Text', type: 'text', rows: 5, group: 'stats', description: 'Shown in the blue year-info panel' },
-    { name: 'iadasLogo', title: 'IADAS Logo', type: 'image', group: 'stats' },
-    { name: 'iadasDescription', title: 'IADAS Description', type: 'text', rows: 8, group: 'stats' },
-    { name: 'iadasStats', title: 'IADAS Stats', type: 'array', of: [{ type: 'heroStat' }], group: 'stats' },
+    // By the Numbers
+    { name: 'byTheNumbersEyebrow', title: 'Section Eyebrow', type: 'string', group: 'byTheNumbers', description: 'e.g. "Webby 30: By the Numbers"' },
+    { name: 'byTheNumbersStatement', title: 'Statement (Rich Text)', type: 'array', of: [{ type: 'block' }], group: 'byTheNumbers', description: 'The big headline statement. Use bold for colored highlights.' },
+    { name: 'entryStats', title: 'Entry Stats', type: 'array', of: [{ type: 'heroStat' }], group: 'byTheNumbers', description: 'The 4 stat blocks (entries, countries, states, nominees)' },
+    { name: 'globalStats', title: 'Global Stats (legacy)', type: 'array', of: [{ type: 'heroStat' }], group: 'byTheNumbers', hidden: () => true },
+    { name: 'webbyHistory', title: 'Webby History Text (legacy)', type: 'text', rows: 5, group: 'byTheNumbers', hidden: () => true },
+
+    // How We Judge
+    { name: 'howWeJudgeHeading', title: 'Section Heading', type: 'string', group: 'howWeJudge', description: 'e.g. "All work is reviewed by the International Academy of Digital Arts & Sciences."' },
+    { name: 'iadasDescription', title: 'IADAS Description', type: 'text', rows: 5, group: 'howWeJudge' },
+    { name: 'iadasStats', title: 'IADAS Stats', type: 'array', of: [{ type: 'heroStat' }], group: 'howWeJudge', description: 'e.g. 3,300+ Members, 77 Countries, 1998 Founded' },
+    { name: 'iadasLogo', title: 'IADAS Logo', type: 'image', group: 'howWeJudge' },
+    { name: 'iadasCardTitle', title: 'IADAS Card Title', type: 'string', group: 'howWeJudge', description: 'e.g. "International Academy of Digital Arts & Sciences"' },
+    { name: 'iadasCardDescription', title: 'IADAS Card Description', type: 'string', group: 'howWeJudge' },
+    { name: 'iadasCardUrl', title: 'IADAS Card URL', type: 'url', group: 'howWeJudge' },
+    { name: 'auditorLogo', title: 'Auditor Logo (e.g. KPMG)', type: 'image', group: 'howWeJudge' },
+    { name: 'auditorCardTitle', title: 'Auditor Card Title', type: 'string', group: 'howWeJudge', description: 'e.g. "Official Tabulation Consultant"' },
+    { name: 'auditorCardDescription', title: 'Auditor Card Description', type: 'string', group: 'howWeJudge' },
+    { name: 'auditorCardUrl', title: 'Auditor Card URL', type: 'url', group: 'howWeJudge' },
 
     // Trends
     { name: 'trendSections', title: 'Trend Sections', type: 'array', of: [{ type: 'trendSection' }], group: 'trends' },
+
+    // Thank You
+    { name: 'thankYouEyebrow', title: 'Eyebrow', type: 'string', group: 'thankYou', description: 'e.g. "Thank You"' },
+    { name: 'thankYouHeading', title: 'Heading', type: 'string', group: 'thankYou' },
+    { name: 'thankYouBody', title: 'Body', type: 'array', of: [{ type: 'block' }], group: 'thankYou' },
+    { name: 'thankYouLinkEyebrow', title: 'Link Card Eyebrow', type: 'string', group: 'thankYou', description: 'e.g. "Learn More"' },
+    { name: 'thankYouLinkTitle', title: 'Link Card Title', type: 'string', group: 'thankYou' },
+    { name: 'thankYouLinkDescription', title: 'Link Card Description', type: 'string', group: 'thankYou' },
+    { name: 'thankYouLinkUrl', title: 'Link Card URL', type: 'url', group: 'thankYou' },
+    { name: 'thankYouCtaTitle', title: 'CTA Card Title', type: 'string', group: 'thankYou', description: 'e.g. "Get in Touch"' },
+    { name: 'thankYouCtaDescription', title: 'CTA Card Description', type: 'string', group: 'thankYou' },
+    { name: 'thankYouCtaUrl', title: 'CTA Card URL', type: 'url', group: 'thankYou' },
 
     // Signup Form
     { name: 'formFields', title: 'Signup Form Fields', type: 'array', of: [{ type: 'formField' }], group: 'signup' },
