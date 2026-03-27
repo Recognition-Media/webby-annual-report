@@ -97,11 +97,21 @@ export interface Report {
   headerImage?: SanityImage
   heroStats?: HeroStat[]
   globalStats?: HeroStat[]
+  byTheNumbersEyebrow?: string
+  byTheNumbersStatement?: import('@portabletext/types').PortableTextBlock[]
   entryStats?: HeroStat[]
   webbyHistory?: string
+  howWeJudgeHeading?: string
   iadasDescription?: string
   iadasStats?: HeroStat[]
   iadasLogo?: SanityImage
+  iadasCardTitle?: string
+  iadasCardDescription?: string
+  iadasCardUrl?: string
+  auditorLogo?: SanityImage
+  auditorCardTitle?: string
+  auditorCardDescription?: string
+  auditorCardUrl?: string
   letterBody?: PortableTextBlock[]
   letterAuthors?: LetterAuthor[]
   carouselImages?: CarouselImage[]

@@ -178,7 +178,7 @@ export function ReportView({ report }: { report: Report }) {
 
             <div style={{ height: 1, background: '#3d3d3d' }} />
 
-            <EntryStats stats={report.entryStats} />
+            <EntryStats stats={report.entryStats} eyebrow={report.byTheNumbersEyebrow} statement={report.byTheNumbersStatement} />
 
             <div style={{ height: 1, background: '#3d3d3d' }} />
 

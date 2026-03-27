@@ -58,6 +58,7 @@ export function IadasSection({ report }: { report: Report }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, amount: 0.3 })
 
+  const heading = report.howWeJudgeHeading || 'All work is reviewed by the International Academy of Digital Arts & Sciences.'
   const description = report.iadasDescription || FALLBACK_DESCRIPTION
   const rawStats = report.iadasStats && report.iadasStats.length > 0 ? report.iadasStats : FALLBACK_STATS
   const stats = rawStats.map((s, i) => ({
@@ -109,7 +110,7 @@ export function IadasSection({ report }: { report: Report }) {
             marginBottom: 24,
           }}
         >
-          All work is reviewed by the International Academy of Digital Arts &amp; Sciences.
+          {heading}
         </h2>
 
         {/* Description */}
@@ -159,7 +160,7 @@ export function IadasSection({ report }: { report: Report }) {
         <div className="flex flex-col gap-4 md:flex-row md:gap-6" style={{ marginTop: 26 }}>
           {/* IADAS card */}
           <a
-            href="https://www.iadas.net"
+            href={report.iadasCardUrl || 'https://www.iadas.net'}
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -181,17 +182,17 @@ export function IadasSection({ report }: { report: Report }) {
             />
             <div>
               <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
-                International Academy of Digital Arts &amp; Sciences
+                {report.iadasCardTitle || 'International Academy of Digital Arts & Sciences'}
               </h4>
               <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
-                The judging body responsible for selecting all Webby Award Winners and Nominees.
+                {report.iadasCardDescription || 'The judging body responsible for selecting all Webby Award Winners and Nominees.'}
               </p>
             </div>
           </a>
 
-          {/* KPMG card */}
+          {/* Auditor card */}
           <a
-            href="https://www.kpmg.com"
+            href={report.auditorCardUrl || 'https://www.kpmg.com'}
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -208,15 +209,15 @@ export function IadasSection({ report }: { report: Report }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`${basePath}/kpmg-logo.svg`}
-              alt="KPMG"
+              alt="Auditor"
               style={{ width: 72, height: 'auto', opacity: 0.9, flexShrink: 0 }}
             />
             <div>
               <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
-                Official Tabulation Consultant
+                {report.auditorCardTitle || 'Official Tabulation Consultant'}
               </h4>
               <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
-                KPMG ensures the accuracy and integrity of the Webby Awards voting process.
+                {report.auditorCardDescription || 'KPMG ensures the accuracy and integrity of the Webby Awards voting process.'}
               </p>
             </div>
           </a>

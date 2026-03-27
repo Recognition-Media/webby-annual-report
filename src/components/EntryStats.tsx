@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import { PortableText } from '@portabletext/react'
 import { AnimatedBg } from './AnimatedBg'
 import {
   motion,
@@ -274,7 +275,7 @@ function StatBlock({
 /*  Main component                                                    */
 /* ------------------------------------------------------------------ */
 
-export function EntryStats({ stats }: { stats?: HeroStat[] }) {
+export function EntryStats({ stats, eyebrow, statement }: { stats?: HeroStat[]; eyebrow?: string; statement?: any[] }) {
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -336,23 +337,38 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
             marginBottom: 24,
           }}
         >
-          Webby 30: By the Numbers Letter
+          {eyebrow || 'Webby 30: By the Numbers'}
         </p>
-        <p
-          style={{
-            fontSize: 'clamp(32px, 4vw, 52px)',
-            fontWeight: 400,
-            color: '#fff',
-            lineHeight: 1.2,
-            letterSpacing: -1,
-          }}
-        >
-          This year, <span style={{ color: '#80D064' }}>13,000+</span> projects
-          were entered from <span style={{ color: '#82D8EB' }}>71 countries</span> and
-          all <span style={{ color: '#8B70D1' }}>50 US states</span>, making this the
-          most globally represented season in our 30-year history. Only{' '}
-          <span style={{ color: '#FFB763' }}>11%</span> were selected as Nominees.
-        </p>
+        {statement && statement.length > 0 ? (
+          <div
+            style={{
+              fontSize: 'clamp(32px, 4vw, 52px)',
+              fontWeight: 400,
+              color: '#fff',
+              lineHeight: 1.2,
+              letterSpacing: -1,
+            }}
+            className="[&_strong]:text-[#80D064] [&_strong]:font-normal [&_em]:text-[#82D8EB] [&_em]:not-italic [&_em]:font-normal"
+          >
+            <PortableText value={statement} />
+          </div>
+        ) : (
+          <p
+            style={{
+              fontSize: 'clamp(32px, 4vw, 52px)',
+              fontWeight: 400,
+              color: '#fff',
+              lineHeight: 1.2,
+              letterSpacing: -1,
+            }}
+          >
+            This year, <span style={{ color: '#80D064' }}>13,000+</span> projects
+            were entered from <span style={{ color: '#82D8EB' }}>71 countries</span> and
+            all <span style={{ color: '#8B70D1' }}>50 US states</span>, making this the
+            most globally represented season in our 30-year history. Only{' '}
+            <span style={{ color: '#FFB763' }}>11%</span> were selected as Nominees.
+          </p>
+        )}
       </motion.div>
 
       {/* 3. Four stat blocks */}
