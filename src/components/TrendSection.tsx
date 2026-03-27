@@ -8,7 +8,21 @@ import type { TrendSection as TrendSectionType, DataStat } from '@/sanity/types'
 import { AnimatedBg } from './AnimatedBg'
 import { urlFor } from '@/sanity/image'
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ''
+// Use Next.js basePath from config — works at build time for static export
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+
+// Runtime basePath hook for client-side rendering
+function useBasePath() {
+  const [bp, setBp] = useState(basePath)
+  useEffect(() => {
+    // Detect from current page URL if the env var was empty at build time
+    if (!bp && typeof window !== 'undefined') {
+      const match = window.location.pathname.match(/^(\/preview\/[^/]+)/)
+      if (match) setBp(match[1])
+    }
+  }, [bp])
+  return bp
+}
 
 export const TREND_COLORS = [
   '#8B70D1', // purple
@@ -292,6 +306,7 @@ function useIsMobile() {
 
 export function TrendSection({ section, index }: { section: TrendSectionType; index: number }) {
   const isMobile = useIsMobile()
+  const resolvedBasePath = useBasePath()
   const trendColor = TREND_COLORS[index % TREND_COLORS.length]
 
   // Quotes — from CMS, respecting toggle
@@ -310,7 +325,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   const videoConfig = section.showVideo && section.videoUrl
     ? {
         type: (section.videoType || 'youtube') as 'local' | 'youtube',
-        src: section.videoType === 'local' ? `${basePath}${section.videoUrl}` : section.videoUrl,
+        src: section.videoType === 'local' ? `${resolvedBasePath}${section.videoUrl}` : section.videoUrl,
       }
     : undefined
   const hasVideo = !!videoConfig
@@ -555,7 +570,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
                     {quote.headshotUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
-                        src={`${basePath}${quote.headshotUrl}`}
+                        src={`${resolvedBasePath}${quote.headshotUrl}`}
                         alt={quote.name}
                         style={{
                           width: 36,
@@ -946,7 +961,9 @@ function PhaseQuote({
   const finalScale = videoActive && isLatest ? 0.8 : layout.scale
 
   const isNewest = position === 0
-  const resolvedHeadshot = quote.headshotUrl ? `${basePath}${quote.headshotUrl}` : undefined
+  // basePath is passed via the component tree; fall back to module-level
+  const bp = typeof window !== 'undefined' ? (window.location.pathname.match(/^(\/preview\/[^/]+)/)?.[1] || basePath) : basePath
+  const resolvedHeadshot = quote.headshotUrl ? `${bp}${quote.headshotUrl}` : undefined
   const hasImage = !!resolvedHeadshot
 
   // Attribution line (shared)
