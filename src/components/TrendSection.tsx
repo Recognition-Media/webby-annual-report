@@ -1021,7 +1021,7 @@ function PhaseQuote({
       {/* Large portrait — centered vertically against the whole quote block */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={quote.headshotUrl}
+        src={resolvedHeadshot}
         alt={quote.name}
         style={{
           width: 125,
