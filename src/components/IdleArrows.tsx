@@ -59,6 +59,7 @@ function Arrow({ rotation, onClick, position }: {
 export function IdleArrows({ active }: { active: boolean }) {
   const [idle, setIdle] = useState(false)
   const [context, setContext] = useState<'vertical' | 'trend' | 'none'>('none')
+  const [, forceUpdate] = useState(0)
   const timerRef = useRef<any>(null)
 
   // Detect context: are we in trends or vertical sections
@@ -76,12 +77,14 @@ export function IdleArrows({ active }: { active: boolean }) {
       } else {
         setContext('vertical')
       }
+      // Force re-render so arrows update when trend/phase changes
+      forceUpdate((n) => n + 1)
     }
 
     checkContext()
     window.addEventListener('scroll', checkContext)
     const observer = new MutationObserver(checkContext)
-    observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['data-trend-active'] })
+    observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['data-trend-active', 'data-trend-phase', 'data-active-trend'] })
 
     return () => {
       window.removeEventListener('scroll', checkContext)
@@ -153,6 +156,14 @@ export function IdleArrows({ active }: { active: boolean }) {
     }
   }
 
+  function isOnThankYouSlide() {
+    const container = document.getElementById('trends')
+    if (!container) return false
+    const activeTrend = parseInt(container.getAttribute('data-active-trend') || '0', 10)
+    const trendCount = parseInt(container.getAttribute('data-trend-count') || '0', 10)
+    return activeTrend === trendCount - 1 && !document.querySelector('[data-trend-active]')
+  }
+
   function clickRight() {
     const trendActive = document.querySelector('[data-trend-active]')
     if (trendActive) {
@@ -166,6 +177,11 @@ export function IdleArrows({ active }: { active: boolean }) {
   }
 
   function clickLeft() {
+    // On Thank You slide — go back to last trend
+    if (isOnThankYouSlide()) {
+      window.dispatchEvent(new Event('trend-prev'))
+      return
+    }
     const trendActive = document.querySelector('[data-trend-active]')
     if (trendActive) {
       const trendPhase = trendActive.getAttribute('data-trend-phase')
@@ -211,9 +227,10 @@ export function IdleArrows({ active }: { active: boolean }) {
       {context === 'trend' && (() => {
         const trendEl = document.querySelector('[data-trend-active]')
         const isFirstTrendStart = trendEl?.getAttribute('data-trend-index') === '0' && trendEl?.getAttribute('data-trend-phase') === '0'
+        const onThankYou = isOnThankYouSlide()
         return (
           <>
-            {!isFirstTrendStart && (
+            {(!isFirstTrendStart || onThankYou) && (
               <Arrow
                 key="left"
                 rotation={180}
@@ -221,12 +238,14 @@ export function IdleArrows({ active }: { active: boolean }) {
                 position={{ top: 'calc(50% - 35px)', left: '15px' }}
               />
             )}
-            <Arrow
-              key="right"
-              rotation={0}
-              onClick={clickRight}
-              position={{ top: 'calc(50% - 35px)', right: '15px' }}
-            />
+            {!onThankYou && (
+              <Arrow
+                key="right"
+                rotation={0}
+                onClick={clickRight}
+                position={{ top: 'calc(50% - 35px)', right: '15px' }}
+              />
+            )}
           </>
         )
       })()}

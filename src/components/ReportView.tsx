@@ -286,7 +286,6 @@ export function ReportView({ report }: { report: Report }) {
               ) : null
             })()}
 
-            <ReportFooter report={report} />
           </ReportScroll>
         </div>
       )}

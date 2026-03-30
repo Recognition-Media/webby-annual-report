@@ -369,19 +369,10 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
 
     function handleWheel(e: WheelEvent) {
       if (Math.abs(e.deltaY) < 5) return
-      // Allow scroll up on phase 0 to go back
-      if (e.deltaY < 0 && phase === 0) {
+      // Only allow scroll up on first trend, first phase — to go back to vertical sections
+      if (e.deltaY < 0 && phase === 0 && index === 0) {
         document.body.style.overflow = ''
-        if (index === 0) {
-          // First trend — scroll back to judging page
-          document.documentElement.classList.add('snap-active')
-        } else {
-          // Other trends — scroll back to previous trend
-          const prevTrend = document.getElementById(`trend-${index - 1}`)
-          if (prevTrend) {
-            prevTrend.scrollIntoView({ behavior: 'smooth' })
-          }
-        }
+        document.documentElement.classList.add('snap-active')
       }
     }
 
