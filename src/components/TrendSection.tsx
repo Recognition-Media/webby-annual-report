@@ -286,7 +286,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   const hasData = !!dataStats && dataStats.length > 0
 
   // Phases: 0 = title+copy, (1 = data if hasData), then quotes, then video if trendVideo is set
-  const hasVideo = !!section.trendVideo
+  const hasVideo = section.showVideo !== false && !!section.trendVideo
   const totalPhases = 1 + (hasData ? 1 : 0) + quotes.length + (hasVideo ? 1 : 0)
   const dataPhase = hasData ? 1 : -1
   const quoteStartPhase = 1 + (hasData ? 1 : 0)

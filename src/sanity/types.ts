@@ -64,6 +64,7 @@ export interface TrendSection {
   dataStats?: DataStat[]
   expertQuotes?: ExpertQuote[]
   sectionImages?: (SanityImage & { alt?: string })[]
+  showVideo?: boolean
   trendVideo?: TrendVideo
 }
 

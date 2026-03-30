@@ -26,10 +26,8 @@ export default defineType({
     { name: 'expertQuotes', title: 'Expert Quotes', type: 'array', of: [{ type: 'expertQuote' }], hidden: ({ parent }) => parent?.showQuotes === false },
 
     // Video (CMS-managed)
-    { name: 'trendVideo', title: 'Video', type: 'trendVideo' },
-
-    // Legacy video fields (hidden, data exists in dataset)
-    { name: 'showVideo', title: 'Show Video (legacy)', type: 'boolean', hidden: () => true },
+    { name: 'showVideo', title: 'Show Video Module', type: 'boolean', initialValue: false },
+    { name: 'trendVideo', title: 'Video', type: 'trendVideo', hidden: ({ parent }) => parent?.showVideo === false },
     { name: 'videoType', title: 'Video Type (legacy)', type: 'string', hidden: () => true },
     { name: 'videoUrl', title: 'Video URL (legacy)', type: 'string', hidden: () => true },
 

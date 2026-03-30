@@ -29,6 +29,7 @@ export const reportBySlugQuery = groq`
       dataStats,
       expertQuotes,
       sectionImages,
+      showVideo,
       trendVideo {
         videoFile { "url": asset->url },
         aspectRatio,
