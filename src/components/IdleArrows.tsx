@@ -123,7 +123,17 @@ export function IdleArrows({ active }: { active: boolean }) {
 
   // Hide entirely on touch/mobile — MobileNav handles navigation
   // On desktop, only show when idle
-  if (!active || !idle || isTouch) return null
+  // Hide on mobile — MobileNav handles navigation
+  const [isMobileScreen, setIsMobileScreen] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    setIsMobileScreen(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobileScreen(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  if (!active || !idle || isTouch || isMobileScreen) return null
 
   function clickDown() {
     // Simulate clicking the right side of screen (forward)

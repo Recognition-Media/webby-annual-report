@@ -21,7 +21,7 @@ function AnimatedNumber({ value, color }: { value: number; color: string }) {
   }, [isInView, value, count])
 
   return (
-    <span ref={ref} style={{ color, fontSize: 'clamp(56px, 8vw, 88px)', fontWeight: 400, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+    <span ref={ref} className="text-[40px] md:text-[clamp(56px,8vw,88px)]" style={{ color, fontWeight: 400, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
       <motion.span>{display}</motion.span>%
     </span>
   )
@@ -44,15 +44,16 @@ export function TrendIntro({
 }) {
   return (
     <div
+      id="trend-intro"
+      className="px-5 md:px-[60px] py-12 md:py-0"
       style={{
         width: '100vw',
-        height: '100vh',
+        minHeight: '100vh',
         flexShrink: 0,
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
         overflow: 'hidden',
-        padding: '0 60px',
       }}
     >
       <AnimatedBg variant={0} />
@@ -60,7 +61,7 @@ export function TrendIntro({
       <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         {/* Eyebrow */}
         {eyebrow && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
+          <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-10">
             <span style={{
               fontSize: 11,
               letterSpacing: 4,
@@ -76,13 +77,10 @@ export function TrendIntro({
 
         {/* Headline */}
         {headline && (
-          <h2 style={{
-            fontSize: 48,
+          <h2 className="text-[28px] leading-[36px] md:text-[48px] md:leading-[58px] mb-6 md:mb-8" style={{
             fontWeight: 400,
             color: '#fff',
-            lineHeight: '58px',
             letterSpacing: '-2px',
-            marginBottom: 32,
             maxWidth: 750,
           }}>
             {headline}
@@ -93,12 +91,11 @@ export function TrendIntro({
         {body && (
           <div
             data-content
+            className="text-sm md:text-base mb-6 md:mb-8"
             style={{
-              fontSize: 16,
-              lineHeight: '28px',
+              lineHeight: '26px',
               color: '#D4D4D4',
               maxWidth: 700,
-              marginBottom: 32,
             }}
           >
             <div className="report-links [&_p]:mb-4">
@@ -109,12 +106,12 @@ export function TrendIntro({
 
         {/* Stats */}
         {stats && stats.length > 0 && (
-          <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', marginBottom: 48 }}>
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 mb-8 md:mb-12">
             {stats.map((stat, i) => {
               const color = INTRO_COLORS[i % INTRO_COLORS.length]
               return (
-              <div key={i} style={{ flex: '1 1 180px', maxWidth: 280 }}>
-                <div style={{ marginBottom: 12 }}>
+              <div key={i} className="flex-1 md:max-w-[280px]">
+                <div className="mb-2 md:mb-3">
                   <AnimatedNumber value={stat.value} color={color} />
                 </div>
                 <motion.div
@@ -125,14 +122,15 @@ export function TrendIntro({
                     height: 2,
                     background: `${color}40`,
                     borderRadius: 2,
-                    marginBottom: 12,
                   }}
+                  className="mb-2 md:mb-3"
                 />
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.5 + i * 0.15 }}
-                  style={{ fontSize: 14, color: '#aaa', lineHeight: 1.5 }}
+                  className="text-xs md:text-sm"
+                  style={{ color: '#aaa', lineHeight: 1.5 }}
                 >
                   {stat.label}
                 </motion.div>
