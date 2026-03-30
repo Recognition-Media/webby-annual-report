@@ -63,7 +63,7 @@ import trendVideo from './objects/trendVideo'
 
 ```ts
 export interface TrendVideo {
-  videoFile: { asset: { url: string } }
+  videoFile: { url: string }
   aspectRatio: '9:16' | '16:9' | '1:1'
   name: string
   title?: string
@@ -108,7 +108,7 @@ trendSections[] {
 - Remove `const hasVideo = index === 0`
 - Replace with `const hasVideo = !!section.trendVideo`
 - Remove hardcoded `/trend-video-test.mp4` path
-- Use `section.trendVideo.videoFile.url` for the video source
+- Use `section.trendVideo.videoFile.url` for the video source (GROQ dereferences the asset, so `videoFile.url` is the resolved URL)
 
 **Update `PhaseVideo` props:**
 
