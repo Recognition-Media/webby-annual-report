@@ -285,7 +285,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   const dataSubheadline = mockData?.subheadline
   const hasData = !!dataStats && dataStats.length > 0
 
-  // Phases: 0 = title+copy, (1 = data if hasData), then quotes, then video
+  // Phases: 0 = title+copy, (1 = data if hasData), then quotes, then video if trendVideo is set
   const hasVideo = !!section.trendVideo
   const totalPhases = 1 + (hasData ? 1 : 0) + quotes.length + (hasVideo ? 1 : 0)
   const dataPhase = hasData ? 1 : -1
