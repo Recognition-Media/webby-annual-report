@@ -31,6 +31,11 @@ export const reportBySlugQuery = groq`
     letterBody,
     letterAuthors,
     carouselImages,
+    trendIntroEyebrow,
+    trendIntroHeadline,
+    trendIntroBody,
+    trendIntroStats,
+    trendIntroCta,
     trendSections[] {
       enabled,
       trendTitle,

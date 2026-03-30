@@ -17,6 +17,7 @@ import { ScrollReveal } from './ScrollReveal'
 import { ReportScroll } from './SmoothScroll'
 import { AnimatedBg } from './AnimatedBg'
 import { IdleArrows } from './IdleArrows'
+import { TrendIntro } from './TrendIntro'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -124,18 +125,29 @@ export function ReportView({ report }: { report: Report }) {
               const allTrends = Array.from({ length: totalTrends }, (_, i) =>
                 cmsTrends[i] || { trendTitle: `Trend ${i + 1}` }
               )
-              const slideCount = allTrends.length + 1 // +1 for Thank You
+              const slideCount = allTrends.length + 2 // +1 for Trend Intro, +1 for Thank You
               const slideTitles = [
+                report.trendIntroEyebrow || 'About The Trends',
                 ...allTrends.map((s, i) =>
                   (TREND_OVERRIDES[i]?.title || s.trendTitle).replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
                 ),
                 'Thank You',
               ]
-              return slideCount > 1 ? (
+              return slideCount > 2 ? (
                 <TrendContainer
                   trendCount={slideCount}
                   trendTitles={slideTitles}
                 >
+                  {/* Trend Intro — gateway slide */}
+                  <TrendIntro
+                    eyebrow={report.trendIntroEyebrow}
+                    headline={report.trendIntroHeadline}
+                    body={report.trendIntroBody}
+                    stats={report.trendIntroStats}
+                    ctaText={report.trendIntroCta}
+                    onCta={() => window.dispatchEvent(new CustomEvent('trend-next-or-exit'))}
+                  />
+
                   {allTrends.map((section, i) => (
                     <TrendSection key={i} section={section} index={i} />
                   ))}

@@ -156,15 +156,22 @@ export function IdleArrows({ active }: { active: boolean }) {
     }
   }
 
-  function isOnThankYouSlide() {
+  function getSpecialSlide() {
     const container = document.getElementById('trends')
-    if (!container) return false
+    if (!container) return null
     const activeTrend = parseInt(container.getAttribute('data-active-trend') || '0', 10)
     const trendCount = parseInt(container.getAttribute('data-trend-count') || '0', 10)
-    return activeTrend === trendCount - 1 && !document.querySelector('[data-trend-active]')
+    if (activeTrend === 0 && !document.querySelector('[data-trend-active]')) return 'intro'
+    if (activeTrend === trendCount - 1 && !document.querySelector('[data-trend-active]')) return 'thankYou'
+    return null
   }
 
   function clickRight() {
+    const special = getSpecialSlide()
+    if (special === 'intro') {
+      window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
+      return
+    }
     const trendActive = document.querySelector('[data-trend-active]')
     if (trendActive) {
       const isCompleted = trendActive.getAttribute('data-trend-completed') === 'true'
@@ -178,7 +185,7 @@ export function IdleArrows({ active }: { active: boolean }) {
 
   function clickLeft() {
     // On Thank You slide — go back to last trend
-    if (isOnThankYouSlide()) {
+    if (getSpecialSlide() === 'thankYou') {
       window.dispatchEvent(new Event('trend-prev'))
       return
     }
@@ -225,12 +232,16 @@ export function IdleArrows({ active }: { active: boolean }) {
         )
       })()}
       {context === 'trend' && (() => {
+        const special = getSpecialSlide()
         const trendEl = document.querySelector('[data-trend-active]')
         const isFirstTrendStart = trendEl?.getAttribute('data-trend-index') === '0' && trendEl?.getAttribute('data-trend-phase') === '0'
-        const onThankYou = isOnThankYouSlide()
+        // Show left arrow unless on intro slide
+        const showLeft = special !== 'intro' && (!isFirstTrendStart || special === 'thankYou')
+        // Show right arrow unless on Thank You slide
+        const showRight = special !== 'thankYou'
         return (
           <>
-            {(!isFirstTrendStart || onThankYou) && (
+            {showLeft && (
               <Arrow
                 key="left"
                 rotation={180}
@@ -238,7 +249,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                 position={{ top: 'calc(50% - 35px)', left: '15px' }}
               />
             )}
-            {!onThankYou && (
+            {showRight && (
               <Arrow
                 key="right"
                 rotation={0}

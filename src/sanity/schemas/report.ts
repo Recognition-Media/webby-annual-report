@@ -12,6 +12,7 @@ export default defineType({
     { name: 'carousel', title: 'Hero Carousel' },
     { name: 'byTheNumbers', title: 'By the Numbers' },
     { name: 'howWeJudge', title: 'How We Judge' },
+    { name: 'trendIntro', title: 'Trend Intro' },
     { name: 'trends', title: 'Trends' },
     { name: 'thankYou', title: 'Thank You' },
     { name: 'signup', title: 'Signup Form' },
@@ -67,6 +68,13 @@ export default defineType({
     { name: 'auditorCardTitle', title: 'Auditor Card Title', type: 'string', group: 'howWeJudge', description: 'e.g. "Official Tabulation Consultant"' },
     { name: 'auditorCardDescription', title: 'Auditor Card Description', type: 'string', group: 'howWeJudge' },
     { name: 'auditorCardUrl', title: 'Auditor Card URL', type: 'url', group: 'howWeJudge' },
+
+    // Trend Intro (gateway slide before trends)
+    { name: 'trendIntroEyebrow', title: 'Eyebrow', type: 'string', group: 'trendIntro', description: 'e.g. "About The Trends"' },
+    { name: 'trendIntroHeadline', title: 'Headline', type: 'string', group: 'trendIntro' },
+    { name: 'trendIntroBody', title: 'Body', type: 'array', of: [{ type: 'block' }], group: 'trendIntro' },
+    { name: 'trendIntroStats', title: 'Stats', type: 'array', of: [{ type: 'dataStat' }], group: 'trendIntro', description: 'Percentage bars (same as trend data modules)' },
+    { name: 'trendIntroCta', title: 'CTA Button Text', type: 'string', group: 'trendIntro', initialValue: 'SEE THE TRENDS', description: 'Button that starts the trend journey' },
 
     // Trends
     { name: 'trendSections', title: 'Trend Sections', type: 'array', of: [{ type: 'trendSection' }], group: 'trends' },

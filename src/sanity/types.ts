@@ -105,6 +105,11 @@ export interface Report {
   letterBody?: PortableTextBlock[]
   letterAuthors?: LetterAuthor[]
   carouselImages?: CarouselImage[]
+  trendIntroEyebrow?: string
+  trendIntroHeadline?: string
+  trendIntroBody?: PortableTextBlock[]
+  trendIntroStats?: DataStat[]
+  trendIntroCta?: string
   trendSections?: TrendSection[]
   formFields?: FormField[]
   submitButtonText?: string

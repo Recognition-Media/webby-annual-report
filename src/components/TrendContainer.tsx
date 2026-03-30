@@ -29,10 +29,10 @@ export function TrendContainer({
     return () => observer.disconnect()
   }, [])
 
-  // Lock scroll when on Thank You slide (last slide, not a TrendSection)
+  // Lock scroll on intro and Thank You slides (not TrendSections, which handle their own)
   useEffect(() => {
     if (!isActive) return
-    if (activeTrend === trendCount - 1) {
+    if (activeTrend === 0 || activeTrend === trendCount - 1) {
       document.body.style.overflow = 'hidden'
       return () => { document.body.style.overflow = '' }
     }
@@ -93,12 +93,12 @@ export function TrendContainer({
         {children}
       </motion.div>
 
-      {/* Subnav — only when trends are in view, exclude Thank You slide */}
-      {isActive && (
+      {/* Subnav — only when trends are in view, exclude intro + Thank You slides */}
+      {isActive && activeTrend > 0 && activeTrend < trendCount - 1 && (
         <TrendSubnav
-          titles={trendTitles.slice(0, -1)}
-          activeTrend={Math.min(activeTrend, trendTitles.length - 2)}
-          onNavigate={navigateToTrend}
+          titles={trendTitles.slice(1, -1)}
+          activeTrend={activeTrend - 1}
+          onNavigate={(i) => navigateToTrend(i + 1)}
         />
       )}
     </section>
