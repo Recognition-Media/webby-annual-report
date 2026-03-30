@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const IDLE_TIMEOUT = 5000
+const IDLE_TIMEOUT = 2000
 
 const arrowPath = {
   shaft: 'M-30,60 L100,60',
@@ -20,33 +20,38 @@ function Arrow({ rotation, onClick, position, isTouch }: {
   return (
     <motion.button
       initial={{ opacity: 0 }}
-      animate={{ opacity: isTouch ? 0.5 : 0.3 }}
+      animate={{ opacity: 0.75 }}
       exit={{ opacity: 0 }}
-      whileHover={isTouch ? undefined : { opacity: 0.7 }}
-      whileTap={{ opacity: 0.9, scale: 1.1 }}
-      transition={{ duration: 0.5 }}
+      whileHover={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
       onClick={(e) => { e.stopPropagation(); onClick() }}
       className="no-custom-cursor"
       style={{
         position: 'fixed',
         ...position,
         zIndex: 50,
-        background: 'none',
-        border: 'none',
+        background: 'rgba(0, 0, 0, 0.5)',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        borderRadius: '50%',
         cursor: 'pointer',
-        padding: isTouch ? 24 : 20,
+        width: 64,
+        height: 64,
+        padding: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
       <svg
-        width={isTouch ? 36 : 42}
-        height={isTouch ? 36 : 42}
+        width="28"
+        height="28"
         viewBox="0 0 120 120"
         fill="none"
         style={{ transform: `rotate(${rotation}deg)` }}
       >
-        <line x1="-30" y1="60" x2="100" y2="60" stroke="white" strokeWidth={isTouch ? 2.5 : 1.5} />
-        <line x1="100" y1="60" x2="54" y2="14" stroke="white" strokeWidth={isTouch ? 2.5 : 1.5} />
-        <line x1="100" y1="60" x2="54" y2="106" stroke="white" strokeWidth={isTouch ? 2.5 : 1.5} />
+        <line x1="-30" y1="60" x2="100" y2="60" stroke="white" strokeWidth="5" strokeLinecap="round" />
+        <line x1="100" y1="60" x2="54" y2="14" stroke="white" strokeWidth="5" strokeLinecap="round" />
+        <line x1="100" y1="60" x2="54" y2="106" stroke="white" strokeWidth="5" strokeLinecap="round" />
       </svg>
     </motion.button>
   )
@@ -60,6 +65,7 @@ function isTouchDevice() {
 export function IdleArrows({ active }: { active: boolean }) {
   const [idle, setIdle] = useState(false)
   const [context, setContext] = useState<'vertical' | 'trend' | 'none'>('none')
+  const [, forceUpdate] = useState(0)
   const [isTouch, setIsTouch] = useState(false)
   const timerRef = useRef<any>(null)
 
@@ -82,12 +88,14 @@ export function IdleArrows({ active }: { active: boolean }) {
       } else {
         setContext('vertical')
       }
+      // Force re-render so arrows update when trend/phase changes
+      forceUpdate((n) => n + 1)
     }
 
     checkContext()
     window.addEventListener('scroll', checkContext)
     const observer = new MutationObserver(checkContext)
-    observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['data-trend-active'] })
+    observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['data-trend-active', 'data-trend-phase', 'data-active-trend'] })
 
     return () => {
       window.removeEventListener('scroll', checkContext)
@@ -95,30 +103,37 @@ export function IdleArrows({ active }: { active: boolean }) {
     }
   }, [active])
 
-  // Idle timer — reset on any interaction
+  // Idle timer — show after initial delay, stay visible
   useEffect(() => {
     if (!active) return
 
     function resetIdle() {
-      setIdle(false)
       clearTimeout(timerRef.current)
       timerRef.current = setTimeout(() => setIdle(true), IDLE_TIMEOUT)
     }
 
     resetIdle()
-    window.addEventListener('click', resetIdle)
     window.addEventListener('scroll', resetIdle)
 
     return () => {
       clearTimeout(timerRef.current)
-      window.removeEventListener('click', resetIdle)
       window.removeEventListener('scroll', resetIdle)
     }
   }, [active])
 
   // Hide entirely on touch/mobile — MobileNav handles navigation
   // On desktop, only show when idle
-  if (!active || !idle || isTouch) return null
+  // Hide on mobile — MobileNav handles navigation
+  const [isMobileScreen, setIsMobileScreen] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    setIsMobileScreen(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobileScreen(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  if (!active || !idle || isTouch || isMobileScreen) return null
 
   function clickDown() {
     // Simulate clicking the right side of screen (forward)
@@ -142,7 +157,6 @@ export function IdleArrows({ active }: { active: boolean }) {
         }
       }
     }
-    setIdle(false)
   }
 
   function clickUp() {
@@ -163,10 +177,24 @@ export function IdleArrows({ active }: { active: boolean }) {
         }
       }
     }
-    setIdle(false)
+  }
+
+  function getSpecialSlide() {
+    const container = document.getElementById('trends')
+    if (!container) return null
+    const activeTrend = parseInt(container.getAttribute('data-active-trend') || '0', 10)
+    const trendCount = parseInt(container.getAttribute('data-trend-count') || '0', 10)
+    if (activeTrend === 0 && !document.querySelector('[data-trend-active]')) return 'intro'
+    if (activeTrend === trendCount - 1 && !document.querySelector('[data-trend-active]')) return 'thankYou'
+    return null
   }
 
   function clickRight() {
+    const special = getSpecialSlide()
+    if (special === 'intro') {
+      window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
+      return
+    }
     const trendActive = document.querySelector('[data-trend-active]')
     if (trendActive) {
       const isCompleted = trendActive.getAttribute('data-trend-completed') === 'true'
@@ -176,24 +204,25 @@ export function IdleArrows({ active }: { active: boolean }) {
         window.dispatchEvent(new Event('trend-advance'))
       }
     }
-    setIdle(false)
   }
 
   function clickLeft() {
+    // On Thank You slide — go back to last trend
+    if (getSpecialSlide() === 'thankYou') {
+      window.dispatchEvent(new Event('trend-prev'))
+      return
+    }
     const trendActive = document.querySelector('[data-trend-active]')
     if (trendActive) {
       const trendPhase = trendActive.getAttribute('data-trend-phase')
       const trendIndex = trendActive.getAttribute('data-trend-index')
       if (trendPhase === '0' && trendIndex === '0') {
-        // Back to judging
-        document.body.style.overflow = ''
-        document.documentElement.classList.add('snap-active')
-        document.getElementById('how-judged')?.scrollIntoView({ behavior: 'smooth' })
+        // Back to intro slide
+        window.dispatchEvent(new Event('trend-prev'))
       } else {
         window.dispatchEvent(new Event('trend-retreat'))
       }
     }
-    setIdle(false)
   }
 
   return (
@@ -226,11 +255,14 @@ export function IdleArrows({ active }: { active: boolean }) {
         )
       })()}
       {context === 'trend' && !isTouch && (() => {
-        const trendEl = document.querySelector('[data-trend-active]')
-        const isFirstTrendStart = trendEl?.getAttribute('data-trend-index') === '0' && trendEl?.getAttribute('data-trend-phase') === '0'
+        const special = getSpecialSlide()
+        // Show left arrow unless on intro slide
+        const showLeft = special !== 'intro'
+        // Show right arrow unless on Thank You slide
+        const showRight = special !== 'thankYou'
         return (
           <>
-            {!isFirstTrendStart && (
+            {showLeft && (
               <Arrow
                 key="left"
                 rotation={180}
@@ -239,13 +271,73 @@ export function IdleArrows({ active }: { active: boolean }) {
                 isTouch={isTouch}
               />
             )}
-            <Arrow
-              key="right"
-              rotation={0}
-              onClick={clickRight}
-              position={{ top: 'calc(50% - 35px)', right: '15px' }}
-              isTouch={isTouch}
-            />
+            {showRight && special === 'intro' && (
+              <motion.button
+                key="right-pill"
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: 0.75,
+                  boxShadow: [
+                    '0 0 0px rgba(130, 216, 235, 0)',
+                    '0 0 12px rgba(130, 216, 235, 0.3)',
+                    '0 0 0px rgba(130, 216, 235, 0)',
+                  ],
+                }}
+                exit={{ opacity: 0.75 }}
+                whileHover={{ opacity: 0.85 }}
+                transition={{
+                  opacity: { duration: 0.6 },
+                  boxShadow: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+                }}
+                onClick={(e) => { e.stopPropagation(); clickRight() }}
+                className="no-custom-cursor"
+                style={{
+                  position: 'fixed',
+                  top: 'calc(50% - 28px)',
+                  right: '20px',
+                  zIndex: 50,
+                  background: '#000',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: 32,
+                  cursor: 'pointer',
+                  padding: '14px 24px 14px 20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  color: '#fff',
+                }}
+              >
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: 2.5,
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                }}>
+                  See the Trends
+                </span>
+                <motion.svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 120 120"
+                  fill="none"
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <line x1="-30" y1="60" x2="100" y2="60" stroke="white" strokeWidth="5" strokeLinecap="round" />
+                  <line x1="100" y1="60" x2="54" y2="14" stroke="white" strokeWidth="5" strokeLinecap="round" />
+                  <line x1="100" y1="60" x2="54" y2="106" stroke="white" strokeWidth="5" strokeLinecap="round" />
+                </motion.svg>
+              </motion.button>
+            )}
+            {showRight && special !== 'intro' && (
+              <Arrow
+                key="right"
+                rotation={0}
+                onClick={clickRight}
+                position={{ top: 'calc(50% - 35px)', right: '15px' }}
+              />
+            )}
           </>
         )
       })()}

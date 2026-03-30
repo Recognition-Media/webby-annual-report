@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { PortableText } from '@portabletext/react'
 import { motion } from 'framer-motion'
-import type { TrendSection as TrendSectionType, DataStat } from '@/sanity/types'
+import type { TrendSection as TrendSectionType, DataStat, TrendVideo } from '@/sanity/types'
 import { AnimatedBg } from './AnimatedBg'
 import { urlFor } from '@/sanity/image'
 
@@ -23,6 +23,7 @@ function useBasePath() {
   }, [bp])
   return bp
 }
+
 
 export const TREND_COLORS = [
   '#8B70D1', // purple
@@ -74,7 +75,6 @@ export const TREND_OVERRIDES: Record<number, {
         quoteText: [{ _type: 'block', _key: 'q2', children: [{ _type: 'span', _key: 's2', text: '\u201CA focus on \u2018invisible\u2019 utility that automates drudgery rather than just adding a chatbot. Also, accessibility tools and real-time translation that solved actual human barriers with zero friction.\u201D' }], markDefs: [], style: 'normal' }],
       },
     ],
-    video: { type: 'local', src: `${basePath}/trend-video-test.mp4` },
   },
   1: {
     title: 'The Best AI Integrations Were Unapologetic',
@@ -107,7 +107,6 @@ export const TREND_OVERRIDES: Record<number, {
         quoteText: [{ _type: 'block', _key: 'q1-2', children: [{ _type: 'span', _key: 's1-2', text: '\u201CThe best AI integrations were unapologetically AI. They went beyond transitions and used AI to elevate the complete narrative arc.\u201D' }], markDefs: [], style: 'normal' }],
       },
     ],
-    video: { type: 'youtube', src: 'https://www.youtube.com/watch?v=zKfk5x0PMMs' },
   },
   2: {
     title: 'The Best Creators Went Deeper, Not Broader',
@@ -329,14 +328,14 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   const dataSubheadline = section.dataSubheadline
   const hasData = !!dataStats && dataStats.length > 0
 
-  // Video — from CMS, respecting toggle
+  // Video — from CMS trendVideo (primary) or legacy videoType/videoUrl fields
   const videoConfig = section.showVideo && section.videoUrl
     ? {
         type: (section.videoType || 'youtube') as 'local' | 'youtube',
         src: section.videoType === 'local' ? `${resolvedBasePath}${section.videoUrl}` : section.videoUrl,
       }
     : undefined
-  const hasVideo = !!videoConfig
+  const hasVideo = section.showVideo !== false && (!!section.trendVideo || !!videoConfig)
   const totalPhases = 1 + (hasData ? 1 : 0) + quotes.length + (hasVideo ? 1 : 0)
   const dataPhase = hasData ? 1 : -1
   const quoteStartPhase = 1 + (hasData ? 1 : 0)
@@ -420,19 +419,10 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
 
     function handleWheel(e: WheelEvent) {
       if (Math.abs(e.deltaY) < 5) return
-      // Allow scroll up on phase 0 to go back
-      if (e.deltaY < 0 && phase === 0) {
+      // Only allow scroll up on first trend, first phase — to go back to vertical sections
+      if (e.deltaY < 0 && phase === 0 && index === 0) {
         document.body.style.overflow = ''
-        if (index === 0) {
-          // First trend — scroll back to judging page
-          document.documentElement.classList.add('snap-active')
-        } else {
-          // Other trends — scroll back to previous trend
-          const prevTrend = document.getElementById(`trend-${index - 1}`)
-          if (prevTrend) {
-            prevTrend.scrollIntoView({ behavior: 'smooth' })
-          }
-        }
+        document.documentElement.classList.add('snap-active')
       }
     }
 
@@ -745,7 +735,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
       </div>
 
       {/* Video page — always rendered if trend has video */}
-      {hasVideo && (
+      {hasVideo && section.trendVideo && (
         <motion.div
           animate={{
             opacity: phase === totalPhases - 1 ? 1 : 0,
@@ -758,7 +748,12 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
             zIndex: 20,
           }}
         >
-          <PhaseVideo video={videoConfig!} onClose={() => { setVideoClosed(true); setPhase(totalPhases - 2) }} isActive={isActive && phase === totalPhases - 1} />
+          <PhaseVideo
+            trendVideo={section.trendVideo!}
+            trendColor={trendColor}
+            onClose={() => { setVideoClosed(true); setPhase(totalPhases - 2) }}
+            isActive={isActive && phase === totalPhases - 1}
+          />
         </motion.div>
       )}
     </div>
@@ -1301,17 +1296,21 @@ function PhaseData({
 /*  Phase: Video                                                       */
 /* ------------------------------------------------------------------ */
 
-function PhaseVideo({ video, onClose, isActive }: { video: { type: 'local' | 'youtube'; src: string }; onClose: () => void; isActive: boolean }) {
+function PhaseVideo({
+  trendVideo,
+  trendColor,
+  onClose,
+  isActive,
+}: {
+  trendVideo: TrendVideo
+  trendColor: string
+  onClose: () => void
+  isActive: boolean
+}) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [muted, setMuted] = useState(false)
 
-  const youtubeId = video.type === 'youtube'
-    ? video.src.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
-    : null
-
-  // Play with audio when active, pause when not (local only)
   useEffect(() => {
-    if (video.type !== 'local') return
     const el = videoRef.current
     if (!el) return
     if (isActive) {
@@ -1327,7 +1326,7 @@ function PhaseVideo({ video, onClose, isActive }: { video: { type: 'local' | 'yo
       el.pause()
       el.currentTime = 0
     }
-  }, [isActive, video.type])
+  }, [isActive])
 
   function toggleMute() {
     if (videoRef.current) {
@@ -1343,8 +1342,17 @@ function PhaseVideo({ video, onClose, isActive }: { video: { type: 'local' | 'yo
     }
   }
 
+  // Map CMS aspect ratio to CSS and constraints
+  const cssAspectRatio = trendVideo.aspectRatio.replace(':', '/')
+  const videoConstraints: React.CSSProperties =
+    trendVideo.aspectRatio === '16:9'
+      ? { maxWidth: '66vw', maxHeight: '57vh' }
+      : trendVideo.aspectRatio === '1:1'
+        ? { maxHeight: '50vh', maxWidth: '50vh' }
+        : { maxHeight: '57vh', maxWidth: '33vh' } // 9:16
+
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       {/* Close button */}
       <button
         onClick={(e) => { e.stopPropagation(); onClose() }}
@@ -1372,99 +1380,112 @@ function PhaseVideo({ video, onClose, isActive }: { video: { type: 'local' | 'yo
           <line x1="12" y1="2" x2="2" y2="12" />
         </svg>
       </button>
-      {youtubeId ? (
-        <iframe
-          src={isActive ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0` : `https://www.youtube.com/embed/${youtubeId}?rel=0`}
-          allow="autoplay; encrypted-media"
-          allowFullScreen
+
+      {/* Video */}
+      <video
+        ref={videoRef}
+        src={trendVideo.videoFile.url}
+        playsInline
+        style={{
+          aspectRatio: cssAspectRatio,
+          width: 'auto',
+          height: 'auto',
+          ...videoConstraints,
+          borderRadius: 4,
+          border: '1px solid rgba(255,255,255,0.12)',
+        }}
+      />
+
+      {/* Controls */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: trendVideo.name ? 80 : 12,
+          right: 12,
+          display: 'flex',
+          gap: 8,
+          pointerEvents: 'auto',
+        }}
+      >
+        <button
+          onClick={toggleMute}
+          className="no-custom-cursor"
           style={{
-            width: '100%',
-            aspectRatio: '16 / 9',
-            maxHeight: '70vh',
-            borderRadius: 4,
-            border: '1px solid rgba(255,255,255,0.12)',
-          }}
-        />
-      ) : (
-        <video
-          ref={videoRef}
-          src={video.src}
-          playsInline
-          style={{
-            maxHeight: '70vh',
-            width: 'auto',
-            borderRadius: 4,
-            border: '1px solid rgba(255,255,255,0.12)',
-          }}
-        />
-      )}
-      {/* Controls — local video only */}
-      {!youtubeId && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 12,
-            right: 12,
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            border: '1px solid rgba(255,255,255,0.3)',
+            background: 'rgba(0,0,0,0.6)',
+            color: '#fff',
+            cursor: 'pointer',
             display: 'flex',
-            gap: 8,
-            pointerEvents: 'auto',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 14,
           }}
         >
-          <button
-            onClick={toggleMute}
-            className="no-custom-cursor"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              border: '1px solid rgba(255,255,255,0.3)',
-              background: 'rgba(0,0,0,0.6)',
-              color: '#fff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 14,
-            }}
-          >
-            {muted ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <path d="M11 5L6 9H2v6h4l5 4V5z" />
-                <line x1="23" y1="9" x2="17" y2="15" />
-                <line x1="17" y1="9" x2="23" y2="15" />
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <path d="M11 5L6 9H2v6h4l5 4V5z" />
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-              </svg>
-            )}
-          </button>
-          <button
-            onClick={replay}
-            className="no-custom-cursor"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              border: '1px solid rgba(255,255,255,0.3)',
-              background: 'rgba(0,0,0,0.6)',
-              color: '#fff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 14,
-            }}
-          >
+          {muted ? (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <polyline points="1 4 1 10 7 10" />
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+              <path d="M11 5L6 9H2v6h4l5 4V5z" />
+              <line x1="23" y1="9" x2="17" y2="15" />
+              <line x1="17" y1="9" x2="23" y2="15" />
             </svg>
-          </button>
-        </div>
-      )}
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <path d="M11 5L6 9H2v6h4l5 4V5z" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+          )}
+        </button>
+        <button
+          onClick={replay}
+          className="no-custom-cursor"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            border: '1px solid rgba(255,255,255,0.3)',
+            background: 'rgba(0,0,0,0.6)',
+            color: '#fff',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 14,
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Context caption below video */}
+      <div
+        style={{
+          marginTop: 12,
+          paddingTop: 10,
+          borderTop: `2px solid ${trendColor}`,
+          width: '100%',
+          maxWidth: trendVideo.aspectRatio === '16:9' ? '80vw' : trendVideo.aspectRatio === '1:1' ? '60vh' : '40vh',
+        }}
+      >
+        <p style={{ fontSize: 16, fontWeight: 500, color: '#fff', margin: 0 }}>
+          {trendVideo.name}
+        </p>
+        {trendVideo.title && (
+          <p style={{ fontSize: 13, color: '#ccc', margin: '2px 0 0' }}>
+            {trendVideo.title}
+          </p>
+        )}
+        {trendVideo.description && (
+          <p style={{ fontSize: 14, color: '#bbb', lineHeight: 1.5, margin: '8px 0 0' }}>
+            {trendVideo.description}
+          </p>
+        )}
+      </div>
     </div>
   )
 }

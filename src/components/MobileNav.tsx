@@ -41,7 +41,7 @@ export function MobileNav({ active, trendTitles }: MobileNavProps) {
       // Build list fresh each time (elements may appear after initial render)
       const allSections: { id: string; top: number }[] = []
 
-      ;['welcome-letter', 'entry-stats', 'how-judged'].forEach((id) => {
+      ;['welcome-letter', 'entry-stats', 'how-judged', 'trend-intro'].forEach((id) => {
         const el = document.getElementById(id)
         if (el) allSections.push({ id, top: el.offsetTop })
       })
@@ -85,6 +85,7 @@ export function MobileNav({ active, trendTitles }: MobileNavProps) {
     { id: 'welcome-letter', label: 'Welcome Letter', color: '#8B70D1' },
     { id: 'entry-stats', label: 'By the Numbers', color: '#80D064' },
     { id: 'how-judged', label: 'How We Judge', color: '#8B70D1' },
+    { id: 'trend-intro', label: 'Quick Summary', color: '#82D8EB' },
     ...trendTitles.map((title, i) => ({
       id: `mobile-trend-${i}`,
       label: title,

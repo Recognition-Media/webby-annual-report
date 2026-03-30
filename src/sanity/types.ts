@@ -50,6 +50,14 @@ export interface DataStat {
   label: string
 }
 
+export interface TrendVideo {
+  videoFile: { url: string }
+  aspectRatio: '9:16' | '16:9' | '1:1'
+  name: string
+  title?: string
+  description?: string
+}
+
 export interface TrendSection {
   enabled?: boolean
   trendTitle: string
@@ -65,6 +73,7 @@ export interface TrendSection {
   showQuotes?: boolean
   expertQuotes?: ExpertQuote[]
   showVideo?: boolean
+  trendVideo?: TrendVideo
   videoType?: 'local' | 'youtube'
   videoUrl?: string
   sectionImages?: (SanityImage & { alt?: string })[]
@@ -117,6 +126,11 @@ export interface Report {
   letterBody?: PortableTextBlock[]
   letterAuthors?: LetterAuthor[]
   carouselImages?: CarouselImage[]
+  trendIntroEyebrow?: string
+  trendIntroHeadline?: string
+  trendIntroBody?: PortableTextBlock[]
+  trendIntroStats?: DataStat[]
+  trendIntroCta?: string
   trendSections?: TrendSection[]
   thankYouEyebrow?: string
   thankYouHeading?: string
@@ -128,6 +142,8 @@ export interface Report {
   thankYouCtaTitle?: string
   thankYouCtaDescription?: string
   thankYouCtaUrl?: string
+  signupTitle?: string
+  signupSubhead?: string
   formFields?: FormField[]
   submitButtonText?: string
   successMessage?: string

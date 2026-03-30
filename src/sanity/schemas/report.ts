@@ -12,6 +12,7 @@ export default defineType({
     { name: 'carousel', title: 'Hero Carousel' },
     { name: 'byTheNumbers', title: 'By the Numbers' },
     { name: 'howWeJudge', title: 'How We Judge' },
+    { name: 'trendIntro', title: 'Trend Intro' },
     { name: 'trends', title: 'Trends' },
     { name: 'thankYou', title: 'Thank You' },
     { name: 'signup', title: 'Signup Form' },
@@ -68,6 +69,13 @@ export default defineType({
     { name: 'auditorCardDescription', title: 'Auditor Card Description', type: 'string', group: 'howWeJudge' },
     { name: 'auditorCardUrl', title: 'Auditor Card URL', type: 'url', group: 'howWeJudge' },
 
+    // Trend Intro (gateway slide before trends)
+    { name: 'trendIntroEyebrow', title: 'Eyebrow', type: 'string', group: 'trendIntro', description: 'e.g. "About The Trends"' },
+    { name: 'trendIntroHeadline', title: 'Headline', type: 'string', group: 'trendIntro' },
+    { name: 'trendIntroBody', title: 'Body', type: 'array', of: [{ type: 'block' }], group: 'trendIntro' },
+    { name: 'trendIntroStats', title: 'Stats', type: 'array', of: [{ type: 'dataStat' }], group: 'trendIntro', description: 'Percentage bars (same as trend data modules)' },
+    { name: 'trendIntroCta', title: 'CTA Button Text', type: 'string', group: 'trendIntro', initialValue: 'SEE THE TRENDS', description: 'Button that starts the trend journey' },
+
     // Trends
     { name: 'trendSections', title: 'Trend Sections', type: 'array', of: [{ type: 'trendSection' }], group: 'trends' },
 
@@ -84,6 +92,8 @@ export default defineType({
     { name: 'thankYouCtaUrl', title: 'CTA Card URL', type: 'url', group: 'thankYou' },
 
     // Signup Form
+    { name: 'signupTitle', title: 'Form Title', type: 'text', rows: 2, group: 'signup', description: 'Supports line breaks. e.g. "Welcome to the\\n30th Annual Webby Awards"' },
+    { name: 'signupSubhead', title: 'Form Subhead', type: 'text', rows: 2, group: 'signup', description: 'e.g. "Please provide us with some basic info..."' },
     { name: 'formFields', title: 'Signup Form Fields', type: 'array', of: [{ type: 'formField' }], group: 'signup' },
     { name: 'submitButtonText', title: 'Submit Button Text', type: 'string', initialValue: 'Access Report', group: 'signup' },
     { name: 'successMessage', title: 'Success Message', type: 'text', group: 'signup' },

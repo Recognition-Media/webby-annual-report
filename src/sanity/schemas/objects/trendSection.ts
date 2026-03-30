@@ -25,10 +25,11 @@ export default defineType({
     { name: 'showQuotes', title: 'Show Expert Quotes', type: 'boolean', initialValue: true },
     { name: 'expertQuotes', title: 'Expert Quotes', type: 'array', of: [{ type: 'expertQuote' }], hidden: ({ parent }) => parent?.showQuotes === false },
 
-    // Video
-    { name: 'showVideo', title: 'Show Video', type: 'boolean', initialValue: false },
-    { name: 'videoType', title: 'Video Type', type: 'string', options: { list: [{ title: 'Local (uploaded)', value: 'local' }, { title: 'YouTube', value: 'youtube' }] }, hidden: ({ parent }) => parent?.showVideo === false },
-    { name: 'videoUrl', title: 'Video URL', type: 'string', description: 'YouTube URL or path to local video (e.g. /trend-video-test.mp4)', hidden: ({ parent }) => parent?.showVideo === false },
+    // Video (CMS-managed)
+    { name: 'showVideo', title: 'Show Video Module', type: 'boolean', initialValue: false },
+    { name: 'trendVideo', title: 'Video', type: 'trendVideo', hidden: ({ parent }) => parent?.showVideo === false },
+    { name: 'videoType', title: 'Video Type (legacy)', type: 'string', hidden: () => true },
+    { name: 'videoUrl', title: 'Video URL (legacy)', type: 'string', hidden: () => true },
 
     // Images
     { name: 'sectionImages', title: 'Images', type: 'array', of: [{ type: 'image', options: { hotspot: true }, fields: [{ name: 'alt', title: 'Alt Text', type: 'string' }] }] },

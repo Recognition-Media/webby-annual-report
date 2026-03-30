@@ -31,6 +31,11 @@ export const reportBySlugQuery = groq`
     letterBody,
     letterAuthors,
     carouselImages,
+    trendIntroEyebrow,
+    trendIntroHeadline,
+    trendIntroBody,
+    trendIntroStats,
+    trendIntroCta,
     trendSections[] {
       enabled,
       trendTitle,
@@ -53,6 +58,13 @@ export const reportBySlugQuery = groq`
         headshotUrl
       },
       showVideo,
+      trendVideo {
+        videoFile { "url": asset->url },
+        aspectRatio,
+        name,
+        title,
+        description
+      },
       videoType,
       videoUrl,
       sectionImages
@@ -67,6 +79,8 @@ export const reportBySlugQuery = groq`
     thankYouCtaTitle,
     thankYouCtaDescription,
     thankYouCtaUrl,
+    signupTitle,
+    signupSubhead,
     formFields,
     submitButtonText,
     successMessage,
