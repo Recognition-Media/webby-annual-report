@@ -4,6 +4,25 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { TrendSubnav } from './TrendSubnav'
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') return window.matchMedia('(max-width: 768px)').matches
+    return false
+  })
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    setIsMobile(mq.matches)
+    if (mq.matches) {
+      document.body.style.overflow = ''
+      document.documentElement.classList.remove('snap-active')
+    }
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return isMobile
+}
+
 export function TrendContainer({
   trendCount,
   trendTitles,
@@ -13,12 +32,14 @@ export function TrendContainer({
   trendTitles: string[]
   children: React.ReactNode
 }) {
+  const isMobile = useIsMobile()
   const [activeTrend, setActiveTrend] = useState(0)
   const [isActive, setIsActive] = useState(false)
   const containerRef = useRef<HTMLElement>(null)
 
-  // Track when container is in view
+  // Track when container is in view (desktop only)
   useEffect(() => {
+    if (isMobile) return
     const el = containerRef.current
     if (!el) return
     const observer = new IntersectionObserver(
@@ -27,10 +48,12 @@ export function TrendContainer({
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [isMobile])
 
   // Lock scroll on intro and Thank You slides (not TrendSections, which handle their own)
+  // Desktop only — mobile uses vertical layout
   useEffect(() => {
+    if (isMobile) return
     if (!isActive) return
     if (activeTrend === 0 || activeTrend === trendCount - 1) {
       // Delay lock to let snap scroll finish centering
@@ -58,11 +81,11 @@ export function TrendContainer({
         document.documentElement.classList.add('snap-active')
       }
     }
-  }, [isActive, activeTrend, trendCount])
+  }, [isMobile, isActive, activeTrend, trendCount])
 
-  // Listen for trend-next/trend-prev events
+  // Listen for trend-next/trend-prev events (desktop only)
   useEffect(() => {
-    if (!isActive) return
+    if (!isActive || isMobile) return
 
     function handleNextTrend() {
       setActiveTrend((t) => Math.min(t + 1, trendCount - 1))
@@ -87,6 +110,18 @@ export function TrendContainer({
   function navigateToTrend(index: number) {
     window.dispatchEvent(new CustomEvent('trend-reset-phase', { detail: { index } }))
     setActiveTrend(index)
+  }
+
+  if (isMobile) {
+    return (
+      <section
+        id="trends"
+        ref={containerRef}
+        style={{ background: '#191919' }}
+      >
+        {children}
+      </section>
+    )
   }
 
   return (

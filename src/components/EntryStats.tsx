@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import { PortableText } from '@portabletext/react'
 import { AnimatedBg } from './AnimatedBg'
 import {
   motion,
@@ -74,7 +75,7 @@ function CountUpNumber({
   return (
     <span
       style={{
-        fontSize: 'clamp(56px, 8vw, 88px)',
+        fontSize: 'clamp(36px, 8vw, 88px)',
         fontWeight: 400,
         fontVariantNumeric: 'tabular-nums',
         lineHeight: 1,
@@ -234,11 +235,9 @@ function StatBlock({
       initial={{ opacity: 0, y: 20 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.12, ease: 'easeOut' }}
+      className="md:flex-1 md:border-l md:border-white/[0.14] first:md:border-l-0 md:pl-6 md:pr-6 first:md:pl-0 py-4 md:py-0"
       style={{
-        flex: 1,
-        paddingLeft: index > 0 ? 24 : 0,
-        paddingRight: 24,
-        borderLeft: index > 0 ? '1px solid rgba(255,255,255,0.14)' : 'none',
+        borderBottom: index < 2 ? '1px solid rgba(255,255,255,0.08)' : 'none',
       }}
     >
       <CountUpNumber
@@ -276,7 +275,7 @@ function StatBlock({
 /*  Main component                                                    */
 /* ------------------------------------------------------------------ */
 
-export function EntryStats({ stats }: { stats?: HeroStat[] }) {
+export function EntryStats({ stats, eyebrow, statement }: { stats?: HeroStat[]; eyebrow?: string; statement?: any[] }) {
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -301,10 +300,10 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
       id="entry-stats"
       data-snap
       ref={ref}
+      className="px-5 md:px-[60px] pt-24 md:pt-0"
       style={{
         background: '#191919',
         minHeight: '100vh',
-        padding: '0 60px',
         overflow: 'hidden',
         position: 'relative',
         display: 'flex',
@@ -338,34 +337,50 @@ export function EntryStats({ stats }: { stats?: HeroStat[] }) {
             marginBottom: 24,
           }}
         >
-          Webby 30: By the Numbers Letter
+          {eyebrow || 'Webby 30: By the Numbers'}
         </p>
-        <p
-          style={{
-            fontSize: 'clamp(32px, 4vw, 52px)',
-            fontWeight: 400,
-            color: '#fff',
-            lineHeight: 1.2,
-            letterSpacing: -1,
-          }}
-        >
-          This year, <span style={{ color: '#80D064' }}>13,000+</span> projects
-          were entered from <span style={{ color: '#82D8EB' }}>71 countries</span> and
-          all <span style={{ color: '#8B70D1' }}>50 US states</span>, making this the
-          most globally represented season in our 30-year history. Only{' '}
-          <span style={{ color: '#FFB763' }}>11%</span> were selected as Nominees.
-        </p>
+        {statement && statement.length > 0 ? (
+          <div
+            style={{
+              fontSize: 'clamp(32px, 4vw, 52px)',
+              fontWeight: 400,
+              color: '#fff',
+              lineHeight: 1.2,
+              letterSpacing: -1,
+            }}
+            className="[&_strong]:text-[#80D064] [&_strong]:font-normal [&_em]:text-[#82D8EB] [&_em]:not-italic [&_em]:font-normal"
+          >
+            <PortableText value={statement} />
+          </div>
+        ) : (
+          <p
+            style={{
+              fontSize: 'clamp(32px, 4vw, 52px)',
+              fontWeight: 400,
+              color: '#fff',
+              lineHeight: 1.2,
+              letterSpacing: -1,
+            }}
+          >
+            This year, <span style={{ color: '#80D064' }}>13,000+</span> projects
+            were entered from <span style={{ color: '#82D8EB' }}>71 countries</span> and
+            all <span style={{ color: '#8B70D1' }}>50 US states</span>, making this the
+            most globally represented season in our 30-year history. Only{' '}
+            <span style={{ color: '#FFB763' }}>11%</span> were selected as Nominees.
+          </p>
+        )}
       </motion.div>
 
       {/* 3. Four stat blocks */}
       <div
         data-content
+        className="grid grid-cols-2 md:flex"
         style={{
           maxWidth: 1000,
           width: '100%',
           margin: '0 auto',
           padding: '60px 0',
-          display: 'flex',
+          gap: 0,
         }}
       >
         {data.map((stat, i) => (

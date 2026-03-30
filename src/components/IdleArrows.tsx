@@ -11,10 +11,11 @@ const arrowPath = {
   chevron2: 'M100,60 L54,106',
 }
 
-function Arrow({ rotation, onClick, position }: {
+function Arrow({ rotation, onClick, position, isTouch }: {
   rotation: number
   onClick: () => void
   position: { top?: string | number; bottom?: string | number; left?: string | number; right?: string | number }
+  isTouch?: boolean
 }) {
   return (
     <motion.button
@@ -56,11 +57,21 @@ function Arrow({ rotation, onClick, position }: {
   )
 }
 
+function isTouchDevice() {
+  if (typeof window === 'undefined') return false
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0
+}
+
 export function IdleArrows({ active }: { active: boolean }) {
   const [idle, setIdle] = useState(false)
   const [context, setContext] = useState<'vertical' | 'trend' | 'none'>('none')
   const [, forceUpdate] = useState(0)
+  const [isTouch, setIsTouch] = useState(false)
   const timerRef = useRef<any>(null)
+
+  useEffect(() => {
+    setIsTouch(isTouchDevice())
+  }, [])
 
   // Detect context: are we in trends or vertical sections
   useEffect(() => {
@@ -110,7 +121,9 @@ export function IdleArrows({ active }: { active: boolean }) {
     }
   }, [active])
 
-  if (!active || !idle) return null
+  // Hide entirely on touch/mobile — MobileNav handles navigation
+  // On desktop, only show when idle
+  if (!active || !idle || isTouch) return null
 
   function clickDown() {
     // Simulate clicking the right side of screen (forward)
@@ -216,6 +229,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                 rotation={-90}
                 onClick={clickUp}
                 position={{ top: '15px', left: '50%', transform: 'translateX(-50%)' } as any}
+                isTouch={isTouch}
               />
             )}
             {!onGoodbye && (
@@ -223,13 +237,14 @@ export function IdleArrows({ active }: { active: boolean }) {
                 key="down"
                 rotation={90}
                 onClick={clickDown}
-                position={{ bottom: '35px', left: '50%', transform: 'translateX(-50%)' } as any}
+                position={{ bottom: isTouch ? '80px' : '35px', left: '50%', transform: 'translateX(-50%)' } as any}
+                isTouch={isTouch}
               />
             )}
           </>
         )
       })()}
-      {context === 'trend' && (() => {
+      {context === 'trend' && !isTouch && (() => {
         const special = getSpecialSlide()
         // Show left arrow unless on intro slide
         const showLeft = special !== 'intro'
@@ -243,6 +258,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                 rotation={180}
                 onClick={clickLeft}
                 position={{ top: 'calc(50% - 35px)', left: '15px' }}
+                isTouch={isTouch}
               />
             )}
             {showRight && special === 'intro' && (

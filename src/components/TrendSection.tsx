@@ -8,6 +8,23 @@ import type { TrendSection as TrendSectionType, DataStat, TrendVideo } from '@/s
 import { AnimatedBg } from './AnimatedBg'
 import { urlFor } from '@/sanity/image'
 
+// Use Next.js basePath from config — works at build time for static export
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+
+// Runtime basePath hook for client-side rendering
+function useBasePath() {
+  const [bp, setBp] = useState(basePath)
+  useEffect(() => {
+    // Detect from current page URL if the env var was empty at build time
+    if (!bp && typeof window !== 'undefined') {
+      const match = window.location.pathname.match(/^(\/preview\/[^/]+)/)
+      if (match) setBp(match[1])
+    }
+  }, [bp])
+  return bp
+}
+
+
 export const TREND_COLORS = [
   '#8B70D1', // purple
   '#82D8EB', // cyan
@@ -23,7 +40,8 @@ export const TREND_OVERRIDES: Record<number, {
   title: string
   body: React.ReactNode[]
   featuredProjects: { title: string; url?: string }[]
-  quotes?: { name: string; title?: string; quoteText: any[]; linkedInUrl?: string }[]
+  quotes?: { name: string; title?: string; quoteText: any[]; linkedInUrl?: string; image?: string }[]
+  video?: { type: 'local' | 'youtube'; src: string }
 }> = {
   0: {
     title: 'The Best AI Is Invisible',
@@ -41,16 +59,19 @@ export const TREND_OVERRIDES: Record<number, {
       {
         name: 'Tom Hale',
         title: 'CEO, Oura',
+        image: `${basePath}/judges/tom_hale_720.jpg`,
         quoteText: [{ _type: 'block', _key: 'q0', children: [{ _type: 'span', _key: 's0', text: '\u201CThe best AI category entrants avoided the trap of \u2018chat shall be its interface\u2019 and leaned more on personalization, interaction, and just-in-time content generation.\u201D' }], markDefs: [], style: 'normal' }],
       },
       {
         name: 'Jeanniey Walden',
         title: 'Founder & CMO, Liftoff Enterprises',
+        image: `${basePath}/judges/jeanniey__walden_360.jpg`,
         quoteText: [{ _type: 'block', _key: 'q1', children: [{ _type: 'span', _key: 's1', text: '\u201CWhat distinguished the best AI products was this: the AI was invisible to the person using it. You didn\u2019t feel like you were \u2018using an AI product.\u2019 You felt like the product finally worked the way it should have always worked. The moment someone has to think about the AI layer, the product has already lost.\u201D' }], markDefs: [], style: 'normal' }],
       },
       {
         name: 'Martin Cedergren',
         title: 'Creative Director, Xnet',
+        image: `${basePath}/judges/martin_cedergren_360.jpg`,
         quoteText: [{ _type: 'block', _key: 'q2', children: [{ _type: 'span', _key: 's2', text: '\u201CA focus on \u2018invisible\u2019 utility that automates drudgery rather than just adding a chatbot. Also, accessibility tools and real-time translation that solved actual human barriers with zero friction.\u201D' }], markDefs: [], style: 'normal' }],
       },
     ],
@@ -270,23 +291,51 @@ const MOCK_DATA_STATS: Record<number, { headline: string; subheadline: string; s
   },
 }
 
-export function TrendSection({ section, index }: { section: TrendSectionType; index: number }) {
-  const trendColor = TREND_COLORS[index % TREND_COLORS.length]
-  const overrideQuotes = TREND_OVERRIDES[index]?.quotes
-  const allQuotes = overrideQuotes || section.expertQuotes || []
-  const quotes = allQuotes.slice(0, 3) // Max 3 quotes
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') return window.matchMedia('(max-width: 768px)').matches
+    return false
+  })
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    setIsMobile(mq.matches)
+    // If mobile, immediately clear any scroll locks that may have been set
+    if (mq.matches) {
+      document.body.style.overflow = ''
+      document.documentElement.classList.remove('snap-active')
+    }
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return isMobile
+}
 
-  // Data module: use CMS data if available, fall back to mock
-  const mockData = MOCK_DATA_STATS[index]
-  const dataStats = section.dataStats && section.dataStats.length > 0
+export function TrendSection({ section, index }: { section: TrendSectionType; index: number }) {
+  const isMobile = useIsMobile()
+  const resolvedBasePath = useBasePath()
+  const trendColor = TREND_COLORS[index % TREND_COLORS.length]
+
+  // Quotes — from CMS, respecting toggle
+  const allQuotes = (section.showQuotes !== false && section.expertQuotes) ? section.expertQuotes : []
+  const quotes = allQuotes.slice(0, 3)
+
+  // Data module — from CMS, respecting toggle
+  const dataStats = section.showData !== false && section.dataStats && section.dataStats.length > 0
     ? section.dataStats
-    : mockData?.stats
-  const dataHeadline = section.dataContext || mockData?.headline
-  const dataSubheadline = mockData?.subheadline
+    : undefined
+  const dataHeadline = section.dataHeadline || section.dataContext
+  const dataSubheadline = section.dataSubheadline
   const hasData = !!dataStats && dataStats.length > 0
 
-  // Phases: 0 = title+copy, (1 = data if hasData), then quotes, then video if trendVideo is set
-  const hasVideo = section.showVideo !== false && !!section.trendVideo
+  // Video — from CMS trendVideo (primary) or legacy videoType/videoUrl fields
+  const videoConfig = section.showVideo && section.videoUrl
+    ? {
+        type: (section.videoType || 'youtube') as 'local' | 'youtube',
+        src: section.videoType === 'local' ? `${resolvedBasePath}${section.videoUrl}` : section.videoUrl,
+      }
+    : undefined
+  const hasVideo = section.showVideo !== false && (!!section.trendVideo || !!videoConfig)
   const totalPhases = 1 + (hasData ? 1 : 0) + quotes.length + (hasVideo ? 1 : 0)
   const dataPhase = hasData ? 1 : -1
   const quoteStartPhase = 1 + (hasData ? 1 : 0)
@@ -298,8 +347,9 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   const lockRef = useRef(false)
   const enterCooldownRef = useRef(false)
 
-  // Track when this section is in view
+  // Track when this section is in view (desktop only)
   useEffect(() => {
+    if (isMobile) return
     const el = sectionRef.current
     if (!el) return
     const observer = new IntersectionObserver(
@@ -357,9 +407,9 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
     return false
   }, [phase, index])
 
-  // Lock scrolling while inside an incomplete trend
+  // Lock scrolling while inside an incomplete trend (desktop only)
   useEffect(() => {
-    if (!isActive) return
+    if (!isActive || isMobile) return
 
     // Let the snap scroll finish, then lock
     document.documentElement.classList.remove('snap-active')
@@ -390,11 +440,11 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
         document.documentElement.classList.add('snap-active')
       }
     }
-  }, [isActive, phase])
+  }, [isActive, phase, isMobile])
 
-  // Expose advance/retreat for click-to-navigate (via custom events)
+  // Expose advance/retreat for click-to-navigate (via custom events, desktop only)
   useEffect(() => {
-    if (!isActive) return
+    if (!isActive || isMobile) return
     function handleAdvance() { advancePhase() }
     function handleRetreat() { retreatPhase() }
     window.addEventListener('trend-advance', handleAdvance)
@@ -405,8 +455,46 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
     }
   }, [isActive, advancePhase, retreatPhase])
 
-  // Reset to phase 0 when navigating via subnav
+  // Touch swipe support (desktop horizontal carousel only — mobile uses vertical scroll)
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
   useEffect(() => {
+    if (!isActive || isMobile) return
+    const el = sectionRef.current
+    if (!el) return
+
+    function handleTouchStart(e: TouchEvent) {
+      touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    }
+
+    function handleTouchEnd(e: TouchEvent) {
+      if (!touchStartRef.current) return
+      const dx = e.changedTouches[0].clientX - touchStartRef.current.x
+      const dy = e.changedTouches[0].clientY - touchStartRef.current.y
+      touchStartRef.current = null
+
+      // Only handle horizontal swipes (dx > dy)
+      if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return
+
+      if (dx < 0) {
+        // Swipe left = advance
+        advancePhase()
+      } else {
+        // Swipe right = retreat
+        retreatPhase()
+      }
+    }
+
+    el.addEventListener('touchstart', handleTouchStart, { passive: true })
+    el.addEventListener('touchend', handleTouchEnd, { passive: true })
+    return () => {
+      el.removeEventListener('touchstart', handleTouchStart)
+      el.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [isActive, advancePhase, retreatPhase])
+
+  // Reset to phase 0 when navigating via subnav (desktop only)
+  useEffect(() => {
+    if (isMobile) return
     function handleReset(e: Event) {
       const detail = (e as CustomEvent).detail
       if (detail?.index === index) {
@@ -418,6 +506,138 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
     return () => window.removeEventListener('trend-reset-phase', handleReset)
   }, [index])
 
+  // ── Mobile: vertical stacked layout ──
+  if (isMobile) {
+    return (
+      <div
+        ref={sectionRef}
+        id={`mobile-trend-${index}`}
+        data-mobile-trend={index}
+        data-nav-id={`mobile-trend-${index}`}
+        style={{
+          padding: '60px 20px',
+          position: 'relative',
+          overflow: 'hidden',
+          borderTop: index > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+        }}
+      >
+        <AnimatedBg variant={index} />
+
+        <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative' }}>
+          {/* Title + Body + Projects */}
+          <PhaseTitle
+            title={section.trendTitle}
+            body={section.trendBody}
+            featuredProjects={section.showFeaturedProjects !== false ? section.featuredProjects : undefined}
+            index={index}
+            color={trendColor}
+            isMobile={true}
+          />
+
+          {/* Data module */}
+          {hasData && (
+            <div style={{ marginTop: 48 }}>
+              <PhaseData
+                stats={dataStats!}
+                eyebrow={section.dataEyebrow}
+                headline={dataHeadline}
+                subheadline={dataSubheadline}
+                color={trendColor}
+                isActive={true}
+                isMobile={true}
+              />
+            </div>
+          )}
+
+          {/* Quotes — stacked vertically */}
+          {quotes.length > 0 && (
+            <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 32 }}>
+              {quotes.map((quote, i) => (
+                <div key={i}>
+                  {/* Quote mark */}
+                  <div style={{ fontSize: 48, lineHeight: 0.8, color: `${trendColor}25`, fontWeight: 700, marginBottom: -10, userSelect: 'none' }}>
+                    &ldquo;
+                  </div>
+                  {/* Quote text */}
+                  <div data-content style={{ fontSize: 16, lineHeight: 1.6, color: '#fff', marginBottom: 12 }}>
+                    <div className="report-links [&_p]:inline">
+                      <PortableText value={quote.quoteText} />
+                    </div>
+                  </div>
+                  {/* Attribution */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {(quote.headshot || quote.headshotUrl) ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={quote.headshot ? urlFor(quote.headshot).width(100).height(100).fit('crop').url() : `${resolvedBasePath}${quote.headshotUrl}`}
+                        alt={quote.name}
+                        style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          objectPosition: 'center 20%',
+                          flexShrink: 0,
+                          border: `2px solid ${trendColor}`,
+                        }}
+                      />
+                    ) : (
+                      <div style={{ width: 24, height: 2, background: trendColor, borderRadius: 2 }} />
+                    )}
+                    <div>
+                      <p style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>
+                        {quote.linkedInUrl ? (
+                          <a href={quote.linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }}>{quote.name}</a>
+                        ) : quote.name}
+                      </p>
+                      {quote.title && <p style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{quote.title}</p>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Video */}
+          {hasVideo && videoConfig && (
+            <div style={{ marginTop: 48, display: 'flex', justifyContent: 'center' }}>
+              <div style={{ width: '100%', maxWidth: 400, position: 'relative' }}>
+                {videoConfig.type === 'youtube' ? (() => {
+                  const youtubeId = videoConfig.src.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
+                  return youtubeId ? (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${youtubeId}?rel=0`}
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                      style={{
+                        width: '100%',
+                        aspectRatio: '16 / 9',
+                        borderRadius: 8,
+                        border: '1px solid rgba(255,255,255,0.12)',
+                      }}
+                    />
+                  ) : null
+                })() : (
+                  <video
+                    src={videoConfig.src}
+                    controls
+                    playsInline
+                    style={{
+                      width: '100%',
+                      borderRadius: 8,
+                      border: '1px solid rgba(255,255,255,0.12)',
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // ── Desktop: horizontal carousel with phases ──
   return (
     <div
       data-trend-active={isActive ? 'true' : undefined}
@@ -451,10 +671,9 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
           }}
         >
           <PhaseTitle
-            title={TREND_OVERRIDES[index]?.title || section.trendTitle}
-            bodyOverride={TREND_OVERRIDES[index]?.body}
+            title={section.trendTitle}
             body={section.trendBody}
-            featuredProjects={TREND_OVERRIDES[index]?.featuredProjects || section.featuredProjects}
+            featuredProjects={section.showFeaturedProjects !== false ? section.featuredProjects : undefined}
             index={index}
             color={trendColor}
           />
@@ -548,17 +767,17 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
 function PhaseTitle({
   title,
   body,
-  bodyOverride,
   featuredProjects,
   index,
   color,
+  isMobile,
 }: {
   title: string
   body?: any[]
-  bodyOverride?: React.ReactNode[]
   featuredProjects?: { title: string; url?: string }[]
   index: number
   color: string
+  isMobile?: boolean
 }) {
   // Strip emojis from title
   const cleanTitle = title.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim()
@@ -589,12 +808,12 @@ function PhaseTitle({
         {/* Title — large, editorial */}
         <h2
           style={{
-            fontSize: 48,
+            fontSize: isMobile ? 28 : 48,
             fontWeight: 400,
             color: '#fff',
-            lineHeight: '58px',
-            letterSpacing: '-2px',
-            marginBottom: 40,
+            lineHeight: isMobile ? '36px' : '58px',
+            letterSpacing: isMobile ? '-1px' : '-2px',
+            marginBottom: isMobile ? 24 : 40,
             maxWidth: 750,
           }}
         >
@@ -612,56 +831,71 @@ function PhaseTitle({
         />
 
         {/* Body — two column feel with narrower text */}
-        {(bodyOverride || body) && (
-          <div style={{ display: 'flex', gap: 60 }}>
+        {body && (
+          <div style={{ display: 'flex', gap: isMobile ? 0 : 60 }}>
             <div
               data-content
               style={{
-                fontSize: 16,
+                fontSize: isMobile ? 15 : 16,
                 lineHeight: '28px',
                 color: '#D4D4D4',
-                maxWidth: 749,
-                flex: '0 0 auto',
+                maxWidth: isMobile ? '100%' : 749,
+                flex: isMobile ? '1 1 auto' : '0 0 auto',
+                minWidth: 0,
               }}
             >
-              {bodyOverride ? (
-                <div className="report-links">
-                  {bodyOverride.map((p, i) => (
-                    <p key={i} style={{ marginBottom: 16 }}>{p}</p>
-                  ))}
-                </div>
-              ) : body ? (
-                <div className="report-links [&_p]:mb-4">
-                  <PortableText value={body} />
-                </div>
-              ) : null}
+              <div className="report-links [&_p]:mb-4">
+                <PortableText value={body} />
+              </div>
 
               {/* Featured projects */}
               {featuredProjects && featuredProjects.length > 0 && (
                 <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                  <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', color: color, fontWeight: 500, marginBottom: 8 }}>
+                  <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', color: color, fontWeight: 500, marginBottom: isMobile ? 12 : 8 }}>
                     Standout Projects
                   </p>
-                  <p style={{ fontSize: 14, color: '#999', lineHeight: 1.6 }}>
-                    {featuredProjects.map((project, i) => (
-                      <span key={i}>
-                        {i > 0 && '  ·  '}
-                        {project.url ? (
-                          <a
-                            href={project.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="report-link"
-                            style={{ color: '#D4D4D4', fontWeight: 500 }}
-                          >
-                            {project.title}
-                          </a>
-                        ) : (
-                          <span style={{ color: '#D4D4D4' }}>{project.title}</span>
-                        )}
-                      </span>
-                    ))}
-                  </p>
+                  {isMobile ? (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {featuredProjects.map((project, i) => (
+                        <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 4, height: 4, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                          {project.url ? (
+                            <a
+                              href={project.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ color: '#D4D4D4', fontWeight: 500, fontSize: 14, lineHeight: 1.4, textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.15)' }}
+                            >
+                              {project.title}
+                            </a>
+                          ) : (
+                            <span style={{ color: '#D4D4D4', fontSize: 14 }}>{project.title}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p style={{ fontSize: 14, color: '#999', lineHeight: 1.6 }}>
+                      {featuredProjects.map((project, i) => (
+                        <span key={i}>
+                          {i > 0 && '  ·  '}
+                          {project.url ? (
+                            <a
+                              href={project.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="report-link"
+                              style={{ color: '#D4D4D4', fontWeight: 500 }}
+                            >
+                              {project.title}
+                            </a>
+                          ) : (
+                            <span style={{ color: '#D4D4D4' }}>{project.title}</span>
+                          )}
+                        </span>
+                      ))}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -680,28 +914,28 @@ function PhaseTitle({
 // Counter-clockwise: newest enters right-center, older ones rotate left and up
 function getQuoteLayout(position: number, visibleCount: number) {
   if (visibleCount === 1) {
-    // Single quote: centered
-    return { top: '50%', left: '50%', xOffset: '-50%', yOffset: '-50%', scale: 1, opacity: 1, maxWidth: 600 }
+    // Single quote: shifted 30px left of center so image extends further left
+    return { top: '50%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '-50%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
   }
   if (visibleCount === 2) {
     if (position === 0) {
-      // Newest: centered but moved up above the dots
-      return { top: '40%', left: '50%', xOffset: '-50%', yOffset: '-50%', scale: 1, opacity: 1, maxWidth: 550 }
+      // Newest: shifted left, wider
+      return { top: '40%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '-50%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
     }
     // Older: top-left
-    return { top: '15%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 420 }
+    return { top: '15%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 'min(35vw, 500px)' }
   }
   // 3 quotes
   if (position === 0) {
-    // Newest: above the 2nd quote, 5px left of its left margin
-    return { top: '-8%', left: 'calc(50% - 5px)', xOffset: '-50%', yOffset: '0%', scale: 1, opacity: 1, maxWidth: 550 }
+    // Newest: above the 2nd quote, shifted left
+    return { top: '-8%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '0%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
   }
   if (position === 1) {
     // 2nd quote: down and right, shrinks and dims
-    return { top: '52%', left: '35%', xOffset: '-50%', yOffset: '-50%', scale: 0.8, opacity: 0.35, maxWidth: 800 }
+    return { top: '52%', left: 'calc(35% - 50px)', xOffset: '-50%', yOffset: '-50%', scale: 0.8, opacity: 0.35, maxWidth: 'min(65vw, 900px)' }
   }
   // Oldest: stays top-left, unchanged
-  return { top: '15%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 420 }
+  return { top: '15%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 'min(35vw, 500px)' }
 }
 
 function PhaseQuote({
@@ -712,14 +946,16 @@ function PhaseQuote({
   visible = false,
   videoActive = false,
   color,
+  isMobile,
 }: {
-  quote: { name: string; title?: string; quoteText: any[]; linkedInUrl?: string }
+  quote: { name: string; title?: string; quoteText: any[]; linkedInUrl?: string; headshot?: any; headshotUrl?: string }
   position: number
   visibleCount: number
   isNew: boolean
   visible?: boolean
   videoActive?: boolean
   color: string
+  isMobile?: boolean
 }) {
   const layout = getQuoteLayout(position, visibleCount)
   const isLatest = position === 0
@@ -727,6 +963,147 @@ function PhaseQuote({
   // When video is active, all quotes dim further and the newest shrinks too
   const finalOpacity = !visible ? 0 : videoActive ? 0.15 : layout.opacity
   const finalScale = videoActive && isLatest ? 0.8 : layout.scale
+
+  const isNewest = position === 0
+  // Resolve headshot: prefer Sanity image upload, fall back to URL path
+  const bp = typeof window !== 'undefined' ? (window.location.pathname.match(/^(\/preview\/[^/]+)/)?.[1] || basePath) : basePath
+  const resolvedHeadshot = quote.headshot
+    ? urlFor(quote.headshot).width(250).height(250).fit('crop').url()
+    : quote.headshotUrl
+      ? `${bp}${quote.headshotUrl}`
+      : undefined
+  const hasImage = !!resolvedHeadshot
+
+  // Attribution line (shared)
+  const attributionLine = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      {hasImage && !isNewest && !isMobile ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={resolvedHeadshot}
+          alt={quote.name}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            objectFit: 'cover',
+            objectPosition: 'center 20%',
+            flexShrink: 0,
+            border: `2px solid ${color}`,
+          }}
+        />
+      ) : hasImage && isMobile ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={resolvedHeadshot}
+          alt={quote.name}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            objectFit: 'cover',
+            objectPosition: 'center 20%',
+            flexShrink: 0,
+            border: `2px solid ${color}`,
+          }}
+        />
+      ) : (
+        <div style={{ width: 40, height: 2, background: color, borderRadius: 2 }} />
+      )}
+      <div>
+        <p style={{ fontSize: isMobile ? 14 : 16, fontWeight: 500, color: '#fff' }}>
+          {quote.linkedInUrl ? (
+            <a href={quote.linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }}>{quote.name}</a>
+          ) : quote.name}
+        </p>
+        {quote.title && (
+          <p style={{ fontSize: isMobile ? 11 : 13, color: '#999', marginTop: 2 }}>{quote.title}</p>
+        )}
+      </div>
+    </div>
+  )
+
+  // Desktop newest quote with large image: image to the left, everything else to the right
+  const quoteContent = !isMobile && isNewest && hasImage ? (
+    <div style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
+      {/* Large portrait — centered vertically against the whole quote block */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={resolvedHeadshot}
+        alt={quote.name}
+        style={{
+          width: 125,
+          height: 125,
+          borderRadius: '50%',
+          objectFit: 'cover',
+          objectPosition: 'center 20%',
+          flexShrink: 0,
+          border: `3px solid ${color}`,
+        }}
+      />
+
+      {/* Quote mark + text + attribution */}
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 100, lineHeight: 0.8, color: 'rgba(139, 112, 209, 0.15)', fontWeight: 700, marginBottom: -24, userSelect: 'none' }}>
+          &ldquo;
+        </div>
+        <div data-content style={{ fontSize: 19, lineHeight: 1.45, color: '#fff', fontWeight: 400, marginBottom: 20 }}>
+          <div className="report-links [&_p]:inline">
+            <PortableText value={quote.quoteText} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 40, height: 2, background: color, borderRadius: 2 }} />
+          <div>
+            <p style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>
+              {quote.linkedInUrl ? (
+                <a href={quote.linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }}>{quote.name}</a>
+              ) : quote.name}
+            </p>
+            {quote.title && <p style={{ fontSize: 13, color: '#999', marginTop: 2 }}>{quote.title}</p>}
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <>
+      {/* Quote mark */}
+      <div style={{ fontSize: isMobile ? 60 : 100, lineHeight: 0.8, color: 'rgba(139, 112, 209, 0.15)', fontWeight: 700, marginBottom: isMobile ? -16 : -24, userSelect: 'none' }}>
+        &ldquo;
+      </div>
+      {/* Quote text */}
+      <div data-content style={{ fontSize: isMobile ? 16 : 19, lineHeight: isMobile ? 1.5 : 1.45, color: '#fff', fontWeight: 400, marginBottom: isMobile ? 14 : 20 }}>
+        <div className="report-links [&_p]:inline">
+          <PortableText value={quote.quoteText} />
+        </div>
+      </div>
+      {attributionLine}
+    </>
+  )
+
+  if (isMobile) {
+    // Mobile: only show the current (newest) quote, centered
+    const mobileOpacity = !visible ? 0 : isLatest ? 1 : 0.2
+    return (
+      <motion.div
+        initial={isNew ? { opacity: 0, x: 100 } : false}
+        animate={{ opacity: mobileOpacity, x: 0 }}
+        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        style={{
+          position: 'absolute',
+          top: '5%',
+          left: 0,
+          right: 0,
+          padding: '0 4px',
+          transform: isLatest ? 'none' : 'scale(0.85)',
+          transformOrigin: 'top center',
+          pointerEvents: isLatest ? 'auto' : 'none',
+        }}
+      >
+        {quoteContent}
+      </motion.div>
+    )
+  }
 
   return (
     <motion.div
@@ -746,59 +1123,7 @@ function PhaseQuote({
         transformOrigin: 'top left',
       }}
     >
-      {/* Large quote mark */}
-      <div
-        style={{
-          fontSize: 100,
-          lineHeight: 0.8,
-          color: 'rgba(139, 112, 209, 0.15)',
-          fontWeight: 700,
-          marginBottom: -24,
-          userSelect: 'none',
-        }}
-      >
-        &ldquo;
-      </div>
-
-      {/* Quote text */}
-      <div
-        data-content
-        style={{
-          fontSize: 20,
-          lineHeight: 1.5,
-          color: '#fff',
-          fontWeight: 400,
-          marginBottom: 20,
-        }}
-      >
-        <div className="report-links [&_p]:inline">
-          <PortableText value={quote.quoteText} />
-        </div>
-      </div>
-
-      {/* Attribution */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ width: 40, height: 2, background: color, borderRadius: 2 }} />
-        <div>
-          <p style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>
-            {quote.linkedInUrl ? (
-              <a
-                href={quote.linkedInUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#fff', textDecoration: 'none' }}
-              >
-                {quote.name}
-              </a>
-            ) : (
-              quote.name
-            )}
-          </p>
-          {quote.title && (
-            <p style={{ fontSize: 13, color: '#999', marginTop: 2 }}>{quote.title}</p>
-          )}
-        </div>
-      </div>
+      {quoteContent}
     </motion.div>
   )
 }
@@ -809,16 +1134,20 @@ function PhaseQuote({
 
 function PhaseData({
   stats,
+  eyebrow,
   headline,
   subheadline,
   color,
   isActive,
+  isMobile,
 }: {
   stats: DataStat[]
+  eyebrow?: string
   headline?: string
   subheadline?: string
   color: string
   isActive: boolean
+  isMobile?: boolean
 }) {
   const [hasAnimated, setHasAnimated] = useState(false)
   const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set())
@@ -845,8 +1174,8 @@ function PhaseData({
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 80,
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+        gap: isMobile ? 32 : 80,
         alignItems: 'center',
       }}
     >
@@ -862,17 +1191,17 @@ function PhaseData({
             marginBottom: 24,
           }}
         >
-          What Judges Said
+          {eyebrow || 'What Judges Said'}
         </div>
         {headline && (
           <h2
             style={{
-              fontSize: 42,
+              fontSize: isMobile ? 24 : 42,
               fontWeight: 400,
               color: '#fff',
               lineHeight: 1.15,
-              letterSpacing: '-1.5px',
-              marginBottom: 20,
+              letterSpacing: isMobile ? '-0.5px' : '-1.5px',
+              marginBottom: isMobile ? 12 : 20,
             }}
           >
             {headline}
@@ -883,7 +1212,7 @@ function PhaseData({
             style={{
               fontSize: 16,
               lineHeight: 1.6,
-              color: '#888',
+              color: '#D4D4D4',
             }}
           >
             {subheadline}
@@ -912,7 +1241,7 @@ function PhaseData({
               {/* Number */}
               <div
                 style={{
-                  fontSize: 64,
+                  fontSize: isMobile ? 40 : 64,
                   fontWeight: 400,
                   color: '#fff',
                   lineHeight: 1,
@@ -949,7 +1278,7 @@ function PhaseData({
               <div
                 style={{
                   fontSize: 13,
-                  color: '#888',
+                  color: '#D4D4D4',
                   letterSpacing: 0.5,
                 }}
               >

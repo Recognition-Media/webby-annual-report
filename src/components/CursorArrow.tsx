@@ -9,6 +9,11 @@ function buildSectionIds(trendCount: number) {
   return ids
 }
 
+function isTouchDevice() {
+  if (typeof window === 'undefined') return false
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0
+}
+
 export function CursorArrow({ active, trendCount }: { active: boolean; trendCount: number }) {
   const sectionIds = useMemo(() => buildSectionIds(trendCount), [trendCount])
   const cursorRef = useRef<HTMLDivElement>(null)
@@ -184,7 +189,7 @@ export function CursorArrow({ active, trendCount }: { active: boolean; trendCoun
     return () => document.removeEventListener('click', handleClick)
   }, [active, handleClick])
 
-  if (!active) return null
+  if (!active || isTouchDevice()) return null
 
   // Rotation logic:
   // - Not rotated yet: 0° (pointing right, initial state)

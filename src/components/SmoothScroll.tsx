@@ -23,10 +23,14 @@ export function ReportScroll({
   const [dotsVisible, setDotsVisible] = useState(false)
   const [inTrend, setInTrend] = useState(false)
 
-  // Enable scroll-snap on html when active
+  // Enable scroll-snap on html when active (desktop only)
   useEffect(() => {
     if (!active) return
-    document.documentElement.classList.add('snap-active')
+    const isMobile = window.matchMedia('(max-width: 768px)').matches
+
+    if (!isMobile) {
+      document.documentElement.classList.add('snap-active')
+    }
     window.scrollTo(0, 0)
 
     // Track active section
@@ -42,8 +46,8 @@ export function ReportScroll({
       { threshold: 0.5 }
     )
 
-    // Prevent scrolling past the trends section until goodbye is shown
-    let goodbyeUnlocked = false
+    // Prevent scrolling past the trends section until goodbye is shown (desktop only)
+    let goodbyeUnlocked = isMobile // always unlocked on mobile
     function clampScroll() {
       if (goodbyeUnlocked) return
       const trends = document.getElementById('trends')
@@ -57,7 +61,9 @@ export function ReportScroll({
     function unlockGoodbye() {
       goodbyeUnlocked = true
     }
-    window.addEventListener('scroll', clampScroll)
+    if (!isMobile) {
+      window.addEventListener('scroll', clampScroll)
+    }
     window.addEventListener('trend-next-or-exit', unlockGoodbye)
 
     setTimeout(() => {
@@ -77,7 +83,9 @@ export function ReportScroll({
 
     return () => {
       document.documentElement.classList.remove('snap-active')
-      window.removeEventListener('scroll', clampScroll)
+      if (!isMobile) {
+        window.removeEventListener('scroll', clampScroll)
+      }
       window.removeEventListener('trend-next-or-exit', unlockGoodbye)
       observer.disconnect()
       mutObserver.disconnect()

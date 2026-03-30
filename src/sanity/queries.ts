@@ -65,6 +65,8 @@ export const reportBySlugQuery = groq`
         title,
         description
       },
+      videoType,
+      videoUrl,
       sectionImages
     },
     thankYouEyebrow,

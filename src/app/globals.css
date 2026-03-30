@@ -196,3 +196,19 @@ html.snap-active {
 html.snap-active section[data-snap] {
   scroll-snap-align: start;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Mobile overrides — max-width: 768px                                */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 768px) {
+  /* Disable scroll-snap on mobile — let users scroll naturally */
+  html.snap-active {
+    scroll-snap-type: none;
+  }
+
+  /* Hide custom cursor on touch devices */
+  * {
+    cursor: auto !important;
+  }
+}
