@@ -499,6 +499,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
       const detail = (e as CustomEvent).detail
       if (detail?.index === index) {
         setPhase(0)
+        setCompleted(false)
         setVideoClosed(false)
       }
     }
