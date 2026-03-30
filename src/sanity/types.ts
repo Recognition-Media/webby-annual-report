@@ -48,6 +48,14 @@ export interface DataStat {
   label: string
 }
 
+export interface TrendVideo {
+  videoFile: { url: string }
+  aspectRatio: '9:16' | '16:9' | '1:1'
+  name: string
+  title?: string
+  description?: string
+}
+
 export interface TrendSection {
   trendTitle: string
   trendBody?: PortableTextBlock[]
@@ -56,6 +64,7 @@ export interface TrendSection {
   dataStats?: DataStat[]
   expertQuotes?: ExpertQuote[]
   sectionImages?: (SanityImage & { alt?: string })[]
+  trendVideo?: TrendVideo
 }
 
 export interface CarouselImage {
