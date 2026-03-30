@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const IDLE_TIMEOUT = 5000
+const IDLE_TIMEOUT = 2000
 
 const arrowPath = {
   shaft: 'M-30,60 L100,60',
@@ -19,32 +19,38 @@ function Arrow({ rotation, onClick, position }: {
   return (
     <motion.button
       initial={{ opacity: 0 }}
-      animate={{ opacity: 0.3 }}
+      animate={{ opacity: 0.75 }}
       exit={{ opacity: 0 }}
-      whileHover={{ opacity: 0.7 }}
-      transition={{ duration: 0.5 }}
+      whileHover={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
       onClick={(e) => { e.stopPropagation(); onClick() }}
       className="no-custom-cursor"
       style={{
         position: 'fixed',
         ...position,
         zIndex: 50,
-        background: 'none',
-        border: 'none',
+        background: 'rgba(0, 0, 0, 0.5)',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        borderRadius: '50%',
         cursor: 'pointer',
-        padding: 20,
+        width: 64,
+        height: 64,
+        padding: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
       <svg
-        width="42"
-        height="42"
+        width="28"
+        height="28"
         viewBox="0 0 120 120"
         fill="none"
         style={{ transform: `rotate(${rotation}deg)` }}
       >
-        <line x1="-30" y1="60" x2="100" y2="60" stroke="white" strokeWidth="1.5" />
-        <line x1="100" y1="60" x2="54" y2="14" stroke="white" strokeWidth="1.5" />
-        <line x1="100" y1="60" x2="54" y2="106" stroke="white" strokeWidth="1.5" />
+        <line x1="-30" y1="60" x2="100" y2="60" stroke="white" strokeWidth="5" strokeLinecap="round" />
+        <line x1="100" y1="60" x2="54" y2="14" stroke="white" strokeWidth="5" strokeLinecap="round" />
+        <line x1="100" y1="60" x2="54" y2="106" stroke="white" strokeWidth="5" strokeLinecap="round" />
       </svg>
     </motion.button>
   )
@@ -83,23 +89,20 @@ export function IdleArrows({ active }: { active: boolean }) {
     }
   }, [active])
 
-  // Idle timer — reset on any interaction
+  // Idle timer — show after initial delay, stay visible
   useEffect(() => {
     if (!active) return
 
     function resetIdle() {
-      setIdle(false)
       clearTimeout(timerRef.current)
       timerRef.current = setTimeout(() => setIdle(true), IDLE_TIMEOUT)
     }
 
     resetIdle()
-    window.addEventListener('click', resetIdle)
     window.addEventListener('scroll', resetIdle)
 
     return () => {
       clearTimeout(timerRef.current)
-      window.removeEventListener('click', resetIdle)
       window.removeEventListener('scroll', resetIdle)
     }
   }, [active])
@@ -128,7 +131,6 @@ export function IdleArrows({ active }: { active: boolean }) {
         }
       }
     }
-    setIdle(false)
   }
 
   function clickUp() {
@@ -149,7 +151,6 @@ export function IdleArrows({ active }: { active: boolean }) {
         }
       }
     }
-    setIdle(false)
   }
 
   function clickRight() {
@@ -162,7 +163,6 @@ export function IdleArrows({ active }: { active: boolean }) {
         window.dispatchEvent(new Event('trend-advance'))
       }
     }
-    setIdle(false)
   }
 
   function clickLeft() {
@@ -179,7 +179,6 @@ export function IdleArrows({ active }: { active: boolean }) {
         window.dispatchEvent(new Event('trend-retreat'))
       }
     }
-    setIdle(false)
   }
 
   return (

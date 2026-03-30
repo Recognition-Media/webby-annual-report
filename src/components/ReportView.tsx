@@ -15,7 +15,6 @@ import { ReportFooter } from './ReportFooter'
 import { AnalyticsScripts } from './AnalyticsScripts'
 import { ScrollReveal } from './ScrollReveal'
 import { ReportScroll } from './SmoothScroll'
-import { CursorArrow } from './CursorArrow'
 import { AnimatedBg } from './AnimatedBg'
 import { IdleArrows } from './IdleArrows'
 
@@ -146,10 +145,7 @@ export function ReportView({ report }: { report: Report }) {
         )}
       </AnimatePresence>
 
-      {/* Custom cursor arrow */}
-      <CursorArrow active={entered} trendCount={report.trendSections?.length ?? 0} />
-
-      {/* Idle navigation arrows */}
+      {/* Navigation arrows */}
       <IdleArrows active={entered} />
 
       {/* Report content — snap scrolling + nav dots activate after entry */}
