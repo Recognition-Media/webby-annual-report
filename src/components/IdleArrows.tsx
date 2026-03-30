@@ -296,7 +296,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                   top: 'calc(50% - 28px)',
                   right: '20px',
                   zIndex: 50,
-                  background: 'rgba(0, 0, 0, 0.85)',
+                  background: '#000',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: 32,
                   cursor: 'pointer',

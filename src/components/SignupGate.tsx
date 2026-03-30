@@ -105,14 +105,11 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
           </div>
         )}
 
-        <h3 className="uppercase font-bold text-xs md:text-sm tracking-wider pb-3 md:pb-4">
-          Welcome to the Webby Awards Report
+        <h3 className="uppercase font-bold text-xs md:text-sm tracking-wider pb-3 md:pb-4 whitespace-pre-line">
+          {report.signupTitle || 'Welcome to the Webby Awards Report'}
         </h3>
-        <p className="text-xs md:text-sm mb-5 md:mb-8 leading-relaxed">
-          Please provide us with some basic info to access the report.
-          <br className="hidden md:block" />
-          <span className="md:hidden"> </span>
-          Feel free to share among your team and colleagues.
+        <p className="text-xs md:text-sm mb-5 md:mb-8 leading-relaxed whitespace-pre-line">
+          {report.signupSubhead || 'Please provide us with some basic info to access the report.\nFeel free to share among your team and colleagues.'}
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -159,9 +156,9 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
           <button
             type="submit"
             disabled={submitting}
-            className="flex items-center justify-between w-full max-w-[280px] mx-auto bg-black text-white uppercase font-medium py-3 md:py-4 px-5 md:px-6 mt-4 md:mt-6 text-xs md:text-sm tracking-wider hover:bg-[#333] transition-colors disabled:opacity-50 cursor-pointer"
+            className="flex items-center justify-center gap-2 w-full max-w-[280px] mx-auto bg-black text-white uppercase font-medium py-3 md:py-4 px-5 md:px-6 mt-4 md:mt-6 text-xs md:text-sm tracking-wider hover:bg-[#333] transition-colors disabled:opacity-50 cursor-pointer"
           >
-            <span>{submitting ? 'Submitting...' : 'Login'}</span>
+            <span>{submitting ? 'Submitting...' : (report.submitButtonText || 'Access Report')}</span>
             <span className="text-base md:text-lg">→</span>
           </button>
         </form>

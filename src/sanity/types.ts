@@ -142,6 +142,8 @@ export interface Report {
   thankYouCtaTitle?: string
   thankYouCtaDescription?: string
   thankYouCtaUrl?: string
+  signupTitle?: string
+  signupSubhead?: string
   formFields?: FormField[]
   submitButtonText?: string
   successMessage?: string

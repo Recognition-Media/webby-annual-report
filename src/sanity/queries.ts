@@ -79,6 +79,8 @@ export const reportBySlugQuery = groq`
     thankYouCtaTitle,
     thankYouCtaDescription,
     thankYouCtaUrl,
+    signupTitle,
+    signupSubhead,
     formFields,
     submitButtonText,
     successMessage,

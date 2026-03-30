@@ -92,6 +92,8 @@ export default defineType({
     { name: 'thankYouCtaUrl', title: 'CTA Card URL', type: 'url', group: 'thankYou' },
 
     // Signup Form
+    { name: 'signupTitle', title: 'Form Title', type: 'text', rows: 2, group: 'signup', description: 'Supports line breaks. e.g. "Welcome to the\\n30th Annual Webby Awards"' },
+    { name: 'signupSubhead', title: 'Form Subhead', type: 'text', rows: 2, group: 'signup', description: 'e.g. "Please provide us with some basic info..."' },
     { name: 'formFields', title: 'Signup Form Fields', type: 'array', of: [{ type: 'formField' }], group: 'signup' },
     { name: 'submitButtonText', title: 'Submit Button Text', type: 'string', initialValue: 'Access Report', group: 'signup' },
     { name: 'successMessage', title: 'Success Message', type: 'text', group: 'signup' },
