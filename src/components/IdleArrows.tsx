@@ -194,10 +194,8 @@ export function IdleArrows({ active }: { active: boolean }) {
       const trendPhase = trendActive.getAttribute('data-trend-phase')
       const trendIndex = trendActive.getAttribute('data-trend-index')
       if (trendPhase === '0' && trendIndex === '0') {
-        // Back to judging
-        document.body.style.overflow = ''
-        document.documentElement.classList.add('snap-active')
-        document.getElementById('how-judged')?.scrollIntoView({ behavior: 'smooth' })
+        // Back to intro slide
+        window.dispatchEvent(new Event('trend-prev'))
       } else {
         window.dispatchEvent(new Event('trend-retreat'))
       }
@@ -233,10 +231,8 @@ export function IdleArrows({ active }: { active: boolean }) {
       })()}
       {context === 'trend' && (() => {
         const special = getSpecialSlide()
-        const trendEl = document.querySelector('[data-trend-active]')
-        const isFirstTrendStart = trendEl?.getAttribute('data-trend-index') === '0' && trendEl?.getAttribute('data-trend-phase') === '0'
         // Show left arrow unless on intro slide
-        const showLeft = special !== 'intro' && (!isFirstTrendStart || special === 'thankYou')
+        const showLeft = special !== 'intro'
         // Show right arrow unless on Thank You slide
         const showRight = special !== 'thankYou'
         return (
@@ -249,7 +245,66 @@ export function IdleArrows({ active }: { active: boolean }) {
                 position={{ top: 'calc(50% - 35px)', left: '15px' }}
               />
             )}
-            {showRight && (
+            {showRight && special === 'intro' && (
+              <motion.button
+                key="right-pill"
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: 0.75,
+                  boxShadow: [
+                    '0 0 0px rgba(130, 216, 235, 0)',
+                    '0 0 12px rgba(130, 216, 235, 0.3)',
+                    '0 0 0px rgba(130, 216, 235, 0)',
+                  ],
+                }}
+                exit={{ opacity: 0.75 }}
+                whileHover={{ opacity: 0.85 }}
+                transition={{
+                  opacity: { duration: 0.6 },
+                  boxShadow: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+                }}
+                onClick={(e) => { e.stopPropagation(); clickRight() }}
+                className="no-custom-cursor"
+                style={{
+                  position: 'fixed',
+                  top: 'calc(50% - 28px)',
+                  right: '20px',
+                  zIndex: 50,
+                  background: 'rgba(0, 0, 0, 0.85)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: 32,
+                  cursor: 'pointer',
+                  padding: '14px 24px 14px 20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  color: '#fff',
+                }}
+              >
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: 2.5,
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                }}>
+                  See the Trends
+                </span>
+                <motion.svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 120 120"
+                  fill="none"
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <line x1="-30" y1="60" x2="100" y2="60" stroke="white" strokeWidth="5" strokeLinecap="round" />
+                  <line x1="100" y1="60" x2="54" y2="14" stroke="white" strokeWidth="5" strokeLinecap="round" />
+                  <line x1="100" y1="60" x2="54" y2="106" stroke="white" strokeWidth="5" strokeLinecap="round" />
+                </motion.svg>
+              </motion.button>
+            )}
+            {showRight && special !== 'intro' && (
               <Arrow
                 key="right"
                 rotation={0}

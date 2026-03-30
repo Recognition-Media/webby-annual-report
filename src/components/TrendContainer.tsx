@@ -33,8 +33,30 @@ export function TrendContainer({
   useEffect(() => {
     if (!isActive) return
     if (activeTrend === 0 || activeTrend === trendCount - 1) {
-      document.body.style.overflow = 'hidden'
-      return () => { document.body.style.overflow = '' }
+      // Delay lock to let snap scroll finish centering
+      document.documentElement.classList.remove('snap-active')
+      const lockTimeout = setTimeout(() => {
+        document.body.style.overflow = 'hidden'
+      }, 600)
+
+      // Allow scroll up on intro slide to go back to previous section
+      function handleWheel(e: WheelEvent) {
+        if (activeTrend !== 0) return
+        if (Math.abs(e.deltaY) < 5) return
+        if (e.deltaY < 0) {
+          document.body.style.overflow = ''
+          document.documentElement.classList.add('snap-active')
+        }
+      }
+
+      window.addEventListener('wheel', handleWheel, { passive: true, capture: true })
+
+      return () => {
+        clearTimeout(lockTimeout)
+        window.removeEventListener('wheel', handleWheel, true)
+        document.body.style.overflow = ''
+        document.documentElement.classList.add('snap-active')
+      }
     }
   }, [isActive, activeTrend, trendCount])
 
