@@ -40,19 +40,7 @@ export function TrendContainer({
       setActiveTrend((t) => Math.max(t - 1, 0))
     }
     function handleNextOrExit() {
-      setActiveTrend((t) => {
-        if (t >= trendCount - 1) {
-          // Last trend — exit to thank-you
-          document.body.style.overflow = ''
-          document.documentElement.classList.remove('snap-active')
-          const thankYou = document.getElementById('thank-you')
-          if (thankYou) {
-            thankYou.scrollIntoView({ behavior: 'smooth' })
-          }
-          return t
-        }
-        return t + 1
-      })
+      setActiveTrend((t) => Math.min(t + 1, trendCount - 1))
     }
 
     window.addEventListener('trend-next', handleNextTrend)
