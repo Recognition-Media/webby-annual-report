@@ -5,6 +5,7 @@ import trendSection from './objects/trendSection'
 import featuredProject from './objects/featuredProject'
 import expertQuote from './objects/expertQuote'
 import dataStat from './objects/dataStat'
+import trendVideo from './objects/trendVideo'
 import carouselImage from './objects/carouselImage'
 import formField from './objects/formField'
 import footerLink from './objects/footerLink'
@@ -17,6 +18,7 @@ export const schemaTypes = [
   featuredProject,
   expertQuote,
   dataStat,
+  trendVideo,
   carouselImage,
   formField,
   footerLink,
