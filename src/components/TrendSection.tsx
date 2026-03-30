@@ -1026,10 +1026,10 @@ function PhaseVideo({
   const cssAspectRatio = trendVideo.aspectRatio.replace(':', '/')
   const videoConstraints: React.CSSProperties =
     trendVideo.aspectRatio === '16:9'
-      ? { maxWidth: '80vw', maxHeight: '70vh' }
+      ? { maxWidth: '66vw', maxHeight: '57vh' }
       : trendVideo.aspectRatio === '1:1'
-        ? { maxHeight: '60vh', maxWidth: '60vh' }
-        : { maxHeight: '70vh', maxWidth: '40vh' } // 9:16
+        ? { maxHeight: '50vh', maxWidth: '50vh' }
+        : { maxHeight: '57vh', maxWidth: '33vh' } // 9:16
 
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -1156,7 +1156,7 @@ function PhaseVideo({
           {trendVideo.name}
         </p>
         {trendVideo.title && (
-          <p style={{ fontSize: 13, color: '#999', margin: '2px 0 0' }}>
+          <p style={{ fontSize: 13, color: '#ccc', margin: '2px 0 0' }}>
             {trendVideo.title}
           </p>
         )}
