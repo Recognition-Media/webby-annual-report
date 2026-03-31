@@ -9,18 +9,15 @@ export function IntroLetter({ report }: { report: Report }) {
     <section
       id="welcome-letter"
       data-snap
-      className="relative overflow-hidden px-5 md:px-[60px] pt-16 md:pt-0"
+      className="relative overflow-hidden px-5 md:px-[60px] pt-16 md:pt-[calc(13vh+5px)]"
       style={{
         background: '#191919',
         minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
       }}
     >
 
       {/* Card */}
-      <div className="relative z-10 md:mt-[-25px]" style={{ maxWidth: 1000, margin: '0 auto', width: '100%' }}>
+      <div className="relative z-10" style={{ maxWidth: 1000, margin: '0 auto', width: '100%' }}>
         {/* Gradient bar */}
         <div
           className="gradient-bar"

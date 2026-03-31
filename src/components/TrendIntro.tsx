@@ -60,7 +60,7 @@ export function TrendIntro({
     >
       <AnimatedBg variant={0} />
 
-      <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+      <div className="md:mt-[-60px]" style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         {/* Eyebrow */}
         {eyebrow && (
           <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-10">

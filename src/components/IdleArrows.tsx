@@ -64,7 +64,10 @@ function isTouchDevice() {
 
 export function IdleArrows({ active }: { active: boolean }) {
   const [idle, setIdle] = useState(false)
-  const [context, setContext] = useState<'vertical' | 'trend' | 'none'>('none')
+  const [context, setContext] = useState<'vertical' | 'trend' | 'none'>(() => {
+    if (typeof window !== 'undefined' && !window.matchMedia('(max-width: 768px)').matches) return 'trend'
+    return 'none'
+  })
   const [, forceUpdate] = useState(0)
   const [isTouch, setIsTouch] = useState(false)
   const [activeSlide, setActiveSlide] = useState(0)
@@ -216,20 +219,12 @@ export function IdleArrows({ active }: { active: boolean }) {
   function getSpecialSlide() {
     const container = document.getElementById('trends')
     if (!container) return null
-    const activeTrend = parseInt(container.getAttribute('data-active-trend') || '0', 10)
     const trendCount = parseInt(container.getAttribute('data-trend-count') || '0', 10)
-    const hasTrendActive = !!document.querySelector('[data-trend-active]')
-    if (activeTrend === 0) return 'first'
-    if (activeTrend === trendCount - 1 && !hasTrendActive) return 'thankYou'
-    if (!hasTrendActive) {
-      // Check which non-trend slide we're on by looking at the Nth child
-      const carousel = container.querySelector('[style*="display: flex"]') || container.firstElementChild
-      if (carousel) {
-        const child = carousel.children[activeTrend]
-        if (child?.getAttribute('data-slide-type') === 'trend-intro') return 'trendIntro'
-      }
-      return 'nonTrend'
-    }
+    if (activeSlide === 0) return 'first'
+    if (activeSlide === trendCount - 1) return 'thankYou'
+    if (activeSlide === 3) return 'trendIntro'
+    // Slides 1, 2 are non-trend (By the Numbers, How We Judge)
+    if (activeSlide <= 3) return 'nonTrend'
     return null
   }
 
@@ -299,8 +294,7 @@ export function IdleArrows({ active }: { active: boolean }) {
           </>
         )
       })()}
-      {context === 'trend' && !isTouch && (() => {
-        void activeSlide // ensure re-render on slide change
+      {!isMobileScreen && !isTouch && (() => {
         const special = getSpecialSlide()
         // Show left arrow unless on first slide
         const showLeft = special !== 'first'

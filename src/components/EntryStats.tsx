@@ -312,6 +312,8 @@ export function EntryStats({ stats, eyebrow, statement }: { stats?: HeroStat[]; 
       }}
     >
 
+      {/* Shift content up on desktop */}
+      <div className="hidden md:block md:mt-[-80px]" />
       {/* 1. Scroll-driven timeline strip */}
       <TimelineStrip progress={scrollYProgress} />
 
