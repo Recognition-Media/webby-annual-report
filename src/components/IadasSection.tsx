@@ -74,7 +74,7 @@ export function IadasSection({ report }: { report: Report }) {
       className="px-5 md:px-[60px] md:pt-[calc(13vh+47px)]"
       style={{
         background: '#191919',
-        minHeight: '100vh',
+        minHeight: 'calc(100vh - 50px)',
         position: 'relative',
         overflow: 'hidden',
       }}

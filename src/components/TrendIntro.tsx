@@ -49,7 +49,7 @@ export function TrendIntro({
       className="px-5 md:px-[60px] py-12 md:py-0"
       style={{
         width: '100vw',
-        minHeight: '100vh',
+        minHeight: 'calc(100vh - 50px)',
         flexShrink: 0,
         display: 'flex',
         alignItems: 'center',

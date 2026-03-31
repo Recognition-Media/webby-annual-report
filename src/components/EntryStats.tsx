@@ -303,7 +303,7 @@ export function EntryStats({ stats, eyebrow, statement }: { stats?: HeroStat[]; 
       className="px-5 md:px-[60px] pt-24 md:pt-0"
       style={{
         background: '#191919',
-        minHeight: '100vh',
+        minHeight: 'calc(100vh - 50px)',
         overflow: 'hidden',
         position: 'relative',
         display: 'flex',

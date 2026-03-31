@@ -265,17 +265,17 @@ export function ReportView({ report }: { report: Report }) {
             {!isMobile && (
               <TrendContainer trendCount={desktopSlideCount} trendTitles={desktopSlideTitles}>
                 {/* Slide 1: Welcome Letter */}
-                <div style={{ width: '100vw', height: '100vh', flexShrink: 0, overflow: 'auto' }}>
+                <div style={{ width: '100vw', height: 'calc(100vh - 50px)', flexShrink: 0, overflow: 'auto' }}>
                   <IntroLetter report={report} />
                 </div>
 
                 {/* Slide 2: By the Numbers */}
-                <div style={{ width: '100vw', height: '100vh', flexShrink: 0, overflow: 'auto' }}>
+                <div style={{ width: '100vw', height: 'calc(100vh - 50px)', flexShrink: 0, overflow: 'auto' }}>
                   <EntryStats stats={report.entryStats} eyebrow={report.byTheNumbersEyebrow} statement={report.byTheNumbersStatement} />
                 </div>
 
                 {/* Slide 3: How We Judge */}
-                <div style={{ width: '100vw', height: '100vh', flexShrink: 0, overflow: 'auto' }}>
+                <div style={{ width: '100vw', height: 'calc(100vh - 50px)', flexShrink: 0, overflow: 'auto' }}>
                   <IadasSection report={report} />
                 </div>
 
@@ -297,7 +297,7 @@ export function ReportView({ report }: { report: Report }) {
                 {/* Last slide: Thank You */}
                 <div
                   id="thank-you-desktop"
-                  style={{ width: '100vw', height: '100vh', flexShrink: 0, display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden', padding: '0 60px' }}
+                  style={{ width: '100vw', height: 'calc(100vh - 50px)', flexShrink: 0, display: 'flex', alignItems: 'center', position: 'relative', overflow: 'auto', padding: '0 60px' }}
                 >
                   <AnimatedBg variant={3} />
                   <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
