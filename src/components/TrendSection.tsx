@@ -691,7 +691,7 @@ export function TrendSection({ section, index, forceMobile }: { section: TrendSe
     >
       <AnimatedBg variant={index} />
 
-      <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '80vh' }}>
+      <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '80vh' }}>
 
         {/* Page 0: Title + Body — always rendered */}
         <motion.div
