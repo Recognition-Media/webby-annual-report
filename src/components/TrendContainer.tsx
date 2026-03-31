@@ -37,17 +37,10 @@ export function TrendContainer({
   const [isActive, setIsActive] = useState(false)
   const containerRef = useRef<HTMLElement>(null)
 
-  // Track when container is in view (desktop only)
+  // On desktop, container is always the full viewport — activate immediately
+  // On mobile, not used (vertical layout)
   useEffect(() => {
-    if (isMobile) return
-    const el = containerRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsActive(entry.isIntersecting),
-      { threshold: 0.5 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
+    if (!isMobile) setIsActive(true)
   }, [isMobile])
 
   // Lock vertical scroll on desktop — everything is horizontal
