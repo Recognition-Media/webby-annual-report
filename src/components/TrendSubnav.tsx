@@ -229,7 +229,7 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
                           fontSize: 10,
                           letterSpacing: 3,
                           textTransform: 'uppercase',
-                          color: isActive ? itemColor : 'rgba(255,255,255,0.3)',
+                          color: isActive ? itemColor : 'rgba(255,255,255,0.5)',
                           fontWeight: 500,
                           transition: 'color 0.3s ease',
                           flexShrink: 0,
@@ -241,7 +241,7 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
                       <span
                         style={{
                           fontSize: 14,
-                          color: isActive ? '#fff' : 'rgba(255,255,255,0.4)',
+                          color: isActive ? '#fff' : 'rgba(255,255,255,0.6)',
                           fontWeight: isActive ? 500 : 400,
                           letterSpacing: '-0.2px',
                           transition: 'all 0.3s ease',
