@@ -698,7 +698,10 @@ export function TrendSection({ section, index, forceMobile }: { section: TrendSe
           animate={{ opacity: phase === 0 ? 1 : 0, x: phase === 0 ? 0 : -200 }}
           transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
           style={{
-            position: 'absolute', top: 12, left: 0, right: 0, bottom: 0,
+            position: phase === 0 ? 'relative' : 'absolute',
+            top: phase === 0 ? 0 : 12,
+            left: 0, right: 0,
+            bottom: phase === 0 ? undefined : 0,
             pointerEvents: phase === 0 ? 'auto' : 'none',
           }}
         >
