@@ -67,11 +67,28 @@ export function IdleArrows({ active }: { active: boolean }) {
   const [context, setContext] = useState<'vertical' | 'trend' | 'none'>('none')
   const [, forceUpdate] = useState(0)
   const [isTouch, setIsTouch] = useState(false)
+  const [activeSlide, setActiveSlide] = useState(0)
   const timerRef = useRef<any>(null)
 
   useEffect(() => {
     setIsTouch(isTouchDevice())
   }, [])
+
+  // Track active slide for re-rendering
+  useEffect(() => {
+    if (!active) return
+    function updateSlide() {
+      const container = document.getElementById('trends')
+      if (container) {
+        setActiveSlide(parseInt(container.getAttribute('data-active-trend') || '0', 10))
+      }
+    }
+    updateSlide()
+    const observer = new MutationObserver(updateSlide)
+    const container = document.getElementById('trends')
+    if (container) observer.observe(container, { attributes: true, attributeFilter: ['data-active-trend'] })
+    return () => observer.disconnect()
+  }, [active])
 
   // Detect context: are we in trends or vertical sections
   useEffect(() => {
@@ -276,6 +293,7 @@ export function IdleArrows({ active }: { active: boolean }) {
         )
       })()}
       {context === 'trend' && !isTouch && (() => {
+        void activeSlide // ensure re-render on slide change
         const special = getSpecialSlide()
         // Show left arrow unless on first slide
         const showLeft = special !== 'first'

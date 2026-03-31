@@ -71,7 +71,6 @@ export function TrendIntro({
             }}>
               {eyebrow}
             </span>
-            <div style={{ width: 60, height: 2, background: '#82D8EB', borderRadius: 2 }} />
           </div>
         )}
 
