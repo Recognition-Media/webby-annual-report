@@ -83,7 +83,8 @@ export function TrendContainer({
   }, [isActive, trendCount])
 
   function navigateToTrend(index: number) {
-    window.dispatchEvent(new CustomEvent('trend-reset-phase', { detail: { index } }))
+    // Reset ALL trends, not just the target
+    window.dispatchEvent(new CustomEvent('trend-reset-phase', { detail: { all: true } }))
     setActiveTrend(index)
   }
 

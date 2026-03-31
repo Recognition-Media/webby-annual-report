@@ -504,7 +504,8 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
     if (isMobile) return
     function handleReset(e: Event) {
       const detail = (e as CustomEvent).detail
-      if (detail?.index === index) {
+      // Reset this trend if specifically targeted, or if reset-all
+      if (detail?.index === index || detail?.all) {
         setPhase(0)
         setCompleted(false)
         setVideoClosed(false)
