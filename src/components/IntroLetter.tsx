@@ -54,47 +54,45 @@ export function IntroLetter({ report }: { report: Report }) {
               lineHeight: '28px',
             }}
           >
-            <p>Welcome to the 30th Annual Webby Awards Report: a deeper look at what defines the Best of the Internet in 2026.</p>
-
-            <p>Thirty years into our Webby journey, we're at another major inflection point for technology, culture, and society. These moments are what make the Internet's evolution fascinating, and what make defining excellence such a worthy challenge. This report is built from what Executive Judges observed as they received and selected the Webby Nominees across every category.</p>
-
-            <p><strong>Inside, you'll find eight themes drawn directly from judges' observations:</strong> invisible AI products, craft as an act of defiance, depth over reach in creator work, brand partnerships that feel Internet native, podcasts becoming full visual worlds, web experiences that practice restraint, and ad campaigns that created ecosystems.</p>
-
-            <p>In sharing these insights, we hope they can inform and inspire the work you and your team are creating online.</p>
-
-            <p>Thank you again for participating in this year's Webby Awards. We are honored to have you in our community.</p>
+            {report.letterBody ? (
+              <div className="report-links [&_p]:mb-5">
+                <PortableText value={report.letterBody} />
+              </div>
+            ) : (
+              <>
+                <p>Welcome to the 30th Annual Webby Awards Report.</p>
+              </>
+            )}
           </div>
 
           {/* Authors */}
-          <div
-            className="flex flex-col gap-6 md:flex-row md:gap-12 pb-8 md:pb-0"
-            style={{
-              marginTop: 48,
-              paddingTop: 32,
-              borderTop: '1px solid rgba(255,255,255,0.12)',
-            }}
-          >
-            <div>
-              <p className="font-medium" style={{ fontSize: 14, color: '#fff' }}>
-                <a href="https://www.linkedin.com/in/nborenstein/" target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }} className="hover:underline">
-                  Nick Borenstein
-                </a>
-              </p>
-              <p className="font-normal" style={{ fontSize: 12, color: '#999' }}>
-                General Manager, The Webby Awards
-              </p>
+          {report.letterAuthors && report.letterAuthors.length > 0 ? (
+            <div
+              className="flex flex-col gap-6 md:flex-row md:gap-12 pb-8 md:pb-0"
+              style={{
+                marginTop: 48,
+                paddingTop: 32,
+                borderTop: '1px solid rgba(255,255,255,0.12)',
+              }}
+            >
+              {report.letterAuthors.map((author, i) => (
+                <div key={i}>
+                  <p className="font-medium" style={{ fontSize: 14, color: '#fff' }}>
+                    {author.linkedInUrl ? (
+                      <a href={author.linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }} className="hover:underline">
+                        {author.name}
+                      </a>
+                    ) : author.name}
+                  </p>
+                  {author.title && (
+                    <p className="font-normal" style={{ fontSize: 12, color: '#999' }}>
+                      {author.title}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
-            <div>
-              <p className="font-medium" style={{ fontSize: 14, color: '#fff' }}>
-                <a href="https://www.linkedin.com/in/jesse-feister-6552b174" target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }} className="hover:underline">
-                  Jesse Feister
-                </a>
-              </p>
-              <p className="font-normal" style={{ fontSize: 12, color: '#999' }}>
-                Executive Director, Webby Media Group
-              </p>
-            </div>
-          </div>
+          ) : null}
         </div>
       </div>
     </section>

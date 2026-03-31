@@ -41,7 +41,7 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
   useEffect(() => {
     function handleScroll(e: Event) {
       const target = e.target as HTMLElement
-      if (!target || target === document) return
+      if (!target || (target as unknown) === document) return
       const scrollTop = target.scrollTop
       if (scrollTop > lastScrollRef.current + 5) {
         setHidden(true)

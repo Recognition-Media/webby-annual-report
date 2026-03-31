@@ -27,7 +27,8 @@ export interface HeroStat {
 
 export interface LetterAuthor {
   name: string
-  title: string
+  title?: string
+  linkedInUrl?: string
 }
 
 export interface FeaturedProject {

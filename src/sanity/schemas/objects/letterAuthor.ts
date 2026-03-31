@@ -6,6 +6,7 @@ export default defineType({
   type: 'object',
   fields: [
     { name: 'name', title: 'Name', type: 'string', validation: (r) => r.required() },
-    { name: 'title', title: 'Title', type: 'string', validation: (r) => r.required() },
+    { name: 'title', title: 'Title', type: 'string' },
+    { name: 'linkedInUrl', title: 'LinkedIn URL', type: 'url' },
   ],
 })
