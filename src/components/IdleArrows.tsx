@@ -274,7 +274,7 @@ export function IdleArrows({ active }: { active: boolean }) {
             {showRight && special === 'intro' && (
               <motion.button
                 key="right-pill"
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 0.75 }}
                 animate={{
                   opacity: 0.75,
                   boxShadow: [
