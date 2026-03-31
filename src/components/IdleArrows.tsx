@@ -254,12 +254,13 @@ export function IdleArrows({ active }: { active: boolean }) {
           </>
         )
       })()}
-      {context === 'trend' && idle && !isTouch && (() => {
+      {context === 'trend' && !isTouch && (() => {
         const special = getSpecialSlide()
-        // Show left arrow unless on intro slide
-        const showLeft = special !== 'intro'
+        // Show left arrow unless on intro slide (needs idle)
+        const showLeft = idle && special !== 'intro'
         // Show right arrow unless on Thank You slide
-        const showRight = special !== 'thankYou'
+        // Intro pill always shows, other right arrows need idle
+        const showRight = special !== 'thankYou' && (special === 'intro' || idle)
         return (
           <>
             {showLeft && (
