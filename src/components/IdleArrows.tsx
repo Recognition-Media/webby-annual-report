@@ -222,11 +222,11 @@ export function IdleArrows({ active }: { active: boolean }) {
     if (activeTrend === 0) return 'first'
     if (activeTrend === trendCount - 1 && !hasTrendActive) return 'thankYou'
     if (!hasTrendActive) {
-      // Check if we're on the Quick Summary slide by looking for the element
-      const introEl = document.getElementById('trend-intro')
-      if (introEl) {
-        const rect = introEl.getBoundingClientRect()
-        if (rect.left >= -10 && rect.left <= 10) return 'trendIntro'
+      // Check which non-trend slide we're on by looking at the Nth child
+      const carousel = container.querySelector('[style*="display: flex"]') || container.firstElementChild
+      if (carousel) {
+        const child = carousel.children[activeTrend]
+        if (child?.getAttribute('data-slide-type') === 'trend-intro') return 'trendIntro'
       }
       return 'nonTrend'
     }

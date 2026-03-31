@@ -45,6 +45,7 @@ export function TrendIntro({
   return (
     <div
       id="trend-intro"
+      data-slide-type="trend-intro"
       className="px-5 md:px-[60px] py-12 md:py-0"
       style={{
         width: '100vw',
