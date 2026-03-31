@@ -92,9 +92,9 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
                 className="no-custom-cursor"
                 style={{
                   background: 'none',
-                  border: '1px solid rgba(255,255,255,0.15)',
+                  border: '1px solid rgba(255,255,255,0.3)',
                   borderRadius: 4,
-                  color: 'rgba(255,255,255,0.5)',
+                  color: 'rgba(255,255,255,0.8)',
                   fontSize: 9,
                   letterSpacing: 2,
                   textTransform: 'uppercase',

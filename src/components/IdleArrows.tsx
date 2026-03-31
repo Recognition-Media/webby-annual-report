@@ -77,20 +77,23 @@ export function IdleArrows({ active }: { active: boolean }) {
     setIsTouch(isTouchDevice())
   }, [])
 
-  // Track active slide for re-rendering
+  // Track active slide for re-rendering — poll + observe for reliability
   useEffect(() => {
     if (!active) return
     function updateSlide() {
       const container = document.getElementById('trends')
       if (container) {
-        setActiveSlide(parseInt(container.getAttribute('data-active-trend') || '0', 10))
+        const val = parseInt(container.getAttribute('data-active-trend') || '0', 10)
+        setActiveSlide((prev) => prev !== val ? val : prev)
       }
     }
     updateSlide()
     const observer = new MutationObserver(updateSlide)
     const container = document.getElementById('trends')
     if (container) observer.observe(container, { attributes: true, attributeFilter: ['data-active-trend'] })
-    return () => observer.disconnect()
+    // Poll as backup every 500ms
+    const interval = setInterval(updateSlide, 500)
+    return () => { observer.disconnect(); clearInterval(interval) }
   }, [active])
 
   // Detect context: are we in trends or vertical sections
@@ -246,8 +249,8 @@ export function IdleArrows({ active }: { active: boolean }) {
         window.dispatchEvent(new Event('trend-advance'))
       }
     } else {
-      // Trend not yet detected by IntersectionObserver — advance anyway
-      window.dispatchEvent(new Event('trend-advance'))
+      // Trend not yet detected — advance with target slide
+      window.dispatchEvent(new CustomEvent('trend-advance', { detail: { slideIndex: activeSlide } }))
     }
   }
 

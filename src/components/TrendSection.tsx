@@ -459,9 +459,15 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   }, [isActive, phase, isMobile])
 
   // Expose advance/retreat for click-to-navigate (via custom events, desktop only)
+  const mySlideIndex = index + 4
   useEffect(() => {
     if (!isActive || isMobile) return
-    function handleAdvance() { advancePhase() }
+    function handleAdvance(e: Event) {
+      const detail = (e as CustomEvent).detail
+      // If event has a target slideIndex, only respond if it matches
+      if (detail?.slideIndex !== undefined && detail.slideIndex !== mySlideIndex) return
+      advancePhase()
+    }
     function handleRetreat() { retreatPhase() }
     window.addEventListener('trend-advance', handleAdvance)
     window.addEventListener('trend-retreat', handleRetreat)
