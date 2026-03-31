@@ -139,6 +139,17 @@ export function IdleArrows({ active }: { active: boolean }) {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
+  // Keyboard left/right arrow navigation (desktop only)
+  useEffect(() => {
+    if (!active || isMobileScreen) return
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight') { clickRight(); e.preventDefault() }
+      if (e.key === 'ArrowLeft') { clickLeft(); e.preventDefault() }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  })
+
   if (!active || isTouch || isMobileScreen) return null
 
   function clickDown() {
