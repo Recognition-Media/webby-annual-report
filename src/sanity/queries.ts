@@ -39,6 +39,7 @@ export const reportBySlugQuery = groq`
     trendSections[] {
       enabled,
       trendTitle,
+      moduleOrder,
       trendBody,
       showFeaturedProjects,
       featuredProjects,

@@ -336,9 +336,27 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
       }
     : undefined
   const hasVideo = section.showVideo !== false && (!!section.trendVideo || !!videoConfig)
-  const totalPhases = 1 + (hasData ? 1 : 0) + quotes.length + (hasVideo ? 1 : 0)
-  const dataPhase = hasData ? 1 : -1
-  const quoteStartPhase = 1 + (hasData ? 1 : 0)
+
+  // Build ordered module list based on CMS moduleOrder
+  const defaultOrder = ['data', 'quotes', 'video']
+  const moduleOrder = section.moduleOrder && section.moduleOrder.length > 0
+    ? section.moduleOrder
+    : defaultOrder
+
+  // Build phase list: always starts with 'title', then ordered modules
+  type PhaseType = 'title' | 'data' | 'quote' | 'video'
+  const phaseList: PhaseType[] = ['title']
+  for (const mod of moduleOrder) {
+    if (mod === 'data' && hasData) phaseList.push('data')
+    if (mod === 'quotes') {
+      for (let q = 0; q < quotes.length; q++) phaseList.push('quote')
+    }
+    if (mod === 'video' && hasVideo) phaseList.push('video')
+  }
+
+  const totalPhases = phaseList.length
+  const dataPhase = phaseList.indexOf('data')
+  const quoteStartPhase = phaseList.indexOf('quote')
   const [phase, setPhase] = useState(0)
   const [isActive, setIsActive] = useState(false)
   const [completed, setCompleted] = useState(false)
@@ -535,72 +553,62 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
             isMobile={true}
           />
 
-          {/* Data module */}
-          {hasData && (
-            <div style={{ marginTop: 48 }}>
-              <PhaseData
-                stats={dataStats!}
-                eyebrow={section.dataEyebrow}
-                headline={dataHeadline}
-                subheadline={dataSubheadline}
-                color={trendColor}
-                isActive={true}
-                isMobile={true}
-              />
-            </div>
-          )}
-
-          {/* Quotes — stacked vertically */}
-          {quotes.length > 0 && (
-            <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 32 }}>
-              {quotes.map((quote, i) => (
-                <div key={i}>
-                  {/* Quote mark */}
-                  <div style={{ fontSize: 48, lineHeight: 0.8, color: `${trendColor}25`, fontWeight: 700, marginBottom: -10, userSelect: 'none' }}>
-                    &ldquo;
-                  </div>
-                  {/* Quote text */}
-                  <div data-content style={{ fontSize: 16, lineHeight: 1.6, color: '#fff', marginBottom: 12 }}>
-                    <div className="report-links [&_p]:inline">
-                      <PortableText value={quote.quoteText} />
+          {/* Modules — rendered in CMS-defined order */}
+          {moduleOrder.map((mod) => {
+            if (mod === 'data' && hasData) return (
+              <div key="data" style={{ marginTop: 48 }}>
+                <PhaseData
+                  stats={dataStats!}
+                  eyebrow={section.dataEyebrow}
+                  headline={dataHeadline}
+                  subheadline={dataSubheadline}
+                  color={trendColor}
+                  isActive={true}
+                  isMobile={true}
+                />
+              </div>
+            )
+            if (mod === 'quotes' && quotes.length > 0) return (
+              <div key="quotes" style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 32 }}>
+                {quotes.map((quote, i) => (
+                  <div key={i}>
+                    <div style={{ fontSize: 48, lineHeight: 0.8, color: `${trendColor}25`, fontWeight: 700, marginBottom: -10, userSelect: 'none' }}>
+                      &ldquo;
+                    </div>
+                    <div data-content style={{ fontSize: 16, lineHeight: 1.6, color: '#fff', marginBottom: 12 }}>
+                      <div className="report-links [&_p]:inline">
+                        <PortableText value={quote.quoteText} />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      {(quote.headshot || quote.headshotUrl) ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={quote.headshot ? urlFor(quote.headshot).width(100).height(100).fit('crop').url() : `${resolvedBasePath}${quote.headshotUrl}`}
+                          alt={quote.name}
+                          style={{
+                            width: 36, height: 36, borderRadius: '50%',
+                            objectFit: 'cover', objectPosition: 'center 20%',
+                            flexShrink: 0, border: `2px solid ${trendColor}`,
+                          }}
+                        />
+                      ) : (
+                        <div style={{ width: 24, height: 2, background: trendColor, borderRadius: 2 }} />
+                      )}
+                      <div>
+                        <p style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>
+                          {quote.linkedInUrl ? (
+                            <a href={quote.linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }}>{quote.name}</a>
+                          ) : quote.name}
+                        </p>
+                        {quote.title && <p style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{quote.title}</p>}
+                      </div>
                     </div>
                   </div>
-                  {/* Attribution */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    {(quote.headshot || quote.headshotUrl) ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={quote.headshot ? urlFor(quote.headshot).width(100).height(100).fit('crop').url() : `${resolvedBasePath}${quote.headshotUrl}`}
-                        alt={quote.name}
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          objectPosition: 'center 20%',
-                          flexShrink: 0,
-                          border: `2px solid ${trendColor}`,
-                        }}
-                      />
-                    ) : (
-                      <div style={{ width: 24, height: 2, background: trendColor, borderRadius: 2 }} />
-                    )}
-                    <div>
-                      <p style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>
-                        {quote.linkedInUrl ? (
-                          <a href={quote.linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }}>{quote.name}</a>
-                        ) : quote.name}
-                      </p>
-                      {quote.title && <p style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{quote.title}</p>}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Video — CMS trendVideo (primary) or legacy videoConfig */}
-          {hasVideo && (section.trendVideo || videoConfig) && (
+                ))}
+              </div>
+            )
+            if (mod === 'video' && hasVideo && (section.trendVideo || videoConfig)) return (
             <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ width: '100%', maxWidth: 400, position: 'relative' }}>
                 {(() => {
@@ -661,7 +669,9 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
                 </div>
               )}
             </div>
-          )}
+            )
+            return null
+          })}
         </div>
       </div>
     )
