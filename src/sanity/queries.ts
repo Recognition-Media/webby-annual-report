@@ -59,7 +59,9 @@ export const reportBySlugQuery = groq`
       },
       showVideo,
       trendVideo {
+        sourceType,
         videoFile { "url": asset->url },
+        youtubeUrl,
         aspectRatio,
         name,
         title,

@@ -1311,7 +1311,13 @@ function PhaseVideo({
   const videoRef = useRef<HTMLVideoElement>(null)
   const [muted, setMuted] = useState(false)
 
+  const isYoutube = trendVideo.sourceType === 'youtube'
+  const youtubeId = isYoutube && trendVideo.youtubeUrl
+    ? trendVideo.youtubeUrl.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
+    : null
+
   useEffect(() => {
+    if (isYoutube) return
     const el = videoRef.current
     if (!el) return
     if (isActive) {
@@ -1327,7 +1333,7 @@ function PhaseVideo({
       el.pause()
       el.currentTime = 0
     }
-  }, [isActive])
+  }, [isActive, isYoutube])
 
   function toggleMute() {
     if (videoRef.current) {
@@ -1382,86 +1388,105 @@ function PhaseVideo({
         </svg>
       </button>
 
-      {/* Video */}
-      <video
-        ref={videoRef}
-        src={trendVideo.videoFile.url}
-        playsInline
-        style={{
-          aspectRatio: cssAspectRatio,
-          width: 'auto',
-          height: 'auto',
-          ...videoConstraints,
-          borderRadius: 4,
-          border: '1px solid rgba(255,255,255,0.12)',
-        }}
-      />
+      {/* YouTube embed */}
+      {isYoutube && youtubeId ? (
+        <iframe
+          src={isActive ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0` : `https://www.youtube.com/embed/${youtubeId}?rel=0`}
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          style={{
+            aspectRatio: cssAspectRatio,
+            width: '100%',
+            height: 'auto',
+            ...videoConstraints,
+            borderRadius: 4,
+            border: '1px solid rgba(255,255,255,0.12)',
+          }}
+        />
+      ) : (
+        /* Uploaded video */
+        <video
+          ref={videoRef}
+          src={trendVideo.videoFile?.url}
+          playsInline
+          style={{
+            aspectRatio: cssAspectRatio,
+            width: 'auto',
+            height: 'auto',
+            ...videoConstraints,
+            borderRadius: 4,
+            border: '1px solid rgba(255,255,255,0.12)',
+          }}
+        />
+      )}
 
-      {/* Controls */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: trendVideo.name ? 80 : 12,
-          right: 12,
-          display: 'flex',
-          gap: 8,
-          pointerEvents: 'auto',
-        }}
-      >
-        <button
-          onClick={toggleMute}
-          className="no-custom-cursor"
+      {/* Controls — only for uploaded videos */}
+      {!isYoutube && (
+        <div
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            border: '1px solid rgba(255,255,255,0.3)',
-            background: 'rgba(0,0,0,0.6)',
-            color: '#fff',
-            cursor: 'pointer',
+            position: 'absolute',
+            bottom: trendVideo.name ? 80 : 12,
+            right: 12,
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 14,
+            gap: 8,
+            pointerEvents: 'auto',
           }}
         >
-          {muted ? (
+          <button
+            onClick={toggleMute}
+            className="no-custom-cursor"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(0,0,0,0.6)',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+            }}
+          >
+            {muted ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                <line x1="23" y1="9" x2="17" y2="15" />
+                <line x1="17" y1="9" x2="23" y2="15" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={replay}
+            className="no-custom-cursor"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(0,0,0,0.6)',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+            }}
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" />
-              <line x1="23" y1="9" x2="17" y2="15" />
-              <line x1="17" y1="9" x2="23" y2="15" />
+              <polyline points="1 4 1 10 7 10" />
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
             </svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" />
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-            </svg>
-          )}
-        </button>
-        <button
-          onClick={replay}
-          className="no-custom-cursor"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            border: '1px solid rgba(255,255,255,0.3)',
-            background: 'rgba(0,0,0,0.6)',
-            color: '#fff',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 14,
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <polyline points="1 4 1 10 7 10" />
-            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-          </svg>
-        </button>
-      </div>
+          </button>
+        </div>
+      )}
 
       {/* Context caption below video */}
       <div

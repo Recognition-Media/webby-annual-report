@@ -51,7 +51,9 @@ export interface DataStat {
 }
 
 export interface TrendVideo {
-  videoFile: { url: string }
+  sourceType: 'upload' | 'youtube'
+  videoFile?: { url: string }
+  youtubeUrl?: string
   aspectRatio: '9:16' | '16:9' | '1:1'
   name: string
   title?: string
