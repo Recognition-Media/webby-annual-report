@@ -700,7 +700,8 @@ export function TrendSection({ section, index, forceMobile }: { section: TrendSe
         alignItems: 'center',
         padding: '0 60px',
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'auto',
       }}
     >
       <AnimatedBg variant={index} />

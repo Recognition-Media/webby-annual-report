@@ -111,7 +111,8 @@ export function TrendContainer({
         height: '100vh',
         paddingBottom: 50,
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'visible',
         background: '#191919',
       }}
     >

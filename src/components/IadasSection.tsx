@@ -71,7 +71,7 @@ export function IadasSection({ report }: { report: Report }) {
       id="how-judged"
       data-snap
       ref={ref}
-      className="px-5 md:px-[60px] md:pt-[calc(13vh+47px)]"
+      className="px-5 md:px-[60px] md:pt-[calc(13vh-3px)]"
       style={{
         background: '#191919',
         minHeight: '100vh',
