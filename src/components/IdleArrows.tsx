@@ -83,10 +83,16 @@ export function IdleArrows({ active }: { active: boolean }) {
       const trendsRect = trendsContainer?.getBoundingClientRect()
       const inTrends = trendsRect && trendsRect.top <= 50 && trendsRect.bottom >= window.innerHeight - 50
 
-      if (trendActive || inTrends) {
-        setContext('trend')
+      // On desktop (non-mobile), everything is horizontal — always trend context
+      const isMobile = window.matchMedia('(max-width: 768px)').matches
+      if (isMobile) {
+        if (trendActive || inTrends) {
+          setContext('trend')
+        } else {
+          setContext('vertical')
+        }
       } else {
-        setContext('vertical')
+        setContext('trend')
       }
       // Force re-render so arrows update when trend/phase changes
       forceUpdate((n) => n + 1)
