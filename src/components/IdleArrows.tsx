@@ -133,7 +133,7 @@ export function IdleArrows({ active }: { active: boolean }) {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
-  if (!active || !idle || isTouch || isMobileScreen) return null
+  if (!active || isTouch || isMobileScreen) return null
 
   function clickDown() {
     // Simulate clicking the right side of screen (forward)
@@ -254,7 +254,7 @@ export function IdleArrows({ active }: { active: boolean }) {
           </>
         )
       })()}
-      {context === 'trend' && !isTouch && (() => {
+      {context === 'trend' && idle && !isTouch && (() => {
         const special = getSpecialSlide()
         // Show left arrow unless on intro slide
         const showLeft = special !== 'intro'
