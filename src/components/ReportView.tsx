@@ -307,11 +307,11 @@ export function ReportView({ report }: { report: Report }) {
                       </span>
                       <div style={{ width: 60, height: 2, background: '#8B70D1', borderRadius: 2 }} />
                     </div>
-                    <h2 style={{ fontSize: 48, fontWeight: 400, color: '#fff', lineHeight: '58px', letterSpacing: '-2px', marginBottom: 40, maxWidth: 750 }}>
+                    <h2 style={{ fontSize: 48, fontWeight: 400, color: '#fff', lineHeight: '58px', letterSpacing: '-2px', marginBottom: 40, maxWidth: 1000 }}>
                       {report.thankYouHeading || "You're Part of What Makes the Internet Worth Being On."}
                     </h2>
                     <div style={{ width: 80, height: 1, background: 'rgba(255,255,255,0.14)', marginBottom: 32 }} />
-                    <div data-content style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 749, marginBottom: 40 }} className="[&_p]:mb-5">
+                    <div data-content style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 1000, marginBottom: 40 }} className="[&_p]:mb-5">
                       {report.thankYouBody ? <PortableText value={report.thankYouBody} /> : (
                         <>
                           <p style={{ marginBottom: 20 }}>Your participation helps us recognize the best of the Internet each year.</p>
