@@ -693,7 +693,7 @@ export function TrendSection({ section, index, forceMobile }: { section: TrendSe
       ref={sectionRef}
       style={{
         width: '100vw',
-        height: '100vh',
+        height: 'calc(100vh - 50px)',
         flexShrink: 0,
         display: 'flex',
         alignItems: 'center',
