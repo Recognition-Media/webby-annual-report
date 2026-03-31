@@ -55,7 +55,8 @@ export function TrendIntro({
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'auto',
         background: '#191919',
       }}
     >

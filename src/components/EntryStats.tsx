@@ -237,7 +237,7 @@ function StatBlock({
       transition={{ duration: 0.6, delay: index * 0.12, ease: 'easeOut' }}
       className="md:flex-1 md:border-l md:border-white/[0.14] first:md:border-l-0 md:pl-6 md:pr-6 first:md:pl-0 py-4 md:py-0"
       style={{
-        borderBottom: index < 2 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+        borderBottom: 'none',
       }}
     >
       <CountUpNumber
@@ -313,16 +313,14 @@ export function EntryStats({ stats, eyebrow, statement }: { stats?: HeroStat[]; 
       }}
     >
 
-      {/* Shift content up on desktop */}
-      <div className="hidden md:block md:mt-[-80px]" />
       {/* 1. Scroll-driven timeline strip */}
       <TimelineStrip progress={scrollYProgress} />
-
       {/* 2. Big typography statement */}
       <motion.div
         data-content
+        className="md:pt-[20px] pt-[80px]"
         style={{
-          padding: '80px 0 20px',
+          paddingBottom: 20,
           maxWidth: 1000,
           width: '100%',
           margin: '0 auto',
