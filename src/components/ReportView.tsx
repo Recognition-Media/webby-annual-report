@@ -211,14 +211,14 @@ export function ReportView({ report }: { report: Report }) {
                     <TrendSection key={i} section={section} index={i} />
                   ))}
 
-                  {/* Thank You slide — last in horizontal carousel */}
+                  {/* Thank You slide — last in horizontal carousel (desktop only, mobile uses vertical below) */}
                   <div
-                    id="thank-you"
+                    id="thank-you-desktop"
+                    className="hidden md:flex"
                     style={{
                       width: '100vw',
                       height: '100vh',
                       flexShrink: 0,
-                      display: 'flex',
                       alignItems: 'center',
                       position: 'relative',
                       overflow: 'hidden',
