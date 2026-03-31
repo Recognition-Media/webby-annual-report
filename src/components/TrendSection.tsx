@@ -340,7 +340,7 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   // Build ordered module list based on CMS moduleOrder
   const defaultOrder = ['data', 'quotes', 'video']
   const moduleOrder = section.moduleOrder && section.moduleOrder.length > 0
-    ? section.moduleOrder
+    ? section.moduleOrder.map((m) => m.module)
     : defaultOrder
 
   // Build phase list: always starts with 'title', then ordered modules

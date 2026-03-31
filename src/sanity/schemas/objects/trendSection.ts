@@ -13,23 +13,42 @@ export default defineType({
   ],
   fields: [
     { name: 'enabled', title: 'Enabled', type: 'boolean', initialValue: true, description: 'Show or hide this entire trend' },
-    { name: 'trendTitle', title: 'Title', type: 'string', validation: (r) => r.required() },
+    { name: 'trendTitle', title: 'Title', type: 'string', validation: (r) => r.required(), fieldset: 'landing' },
 
     // Module order — drag to reorder how modules appear in the report
     {
       name: 'moduleOrder',
       title: 'Module Order',
       type: 'array',
-      description: 'Drag to reorder. Modules not listed here will appear in default order.',
-      of: [{ type: 'string' }],
-      options: {
-        list: [
-          { title: 'Data Module', value: 'data' },
-          { title: 'Expert Quotes', value: 'quotes' },
-          { title: 'Video Module', value: 'video' },
+      description: 'Drag to reorder how modules appear in the report.',
+      of: [{
+        type: 'object',
+        fields: [
+          {
+            name: 'module',
+            title: 'Module',
+            type: 'string',
+            options: { list: [
+              { title: 'Data Module', value: 'data' },
+              { title: 'Expert Quotes', value: 'quotes' },
+              { title: 'Video Module', value: 'video' },
+            ]},
+            validation: (r) => r.required(),
+          },
         ],
-      },
-      initialValue: ['data', 'quotes', 'video'],
+        preview: {
+          select: { module: 'module' },
+          prepare({ module }) {
+            const labels: Record<string, string> = { data: 'Data Module', quotes: 'Expert Quotes', video: 'Video Module' }
+            return { title: labels[module] || module }
+          },
+        },
+      }],
+      initialValue: [
+        { _type: 'object', module: 'data' },
+        { _type: 'object', module: 'quotes' },
+        { _type: 'object', module: 'video' },
+      ],
     },
 
     // Landing Page

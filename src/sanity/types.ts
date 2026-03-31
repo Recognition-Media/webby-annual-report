@@ -63,7 +63,7 @@ export interface TrendVideo {
 export interface TrendSection {
   enabled?: boolean
   trendTitle: string
-  moduleOrder?: string[]
+  moduleOrder?: { module: string }[]
   trendBody?: PortableTextBlock[]
   showFeaturedProjects?: boolean
   featuredProjects?: FeaturedProject[]
