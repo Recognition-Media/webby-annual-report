@@ -50,38 +50,20 @@ export function TrendContainer({
     return () => observer.disconnect()
   }, [isMobile])
 
-  // Lock scroll on intro and Thank You slides (not TrendSections, which handle their own)
-  // Desktop only — mobile uses vertical layout
+  // Lock vertical scroll on desktop — everything is horizontal
   useEffect(() => {
     if (isMobile) return
     if (!isActive) return
-    if (activeTrend === 0 || activeTrend === trendCount - 1) {
-      // Delay lock to let snap scroll finish centering
-      document.documentElement.classList.remove('snap-active')
-      const lockTimeout = setTimeout(() => {
-        document.body.style.overflow = 'hidden'
-      }, 600)
+    document.documentElement.classList.remove('snap-active')
+    const lockTimeout = setTimeout(() => {
+      document.body.style.overflow = 'hidden'
+    }, 300)
 
-      // Allow scroll up on intro slide to go back to previous section
-      function handleWheel(e: WheelEvent) {
-        if (activeTrend !== 0) return
-        if (Math.abs(e.deltaY) < 5) return
-        if (e.deltaY < 0) {
-          document.body.style.overflow = ''
-          document.documentElement.classList.add('snap-active')
-        }
-      }
-
-      window.addEventListener('wheel', handleWheel, { passive: true, capture: true })
-
-      return () => {
-        clearTimeout(lockTimeout)
-        window.removeEventListener('wheel', handleWheel, true)
-        document.body.style.overflow = ''
-        document.documentElement.classList.add('snap-active')
-      }
+    return () => {
+      clearTimeout(lockTimeout)
+      document.body.style.overflow = ''
     }
-  }, [isMobile, isActive, activeTrend, trendCount])
+  }, [isMobile, isActive])
 
   // Listen for trend-next/trend-prev events (desktop only)
   useEffect(() => {
@@ -150,12 +132,12 @@ export function TrendContainer({
         {children}
       </motion.div>
 
-      {/* Subnav — only when trends are in view, exclude intro + Thank You slides */}
-      {isActive && activeTrend > 0 && activeTrend < trendCount - 1 && (
+      {/* Subnav — all pages */}
+      {isActive && (
         <TrendSubnav
-          titles={trendTitles.slice(1, -1)}
-          activeTrend={activeTrend - 1}
-          onNavigate={(i) => navigateToTrend(i + 1)}
+          titles={trendTitles}
+          activeTrend={activeTrend}
+          onNavigate={navigateToTrend}
         />
       )}
     </section>

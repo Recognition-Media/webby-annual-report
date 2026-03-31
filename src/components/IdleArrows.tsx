@@ -184,14 +184,18 @@ export function IdleArrows({ active }: { active: boolean }) {
     if (!container) return null
     const activeTrend = parseInt(container.getAttribute('data-active-trend') || '0', 10)
     const trendCount = parseInt(container.getAttribute('data-trend-count') || '0', 10)
-    if (activeTrend === 0 && !document.querySelector('[data-trend-active]')) return 'intro'
-    if (activeTrend === trendCount - 1 && !document.querySelector('[data-trend-active]')) return 'thankYou'
+    const hasTrendActive = !!document.querySelector('[data-trend-active]')
+    if (activeTrend === 0) return 'first'
+    if (activeTrend === 3 && !hasTrendActive) return 'trendIntro' // Quick Summary slide
+    if (activeTrend === trendCount - 1 && !hasTrendActive) return 'thankYou'
+    if (!hasTrendActive) return 'nonTrend' // letter, stats, iadas slides
     return null
   }
 
   function clickRight() {
     const special = getSpecialSlide()
-    if (special === 'intro') {
+    if (special && special !== 'thankYou') {
+      // Non-trend slides: just advance
       window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
       return
     }
@@ -207,17 +211,17 @@ export function IdleArrows({ active }: { active: boolean }) {
   }
 
   function clickLeft() {
-    // On Thank You slide — go back to last trend
-    if (getSpecialSlide() === 'thankYou') {
+    const special = getSpecialSlide()
+    // Non-trend slides (thankYou, trendIntro, nonTrend): just go prev
+    if (special && special !== 'first') {
       window.dispatchEvent(new Event('trend-prev'))
       return
     }
     const trendActive = document.querySelector('[data-trend-active]')
     if (trendActive) {
       const trendPhase = trendActive.getAttribute('data-trend-phase')
-      const trendIndex = trendActive.getAttribute('data-trend-index')
-      if (trendPhase === '0' && trendIndex === '0') {
-        // Back to intro slide
+      if (trendPhase === '0') {
+        // At trend landing — go to previous slide
         window.dispatchEvent(new Event('trend-prev'))
       } else {
         window.dispatchEvent(new Event('trend-retreat'))
@@ -256,11 +260,11 @@ export function IdleArrows({ active }: { active: boolean }) {
       })()}
       {context === 'trend' && !isTouch && (() => {
         const special = getSpecialSlide()
-        // Show left arrow unless on intro slide (needs idle)
-        const showLeft = idle && special !== 'intro'
-        // Show right arrow unless on Thank You slide
-        // Intro pill always shows, other right arrows need idle
-        const showRight = special !== 'thankYou' && (special === 'intro' || idle)
+        // Show left arrow unless on first slide
+        const showLeft = special !== 'first'
+        // Show right arrow unless on Thank You (last) slide
+        // trendIntro pill always shows immediately, others show immediately too (no idle needed)
+        const showRight = special !== 'thankYou'
         return (
           <>
             {showLeft && (
@@ -272,7 +276,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                 isTouch={isTouch}
               />
             )}
-            {showRight && special === 'intro' && (
+            {showRight && special === 'trendIntro' && (
               <motion.button
                 key="right-pill"
                 initial={{ opacity: 0.75 }}
@@ -331,7 +335,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                 </motion.svg>
               </motion.button>
             )}
-            {showRight && special !== 'intro' && (
+            {showRight && special !== 'trendIntro' && (
               <Arrow
                 key="right"
                 rotation={0}

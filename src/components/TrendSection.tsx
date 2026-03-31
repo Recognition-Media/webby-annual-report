@@ -435,20 +435,8 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
       document.body.style.overflow = 'hidden'
     }, 600)
 
-    function handleWheel(e: WheelEvent) {
-      if (Math.abs(e.deltaY) < 5) return
-      // Only allow scroll up on first trend, first phase — to go back to vertical sections
-      if (e.deltaY < 0 && phase === 0 && index === 0) {
-        document.body.style.overflow = ''
-        document.documentElement.classList.add('snap-active')
-      }
-    }
-
-    window.addEventListener('wheel', handleWheel, { passive: true, capture: true })
-
     return () => {
       clearTimeout(lockTimeout)
-      window.removeEventListener('wheel', handleWheel, true)
       document.body.style.overflow = ''
       // Only re-enable snap if not on the goodbye page
       const thankYou = document.getElementById('thank-you')
