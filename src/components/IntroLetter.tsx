@@ -20,7 +20,7 @@ export function IntroLetter({ report }: { report: Report }) {
     >
 
       {/* Card */}
-      <div className="relative z-10" style={{ maxWidth: 1000, margin: '0 auto', width: '100%' }}>
+      <div className="relative z-10 md:mt-[-25px]" style={{ maxWidth: 1000, margin: '0 auto', width: '100%' }}>
         {/* Gradient bar */}
         <div
           className="gradient-bar"
