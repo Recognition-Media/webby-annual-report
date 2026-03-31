@@ -439,24 +439,8 @@ export function TrendSection({ section, index, forceMobile }: { section: TrendSe
   // Lock scrolling while inside an incomplete trend (desktop only)
   useEffect(() => {
     if (!isActive || isMobile) return
-
-    // Let the snap scroll finish, then lock
     document.documentElement.classList.remove('snap-active')
-    const lockTimeout = setTimeout(() => {
-      document.body.style.overflow = 'hidden'
-    }, 600)
-
-    return () => {
-      clearTimeout(lockTimeout)
-      document.body.style.overflow = ''
-      // Only re-enable snap if not on the goodbye page
-      const thankYou = document.getElementById('thank-you')
-      const thankYouRect = thankYou?.getBoundingClientRect()
-      const goingToGoodbye = thankYouRect && thankYouRect.top < window.innerHeight
-      if (!goingToGoodbye) {
-        document.documentElement.classList.add('snap-active')
-      }
-    }
+    return () => {}
   }, [isActive, phase, isMobile])
 
   // Expose advance/retreat for click-to-navigate (via custom events, desktop only)

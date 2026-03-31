@@ -43,19 +43,11 @@ export function TrendContainer({
     if (!isMobile) setIsActive(true)
   }, [isMobile])
 
-  // Lock vertical scroll on desktop — everything is horizontal
+  // Remove snap scroll on desktop — everything is horizontal
   useEffect(() => {
     if (isMobile) return
     if (!isActive) return
     document.documentElement.classList.remove('snap-active')
-    const lockTimeout = setTimeout(() => {
-      document.body.style.overflow = 'hidden'
-    }, 300)
-
-    return () => {
-      clearTimeout(lockTimeout)
-      document.body.style.overflow = ''
-    }
   }, [isMobile, isActive])
 
   // Listen for trend-next/trend-prev events (desktop only)
