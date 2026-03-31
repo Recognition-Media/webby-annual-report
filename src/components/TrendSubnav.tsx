@@ -2,20 +2,26 @@
 
 import { motion } from 'framer-motion'
 
-const SECTION_COLORS: Record<string, string> = {
-  'Welcome Letter': '#8B70D1',
-  'By the Numbers': '#80D064',
-  'How We Judge': '#8B70D1',
-  'Quick Summary': '#82D8EB',
-  'Thank You': '#8B70D1',
+// Colors by slide index:
+// 0=Welcome Letter, 1=By the Numbers, 2=How We Judge, 3=Quick Summary,
+// 4=Trend1, 5=Trend2, 6=Trend3, 7=Trend4, 8=Trend5, 9=Trend6, 10=Trend7, 11=Thank You
+const SLIDE_COLORS: Record<number, string> = {
+  0: '#8B70D1',  // Welcome Letter — purple
+  1: '#80D064',  // By the Numbers — green
+  2: '#8B70D1',  // How We Judge — purple
+  3: '#82D8EB',  // Quick Summary — blue
+  4: '#8B70D1',  // Trend 1 — purple
+  5: '#82D8EB',  // Trend 2 — blue
+  6: '#FF7F63',  // Trend 3 — red/coral
+  7: '#80D064',  // Trend 4 — green
+  8: '#FFB763',  // Trend 5 — orange
+  9: '#FF69B4',  // Trend 6 — pink
+  10: '#FFD700', // Trend 7 — yellow
+  11: '#8B70D1', // Thank You — purple
 }
 
-const TREND_COLORS = [
-  '#8B70D1', '#82D8EB', '#FF7F63', '#80D064', '#FFB763',
-]
-
-function getColor(title: string, index: number): string {
-  return SECTION_COLORS[title] || TREND_COLORS[index % TREND_COLORS.length]
+function getColor(index: number): string {
+  return SLIDE_COLORS[index] || '#8B70D1'
 }
 
 interface TrendSubnavProps {
@@ -26,7 +32,7 @@ interface TrendSubnavProps {
 
 export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProps) {
   const activeTitle = titles[activeTrend] || ''
-  const activeColor = getColor(activeTitle, activeTrend)
+  const activeColor = getColor(activeTrend)
 
   return (
     <motion.div
