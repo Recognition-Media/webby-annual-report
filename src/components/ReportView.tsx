@@ -297,7 +297,7 @@ export function ReportView({ report }: { report: Report }) {
                 {/* Last slide: Thank You */}
                 <div
                   id="thank-you-desktop"
-                  style={{ width: '100vw', height: '100vh', flexShrink: 0, display: 'flex', alignItems: 'center', position: 'relative', overflow: 'auto', padding: '0 60px', paddingBottom: 50 }}
+                  style={{ width: '100vw', height: '100vh', flexShrink: 0, display: 'flex', alignItems: 'safe center', position: 'relative', overflowX: 'hidden', overflowY: 'auto', padding: '0 60px', paddingBottom: 50 }}
                 >
                   <AnimatedBg variant={3} />
                   <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
