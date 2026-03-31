@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 // Colors by slide index:
@@ -34,31 +33,10 @@ interface TrendSubnavProps {
 export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProps) {
   const activeTitle = titles[activeTrend] || ''
   const activeColor = getColor(activeTrend)
-  const [hidden, setHidden] = useState(false)
-  const lastScrollRef = useRef(0)
-
-  // Hide on scroll down within slides, show on scroll up
-  useEffect(() => {
-    function handleScroll(e: Event) {
-      const target = e.target as HTMLElement
-      if (!target || (target as unknown) === document) return
-      const scrollTop = target.scrollTop
-      if (scrollTop > lastScrollRef.current + 5) {
-        setHidden(true)
-      } else if (scrollTop < lastScrollRef.current - 5) {
-        setHidden(false)
-      }
-      lastScrollRef.current = scrollTop
-    }
-    // Listen on capture phase to catch scroll inside slide containers
-    window.addEventListener('scroll', handleScroll, { capture: true, passive: true })
-    return () => window.removeEventListener('scroll', handleScroll, true)
-  }, [])
-
   return (
     <motion.div
       initial={{ y: 80, opacity: 0 }}
-      animate={{ y: hidden ? 60 : 0, opacity: 1 }}
+      animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
       style={{
         position: 'fixed',
