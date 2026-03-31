@@ -54,6 +54,7 @@ export function TrendIntro({
         alignItems: 'center',
         position: 'relative',
         overflow: 'hidden',
+        background: '#191919',
       }}
     >
       <AnimatedBg variant={0} />
