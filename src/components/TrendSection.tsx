@@ -599,38 +599,67 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
             </div>
           )}
 
-          {/* Video */}
-          {hasVideo && videoConfig && (
-            <div style={{ marginTop: 48, display: 'flex', justifyContent: 'center' }}>
+          {/* Video — CMS trendVideo (primary) or legacy videoConfig */}
+          {hasVideo && (section.trendVideo || videoConfig) && (
+            <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ width: '100%', maxWidth: 400, position: 'relative' }}>
-                {videoConfig.type === 'youtube' ? (() => {
-                  const youtubeId = videoConfig.src.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
-                  return youtubeId ? (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${youtubeId}?rel=0`}
-                      allow="autoplay; encrypted-media"
-                      allowFullScreen
-                      style={{
-                        width: '100%',
-                        aspectRatio: '16 / 9',
-                        borderRadius: 8,
-                        border: '1px solid rgba(255,255,255,0.12)',
-                      }}
-                    />
-                  ) : null
-                })() : (
-                  <video
-                    src={videoConfig.src}
-                    controls
-                    playsInline
-                    style={{
-                      width: '100%',
-                      borderRadius: 8,
-                      border: '1px solid rgba(255,255,255,0.12)',
-                    }}
-                  />
-                )}
+                {(() => {
+                  // CMS trendVideo (primary)
+                  if (section.trendVideo) {
+                    const tv = section.trendVideo
+                    const isYT = tv.sourceType === 'youtube'
+                    const ytId = isYT && tv.youtubeUrl
+                      ? tv.youtubeUrl.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
+                      : null
+                    const cssAR = tv.aspectRatio.replace(':', ' / ')
+                    return isYT && ytId ? (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${ytId}?rel=0`}
+                        allow="autoplay; encrypted-media"
+                        allowFullScreen
+                        style={{ width: '100%', aspectRatio: cssAR, borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)' }}
+                      />
+                    ) : (
+                      <video
+                        src={tv.videoFile?.url}
+                        controls
+                        playsInline
+                        style={{ width: '100%', aspectRatio: cssAR, borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)' }}
+                      />
+                    )
+                  }
+                  // Legacy videoConfig fallback
+                  if (videoConfig) {
+                    return videoConfig.type === 'youtube' ? (() => {
+                      const youtubeId = videoConfig.src.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
+                      return youtubeId ? (
+                        <iframe
+                          src={`https://www.youtube.com/embed/${youtubeId}?rel=0`}
+                          allow="autoplay; encrypted-media"
+                          allowFullScreen
+                          style={{ width: '100%', aspectRatio: '16 / 9', borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)' }}
+                        />
+                      ) : null
+                    })() : (
+                      <video
+                        src={videoConfig.src}
+                        controls
+                        playsInline
+                        style={{ width: '100%', borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)' }}
+                      />
+                    )
+                  }
+                  return null
+                })()}
               </div>
+              {/* Caption on mobile */}
+              {section.trendVideo && (
+                <div style={{ width: '100%', maxWidth: 400, marginTop: 12, paddingTop: 10, borderTop: `2px solid ${trendColor}` }}>
+                  <p style={{ fontSize: 14, fontWeight: 500, color: '#fff', margin: 0 }}>{section.trendVideo.name}</p>
+                  {section.trendVideo.title && <p style={{ fontSize: 12, color: '#ccc', margin: '2px 0 0' }}>{section.trendVideo.title}</p>}
+                  {section.trendVideo.description && <p style={{ fontSize: 13, color: '#bbb', lineHeight: 1.5, margin: '6px 0 0' }}>{section.trendVideo.description}</p>}
+                </div>
+              )}
             </div>
           )}
         </div>
