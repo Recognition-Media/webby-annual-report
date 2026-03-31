@@ -21,7 +21,7 @@ export function AnimatedBg({ variant = 0 }: { variant?: number }) {
     : { bottom: 0, right: 0 }
 
   return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+    <div style={{ position: 'sticky', top: 0, width: '100%', height: '100vh', overflow: 'hidden', pointerEvents: 'none', marginBottom: '-100vh' }}>
       <svg
         style={{
           position: 'absolute',
