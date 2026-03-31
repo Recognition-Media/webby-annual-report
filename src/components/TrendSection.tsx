@@ -694,11 +694,10 @@ export function TrendSection({ section, index, forceMobile }: { section: TrendSe
       style={{
         width: '100vw',
         height: '100vh',
-        paddingBottom: 50,
         flexShrink: 0,
         display: 'flex',
-        alignItems: 'center',
-        padding: '0 60px',
+        alignItems: 'safe center',
+        padding: '0 60px 50px',
         position: 'relative',
         overflowX: 'hidden',
         overflowY: 'auto',
