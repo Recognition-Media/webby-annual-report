@@ -3,6 +3,7 @@ import { client } from '@/sanity/client'
 import { reportBySlugQuery, allReportSlugsQuery } from '@/sanity/queries'
 import type { Report } from '@/sanity/types'
 import { ReportView } from '@/components/ReportView'
+import { urlFor } from '@/sanity/image'
 
 export async function generateStaticParams() {
   const slugs = await client.fetch<{ slug: string }[]>(allReportSlugsQuery)
@@ -28,8 +29,21 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params
   const report = await client.fetch<Report | null>(reportBySlugQuery, { slug })
 
+  const ogImage = report?.shareImage ? urlFor(report.shareImage).width(1200).height(630).url() : undefined
+
   return {
     title: report?.metaTitle || report?.title || 'Annual Report',
     description: report?.metaDescription || '',
+    openGraph: {
+      title: report?.metaTitle || report?.title || 'Annual Report',
+      description: report?.metaDescription || '',
+      ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630 }] }),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: report?.metaTitle || report?.title || 'Annual Report',
+      description: report?.metaDescription || '',
+      ...(ogImage && { images: [ogImage] }),
+    },
   }
 }
