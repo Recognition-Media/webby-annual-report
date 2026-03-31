@@ -230,11 +230,13 @@ export function IdleArrows({ active }: { active: boolean }) {
 
   function clickRight() {
     const special = getSpecialSlide()
-    if (special && special !== 'thankYou') {
-      // Non-trend slides: just advance
+    if (special === 'thankYou') return
+    if (special) {
+      // Non-trend slides: just advance to next slide
       window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
       return
     }
+    // Trend slides
     const trendActive = document.querySelector('[data-trend-active]')
     if (trendActive) {
       const isCompleted = trendActive.getAttribute('data-trend-completed') === 'true'
@@ -243,6 +245,9 @@ export function IdleArrows({ active }: { active: boolean }) {
       } else {
         window.dispatchEvent(new Event('trend-advance'))
       }
+    } else {
+      // Trend not yet detected by IntersectionObserver — advance anyway
+      window.dispatchEvent(new Event('trend-advance'))
     }
   }
 
@@ -257,11 +262,13 @@ export function IdleArrows({ active }: { active: boolean }) {
     if (trendActive) {
       const trendPhase = trendActive.getAttribute('data-trend-phase')
       if (trendPhase === '0') {
-        // At trend landing — go to previous slide
         window.dispatchEvent(new Event('trend-prev'))
       } else {
         window.dispatchEvent(new Event('trend-retreat'))
       }
+    } else {
+      // Trend not yet detected — go to previous slide
+      window.dispatchEvent(new Event('trend-prev'))
     }
   }
 
@@ -324,7 +331,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                     '0 0 0px rgba(130, 216, 235, 0)',
                   ],
                 }}
-                exit={{ opacity: 0.75 }}
+                exit={{ opacity: 0, transition: { duration: 0.15 } }}
                 whileHover={{ opacity: 0.85 }}
                 transition={{
                   opacity: { duration: 0.6 },

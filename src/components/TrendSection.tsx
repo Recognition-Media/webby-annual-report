@@ -366,25 +366,34 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   const lockRef = useRef(false)
   const enterCooldownRef = useRef(false)
 
-  // Track when this section is in view (desktop only)
+  // Track when this section is the active slide (desktop only)
+  // Use both IntersectionObserver AND container data-active-trend for reliability
   useEffect(() => {
     if (isMobile) return
     const el = sectionRef.current
     if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsActive(entry.isIntersecting)
-        if (entry.isIntersecting) {
-          enterCooldownRef.current = true
-          setTimeout(() => { enterCooldownRef.current = false }, 800)
-          // Reset video closed state when returning to this trend
-          setVideoClosed(false)
-        }
-        // Never reset phase — preserve wherever the user left off
-      },
-      { threshold: 0.5 }
-    )
-    observer.observe(el)
+
+    function checkActive() {
+      const container = document.getElementById('trends')
+      if (!container) return
+      // The trend's slide index = index + 4 (letter=0, numbers=1, judge=2, summary=3, then trends)
+      const activeSlideIndex = parseInt(container.getAttribute('data-active-trend') || '0', 10)
+      const mySlideIndex = index + 4
+      const shouldBeActive = activeSlideIndex === mySlideIndex
+      setIsActive(shouldBeActive)
+      if (shouldBeActive) {
+        enterCooldownRef.current = true
+        setTimeout(() => { enterCooldownRef.current = false }, 800)
+        setVideoClosed(false)
+      }
+    }
+
+    // Check immediately and on attribute changes
+    checkActive()
+    const observer = new MutationObserver(checkActive)
+    const container = document.getElementById('trends')
+    if (container) observer.observe(container, { attributes: true, attributeFilter: ['data-active-trend'] })
+
     return () => observer.disconnect()
   }, [])
 
