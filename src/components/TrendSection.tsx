@@ -634,9 +634,10 @@ export function TrendSection({ section, index, forceMobile }: { section: TrendSe
                       />
                     ) : (
                       <video
-                        src={tv.videoFile?.url}
+                        src={`${tv.videoFile?.url}#t=0.1`}
                         controls
                         playsInline
+                        preload="metadata"
                         style={{ width: '100%', aspectRatio: cssAR, borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)' }}
                       />
                     )
@@ -655,9 +656,10 @@ export function TrendSection({ section, index, forceMobile }: { section: TrendSe
                       ) : null
                     })() : (
                       <video
-                        src={videoConfig.src}
+                        src={`${videoConfig.src}#t=0.1`}
                         controls
                         playsInline
+                        preload="metadata"
                         style={{ width: '100%', borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)' }}
                       />
                     )
@@ -910,7 +912,8 @@ function PhaseTitle({
                               href={project.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              style={{ color: '#D4D4D4', fontWeight: 500, fontSize: 14, lineHeight: 1.4, textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.15)' }}
+                              className="report-link"
+                              style={{ color: '#D4D4D4', fontWeight: 500, fontSize: 14, lineHeight: 1.4 }}
                             >
                               {project.title}
                             </a>
