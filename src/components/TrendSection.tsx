@@ -848,8 +848,8 @@ function PhaseTitle({
             color: '#fff',
             lineHeight: isMobile ? '36px' : '58px',
             letterSpacing: isMobile ? '-1px' : '-2px',
-            marginBottom: isMobile ? 24 : 40,
-            maxWidth: 750,
+            marginBottom: isMobile ? 24 : 32,
+            maxWidth: isMobile ? 750 : 1000,
           }}
         >
           {cleanTitle}
@@ -874,7 +874,7 @@ function PhaseTitle({
                 fontSize: isMobile ? 15 : 16,
                 lineHeight: '28px',
                 color: '#D4D4D4',
-                maxWidth: isMobile ? '100%' : 749,
+                maxWidth: isMobile ? '100%' : 1000,
                 flex: isMobile ? '1 1 auto' : '0 0 auto',
                 minWidth: 0,
               }}
