@@ -108,7 +108,8 @@ export function TrendContainer({
       data-snap
       ref={containerRef}
       style={{
-        height: 'calc(100vh - 50px)',
+        height: '100vh',
+        paddingBottom: 50,
         position: 'relative',
         overflow: 'hidden',
         background: '#191919',

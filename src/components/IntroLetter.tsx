@@ -12,7 +12,8 @@ export function IntroLetter({ report }: { report: Report }) {
       className="relative overflow-hidden px-5 md:px-[60px] pt-16 md:pt-[calc(13vh+5px)]"
       style={{
         background: '#191919',
-        minHeight: 'calc(100vh - 50px)',
+        minHeight: '100vh',
+        paddingBottom: 50,
       }}
     >
 
