@@ -220,9 +220,16 @@ export function IdleArrows({ active }: { active: boolean }) {
     const trendCount = parseInt(container.getAttribute('data-trend-count') || '0', 10)
     const hasTrendActive = !!document.querySelector('[data-trend-active]')
     if (activeTrend === 0) return 'first'
-    if (activeTrend === 3 && !hasTrendActive) return 'trendIntro' // Quick Summary slide
     if (activeTrend === trendCount - 1 && !hasTrendActive) return 'thankYou'
-    if (!hasTrendActive) return 'nonTrend' // letter, stats, iadas slides
+    if (!hasTrendActive) {
+      // Check if we're on the Quick Summary slide by looking for the element
+      const introEl = document.getElementById('trend-intro')
+      if (introEl) {
+        const rect = introEl.getBoundingClientRect()
+        if (rect.left >= -10 && rect.left <= 10) return 'trendIntro'
+      }
+      return 'nonTrend'
+    }
     return null
   }
 
