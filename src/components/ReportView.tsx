@@ -208,7 +208,7 @@ export function ReportView({ report }: { report: Report }) {
                 {allTrends.length > 0 && (
                   <TrendContainer trendCount={allTrends.length} trendTitles={trendTitles}>
                     {allTrends.map((section, i) => (
-                      <TrendSection key={i} section={section} index={i} />
+                      <TrendSection key={`mobile-${i}`} section={section} index={i} forceMobile />
                     ))}
                   </TrendContainer>
                 )}

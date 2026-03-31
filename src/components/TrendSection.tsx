@@ -311,8 +311,9 @@ function useIsMobile() {
   return isMobile
 }
 
-export function TrendSection({ section, index }: { section: TrendSectionType; index: number }) {
-  const isMobile = useIsMobile()
+export function TrendSection({ section, index, forceMobile }: { section: TrendSectionType; index: number; forceMobile?: boolean }) {
+  const _isMobile = useIsMobile()
+  const isMobile = forceMobile || _isMobile
   const resolvedBasePath = useBasePath()
   const trendColor = TREND_COLORS[index % TREND_COLORS.length]
 
