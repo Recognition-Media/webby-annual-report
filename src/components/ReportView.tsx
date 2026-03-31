@@ -181,7 +181,7 @@ export function ReportView({ report }: { report: Report }) {
           'By the Numbers',
           'How We Judge',
           report.trendIntroEyebrow || 'Quick Summary',
-          ...trendTitles,
+          ...trendTitles.map((t, i) => `Trend ${String(i + 1).padStart(2, '0')}: ${t}`),
           'Thank You',
         ]
 
