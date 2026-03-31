@@ -91,7 +91,7 @@ export function TrendContainer({
   if (isMobile) {
     return (
       <section
-        id="trends"
+        id="trends-mobile"
         ref={containerRef}
         style={{ background: '#191919' }}
       >

@@ -464,7 +464,6 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
     if (!isActive || isMobile) return
     function handleAdvance(e: Event) {
       const detail = (e as CustomEvent).detail
-      // If event has a target slideIndex, only respond if it matches
       if (detail?.slideIndex !== undefined && detail.slideIndex !== mySlideIndex) return
       advancePhase()
     }

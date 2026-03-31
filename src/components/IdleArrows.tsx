@@ -235,23 +235,11 @@ export function IdleArrows({ active }: { active: boolean }) {
     const special = getSpecialSlide()
     if (special === 'thankYou') return
     if (special) {
-      // Non-trend slides: just advance to next slide
       window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
       return
     }
-    // Trend slides
-    const trendActive = document.querySelector('[data-trend-active]')
-    if (trendActive) {
-      const isCompleted = trendActive.getAttribute('data-trend-completed') === 'true'
-      if (isCompleted) {
-        window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
-      } else {
-        window.dispatchEvent(new Event('trend-advance'))
-      }
-    } else {
-      // Trend not yet detected — advance with target slide
-      window.dispatchEvent(new CustomEvent('trend-advance', { detail: { slideIndex: activeSlide } }))
-    }
+    // Always dispatch with slideIndex so only the correct trend responds
+    window.dispatchEvent(new CustomEvent('trend-advance', { detail: { slideIndex: activeSlide } }))
   }
 
   function clickLeft() {
@@ -306,10 +294,7 @@ export function IdleArrows({ active }: { active: boolean }) {
       })()}
       {!isMobileScreen && !isTouch && (() => {
         const special = getSpecialSlide()
-        // Show left arrow unless on first slide
         const showLeft = special !== 'first'
-        // Show right arrow unless on Thank You (last) slide
-        // trendIntro pill always shows immediately, others show immediately too (no idle needed)
         const showRight = special !== 'thankYou'
         return (
           <>
