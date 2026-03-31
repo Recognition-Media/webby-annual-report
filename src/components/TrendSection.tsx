@@ -960,28 +960,22 @@ function PhaseTitle({
 // Counter-clockwise: newest enters right-center, older ones rotate left and up
 function getQuoteLayout(position: number, visibleCount: number) {
   if (visibleCount === 1) {
-    // Single quote: shifted 30px left of center so image extends further left
     return { top: '50%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '-50%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
   }
   if (visibleCount === 2) {
     if (position === 0) {
-      // Newest: shifted left, wider
-      return { top: '40%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '-50%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
+      return { top: '45%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '-50%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
     }
-    // Older: top-left
-    return { top: '15%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 'min(35vw, 500px)' }
+    return { top: '20%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 'min(35vw, 500px)' }
   }
   // 3 quotes
   if (position === 0) {
-    // Newest: above the 2nd quote, shifted left
-    return { top: '-8%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '0%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
+    return { top: '2%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '0%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
   }
   if (position === 1) {
-    // 2nd quote: down and right, shrinks and dims
-    return { top: '52%', left: 'calc(35% - 50px)', xOffset: '-50%', yOffset: '-50%', scale: 0.8, opacity: 0.35, maxWidth: 'min(65vw, 900px)' }
+    return { top: '57%', left: 'calc(35% - 50px)', xOffset: '-50%', yOffset: '-50%', scale: 0.8, opacity: 0.35, maxWidth: 'min(65vw, 900px)' }
   }
-  // Oldest: stays top-left, unchanged
-  return { top: '15%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 'min(35vw, 500px)' }
+  return { top: '20%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 'min(35vw, 500px)' }
 }
 
 function PhaseQuote({
