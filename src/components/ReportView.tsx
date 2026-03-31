@@ -31,7 +31,23 @@ function setCookie(name: string, value: string, days: number) {
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') return window.matchMedia('(max-width: 768px)').matches
+    return false
+  })
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return isMobile
+}
+
 export function ReportView({ report }: { report: Report }) {
+  const isMobile = useIsMobile()
   const cookieKey = `report-access-${report.slug.current}`
   const [hasAccess, setHasAccess] = useState(false)
   const [showGate, setShowGate] = useState(false)
@@ -188,7 +204,7 @@ export function ReportView({ report }: { report: Report }) {
         return (
           <div ref={reportRef}>
             {/* ── Mobile: vertical scroll ── */}
-            <div className="md:hidden">
+            {isMobile && (
               <ReportScroll active={entered} trendCount={allTrends.length}>
                 <IntroLetter report={report} />
                 <div style={{ height: 1, background: '#3d3d3d' }} />
@@ -243,10 +259,10 @@ export function ReportView({ report }: { report: Report }) {
 
                 {showGoodbye && <ReportFooter report={report} />}
               </ReportScroll>
-            </div>
+            )}
 
             {/* ── Desktop: fully horizontal carousel ── */}
-            <div className="hidden md:block">
+            {!isMobile && (
               <TrendContainer trendCount={desktopSlideCount} trendTitles={desktopSlideTitles}>
                 {/* Slide 1: Welcome Letter */}
                 <div style={{ width: '100vw', height: '100vh', flexShrink: 0, overflow: 'auto' }}>
@@ -323,7 +339,7 @@ export function ReportView({ report }: { report: Report }) {
                   </div>
                 </div>
               </TrendContainer>
-            </div>
+            )}
           </div>
         )
       })()}
