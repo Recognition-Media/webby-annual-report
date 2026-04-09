@@ -1,35 +1,41 @@
-import { useClient, type DocumentActionComponent } from 'sanity'
-import { uuid } from '@sanity/uuid'
+import { type DocumentActionComponent, useClient } from 'sanity'
 import { CopyIcon } from '@sanity/icons'
+import { useState } from 'react'
 import { useRouter } from 'sanity/router'
 
-export const duplicateReportAction: DocumentActionComponent = (props) => {
+export const duplicateReportAction: DocumentActionComponent = ({ draft, published, id }) => {
   const client = useClient({ apiVersion: '2024-01-01' })
   const router = useRouter()
-  const { draft, published } = props
+  const [isDuplicating, setIsDuplicating] = useState(false)
 
   return {
-    label: 'Duplicate Report',
+    label: isDuplicating ? 'Duplicating...' : 'Duplicate Report',
     icon: CopyIcon,
+    disabled: isDuplicating,
     onHandle: async () => {
       const source = draft || published
       if (!source) return
 
-      const newId = uuid()
-      const { _id, _rev, _createdAt, _updatedAt, slug, status, ...rest } = source as any
+      setIsDuplicating(true)
 
-      const newDoc = {
-        ...rest,
-        _id: `drafts.${newId}`,
-        _type: 'report',
-        title: `${(source as any).title} (Copy)`,
-        slug: { _type: 'slug', current: `${slug?.current}-copy` },
-        status: 'draft',
+      try {
+        const { _id, _rev, _createdAt, _updatedAt, _type, slug, status, title, ...rest } = source as any
+
+        const newDoc = {
+          ...rest,
+          _type: 'report',
+          title: `${title} (Copy)`,
+          slug: { _type: 'slug', current: `${slug?.current}-copy` },
+          status: 'draft',
+        }
+
+        const result = await client.create(newDoc)
+        router.navigateIntent('edit', { id: result._id, type: 'report' })
+      } catch (err) {
+        console.error('Failed to duplicate report:', err)
+      } finally {
+        setIsDuplicating(false)
       }
-
-      await client.create(newDoc)
-
-      router.navigateIntent('edit', { id: newId, type: 'report' })
     },
   }
 }

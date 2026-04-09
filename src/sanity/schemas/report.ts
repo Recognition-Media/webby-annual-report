@@ -48,8 +48,10 @@ export default defineType({
     { name: 'shareImage', title: 'Share Image', type: 'image', group: 'seo' },
 
     // Intro & Hero
+    { name: 'heroHeadline', title: 'Hero Headline', type: 'string', group: 'intro', description: 'e.g. "Webby 30: In Review" — use \\n for line break' },
+    { name: 'heroSubtitle', title: 'Hero Subtitle', type: 'string', group: 'intro', description: 'e.g. "A deeper look into the 30th Annual Webby Awards"' },
+    { name: 'heroButtonText', title: 'Hero Button Text', type: 'string', group: 'intro', initialValue: 'See The Report' },
     { name: 'headerImage', title: 'Header Image / Logo', type: 'image', options: { hotspot: true }, group: 'intro' },
-    { name: 'heroStats', title: 'Hero Stats', type: 'array', of: [{ type: 'heroStat' }], group: 'intro' },
 
     // Welcome Letter
     { name: 'letterBody', title: 'Welcome Letter', type: 'array', of: [{ type: 'block' }], group: 'letter' },

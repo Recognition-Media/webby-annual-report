@@ -64,7 +64,9 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Webby 30:<br />In Review
+            {(report.heroHeadline || 'Webby 30:\nIn Review').split('\n').map((line, i, arr) => (
+              <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+            ))}
           </motion.h1>
 
           <motion.div
@@ -82,7 +84,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            A deeper look into the 30th Annual Webby Awards
+            {report.heroSubtitle || 'A deeper look into the 30th Annual Webby Awards'}
           </motion.p>
 
           <motion.button
@@ -92,7 +94,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <span>See The Report</span>
+            <span>{report.heroButtonText || 'See The Report'}</span>
             <span className="text-lg">→</span>
           </motion.button>
         </div>

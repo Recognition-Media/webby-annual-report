@@ -105,10 +105,14 @@ export interface Report {
   year: number
   title: string
   slug: { current: string }
+  property?: 'webby' | 'anthem' | 'telly' | 'lovie'
   status: 'draft' | 'live'
   metaTitle?: string
   metaDescription?: string
   shareImage?: SanityImage
+  heroHeadline?: string
+  heroSubtitle?: string
+  heroButtonText?: string
   headerImage?: SanityImage
   heroStats?: HeroStat[]
   globalStats?: HeroStat[]
