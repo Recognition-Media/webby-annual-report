@@ -25,6 +25,15 @@ export default defineType({
     { name: 'title', title: 'Title', type: 'string', validation: (r) => r.required(), group: 'core' },
     { name: 'slug', title: 'Slug', type: 'slug', options: { source: 'title' }, validation: (r) => r.required(), group: 'core' },
     {
+      name: 'property',
+      title: 'Property',
+      type: 'string',
+      options: { list: ['webby', 'anthem', 'telly', 'lovie'] },
+      initialValue: 'webby',
+      group: 'core',
+      description: 'Which awards property this report belongs to',
+    },
+    {
       name: 'status',
       title: 'Status',
       type: 'string',
@@ -112,9 +121,9 @@ export default defineType({
     { title: 'Year (Newest)', name: 'yearDesc', by: [{ field: 'year', direction: 'desc' }] },
   ],
   preview: {
-    select: { title: 'title', year: 'year', status: 'status' },
-    prepare({ title, year, status }) {
-      return { title: `${title} (${year})`, subtitle: status }
+    select: { title: 'title', year: 'year', status: 'status', property: 'property' },
+    prepare({ title, year, status, property }) {
+      return { title: `${title} (${year})`, subtitle: `${property || 'webby'} — ${status}` }
     },
   },
 })

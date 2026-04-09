@@ -4,10 +4,11 @@ import { visionTool } from '@sanity/vision'
 import { schemaTypes } from './schemas'
 import { projectId, dataset } from './config'
 import { signupExportPlugin } from './plugins/signupExport'
+import { duplicateReportAction } from './actions/duplicateReport'
 
 export default defineConfig({
   name: 'webby-annual-report',
-  title: 'Webby Annual Report',
+  title: 'Annual Reports',
   projectId,
   dataset,
   basePath: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/studio`,
@@ -19,6 +20,14 @@ export default defineConfig({
     }),
   ],
   schema: { types: schemaTypes },
+  document: {
+    actions: (prev, context) => {
+      if (context.schemaType === 'report') {
+        return [...prev, duplicateReportAction]
+      }
+      return prev
+    },
+  },
   tools: (prev, { currentUser }) => {
     const isAdmin = currentUser?.roles?.some((r) => r.name === 'administrator')
     if (isAdmin) return prev
