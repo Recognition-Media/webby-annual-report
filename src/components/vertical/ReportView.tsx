@@ -114,14 +114,24 @@ export function ReportView({ report }: { report: Report }) {
       window.location.replace(window.location.pathname)
       return
     }
+    // If the signup gate is turned off in the CMS, grant access without
+    // checking the cookie — visitors enter the report directly.
+    if (report.signupGateEnabled === false) {
+      setHasAccess(true)
+      return
+    }
     if (getCookie(cookieKey)) {
       setHasAccess(true)
     }
-  }, [cookieKey])
+  }, [cookieKey, report.signupGateEnabled])
 
-  // Once access is granted, scroll to report and hide hero
+  // Once access is granted, scroll to report and hide hero — but only for
+  // returning visitors who already have the cookie. When the signup gate is
+  // disabled in the CMS, hasAccess is also true from mount, but we want
+  // those users to see the hero and click "Explore" themselves.
   useEffect(() => {
     if (!hasAccess) return
+    if (report.signupGateEnabled === false) return
     // Small delay to let report content render
     setTimeout(() => {
       reportRef.current?.scrollIntoView({ behavior: 'smooth' })

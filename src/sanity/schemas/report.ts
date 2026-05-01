@@ -126,6 +126,14 @@ export default defineType({
     { name: 'thankYouCtaUrl', title: 'CTA Card URL', type: 'url', group: 'thankYou' },
 
     // Signup Form
+    {
+      name: 'signupGateEnabled',
+      title: 'Show Signup Form',
+      type: 'boolean',
+      description: 'When on, visitors see a signup form before viewing the report. When off, "Explore the report" takes them straight in. Applies to both Webby and Anthem report templates.',
+      initialValue: true,
+      group: 'signup',
+    },
     { name: 'signupTitle', title: 'Form Title', type: 'text', rows: 2, group: 'signup', description: 'Supports line breaks. e.g. "Welcome to the\\n30th Annual Webby Awards"' },
     { name: 'signupSubhead', title: 'Form Subhead', type: 'text', rows: 2, group: 'signup', description: 'e.g. "Please provide us with some basic info..."' },
     { name: 'formFields', title: 'Signup Form Fields', type: 'array', of: [{ type: 'formField' }], group: 'signup' },
