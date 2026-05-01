@@ -186,7 +186,7 @@ export function ReportView({ report }: { report: Report }) {
       {/* Report content — snap scrolling + nav dots activate after entry */}
       {hasAccess && (
         <div ref={reportRef}>
-          <ReportScroll active={entered} trendCount={report.trendSections?.length ?? 0}>
+          <ReportScroll active={entered} trendCount={report.trendSections?.length ?? 0} snap={false}>
             <IntroLetter report={report} />
 
             {/* By the Numbers — hidden for Anthem redesign */}

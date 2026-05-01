@@ -12,10 +12,18 @@ function buildSectionIds(trendCount: number) {
 export function ReportScroll({
   active,
   trendCount,
+  snap = true,
   children,
 }: {
   active: boolean
   trendCount: number
+  /**
+   * Enable CSS scroll-snap on the page (desktop only). Defaults to true for
+   * the horizontal/Webby template's snap-scroll trend slides. The vertical/
+   * Anthem template passes `snap={false}` because its layout is a normal
+   * top-to-bottom scroll and snap would fight the user.
+   */
+  snap?: boolean
   children: React.ReactNode
 }) {
   const sectionIds = useMemo(() => buildSectionIds(trendCount), [trendCount])
@@ -28,10 +36,9 @@ export function ReportScroll({
     if (!active) return
     const isMobile = window.matchMedia('(max-width: 768px)').matches
 
-    // Snap scrolling disabled for Anthem vertical scroll redesign
-    // if (!isMobile) {
-    //   document.documentElement.classList.add('snap-active')
-    // }
+    if (snap && !isMobile) {
+      document.documentElement.classList.add('snap-active')
+    }
     window.scrollTo(0, 0)
 
     // Track active section
@@ -91,7 +98,7 @@ export function ReportScroll({
       observer.disconnect()
       mutObserver.disconnect()
     }
-  }, [active, sectionIds])
+  }, [active, sectionIds, snap])
 
   const scrollTo = useCallback((index: number) => {
     const el = document.getElementById(sectionIds[index])

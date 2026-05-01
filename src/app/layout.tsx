@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
 import './globals.css'
 
+// Generic site-wide fallback. Each report route overrides via its own
+// `generateMetadata` in app/[slug]/page.tsx, which pulls metaTitle/
+// metaDescription/shareImage from the Sanity Report doc.
 export const metadata: Metadata = {
-  title: 'Webby Awards Annual Report',
-  description: 'The annual report on the state of the internet from The Webby Awards.',
+  title: 'Annual Report',
+  description: 'The annual reports from The International Academy of Digital Arts and Sciences.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
