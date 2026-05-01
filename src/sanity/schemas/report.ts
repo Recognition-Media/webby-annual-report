@@ -71,8 +71,10 @@ export default defineType({
     { name: 'shareImage', title: 'Share Image', type: 'image', group: 'seo' },
 
     // Intro & Hero
+    { name: 'heroHeadline', title: 'Hero Headline', type: 'string', group: 'intro', description: 'e.g. "Webby 30: In Review" — use \\n for line break' },
+    { name: 'heroSubtitle', title: 'Hero Subtitle', type: 'string', group: 'intro', description: 'e.g. "A deeper look into the 30th Annual Webby Awards"' },
+    { name: 'heroButtonText', title: 'Hero Button Text', type: 'string', group: 'intro', initialValue: 'See The Report' },
     { name: 'headerImage', title: 'Header Image / Logo', type: 'image', options: { hotspot: true }, group: 'intro' },
-    { name: 'heroStats', title: 'Hero Stats', type: 'array', of: [{ type: 'heroStat' }], group: 'intro' },
 
     // Welcome Letter
     { name: 'letterBody', title: 'Welcome Letter', type: 'array', of: [{ type: 'block' }], group: 'letter' },
@@ -144,9 +146,9 @@ export default defineType({
     { title: 'Year (Newest)', name: 'yearDesc', by: [{ field: 'year', direction: 'desc' }] },
   ],
   preview: {
-    select: { title: 'title', year: 'year', status: 'status' },
-    prepare({ title, year, status }) {
-      return { title: `${title} (${year})`, subtitle: status }
+    select: { title: 'title', year: 'year', status: 'status', property: 'property' },
+    prepare({ title, year, status, property }) {
+      return { title: `${title} (${year})`, subtitle: `${property || 'webby'} — ${status}` }
     },
   },
 })
