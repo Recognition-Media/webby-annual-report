@@ -71,19 +71,17 @@ export function IadasSection({ report }: { report: Report }) {
       id="how-judged"
       data-snap
       ref={ref}
-      className="px-5 md:px-[60px]"
+      className="px-5 md:px-[60px] md:pt-[calc(13vh-3px)]"
       style={{
         background: '#191919',
         minHeight: '100vh',
+        paddingBottom: 50,
         position: 'relative',
         overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
       }}
     >
 
-      <div data-content style={{ maxWidth: 1000, width: '100%', position: 'relative' }}>
+      <div data-content style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative' }}>
         {/* Section label */}
         <p
           style={{

@@ -64,14 +64,37 @@ function isTouchDevice() {
 
 export function IdleArrows({ active }: { active: boolean }) {
   const [idle, setIdle] = useState(false)
-  const [context, setContext] = useState<'vertical' | 'trend' | 'none'>('none')
+  const [context, setContext] = useState<'vertical' | 'trend' | 'none'>(() => {
+    if (typeof window !== 'undefined' && !window.matchMedia('(max-width: 768px)').matches) return 'trend'
+    return 'none'
+  })
   const [, forceUpdate] = useState(0)
   const [isTouch, setIsTouch] = useState(false)
+  const [activeSlide, setActiveSlide] = useState(0)
   const timerRef = useRef<any>(null)
 
   useEffect(() => {
     setIsTouch(isTouchDevice())
   }, [])
+
+  // Track active slide for re-rendering — poll + observe for reliability
+  useEffect(() => {
+    if (!active) return
+    function updateSlide() {
+      const container = document.getElementById('trends')
+      if (container) {
+        const val = parseInt(container.getAttribute('data-active-trend') || '0', 10)
+        setActiveSlide((prev) => prev !== val ? val : prev)
+      }
+    }
+    updateSlide()
+    const observer = new MutationObserver(updateSlide)
+    const container = document.getElementById('trends')
+    if (container) observer.observe(container, { attributes: true, attributeFilter: ['data-active-trend'] })
+    // Poll as backup every 500ms
+    const interval = setInterval(updateSlide, 500)
+    return () => { observer.disconnect(); clearInterval(interval) }
+  }, [active])
 
   // Detect context: are we in trends or vertical sections
   useEffect(() => {
@@ -83,10 +106,16 @@ export function IdleArrows({ active }: { active: boolean }) {
       const trendsRect = trendsContainer?.getBoundingClientRect()
       const inTrends = trendsRect && trendsRect.top <= 50 && trendsRect.bottom >= window.innerHeight - 50
 
-      if (trendActive || inTrends) {
-        setContext('trend')
+      // On desktop (non-mobile), everything is horizontal — always trend context
+      const isMobile = window.matchMedia('(max-width: 768px)').matches
+      if (isMobile) {
+        if (trendActive || inTrends) {
+          setContext('trend')
+        } else {
+          setContext('vertical')
+        }
       } else {
-        setContext('vertical')
+        setContext('trend')
       }
       // Force re-render so arrows update when trend/phase changes
       forceUpdate((n) => n + 1)
@@ -133,7 +162,18 @@ export function IdleArrows({ active }: { active: boolean }) {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
-  if (!active || !idle || isTouch || isMobileScreen) return null
+  // Keyboard left/right arrow navigation (desktop only)
+  useEffect(() => {
+    if (!active || isMobileScreen) return
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight') { clickRight(); e.preventDefault() }
+      if (e.key === 'ArrowLeft') { clickLeft(); e.preventDefault() }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  })
+
+  if (!active || isTouch || isMobileScreen) return null
 
   function clickDown() {
     // Simulate clicking the right side of screen (forward)
@@ -182,46 +222,44 @@ export function IdleArrows({ active }: { active: boolean }) {
   function getSpecialSlide() {
     const container = document.getElementById('trends')
     if (!container) return null
-    const activeTrend = parseInt(container.getAttribute('data-active-trend') || '0', 10)
     const trendCount = parseInt(container.getAttribute('data-trend-count') || '0', 10)
-    if (activeTrend === 0 && !document.querySelector('[data-trend-active]')) return 'intro'
-    if (activeTrend === trendCount - 1 && !document.querySelector('[data-trend-active]')) return 'thankYou'
+    if (activeSlide === 0) return 'first'
+    if (activeSlide === trendCount - 1) return 'thankYou'
+    if (activeSlide === 3) return 'trendIntro'
+    // Slides 1, 2 are non-trend (By the Numbers, How We Judge)
+    if (activeSlide <= 3) return 'nonTrend'
     return null
   }
 
   function clickRight() {
     const special = getSpecialSlide()
-    if (special === 'intro') {
+    if (special === 'thankYou') return
+    if (special) {
       window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
       return
     }
-    const trendActive = document.querySelector('[data-trend-active]')
-    if (trendActive) {
-      const isCompleted = trendActive.getAttribute('data-trend-completed') === 'true'
-      if (isCompleted) {
-        window.dispatchEvent(new CustomEvent('trend-next-or-exit'))
-      } else {
-        window.dispatchEvent(new Event('trend-advance'))
-      }
-    }
+    // Always dispatch with slideIndex so only the correct trend responds
+    window.dispatchEvent(new CustomEvent('trend-advance', { detail: { slideIndex: activeSlide } }))
   }
 
   function clickLeft() {
-    // On Thank You slide — go back to last trend
-    if (getSpecialSlide() === 'thankYou') {
+    const special = getSpecialSlide()
+    // Non-trend slides (thankYou, trendIntro, nonTrend): just go prev
+    if (special && special !== 'first') {
       window.dispatchEvent(new Event('trend-prev'))
       return
     }
     const trendActive = document.querySelector('[data-trend-active]')
     if (trendActive) {
       const trendPhase = trendActive.getAttribute('data-trend-phase')
-      const trendIndex = trendActive.getAttribute('data-trend-index')
-      if (trendPhase === '0' && trendIndex === '0') {
-        // Back to intro slide
+      if (trendPhase === '0') {
         window.dispatchEvent(new Event('trend-prev'))
       } else {
         window.dispatchEvent(new Event('trend-retreat'))
       }
+    } else {
+      // Trend not yet detected — go to previous slide
+      window.dispatchEvent(new Event('trend-prev'))
     }
   }
 
@@ -254,11 +292,9 @@ export function IdleArrows({ active }: { active: boolean }) {
           </>
         )
       })()}
-      {context === 'trend' && !isTouch && (() => {
+      {!isMobileScreen && !isTouch && (() => {
         const special = getSpecialSlide()
-        // Show left arrow unless on intro slide
-        const showLeft = special !== 'intro'
-        // Show right arrow unless on Thank You slide
+        const showLeft = special !== 'first'
         const showRight = special !== 'thankYou'
         return (
           <>
@@ -271,10 +307,10 @@ export function IdleArrows({ active }: { active: boolean }) {
                 isTouch={isTouch}
               />
             )}
-            {showRight && special === 'intro' && (
+            {showRight && special === 'trendIntro' && (
               <motion.button
                 key="right-pill"
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 0.75 }}
                 animate={{
                   opacity: 0.75,
                   boxShadow: [
@@ -283,7 +319,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                     '0 0 0px rgba(130, 216, 235, 0)',
                   ],
                 }}
-                exit={{ opacity: 0.75 }}
+                exit={{ opacity: 0, transition: { duration: 0.15 } }}
                 whileHover={{ opacity: 0.85 }}
                 transition={{
                   opacity: { duration: 0.6 },
@@ -330,7 +366,7 @@ export function IdleArrows({ active }: { active: boolean }) {
                 </motion.svg>
               </motion.button>
             )}
-            {showRight && special !== 'intro' && (
+            {showRight && special !== 'trendIntro' && (
               <Arrow
                 key="right"
                 rotation={0}

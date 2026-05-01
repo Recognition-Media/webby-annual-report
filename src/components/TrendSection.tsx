@@ -311,8 +311,9 @@ function useIsMobile() {
   return isMobile
 }
 
-export function TrendSection({ section, index }: { section: TrendSectionType; index: number }) {
-  const isMobile = useIsMobile()
+export function TrendSection({ section, index, forceMobile }: { section: TrendSectionType; index: number; forceMobile?: boolean }) {
+  const _isMobile = useIsMobile()
+  const isMobile = forceMobile || _isMobile
   const resolvedBasePath = useBasePath()
   const trendColor = TREND_COLORS[index % TREND_COLORS.length]
 
@@ -336,9 +337,28 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
       }
     : undefined
   const hasVideo = section.showVideo !== false && (!!section.trendVideo || !!videoConfig)
-  const totalPhases = 1 + (hasData ? 1 : 0) + quotes.length + (hasVideo ? 1 : 0)
-  const dataPhase = hasData ? 1 : -1
-  const quoteStartPhase = 1 + (hasData ? 1 : 0)
+
+  // Build ordered module list based on CMS moduleOrder
+  const defaultOrder = ['data', 'quotes', 'video']
+  const rawOrder = section.moduleOrder && section.moduleOrder.length > 0
+    ? section.moduleOrder.map((m) => typeof m === 'string' ? m : m.module).filter(Boolean)
+    : []
+  const moduleOrder = rawOrder.length > 0 ? rawOrder : defaultOrder
+
+  // Build phase list: always starts with 'title', then ordered modules
+  type PhaseType = 'title' | 'data' | 'quote' | 'video'
+  const phaseList: PhaseType[] = ['title']
+  for (const mod of moduleOrder) {
+    if (mod === 'data' && hasData) phaseList.push('data')
+    if (mod === 'quotes') {
+      for (let q = 0; q < quotes.length; q++) phaseList.push('quote')
+    }
+    if (mod === 'video' && hasVideo) phaseList.push('video')
+  }
+
+  const totalPhases = phaseList.length
+  const dataPhase = phaseList.indexOf('data')
+  const quoteStartPhase = phaseList.indexOf('quote')
   const [phase, setPhase] = useState(0)
   const [isActive, setIsActive] = useState(false)
   const [completed, setCompleted] = useState(false)
@@ -347,25 +367,34 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   const lockRef = useRef(false)
   const enterCooldownRef = useRef(false)
 
-  // Track when this section is in view (desktop only)
+  // Track when this section is the active slide (desktop only)
+  // Use both IntersectionObserver AND container data-active-trend for reliability
   useEffect(() => {
     if (isMobile) return
     const el = sectionRef.current
     if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsActive(entry.isIntersecting)
-        if (entry.isIntersecting) {
-          enterCooldownRef.current = true
-          setTimeout(() => { enterCooldownRef.current = false }, 800)
-          // Reset video closed state when returning to this trend
-          setVideoClosed(false)
-        }
-        // Never reset phase — preserve wherever the user left off
-      },
-      { threshold: 0.5 }
-    )
-    observer.observe(el)
+
+    function checkActive() {
+      const container = document.getElementById('trends')
+      if (!container) return
+      // The trend's slide index = index + 4 (letter=0, numbers=1, judge=2, summary=3, then trends)
+      const activeSlideIndex = parseInt(container.getAttribute('data-active-trend') || '0', 10)
+      const mySlideIndex = index + 4
+      const shouldBeActive = activeSlideIndex === mySlideIndex
+      setIsActive(shouldBeActive)
+      if (shouldBeActive) {
+        enterCooldownRef.current = true
+        setTimeout(() => { enterCooldownRef.current = false }, 800)
+        setVideoClosed(false)
+      }
+    }
+
+    // Check immediately and on attribute changes
+    checkActive()
+    const observer = new MutationObserver(checkActive)
+    const container = document.getElementById('trends')
+    if (container) observer.observe(container, { attributes: true, attributeFilter: ['data-active-trend'] })
+
     return () => observer.disconnect()
   }, [])
 
@@ -410,42 +439,19 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
   // Lock scrolling while inside an incomplete trend (desktop only)
   useEffect(() => {
     if (!isActive || isMobile) return
-
-    // Let the snap scroll finish, then lock
     document.documentElement.classList.remove('snap-active')
-    const lockTimeout = setTimeout(() => {
-      document.body.style.overflow = 'hidden'
-    }, 600)
-
-    function handleWheel(e: WheelEvent) {
-      if (Math.abs(e.deltaY) < 5) return
-      // Only allow scroll up on first trend, first phase — to go back to vertical sections
-      if (e.deltaY < 0 && phase === 0 && index === 0) {
-        document.body.style.overflow = ''
-        document.documentElement.classList.add('snap-active')
-      }
-    }
-
-    window.addEventListener('wheel', handleWheel, { passive: true, capture: true })
-
-    return () => {
-      clearTimeout(lockTimeout)
-      window.removeEventListener('wheel', handleWheel, true)
-      document.body.style.overflow = ''
-      // Only re-enable snap if not on the goodbye page
-      const thankYou = document.getElementById('thank-you')
-      const thankYouRect = thankYou?.getBoundingClientRect()
-      const goingToGoodbye = thankYouRect && thankYouRect.top < window.innerHeight
-      if (!goingToGoodbye) {
-        document.documentElement.classList.add('snap-active')
-      }
-    }
+    return () => {}
   }, [isActive, phase, isMobile])
 
   // Expose advance/retreat for click-to-navigate (via custom events, desktop only)
+  const mySlideIndex = index + 4
   useEffect(() => {
     if (!isActive || isMobile) return
-    function handleAdvance() { advancePhase() }
+    function handleAdvance(e: Event) {
+      const detail = (e as CustomEvent).detail
+      if (detail?.slideIndex !== undefined && detail.slideIndex !== mySlideIndex) return
+      advancePhase()
+    }
     function handleRetreat() { retreatPhase() }
     window.addEventListener('trend-advance', handleAdvance)
     window.addEventListener('trend-retreat', handleRetreat)
@@ -497,8 +503,10 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
     if (isMobile) return
     function handleReset(e: Event) {
       const detail = (e as CustomEvent).detail
-      if (detail?.index === index) {
+      // Reset this trend if specifically targeted, or if reset-all
+      if (detail?.index === index || detail?.all) {
         setPhase(0)
+        setCompleted(false)
         setVideoClosed(false)
       }
     }
@@ -534,104 +542,127 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
             isMobile={true}
           />
 
-          {/* Data module */}
-          {hasData && (
-            <div style={{ marginTop: 48 }}>
-              <PhaseData
-                stats={dataStats!}
-                eyebrow={section.dataEyebrow}
-                headline={dataHeadline}
-                subheadline={dataSubheadline}
-                color={trendColor}
-                isActive={true}
-                isMobile={true}
-              />
-            </div>
-          )}
-
-          {/* Quotes — stacked vertically */}
-          {quotes.length > 0 && (
-            <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 32 }}>
-              {quotes.map((quote, i) => (
-                <div key={i}>
-                  {/* Quote mark */}
-                  <div style={{ fontSize: 48, lineHeight: 0.8, color: `${trendColor}25`, fontWeight: 700, marginBottom: -10, userSelect: 'none' }}>
-                    &ldquo;
-                  </div>
-                  {/* Quote text */}
-                  <div data-content style={{ fontSize: 16, lineHeight: 1.6, color: '#fff', marginBottom: 12 }}>
-                    <div className="report-links [&_p]:inline">
-                      <PortableText value={quote.quoteText} />
+          {/* Modules — rendered in CMS-defined order */}
+          {moduleOrder.map((mod) => {
+            if (mod === 'data' && hasData) return (
+              <div key="data" style={{ marginTop: 48 }}>
+                <PhaseData
+                  stats={dataStats!}
+                  eyebrow={section.dataEyebrow}
+                  headline={dataHeadline}
+                  subheadline={dataSubheadline}
+                  color={trendColor}
+                  isActive={true}
+                  isMobile={true}
+                />
+              </div>
+            )
+            if (mod === 'quotes' && quotes.length > 0) return (
+              <div key="quotes" style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 32 }}>
+                {quotes.map((quote, i) => (
+                  <div key={i}>
+                    <div style={{ fontSize: 48, lineHeight: 0.8, color: `${trendColor}25`, fontWeight: 700, marginBottom: -10, userSelect: 'none' }}>
+                      &ldquo;
+                    </div>
+                    <div data-content style={{ fontSize: 16, lineHeight: 1.6, color: '#fff', marginBottom: 12 }}>
+                      <div className="report-links [&_p]:inline">
+                        <PortableText value={quote.quoteText} />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      {(quote.headshot || quote.headshotUrl) ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={quote.headshot ? urlFor(quote.headshot).width(100).height(100).fit('crop').url() : `${resolvedBasePath}${quote.headshotUrl}`}
+                          alt={quote.name}
+                          style={{
+                            width: 36, height: 36, borderRadius: '50%',
+                            objectFit: 'cover', objectPosition: 'center 20%',
+                            flexShrink: 0, border: `2px solid ${trendColor}`,
+                          }}
+                        />
+                      ) : (
+                        <div style={{ width: 24, height: 2, background: trendColor, borderRadius: 2 }} />
+                      )}
+                      <div>
+                        <p style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>
+                          {quote.linkedInUrl ? (
+                            <a href={quote.linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }}>{quote.name}</a>
+                          ) : quote.name}
+                        </p>
+                        {quote.title && <p style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{quote.title}</p>}
+                      </div>
                     </div>
                   </div>
-                  {/* Attribution */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    {(quote.headshot || quote.headshotUrl) ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={quote.headshot ? urlFor(quote.headshot).width(100).height(100).fit('crop').url() : `${resolvedBasePath}${quote.headshotUrl}`}
-                        alt={quote.name}
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          objectPosition: 'center 20%',
-                          flexShrink: 0,
-                          border: `2px solid ${trendColor}`,
-                        }}
+                ))}
+              </div>
+            )
+            if (mod === 'video' && hasVideo && (section.trendVideo || videoConfig)) return (
+            <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ width: '100%', maxWidth: 400, position: 'relative' }}>
+                {(() => {
+                  // CMS trendVideo (primary)
+                  if (section.trendVideo) {
+                    const tv = section.trendVideo
+                    const isYT = tv.sourceType === 'youtube'
+                    const ytId = isYT && tv.youtubeUrl
+                      ? tv.youtubeUrl.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
+                      : null
+                    const cssAR = tv.aspectRatio.replace(':', ' / ')
+                    return isYT && ytId ? (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${ytId}?rel=0`}
+                        allow="autoplay; encrypted-media"
+                        allowFullScreen
+                        style={{ width: '100%', aspectRatio: cssAR, borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)' }}
                       />
                     ) : (
-                      <div style={{ width: 24, height: 2, background: trendColor, borderRadius: 2 }} />
-                    )}
-                    <div>
-                      <p style={{ fontSize: 14, fontWeight: 500, color: '#fff' }}>
-                        {quote.linkedInUrl ? (
-                          <a href={quote.linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }}>{quote.name}</a>
-                        ) : quote.name}
-                      </p>
-                      {quote.title && <p style={{ fontSize: 11, color: '#999', marginTop: 2 }}>{quote.title}</p>}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Video */}
-          {hasVideo && videoConfig && (
-            <div style={{ marginTop: 48, display: 'flex', justifyContent: 'center' }}>
-              <div style={{ width: '100%', maxWidth: 400, position: 'relative' }}>
-                {videoConfig.type === 'youtube' ? (() => {
-                  const youtubeId = videoConfig.src.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
-                  return youtubeId ? (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${youtubeId}?rel=0`}
-                      allow="autoplay; encrypted-media"
-                      allowFullScreen
-                      style={{
-                        width: '100%',
-                        aspectRatio: '16 / 9',
-                        borderRadius: 8,
-                        border: '1px solid rgba(255,255,255,0.12)',
-                      }}
-                    />
-                  ) : null
-                })() : (
-                  <video
-                    src={videoConfig.src}
-                    controls
-                    playsInline
-                    style={{
-                      width: '100%',
-                      borderRadius: 8,
-                      border: '1px solid rgba(255,255,255,0.12)',
-                    }}
-                  />
-                )}
+                      <video
+                        src={`${tv.videoFile?.url}#t=0.1`}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        style={{ width: '100%', aspectRatio: cssAR, borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)' }}
+                      />
+                    )
+                  }
+                  // Legacy videoConfig fallback
+                  if (videoConfig) {
+                    return videoConfig.type === 'youtube' ? (() => {
+                      const youtubeId = videoConfig.src.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
+                      return youtubeId ? (
+                        <iframe
+                          src={`https://www.youtube.com/embed/${youtubeId}?rel=0`}
+                          allow="autoplay; encrypted-media"
+                          allowFullScreen
+                          style={{ width: '100%', aspectRatio: '16 / 9', borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)' }}
+                        />
+                      ) : null
+                    })() : (
+                      <video
+                        src={`${videoConfig.src}#t=0.1`}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        style={{ width: '100%', borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)' }}
+                      />
+                    )
+                  }
+                  return null
+                })()}
               </div>
+              {/* Caption on mobile */}
+              {section.trendVideo && (
+                <div style={{ width: '100%', maxWidth: 400, marginTop: 12, paddingTop: 10, borderTop: `2px solid ${trendColor}` }}>
+                  <p style={{ fontSize: 14, fontWeight: 500, color: '#fff', margin: 0 }}>{section.trendVideo.name}</p>
+                  {section.trendVideo.title && <p style={{ fontSize: 12, color: '#ccc', margin: '2px 0 0' }}>{section.trendVideo.title}</p>}
+                  {section.trendVideo.description && <p style={{ fontSize: 13, color: '#bbb', lineHeight: 1.5, margin: '6px 0 0' }}>{section.trendVideo.description}</p>}
+                </div>
+              )}
             </div>
-          )}
+            )
+            return null
+          })}
         </div>
       </div>
     )
@@ -651,22 +682,26 @@ export function TrendSection({ section, index }: { section: TrendSectionType; in
         height: '100vh',
         flexShrink: 0,
         display: 'flex',
-        alignItems: 'center',
-        padding: '0 60px',
+        alignItems: 'safe center',
+        padding: '0 60px 50px',
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'auto',
       }}
     >
       <AnimatedBg variant={index} />
 
-      <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '80vh' }}>
+      <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '80vh' }}>
 
         {/* Page 0: Title + Body — always rendered */}
         <motion.div
           animate={{ opacity: phase === 0 ? 1 : 0, x: phase === 0 ? 0 : -200 }}
           transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
           style={{
-            position: 'absolute', top: 12, left: 0, right: 0, bottom: 0,
+            position: phase === 0 ? 'relative' : 'absolute',
+            top: phase === 0 ? 0 : 12,
+            left: 0, right: 0,
+            bottom: phase === 0 ? undefined : 0,
             pointerEvents: phase === 0 ? 'auto' : 'none',
           }}
         >
@@ -813,8 +848,8 @@ function PhaseTitle({
             color: '#fff',
             lineHeight: isMobile ? '36px' : '58px',
             letterSpacing: isMobile ? '-1px' : '-2px',
-            marginBottom: isMobile ? 24 : 40,
-            maxWidth: 750,
+            marginBottom: isMobile ? 24 : 32,
+            maxWidth: '100%',
           }}
         >
           {cleanTitle}
@@ -839,7 +874,7 @@ function PhaseTitle({
                 fontSize: isMobile ? 15 : 16,
                 lineHeight: '28px',
                 color: '#D4D4D4',
-                maxWidth: isMobile ? '100%' : 749,
+                maxWidth: '100%',
                 flex: isMobile ? '1 1 auto' : '0 0 auto',
                 minWidth: 0,
               }}
@@ -864,7 +899,8 @@ function PhaseTitle({
                               href={project.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              style={{ color: '#D4D4D4', fontWeight: 500, fontSize: 14, lineHeight: 1.4, textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.15)' }}
+                              className="report-link"
+                              style={{ color: '#D4D4D4', fontWeight: 500, fontSize: 14, lineHeight: 1.4 }}
                             >
                               {project.title}
                             </a>
@@ -914,28 +950,22 @@ function PhaseTitle({
 // Counter-clockwise: newest enters right-center, older ones rotate left and up
 function getQuoteLayout(position: number, visibleCount: number) {
   if (visibleCount === 1) {
-    // Single quote: shifted 30px left of center so image extends further left
     return { top: '50%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '-50%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
   }
   if (visibleCount === 2) {
     if (position === 0) {
-      // Newest: shifted left, wider
-      return { top: '40%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '-50%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
+      return { top: '45%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '-50%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
     }
-    // Older: top-left
-    return { top: '15%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 'min(35vw, 500px)' }
+    return { top: '20%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 'min(35vw, 500px)' }
   }
   // 3 quotes
   if (position === 0) {
-    // Newest: above the 2nd quote, shifted left
-    return { top: '-8%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '0%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
+    return { top: '2%', left: 'calc(50% - 103px)', xOffset: '-50%', yOffset: '0%', scale: 1, opacity: 1, maxWidth: 'min(87vw, 1195px)' }
   }
   if (position === 1) {
-    // 2nd quote: down and right, shrinks and dims
-    return { top: '52%', left: 'calc(35% - 50px)', xOffset: '-50%', yOffset: '-50%', scale: 0.8, opacity: 0.35, maxWidth: 'min(65vw, 900px)' }
+    return { top: '57%', left: 'calc(35% - 50px)', xOffset: '-50%', yOffset: '-50%', scale: 0.8, opacity: 0.35, maxWidth: 'min(65vw, 900px)' }
   }
-  // Oldest: stays top-left, unchanged
-  return { top: '15%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 'min(35vw, 500px)' }
+  return { top: '20%', left: '0%', xOffset: '0%', yOffset: '0%', scale: 0.8, opacity: 0.35, maxWidth: 'min(35vw, 500px)' }
 }
 
 function PhaseQuote({
@@ -1310,7 +1340,13 @@ function PhaseVideo({
   const videoRef = useRef<HTMLVideoElement>(null)
   const [muted, setMuted] = useState(false)
 
+  const isYoutube = trendVideo.sourceType === 'youtube'
+  const youtubeId = isYoutube && trendVideo.youtubeUrl
+    ? trendVideo.youtubeUrl.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?#]+)/)?.[1]
+    : null
+
   useEffect(() => {
+    if (isYoutube) return
     const el = videoRef.current
     if (!el) return
     if (isActive) {
@@ -1326,7 +1362,7 @@ function PhaseVideo({
       el.pause()
       el.currentTime = 0
     }
-  }, [isActive])
+  }, [isActive, isYoutube])
 
   function toggleMute() {
     if (videoRef.current) {
@@ -1381,86 +1417,105 @@ function PhaseVideo({
         </svg>
       </button>
 
-      {/* Video */}
-      <video
-        ref={videoRef}
-        src={trendVideo.videoFile.url}
-        playsInline
-        style={{
-          aspectRatio: cssAspectRatio,
-          width: 'auto',
-          height: 'auto',
-          ...videoConstraints,
-          borderRadius: 4,
-          border: '1px solid rgba(255,255,255,0.12)',
-        }}
-      />
+      {/* YouTube embed */}
+      {isYoutube && youtubeId ? (
+        <iframe
+          src={isActive ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0` : `https://www.youtube.com/embed/${youtubeId}?rel=0`}
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          style={{
+            aspectRatio: cssAspectRatio,
+            width: '100%',
+            height: 'auto',
+            ...videoConstraints,
+            borderRadius: 4,
+            border: '1px solid rgba(255,255,255,0.12)',
+          }}
+        />
+      ) : (
+        /* Uploaded video */
+        <video
+          ref={videoRef}
+          src={trendVideo.videoFile?.url}
+          playsInline
+          style={{
+            aspectRatio: cssAspectRatio,
+            width: 'auto',
+            height: 'auto',
+            ...videoConstraints,
+            borderRadius: 4,
+            border: '1px solid rgba(255,255,255,0.12)',
+          }}
+        />
+      )}
 
-      {/* Controls */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: trendVideo.name ? 80 : 12,
-          right: 12,
-          display: 'flex',
-          gap: 8,
-          pointerEvents: 'auto',
-        }}
-      >
-        <button
-          onClick={toggleMute}
-          className="no-custom-cursor"
+      {/* Controls — only for uploaded videos */}
+      {!isYoutube && (
+        <div
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            border: '1px solid rgba(255,255,255,0.3)',
-            background: 'rgba(0,0,0,0.6)',
-            color: '#fff',
-            cursor: 'pointer',
+            position: 'absolute',
+            bottom: trendVideo.name ? 80 : 12,
+            right: 12,
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 14,
+            gap: 8,
+            pointerEvents: 'auto',
           }}
         >
-          {muted ? (
+          <button
+            onClick={toggleMute}
+            className="no-custom-cursor"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(0,0,0,0.6)',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+            }}
+          >
+            {muted ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                <line x1="23" y1="9" x2="17" y2="15" />
+                <line x1="17" y1="9" x2="23" y2="15" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={replay}
+            className="no-custom-cursor"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(0,0,0,0.6)',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+            }}
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" />
-              <line x1="23" y1="9" x2="17" y2="15" />
-              <line x1="17" y1="9" x2="23" y2="15" />
+              <polyline points="1 4 1 10 7 10" />
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
             </svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" />
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-            </svg>
-          )}
-        </button>
-        <button
-          onClick={replay}
-          className="no-custom-cursor"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            border: '1px solid rgba(255,255,255,0.3)',
-            background: 'rgba(0,0,0,0.6)',
-            color: '#fff',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 14,
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <polyline points="1 4 1 10 7 10" />
-            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-          </svg>
-        </button>
-      </div>
+          </button>
+        </div>
+      )}
 
       {/* Context caption below video */}
       <div

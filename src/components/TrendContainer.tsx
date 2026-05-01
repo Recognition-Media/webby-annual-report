@@ -37,51 +37,18 @@ export function TrendContainer({
   const [isActive, setIsActive] = useState(false)
   const containerRef = useRef<HTMLElement>(null)
 
-  // Track when container is in view (desktop only)
+  // On desktop, container is always the full viewport — activate immediately
+  // On mobile, not used (vertical layout)
   useEffect(() => {
-    if (isMobile) return
-    const el = containerRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsActive(entry.isIntersecting),
-      { threshold: 0.5 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
+    if (!isMobile) setIsActive(true)
   }, [isMobile])
 
-  // Lock scroll on intro and Thank You slides (not TrendSections, which handle their own)
-  // Desktop only — mobile uses vertical layout
+  // Remove snap scroll on desktop — everything is horizontal
   useEffect(() => {
     if (isMobile) return
     if (!isActive) return
-    if (activeTrend === 0 || activeTrend === trendCount - 1) {
-      // Delay lock to let snap scroll finish centering
-      document.documentElement.classList.remove('snap-active')
-      const lockTimeout = setTimeout(() => {
-        document.body.style.overflow = 'hidden'
-      }, 600)
-
-      // Allow scroll up on intro slide to go back to previous section
-      function handleWheel(e: WheelEvent) {
-        if (activeTrend !== 0) return
-        if (Math.abs(e.deltaY) < 5) return
-        if (e.deltaY < 0) {
-          document.body.style.overflow = ''
-          document.documentElement.classList.add('snap-active')
-        }
-      }
-
-      window.addEventListener('wheel', handleWheel, { passive: true, capture: true })
-
-      return () => {
-        clearTimeout(lockTimeout)
-        window.removeEventListener('wheel', handleWheel, true)
-        document.body.style.overflow = ''
-        document.documentElement.classList.add('snap-active')
-      }
-    }
-  }, [isMobile, isActive, activeTrend, trendCount])
+    document.documentElement.classList.remove('snap-active')
+  }, [isMobile, isActive])
 
   // Listen for trend-next/trend-prev events (desktop only)
   useEffect(() => {
@@ -108,14 +75,15 @@ export function TrendContainer({
   }, [isActive, trendCount])
 
   function navigateToTrend(index: number) {
-    window.dispatchEvent(new CustomEvent('trend-reset-phase', { detail: { index } }))
+    // Reset ALL trends, not just the target
+    window.dispatchEvent(new CustomEvent('trend-reset-phase', { detail: { all: true } }))
     setActiveTrend(index)
   }
 
   if (isMobile) {
     return (
       <section
-        id="trends"
+        id="trends-mobile"
         ref={containerRef}
         style={{ background: '#191919' }}
       >
@@ -133,8 +101,10 @@ export function TrendContainer({
       ref={containerRef}
       style={{
         height: '100vh',
+        paddingBottom: 50,
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'auto',
         background: '#191919',
       }}
     >
@@ -150,12 +120,12 @@ export function TrendContainer({
         {children}
       </motion.div>
 
-      {/* Subnav — only when trends are in view, exclude intro + Thank You slides */}
-      {isActive && activeTrend > 0 && activeTrend < trendCount - 1 && (
+      {/* Subnav — all pages */}
+      {isActive && (
         <TrendSubnav
-          titles={trendTitles.slice(1, -1)}
-          activeTrend={activeTrend - 1}
-          onNavigate={(i) => navigateToTrend(i + 1)}
+          titles={trendTitles}
+          activeTrend={activeTrend}
+          onNavigate={navigateToTrend}
         />
       )}
     </section>

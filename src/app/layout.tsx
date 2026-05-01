@@ -2,17 +2,21 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Anthem Awards — 2026 State of Social Impact',
-  description: 'The 2026 State of Social Impact Report from The Anthem Awards.',
+  title: 'Webby Awards Annual Report',
+  description: 'The annual report on the state of the internet from The Webby Awards.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/favicon.ico" type="image/jpeg" />
+        <link rel="stylesheet" href="https://use.typekit.net/ona0hkt.css" />
+        {/* Anthem Typekit (Roc Grotesk + Decoy) — loaded alongside Webby's;
+            theme scoping happens via body class set by template */}
         <link rel="stylesheet" href="https://use.typekit.net/ods5cgw.css" />
       </head>
-      <body className="bg-[#21261A] text-[#E3DDCA]">{children}</body>
+      <body className="bg-white text-black">{children}</body>
     </html>
   )
 }

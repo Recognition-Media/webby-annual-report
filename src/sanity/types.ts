@@ -27,7 +27,8 @@ export interface HeroStat {
 
 export interface LetterAuthor {
   name: string
-  title: string
+  title?: string
+  linkedInUrl?: string
 }
 
 export interface FeaturedProject {
@@ -51,7 +52,9 @@ export interface DataStat {
 }
 
 export interface TrendVideo {
-  videoFile: { url: string }
+  sourceType: 'upload' | 'youtube'
+  videoFile?: { url: string }
+  youtubeUrl?: string
   aspectRatio: '9:16' | '16:9' | '1:1'
   name: string
   title?: string
@@ -61,6 +64,7 @@ export interface TrendVideo {
 export interface TrendSection {
   enabled?: boolean
   trendTitle: string
+  moduleOrder?: { module: string }[]
   trendBody?: PortableTextBlock[]
   showFeaturedProjects?: boolean
   featuredProjects?: FeaturedProject[]
@@ -101,10 +105,14 @@ export interface Report {
   year: number
   title: string
   slug: { current: string }
+  property?: 'webby' | 'anthem' | 'telly' | 'lovie'
   status: 'draft' | 'live'
   metaTitle?: string
   metaDescription?: string
   shareImage?: SanityImage
+  heroHeadline?: string
+  heroSubtitle?: string
+  heroButtonText?: string
   headerImage?: SanityImage
   heroStats?: HeroStat[]
   globalStats?: HeroStat[]

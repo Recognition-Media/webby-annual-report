@@ -1,12 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import type { Report, FormField } from '@/sanity/types'
+import { urlFor } from '@/sanity/image'
 import { trackSignupConversion } from '@/lib/analytics'
 
 function FieldInput({ field, value, onChange }: { field: FormField; value: string; onChange: (v: string) => void }) {
-  const baseClass = "w-full border-0 border-b-2 border-[#21261A]/30 bg-transparent px-1 py-2 text-base text-[#21261A] outline-none focus:border-[#8C001C] transition-colors placeholder:text-[#21261A]/40"
-  const fontStyle = { fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }
+  const baseClass = "w-full border-0 border-b-2 border-[#ccc] bg-transparent px-1 py-2 text-base outline-none focus:border-black transition-colors"
+  const fontStyle = { fontFamily: "'Aktiv Grotesk', -apple-system, sans-serif" }
   const placeholder = field.label
 
   if (field.fieldType === 'dropdown') {
@@ -14,7 +16,7 @@ function FieldInput({ field, value, onChange }: { field: FormField; value: strin
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border-2 border-[#21261A]/30 bg-transparent px-1 py-2 text-base text-[#21261A] outline-none focus:border-[#8C001C] transition-colors"
+        className="w-full border-2 border-[#ccc] bg-transparent px-1 py-2 text-base outline-none focus:border-black transition-colors"
         style={fontStyle}
       >
         <option value="">{placeholder}</option>
@@ -74,94 +76,92 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
   }
 
   return (
-    <div className="fixed inset-0 bg-[#21261A]/80 z-50 flex items-center justify-center px-3 md:px-4 overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center px-3 md:px-4 overflow-y-auto">
       <div
-        className="w-full max-w-[575px] p-[3px] md:p-[4px] text-center my-4"
-        style={{ background: '#8C001C' }}
+        className="w-full max-w-[575px] p-[6px] md:p-[10px] text-center text-black my-4"
+        style={{
+          background: 'linear-gradient(270deg, #80D064, #FFDE67, #82D8EB, #559DDF, #8B70D1, #FF67CB, #FF7F63, #FFB763, #80D064)',
+          backgroundSize: '300% 300%',
+          animation: 'gradientBorder 6s linear infinite',
+        }}
       >
-        <div
-          className="p-5 md:p-10"
-          style={{
-            background: '#E3DDCA',
-            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
-          }}
-        >
-          {/* Anthem Awards logo — moss green */}
+        <style>{`
+          @keyframes gradientBorder {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+          }
+        `}</style>
+        <div className="bg-white p-5 md:p-10" style={{ fontFamily: "'Aktiv Grotesk', -apple-system, sans-serif" }}>
+        {/* Logo */}
+        {report.headerImage && (
           <div className="mb-4 md:mb-6">
-            <img
-              src="/anthem/anthem-logo-green.svg"
-              alt="6th Annual Anthem Awards"
-              className="mx-auto h-[50px] md:h-[70px] w-auto"
+            <Image
+              src={urlFor(report.headerImage).width(300).url()}
+              alt="The Webby Awards"
+              width={120}
+              height={60}
+              className="mx-auto w-auto h-auto max-h-[40px] md:max-h-[60px]"
             />
           </div>
+        )}
 
-          <h3
-            className="uppercase font-bold text-xs md:text-sm tracking-wider pb-3 md:pb-4 whitespace-pre-line"
-            style={{ color: '#21261A' }}
-          >
-            {report.signupTitle || '2026 State of Social Impact Report'}
-          </h3>
-          <p
-            className="text-xs md:text-sm mb-5 md:mb-8 leading-relaxed whitespace-pre-line"
-            style={{ color: '#21261A', opacity: 0.7 }}
-          >
-            {report.signupSubhead || "Hear directly from impact leaders on what's shaping the work in 2026. Sign up to explore the report."}
-          </p>
+        <h3 className="uppercase font-bold text-xs md:text-sm tracking-wider pb-3 md:pb-4 whitespace-pre-line">
+          {report.signupTitle || 'Welcome to the Webby Awards Report'}
+        </h3>
+        <p className="text-xs md:text-sm mb-5 md:mb-8 leading-relaxed whitespace-pre-line">
+          {report.signupSubhead || 'Please provide us with some basic info to access the report.\nFeel free to share among your team and colleagues.'}
+        </p>
 
-          <form onSubmit={handleSubmit}>
-            {/* Mobile: compact stacked inputs */}
-            <div className="md:hidden flex flex-col gap-3 text-left">
-              {fields.map((field) => (
-                <div key={field.label} className="w-full">
+        <form onSubmit={handleSubmit}>
+          {/* Mobile: compact stacked inputs with placeholder labels */}
+          <div className="md:hidden flex flex-col gap-3 text-left">
+            {fields.map((field) => (
+              <div key={field.label} className="w-full">
+                <FieldInput
+                  field={field}
+                  value={formData[field.label] || ''}
+                  onChange={(v) => updateField(field.label, v)}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: side-by-side label + input */}
+          <div className="hidden md:block">
+            {fields.map((field) => (
+              <div key={field.label} className="flex flex-row items-center mb-5 text-left">
+                <label className="w-[30%] text-sm font-bold text-right pr-4">
+                  {field.label}{field.required ? <span className="text-red-500 ml-0.5">*</span> : ''}
+                </label>
+                <div className="w-[70%]">
                   <FieldInput
                     field={field}
                     value={formData[field.label] || ''}
                     onChange={(v) => updateField(field.label, v)}
                   />
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
 
-            {/* Desktop: side-by-side label + input */}
-            <div className="hidden md:block">
-              {fields.map((field) => (
-                <div key={field.label} className="flex flex-row items-center mb-5 text-left">
-                  <label
-                    className="w-[30%] text-sm font-bold text-right pr-4"
-                    style={{ color: '#21261A' }}
-                  >
-                    {field.label}{(field.required || field.label.toLowerCase() === 'company') ? <span className="text-[#8C001C] ml-0.5">*</span> : ''}
-                  </label>
-                  <div className="w-[70%]">
-                    <FieldInput
-                      field={field}
-                      value={formData[field.label] || ''}
-                      onChange={(v) => updateField(field.label, v)}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+          {error && <p className="text-xs md:text-sm text-red-600">{error}</p>}
 
-            {error && <p className="text-xs md:text-sm text-[#8C001C]">{error}</p>}
+          <p className="text-[10px] md:text-xs text-[#999] mt-3 md:mt-4">
+            By logging in you agree to our{' '}
+            <a href="https://www.webbyawards.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline text-black">
+              Privacy Policy
+            </a>
+          </p>
 
-            <p className="text-[10px] md:text-xs mt-3 md:mt-4" style={{ color: '#21261A', opacity: 0.5 }}>
-              By logging in you agree to our{' '}
-              <a href="https://www.anthemawards.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#21261A' }}>
-                Privacy Policy
-              </a>
-            </p>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex items-center justify-between w-full max-w-[280px] mx-auto uppercase font-medium py-3 md:py-4 px-5 md:px-6 mt-4 md:mt-6 text-xs md:text-sm tracking-wider transition-colors disabled:opacity-50 cursor-pointer rounded-full"
-              style={{ background: '#8C001C', color: '#E3DDCA' }}
-            >
-              <span>{submitting ? 'Submitting...' : (report.submitButtonText || 'Explore The Report')}</span>
-              <span className="text-base md:text-lg">→</span>
-            </button>
-          </form>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex items-center justify-center gap-2 w-full max-w-[280px] mx-auto bg-black text-white uppercase font-medium py-3 md:py-4 px-5 md:px-6 mt-4 md:mt-6 text-xs md:text-sm tracking-wider hover:bg-[#333] transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            <span>{submitting ? 'Submitting...' : (report.submitButtonText || 'Access Report')}</span>
+            <span className="text-base md:text-lg">→</span>
+          </button>
+        </form>
         </div>
       </div>
     </div>

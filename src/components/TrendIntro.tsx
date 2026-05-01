@@ -45,20 +45,24 @@ export function TrendIntro({
   return (
     <div
       id="trend-intro"
+      data-slide-type="trend-intro"
       className="px-5 md:px-[60px] py-12 md:py-0"
       style={{
         width: '100vw',
         minHeight: '100vh',
+        paddingBottom: 50,
         flexShrink: 0,
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'auto',
+        background: '#191919',
       }}
     >
       <AnimatedBg variant={0} />
 
-      <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+      <div className="md:mt-[-60px]" style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         {/* Eyebrow */}
         {eyebrow && (
           <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-10">
@@ -71,7 +75,6 @@ export function TrendIntro({
             }}>
               {eyebrow}
             </span>
-            <div style={{ width: 60, height: 2, background: '#82D8EB', borderRadius: 2 }} />
           </div>
         )}
 
