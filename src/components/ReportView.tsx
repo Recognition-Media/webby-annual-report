@@ -5,16 +5,19 @@ import { ReportView as HorizontalReportView } from './horizontal/ReportView'
 /**
  * Template router. Picks which scroll/layout template renders this report.
  *
- * Today: switches on `report.property` (existing field — `webby` or `anthem`).
- * Once the Sanity schema gains a dedicated `template` field, switch this on
- * `report.template` instead so editors can pick the layout independent of
- * brand at create-time.
+ * Two layouts:
+ *   - vertical   = Anthem-style (top-to-bottom scroll, no snap)
+ *   - horizontal = Webby-style (snap-scroll trend slides, sideways trend
+ *     navigation)
+ *
+ * Prefer the `template` field (editor's explicit choice). Fall back to
+ * inferring from `property` for legacy docs that haven't been tagged
+ * (Anthem → vertical, everything else → horizontal).
  */
 export function ReportView({ report }: { report: Report }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const property = (report as any).property
-  if (property === 'anthem') {
-    return <HorizontalReportView report={report} />
+  const template = report.template ?? (report.property === 'anthem' ? 'vertical' : 'horizontal')
+  if (template === 'vertical') {
+    return <VerticalReportView report={report} />
   }
-  return <VerticalReportView report={report} />
+  return <HorizontalReportView report={report} />
 }

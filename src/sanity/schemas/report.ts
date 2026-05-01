@@ -32,6 +32,38 @@ export default defineType({
       initialValue: 'draft',
       group: 'core',
     },
+    {
+      name: 'property',
+      title: 'Property (brand)',
+      type: 'string',
+      description: 'Drives branding (logo, palette). Independent of layout template.',
+      options: {
+        list: [
+          { title: 'Webby', value: 'webby' },
+          { title: 'Anthem', value: 'anthem' },
+          { title: 'Telly', value: 'telly' },
+          { title: 'Lovie', value: 'lovie' },
+        ],
+      },
+      initialValue: 'webby',
+      group: 'core',
+    },
+    {
+      name: 'template',
+      title: 'Layout Template',
+      type: 'string',
+      description:
+        'Picks the layout/scroll pattern. Horizontal = Webby-style snap-scroll trend slides. Vertical = Anthem-style top-to-bottom scroll. Independent of brand.',
+      options: {
+        list: [
+          { title: 'Horizontal (Webby-style)', value: 'horizontal' },
+          { title: 'Vertical (Anthem-style)', value: 'vertical' },
+        ],
+      },
+      initialValue: 'horizontal',
+      validation: (r) => r.required(),
+      group: 'core',
+    },
 
     // SEO
     { name: 'metaTitle', title: 'Meta Title', type: 'string', group: 'seo' },
