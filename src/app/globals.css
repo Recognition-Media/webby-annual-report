@@ -1,34 +1,19 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-@font-face {
-  font-family: 'Aktiv Grotesk';
-  src: url('/fonts/AktivGrotesk_Rg.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Aktiv Grotesk';
-  src: url('/fonts/AktivGrotesk_Md.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-}
+/* Anthem Awards fonts — Roc Grotesk (body) + Decoy (headers) via Typekit */
 
 :root {
-  --webby-black: #191919;
-  --color-websites: #8B70D1;
-  --color-video: #FF7F63;
-  --color-ads: #82D8EB;
-  --color-apps: #559DDF;
-  --color-social: #FFDE67;
-  --color-podcasts: #FF67CB;
-  --color-games: #80D064;
-  --color-special: #FFB763;
-  --color-primary-blue: #85CEFF;
-  --color-primary-green: #7ACA6C;
-  --color-lime-accent: #a7f076;
-  --color-blue-gradient: #75b9f2;
+  --anthem-moss: #21261A;
+  --anthem-red: #8C001C;
+  --anthem-blue: #066DBA;
+  --anthem-cream: #E3DDCA;
+  --anthem-purple: #D17DD0;
+  --anthem-green: #00B469;
+  --color-primary-blue: #066DBA;
+  --color-primary-green: #00B469;
+  --color-lime-accent: #00B469;
+  --color-blue-gradient: #066DBA;
   --color-light-gray: #eee;
   --color-dark-gray: #333;
   --color-author-gray: #555;
@@ -44,7 +29,8 @@
   --color-dark-gray: var(--color-dark-gray);
   --color-author-gray: var(--color-author-gray);
   --color-copyright-gray: var(--color-copyright-gray);
-  --font-sans: 'Aktiv Grotesk', -apple-system, sans-serif;
+  --font-sans: 'roc-grotesk-variable', -apple-system, sans-serif;
+  --font-display: 'decoy', Georgia, serif;
 }
 
 html.lenis, html.lenis body {
@@ -64,11 +50,11 @@ html.lenis, html.lenis body {
 }
 
 body {
-  font-family: 'Aktiv Grotesk', -apple-system, sans-serif;
+  font-family: 'roc-grotesk-variable', -apple-system, sans-serif;
   font-size: 16px;
   line-height: 26px;
-  background: #fff;
-  color: #000;
+  background: var(--anthem-moss);
+  color: var(--anthem-cream);
   -webkit-font-smoothing: antialiased;
 }
 

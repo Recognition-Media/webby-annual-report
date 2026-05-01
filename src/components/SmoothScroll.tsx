@@ -28,9 +28,10 @@ export function ReportScroll({
     if (!active) return
     const isMobile = window.matchMedia('(max-width: 768px)').matches
 
-    if (!isMobile) {
-      document.documentElement.classList.add('snap-active')
-    }
+    // Snap scrolling disabled for Anthem vertical scroll redesign
+    // if (!isMobile) {
+    //   document.documentElement.classList.add('snap-active')
+    // }
     window.scrollTo(0, 0)
 
     // Track active section
