@@ -19,6 +19,7 @@ export default defineType({
     { name: 'thankYou', title: 'Thank You' },
     { name: 'signup', title: 'Signup Form' },
     { name: 'analytics', title: 'Analytics' },
+    { name: 'credits', title: 'Credits' },
     { name: 'footer', title: 'Footer' },
   ],
   fields: [
@@ -167,6 +168,10 @@ export default defineType({
     { name: 'footerSubhead', title: 'Footer Subhead / CTA Copy', type: 'text', rows: 2, group: 'footer', description: 'e.g. "Enter Your Work before the Early Entry Deadline on May 22nd"' },
     { name: 'footerCtaUrl', title: 'Footer CTA URL', type: 'url', group: 'footer', description: 'e.g. https://www.anthemawards.com/' },
     { name: 'footerBody', title: 'Footer Body', type: 'array', of: [{ type: 'block' }], group: 'footer', description: 'Long-form description and partner list' },
+
+    // Credits (Anthem vertical template — closing credits page)
+    { name: 'creditsCreatedBy', title: 'Created By', type: 'array', of: [{ type: 'creditPerson' }], group: 'credits', description: 'Internal team members who built the report' },
+    { name: 'creditsContributors', title: 'Contributors', type: 'array', of: [{ type: 'creditPerson' }], group: 'credits', description: 'External contributors / quoted experts' },
   ],
   orderings: [
     { title: 'Year (Newest)', name: 'yearDesc', by: [{ field: 'year', direction: 'desc' }] },
