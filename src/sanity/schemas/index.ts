@@ -11,6 +11,7 @@ import formField from './objects/formField'
 import footerLink from './objects/footerLink'
 import sectionCover from './objects/sectionCover'
 import keyFinding from './objects/keyFinding'
+import creditPerson from './objects/creditPerson'
 
 export const schemaTypes = [
   report,
@@ -26,4 +27,5 @@ export const schemaTypes = [
   footerLink,
   sectionCover,
   keyFinding,
+  creditPerson,
 ]

@@ -108,7 +108,9 @@ export const reportBySlugQuery = groq`
     footerHeadline,
     footerSubhead,
     footerCtaUrl,
-    footerBody
+    footerBody,
+    creditsCreatedBy[] { name, title, url },
+    creditsContributors[] { name, title, url }
   }
 `
 

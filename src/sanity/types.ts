@@ -109,6 +109,12 @@ export interface KeyFinding {
   anchor?: string
 }
 
+export interface CreditPerson {
+  name: string
+  title?: string
+  url?: string
+}
+
 export interface SectionCover {
   sectionNumber: string
   title: string
@@ -190,4 +196,6 @@ export interface Report {
   footerSubhead?: string
   footerCtaUrl?: string
   footerBody?: PortableTextBlock[]
+  creditsCreatedBy?: CreditPerson[]
+  creditsContributors?: CreditPerson[]
 }

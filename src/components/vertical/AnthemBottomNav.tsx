@@ -13,7 +13,7 @@ const SECTIONS = [
   { id: 'section-01', label: 'The State of Social Impact', color: '#8C001C' },
   { id: 'section-02', label: 'Where the Pressure Is Landing', color: '#D17DD0' },
   { id: 'section-03', label: 'How the Sector Is Responding', color: '#00B469' },
-  { id: 'thank-you', label: 'Takeaways', color: '#066DBA' },
+  { id: 'section-04', label: 'Takeaways', color: '#066DBA' },
 ]
 
 export function AnthemBottomNav({ active }: { active: boolean }) {

@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import type { Report, CreditPerson } from '@/sanity/types'
 
 interface Person {
   name: string
@@ -39,7 +40,19 @@ const CONTRIBUTORS: Person[] = [
 
 const ACCENT = '#D17DD0'
 
-export function Credits() {
+function fromCms(list: CreditPerson[] | undefined, fallback: Person[]): Person[] {
+  if (!list || list.length === 0) return fallback
+  return list.map((p) => ({
+    name: p.name,
+    title: p.title || '',
+    url: p.url,
+  }))
+}
+
+export function Credits({ report }: { report?: Report } = {}) {
+  const createdBy = fromCms(report?.creditsCreatedBy, CREATED_BY)
+  const contributors = fromCms(report?.creditsContributors, CONTRIBUTORS)
+
   return (
     <section
       id="credits"
@@ -61,10 +74,10 @@ export function Credits() {
 
         {/* Editorial credits column */}
         <div className="mx-auto" style={{ maxWidth: 880 }}>
-          <PeopleGroup title="Created By" people={CREATED_BY} columns={2} delay={0.1} />
+          <PeopleGroup title="Created By" people={createdBy} columns={2} delay={0.1} />
 
           <div className="mt-14 md:mt-16">
-            <PeopleGroup title="Contributors" people={CONTRIBUTORS} columns={3} delay={0.2} />
+            <PeopleGroup title="Contributors" people={contributors} columns={3} delay={0.2} />
           </div>
         </div>
       </div>

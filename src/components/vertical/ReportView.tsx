@@ -738,7 +738,7 @@ export function ReportView({ report }: { report: Report }) {
 
             <SurveyDemographics />
 
-            <Credits />
+            <Credits report={report} />
 
             <AnthemFooter report={report} />
           </ReportScroll>
