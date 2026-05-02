@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import type { KeyFinding } from '@/sanity/types'
 
-const SECTIONS = [
+const FALLBACK_SECTIONS = [
   {
     number: '01',
     title: 'The State of Social Impact',
@@ -44,8 +45,32 @@ function scrollToAnchor(anchor: string) {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-export function KeyFindings() {
+type ResolvedSection = {
+  number: string
+  title: string
+  description: string
+  color: string
+  hoverBg: string
+  anchor: string
+}
+
+interface KeyFindingsProps {
+  findings?: KeyFinding[]
+}
+
+export function KeyFindings({ findings }: KeyFindingsProps = {}) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+
+  const sections: ResolvedSection[] = findings && findings.length > 0
+    ? findings.map((f, i) => ({
+        number: f.number,
+        title: f.title,
+        description: f.description || '',
+        color: '#21261A',
+        hoverBg: f.hoverColor || FALLBACK_SECTIONS[i % FALLBACK_SECTIONS.length].hoverBg,
+        anchor: f.anchor || FALLBACK_SECTIONS[i % FALLBACK_SECTIONS.length].anchor,
+      }))
+    : FALLBACK_SECTIONS
 
   return (
     <section
@@ -86,7 +111,7 @@ export function KeyFindings() {
 
         {/* 2x2 Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 max-w-[800px] mx-auto">
-          {SECTIONS.map((section, i) => (
+          {sections.map((section, i) => (
             <motion.div
               key={section.number}
               role="button"

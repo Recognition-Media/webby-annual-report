@@ -10,9 +10,11 @@ export default defineType({
     { name: 'intro', title: 'Intro & Hero' },
     { name: 'letter', title: 'Welcome Letter' },
     { name: 'carousel', title: 'Hero Carousel' },
-    { name: 'byTheNumbers', title: 'By the Numbers' },
-    { name: 'howWeJudge', title: 'How We Judge' },
+    { name: 'byTheNumbers', title: 'By the Numbers', hidden: ({ document }) => document?.template === 'vertical' },
+    { name: 'howWeJudge', title: 'How We Judge', hidden: ({ document }) => document?.template === 'vertical' },
     { name: 'trendIntro', title: 'Trend Intro' },
+    { name: 'keyFindings', title: 'Key Findings' },
+    { name: 'sectionCovers', title: 'Section Covers' },
     { name: 'trends', title: 'Trends' },
     { name: 'thankYou', title: 'Thank You' },
     { name: 'signup', title: 'Signup Form' },
@@ -110,6 +112,15 @@ export default defineType({
     { name: 'trendIntroStats', title: 'Stats', type: 'array', of: [{ type: 'dataStat' }], group: 'trendIntro', description: 'Percentage bars (same as trend data modules)' },
     { name: 'trendIntroCta', title: 'CTA Button Text', type: 'string', group: 'trendIntro', initialValue: 'SEE THE TRENDS', description: 'Button that starts the trend journey' },
 
+    // Key Findings (Anthem vertical template — preview grid above section 01)
+    { name: 'keyFindings', title: 'Key Findings', type: 'array', of: [{ type: 'keyFinding' }], group: 'keyFindings', description: 'Top-of-report navigation grid (typically 4 items)' },
+
+    // Section Covers (Anthem vertical template — 01, 02, 03, 04)
+    { name: 'section01Cover', title: 'Section 01 Cover', type: 'sectionCover', group: 'sectionCovers' },
+    { name: 'section02Cover', title: 'Section 02 Cover', type: 'sectionCover', group: 'sectionCovers' },
+    { name: 'section03Cover', title: 'Section 03 Cover', type: 'sectionCover', group: 'sectionCovers' },
+    { name: 'section04Cover', title: 'Section 04 Cover', type: 'sectionCover', group: 'sectionCovers' },
+
     // Trends
     { name: 'trendSections', title: 'Trend Sections', type: 'array', of: [{ type: 'trendSection' }], group: 'trends' },
 
@@ -146,9 +157,16 @@ export default defineType({
     { name: 'googleAdsId', title: 'Google Ads ID', type: 'string', group: 'analytics' },
 
     // Footer
-    { name: 'footerLinks', title: 'Footer Links', type: 'array', of: [{ type: 'footerLink' }], group: 'footer' },
-    { name: 'sponsorLogos', title: 'Sponsor Logos', type: 'array', of: [{ type: 'image' }], group: 'footer' },
-    { name: 'ceremonyDetails', title: 'Ceremony Details', type: 'array', of: [{ type: 'block' }], group: 'footer' },
+    { name: 'footerLinks', title: 'Footer Links', type: 'array', of: [{ type: 'footerLink' }], group: 'footer', hidden: ({ document }) => document?.template === 'vertical' },
+    { name: 'sponsorLogos', title: 'Sponsor Logos', type: 'array', of: [{ type: 'image' }], group: 'footer', hidden: ({ document }) => document?.template === 'vertical' },
+    { name: 'ceremonyDetails', title: 'Ceremony Details', type: 'array', of: [{ type: 'block' }], group: 'footer', hidden: ({ document }) => document?.template === 'vertical' },
+
+    // Anthem footer fields (vertical template) — populated now, component refactor pending design
+    { name: 'footerEyebrow', title: 'Footer Eyebrow', type: 'string', group: 'footer', description: 'e.g. "About the Anthem Awards"' },
+    { name: 'footerHeadline', title: 'Footer Headline', type: 'string', group: 'footer', description: 'e.g. "Set the New Standard for Good"' },
+    { name: 'footerSubhead', title: 'Footer Subhead / CTA Copy', type: 'text', rows: 2, group: 'footer', description: 'e.g. "Enter Your Work before the Early Entry Deadline on May 22nd"' },
+    { name: 'footerCtaUrl', title: 'Footer CTA URL', type: 'url', group: 'footer', description: 'e.g. https://www.anthemawards.com/' },
+    { name: 'footerBody', title: 'Footer Body', type: 'array', of: [{ type: 'block' }], group: 'footer', description: 'Long-form description and partner list' },
   ],
   orderings: [
     { title: 'Year (Newest)', name: 'yearDesc', by: [{ field: 'year', direction: 'desc' }] },

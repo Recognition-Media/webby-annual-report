@@ -41,9 +41,15 @@ export const reportBySlugQuery = groq`
     trendIntroBody,
     trendIntroStats,
     trendIntroCta,
+    keyFindings[] { number, title, description, hoverColor, anchor },
+    section01Cover { sectionNumber, title, subtitle, copy, accentColor },
+    section02Cover { sectionNumber, title, subtitle, copy, accentColor },
+    section03Cover { sectionNumber, title, subtitle, copy, accentColor },
+    section04Cover { sectionNumber, title, subtitle, copy, accentColor },
     trendSections[] {
       enabled,
       trendTitle,
+      accentColor,
       moduleOrder,
       trendBody,
       showFeaturedProjects,
@@ -97,7 +103,12 @@ export const reportBySlugQuery = groq`
     googleAdsId,
     footerLinks,
     sponsorLogos,
-    ceremonyDetails
+    ceremonyDetails,
+    footerEyebrow,
+    footerHeadline,
+    footerSubhead,
+    footerCtaUrl,
+    footerBody
   }
 `
 

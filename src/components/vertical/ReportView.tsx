@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
-import type { Report } from '@/sanity/types'
+import type { Report, ExpertQuote } from '@/sanity/types'
+import type { PortableTextBlock } from '@portabletext/types'
+import { urlFor } from '@/sanity/image'
 import { HeroSection } from './HeroSection'
 import { SignupGate } from './SignupGate'
 import { EntryStats } from '../EntryStats'
@@ -11,7 +13,7 @@ import { IadasSection } from '../IadasSection'
 import { IntroLetter } from './IntroLetter'
 import { TrendSection } from '../TrendSection'
 import { TrendContainer } from '../TrendContainer'
-import { ReportFooter } from '../ReportFooter'
+import { AnthemFooter } from './AnthemFooter'
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
@@ -19,6 +21,9 @@ import { QuoteVideoSection } from './QuoteVideoSection'
 import { BubbleChart } from './BubbleChart'
 import { PairedBarChart } from './PairedBarChart'
 import { TabbedPriorities } from './TabbedPriorities'
+import { Takeaways } from './Takeaways'
+import { SurveyDemographics } from './SurveyDemographics'
+import { Credits } from './Credits'
 import { AnalyticsScripts } from '../AnalyticsScripts'
 import { ScrollReveal } from '../ScrollReveal'
 import { ReportScroll } from '../SmoothScroll'
@@ -26,6 +31,55 @@ import { AnimatedBg } from '../AnimatedBg'
 import { IdleArrows } from '../IdleArrows'
 import { TrendIntro } from '../TrendIntro'
 import { MobileNav } from '../MobileNav'
+
+type ResolvedQuote = { name: string; title: string; text: string; headshotUrl?: string; borderColor?: string }
+
+function portableTextToPlain(blocks: PortableTextBlock[] | undefined): string {
+  if (!blocks) return ''
+  return blocks
+    .map((block) => {
+      if (block._type !== 'block') return ''
+      const children = (block as { children?: { text?: string }[] }).children || []
+      return children.map((c) => c.text || '').join('')
+    })
+    .filter(Boolean)
+    .join(' ')
+}
+
+function resolveTrendQuotes(quotes: ExpertQuote[] | undefined, fallback: ResolvedQuote[]): ResolvedQuote[] {
+  if (!quotes || quotes.length === 0) return fallback
+  return quotes.map((q, i) => ({
+    name: q.name,
+    title: q.title || '',
+    text: portableTextToPlain(q.quoteText),
+    headshotUrl: q.headshot ? urlFor(q.headshot).width(400).url() : fallback[i]?.headshotUrl,
+  }))
+}
+
+const inlineBlockComponents = {
+  block: {
+    normal: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  },
+  marks: {
+    link: ({ value, children }: { value?: { href?: string }; children?: React.ReactNode }) => (
+      <a
+        href={value?.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ textDecoration: 'underline' }}
+      >
+        {children}
+      </a>
+    ),
+  },
+}
+
+function portableTextToBody(blocks: PortableTextBlock[] | undefined, fallback: React.ReactNode[]): React.ReactNode[] {
+  if (!blocks || blocks.length === 0) return fallback
+  return blocks.map((block, i) => (
+    <PortableText key={i} value={[block]} components={inlineBlockComponents} />
+  ))
+}
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -208,25 +262,25 @@ export function ReportView({ report }: { report: Report }) {
 
             {/* IADAS — hidden for Anthem redesign */}
             {/* <IadasSection report={report} /> */}
-            <KeyFindings />
+            <KeyFindings findings={report.keyFindings} />
 
             {/* Old trends — hidden for Anthem redesign */}
             {/* Section 1: The State of Social Impact */}
             <ReportSectionCover
-              sectionNumber="01"
-              title="The State of Social Impact"
-              subtitle="Rollbacks have increased across the sector, but leaders have settled into their new reality, becoming more resilient and strategic in the process."
-              copy="Last year, we asked the Anthem Awards community how the shifting landscape was impacting their work. This year, we see how the community is adapting."
-              accentColor="#8C001C"
+              sectionNumber={report.section01Cover?.sectionNumber || '01'}
+              title={report.section01Cover?.title || 'The State of Social Impact'}
+              subtitle={report.section01Cover?.subtitle || 'Rollbacks have increased across the sector, but leaders have settled into their new reality, becoming more resilient and strategic in the process.'}
+              copy={report.section01Cover?.copy || 'Last year, we asked the Anthem Awards community how the shifting landscape was impacting their work. This year, we see how the community is adapting.'}
+              accentColor={report.section01Cover?.accentColor || '#8C001C'}
             />
 
             <TrendContent
               trendNumber="01"
-              title="Rollbacks Have Increased In Every Corner of the Sector in 2026"
-              body={[
+              title={report.trendSections?.[0]?.trendTitle || 'Rollbacks Have Increased In Every Corner of the Sector in 2026'}
+              body={portableTextToBody(report.trendSections?.[0]?.trendBody, [
                 <>In 2025, the Anthem community observed rollbacks or gaps centered primarily around Racial and Social Equity. In 2026, impact leaders report witnessing regression across every area in the sector. <strong>Racial and Social Equity remains the most-cited rollback— at 77%— but it is no longer alone.</strong></>,
                 "Leaders report increased rollbacks in Human & Civil Rights by 10%, in Corporate Responsibility by 15%, and Climate Advocacy by 15%—and across mental health, reproductive health, affordable access to food, and more.",
-              ]}
+              ])}
               accentColor="#8C001C"
               dataModule={{
                 eyebrow: '',
@@ -244,7 +298,7 @@ export function ReportView({ report }: { report: Report }) {
 
             <QuoteVideoSection
               eyebrow="What Our Community Is Saying"
-              quotes={[
+              quotes={resolveTrendQuotes(report.trendSections?.[0]?.expertQuotes, [
                 {
                   name: 'Anonymous',
                   title: 'Survey respondent',
@@ -255,22 +309,22 @@ export function ReportView({ report }: { report: Report }) {
                   title: 'Producer, Working Voices on KPFK',
                   text: '"We witnessed the dismantling of public cultural institutions and feel threatened but breathe a sigh of relief that we had not been reliant on funds from the Corporation for Public Broadcasting."',
                 },
-              ]}
+              ])}
               videoSrc="/anthem/rollbacks-video.mp4"
               videoLabel="Watch Video"
-              videoName="Jim Stengel"
-              videoTitle="President & CEO, The Jim Stengel Group"
-              accentColor="#8C001C"
+              videoName="Michael Bellavia"
+              videoTitle="CEO, HelpGood"
+              accentColor={report.trendSections?.[0]?.accentColor || '#8C001C'}
             />
 
             {/* Trend 2 — still within Section 1 */}
             <TrendContent
               trendNumber="02"
-              title="Despite Hardships, the Community Has Accepted Its New Reality"
-              body={[
+              title={report.trendSections?.[1]?.trendTitle || 'Despite Hardships, the Community Has Accepted Its New Reality'}
+              body={portableTextToBody(report.trendSections?.[1]?.trendBody, [
                 <>Last year, 70% of respondents described the social impact landscape as negative, somewhat negative or negative. <strong>This year, the average score landed at 53.7.</strong> While some leaders feel exhausted, the community is stabilizing and not collapsing under the pressure.</>,
                 <>According to multiple leaders, they are digging in with a strengthened resolve rather than giving up. Respondents described their organizations as <strong>{'"'}constantly catching up{'"'}</strong> or <strong>{'"'}reimagining{'"'}</strong> new strategies to move the work forward.</>,
-              ]}
+              ])}
               accentColor="#8C001C"
               sentimentGauge={{
                 score: 53.9,
@@ -282,7 +336,7 @@ export function ReportView({ report }: { report: Report }) {
 
             <QuoteVideoSection
               eyebrow="What Our Community Is Saying"
-              quotes={[
+              quotes={resolveTrendQuotes(report.trendSections?.[1]?.expertQuotes, [
                 {
                   name: 'Olive Mwangi',
                   title: 'Head of Social Media, Dentsu Creative Kenya',
@@ -294,21 +348,21 @@ export function ReportView({ report }: { report: Report }) {
                   title: 'Founder, CEO, Paper Crane Factory',
                   text: '"We are all doing the heavy lifting. The current administration is devastating both the planet and the morale of those trying to save it. But it\'s a battle. The war is there to win. And it will take all of us."',
                 },
-              ]}
+              ])}
               videoSrc="/anthem/state-of-impact-video.mp4"
               videoLabel="Watch Video"
-              videoName="Jim Stengel"
-              videoTitle="President & CEO, The Jim Stengel Group"
-              accentColor="#8C001C"
+              videoName="Kyle Lierman"
+              videoTitle="CEO, Civic Nation"
+              accentColor={report.trendSections?.[1]?.accentColor || '#8C001C'}
             />
 
             {/* Section 2: Where the Pressure Is Landing */}
             <ReportSectionCover
-              sectionNumber="02"
-              title="Where the Pressure Is Landing"
-              subtitle={'"No one feels generous in a time of enormous stress."'}
-              copy="The burden isn't shared evenly across the sector. Funding losses have put the largest strain on Health and Humanitarian Action and Services, while attacks on DE&I have impacted anyone doing this work, regardless of org size or cause area."
-              accentColor="#D17DD0"
+              sectionNumber={report.section02Cover?.sectionNumber || '02'}
+              title={report.section02Cover?.title || 'Where the Pressure Is Landing'}
+              subtitle={report.section02Cover?.subtitle || '"No one feels generous in a time of enormous stress."'}
+              copy={report.section02Cover?.copy || "The burden isn't shared evenly across the sector. Funding losses have put the largest strain on Health and Humanitarian Action and Services, while attacks on DE&I have impacted anyone doing this work, regardless of org size or cause area."}
+              accentColor={report.section02Cover?.accentColor || '#D17DD0'}
             />
 
             <BubbleChart
@@ -327,11 +381,11 @@ export function ReportView({ report }: { report: Report }) {
 
             <TrendContent
               trendNumber="03"
-              title="Health & Human Services Report Facing The Harshest Funding Crisis"
-              body={[
+              title={report.trendSections?.[2]?.trendTitle || 'Health & Human Services Report Facing The Harshest Funding Crisis'}
+              body={portableTextToBody(report.trendSections?.[2]?.trendBody, [
                 <>Respondents <strong>described funding losses not as budget adjustments but as deliberate targeting</strong>, with Health and Humanitarian Action and Services-focused organizations facing the brunt. Following the collapse of USAID, humanitarian organizations are now competing for a shrinking pool of private funding, while immigration has become a new flashpoint.</>,
                 <>The pressure isn{"'"}t coming from one direction. When we asked leaders for the top challenges they are facing right now, three answers came back in near-equal measure: <strong>cultural and political shifts (59%)</strong>, <strong>private funding (58%)</strong>, and <strong>government funding (57%)</strong>.</>,
-              ]}
+              ])}
               accentColor="#D17DD0"
               customRightColumn={
                 <PairedBarChart
@@ -353,7 +407,7 @@ export function ReportView({ report }: { report: Report }) {
 
             <QuoteVideoSection
               eyebrow="What Our Community Is Saying"
-              quotes={[
+              quotes={resolveTrendQuotes(report.trendSections?.[2]?.expertQuotes, [
                 {
                   name: 'M M De Voe',
                   title: 'Executive Director, Pen Parentis',
@@ -362,22 +416,23 @@ export function ReportView({ report }: { report: Report }) {
                 {
                   name: 'Anonymous',
                   title: 'Mid-sized NGO',
+                  headshotUrl: '/anthem/CAUSE_HUMINATARIAN.svg',
                   text: '"With the fall of USAID, more nonprofits are battling for a smaller pool of funding from private sources. Economic uncertainty and inflation are making fundraising from individual donors more challenging as well."',
                 },
-              ]}
+              ])}
               imageSrc="/anthem/hero-3.jpg"
               imageAlt="Anthem Awards winner"
-              accentColor="#D17DD0"
+              accentColor={report.trendSections?.[2]?.accentColor || '#D17DD0'}
             />
 
             {/* Trend 4 — still within Section 2 */}
             <TrendContent
               trendNumber="04"
-              title="Attacks Against DEI Have Caused a Trickle-Down Effect Throughout the Sector"
-              body={[
+              title={report.trendSections?.[3]?.trendTitle || 'Attacks Against DEI Have Caused a Trickle-Down Effect Throughout the Sector'}
+              body={portableTextToBody(report.trendSections?.[3]?.trendBody, [
                 <>Targeted attacks on DEI are causing a cross-sector effect. <strong>71% of B&I-focused organizations reported experiencing challenges with public funding.</strong> Given the intersectional nature of inclusivity, the damage is spreading across cause areas.</>,
                 <>When DEI is defunded, it has devastating effects on every sector. The Trump administration{"'"}s attacks have <a href="https://www.teenvogue.com/story/trump-admins-attack-on-higher-education-and-dei-are-impacting-campuses" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>impacted college admissions</a>, put a strain on <a href="https://communitycatalyst.org/posts/ignoring-dei-isnt-neutral-its-actively-harming-patient-care/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>patient healthcare services</a>, stunted progress for <a href="https://www.axios.com/2025/01/24/dei-orders-disabled-workers-telework" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>disabled workers</a>, and lessened <a href="https://www.climatepeople.com/blog/why-dei-remains-essential-in-climate-work-despite-rollbacks" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>representation in the climate space</a>. Moreover, health equity research loses its language, educational programs like ESL lose funding, and gaps in technology access widen.</>,
-              ]}
+              ])}
               accentColor="#D17DD0"
               customRightColumn={
                 <motion.div
@@ -442,11 +497,11 @@ export function ReportView({ report }: { report: Report }) {
             {/* Trend 5 — still within Section 2 */}
             <TrendContent
               trendNumber="05"
-              title="A Sector On the Brink of Burnout"
-              body={[
+              title={report.trendSections?.[4]?.trendTitle || 'A Sector On the Brink of Burnout'}
+              body={portableTextToBody(report.trendSections?.[4]?.trendBody, [
                 <>Forty percent of all respondents chose burnout as a top challenge in 2026, making it the <strong>fourth most-cited issue overall</strong>. And burnout isn{"'"}t concentrated in one cause area; the entire industry is feeling the heat.</>,
                 <>The sector has spent two years absorbing hits, from funding cuts and DE&I rollbacks, to legislative hostility and the collapse of USAID. Most organizations reported responding by doing more with less — pivoting strategies, rewriting grant applications, rethinking messaging — all while keeping programs running for the communities depending on them.</>,
-              ]}
+              ])}
               accentColor="#D17DD0"
               dataModule={{
                 eyebrow: '',
@@ -463,7 +518,7 @@ export function ReportView({ report }: { report: Report }) {
 
             <QuoteVideoSection
               eyebrow="What Our Community Is Saying"
-              quotes={[
+              quotes={resolveTrendQuotes(report.trendSections?.[4]?.expertQuotes, [
                 {
                   name: 'M M De Voe',
                   title: 'Executive Director, Pen Parentis',
@@ -474,19 +529,21 @@ export function ReportView({ report }: { report: Report }) {
                   title: 'Co-Founder, Artist & Design Principal, A Gang of Three',
                   text: '"We\'re a very small (2-person) company. Keeping up with ever-changing things is rapidly leading to burnout."',
                 },
-              ]}
-              imageSrc="/anthem/hero-2.jpg"
-              imageAlt="Anthem Awards winner"
-              accentColor="#D17DD0"
+              ])}
+              videoSrc="/anthem/touch-grass-video.mp4"
+              videoLabel="Watch Video"
+              videoName="KoAnn Vikoren Skrzyniarz"
+              videoTitle="Founder, CEO and Chairwoman, Sustainable Brands"
+              accentColor={report.trendSections?.[4]?.accentColor || '#D17DD0'}
             />
 
             {/* Section 3: How the Sector Is Responding */}
             <ReportSectionCover
-              sectionNumber="03"
-              title="How the Sector Is Responding"
-              subtitle="Despite resources tightening and the cultural climate shifting, the sector isn't deterred."
-              copy="Leaders are making deliberate bets to win public support: investing in storytelling that travels, building cross-sector coalitions, and using AI —when appropriate— to scale their mission."
-              accentColor="#00B469"
+              sectionNumber={report.section03Cover?.sectionNumber || '03'}
+              title={report.section03Cover?.title || 'How the Sector Is Responding'}
+              subtitle={report.section03Cover?.subtitle || "Despite resources tightening and the cultural climate shifting, the sector isn't deterred."}
+              copy={report.section03Cover?.copy || 'Leaders are making deliberate bets to win public support: investing in storytelling that travels, building cross-sector coalitions, and using AI —when appropriate— to scale their mission.'}
+              accentColor={report.section03Cover?.accentColor || '#00B469'}
             />
 
             <TabbedPriorities
@@ -500,184 +557,190 @@ export function ReportView({ report }: { report: Report }) {
               ]}
             />
 
-            {/* Trend placeholder — ready for content */}
+            {/* Trend 06 */}
             <TrendContent
-              trendNumber="01"
-              title="[Trend Title Placeholder]"
-              body={[
+              trendNumber="06"
+              title={report.trendSections?.[5]?.trendTitle || 'The Path Forward is Collaborative and Community-Led'}
+              body={portableTextToBody(report.trendSections?.[5]?.trendBody, [
                 "[First paragraph placeholder]",
-              ]}
+              ])}
               accentColor="#00B469"
+              dataModule={{
+                eyebrow: '',
+                question: '"What do you see as the top emerging opportunities in your work?" Select all that apply.',
+                bars: [
+                  { label: 'AI-powered workflows and tools', value: 59, displayValue: '59%', color: '#066DBA' },
+                  { label: 'Cross-sector collaboration and resource pooling', value: 51, displayValue: '51%', color: '#00B469' },
+                  { label: 'Short-form content and digital storytelling', value: 49, displayValue: '49%', color: '#D17DD0' },
+                  { label: 'Increased community-led and grassroots organizing', value: 47, displayValue: '47%', color: '#00B469' },
+                  { label: 'Renewed public engagement and advocacy', value: 34, displayValue: '34%', color: '#8C001C' },
+                  { label: 'Growth in private and philanthropic funding', value: 26, displayValue: '26%', color: '#066DBA' },
+                  { label: 'Refined and effective impact measurement', value: 19, displayValue: '19%', color: '#D17DD0' },
+                  { label: 'Other (please specify)', value: 8, displayValue: '8%', color: '#21261A' },
+                ],
+              }}
             />
 
             <QuoteVideoSection
               eyebrow="What Our Community Is Saying"
-              quotes={[
+              quotes={resolveTrendQuotes(report.trendSections?.[5]?.expertQuotes, [
                 {
-                  name: '[Name]',
-                  title: '[Title, Organization]',
-                  text: '"[Quote placeholder]"',
+                  name: 'Shirley Senn',
+                  title: "Chief Community Impact Officer, New Orleans Firemen's FCU",
+                  text: '"One of our biggest takeaways was the importance of listening—engaging more deeply with members and local partners helped us better understand where we could make the greatest impact, particularly in financial wellness and community resilience."',
                 },
                 {
-                  name: '[Name]',
-                  title: '[Title, Organization]',
-                  text: '"[Quote placeholder]"',
+                  name: 'Mifa Adejumo',
+                  title: 'Communications Lead, The Special Youth Leadership Foundation',
+                  text: '"2025 forced us to move beyond short-term interventions and think more intentionally about continuity and scale. We saw that access alone isn\'t enough; what matters is sustained support, quality delivery, and measurable outcomes over time. As a result, we\'re approaching this year with a stronger focus on deepening impact within existing communities, strengthening our program structure, and being more deliberate about partnerships that enable long-term growth."',
                 },
-              ]}
-              imageSrc=""
-              accentColor="#00B469"
+              ])}
+              videoSrc="/anthem/community-led-video.mp4"
+              videoLabel="Watch Video"
+              videoName="Kyle Lierman"
+              videoTitle="CEO, Civic Nation"
+              accentColor={report.trendSections?.[5]?.accentColor || '#00B469'}
             />
 
-            {/* Thank You section — always visible in Anthem redesign */}
-            {true && (
-              <section
-                id="thank-you"
-                className="px-5 md:px-[60px]"
-                style={{
-                  minHeight: '100vh',
-                  display: 'flex',
-                  alignItems: 'center',
-                  backgroundColor: '#191919',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Animated background */}
-                <AnimatedBg variant={3} />
+            {/* Trend 07 */}
+            <TrendContent
+              trendNumber="07"
+              title={report.trendSections?.[6]?.trendTitle || 'Organizations are fighting a narrative battle. To win, they are prioritizing video.'}
+              body={portableTextToBody(report.trendSections?.[6]?.trendBody, [
+                "[First paragraph placeholder]",
+              ])}
+              accentColor="#00B469"
+              customRightColumn={
+                <PairedBarChart
+                  title=""
+                  question={'Where Organizations Are Investing in 2026'}
+                  accentColor="#00B469"
+                  data={[
+                    { label: 'Written content and editorial', shortLabel: 'Written', value2025: null, value2026: 77 },
+                    { label: 'Short-form video (Reels, TikTok, Shorts)', shortLabel: 'Short-form Video', value2025: null, value2026: 71 },
+                    { label: 'Long-form video or documentary', shortLabel: 'Long-form Video', value2025: null, value2026: 47 },
+                    { label: 'Creator or brand collaborations', shortLabel: 'Creator/\nBrand', value2025: null, value2026: 47 },
+                    { label: 'Podcast or audio content', shortLabel: 'Podcast', value2025: null, value2026: 45 },
+                    { label: 'Live events or live streaming', shortLabel: 'Live Events', value2025: null, value2026: 43 },
+                    { label: 'User-generated or community storytelling', shortLabel: 'UGC', value2025: null, value2026: 37 },
+                    { label: 'Data visualization or interactive reports', shortLabel: 'Data Viz', value2025: null, value2026: 28 },
+                  ]}
+                />
+              }
+            />
 
-                <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-                  {/* Eyebrow */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
-                    <span style={{
-                      fontSize: 11,
-                      letterSpacing: 4,
-                      textTransform: 'uppercase',
-                      color: '#8B70D1',
-                      fontWeight: 500,
-                    }}>
-                      {report.thankYouEyebrow || 'Thank You'}
-                    </span>
-                    <div style={{ width: 60, height: 2, background: '#8B70D1', borderRadius: 2 }} />
-                  </div>
+            <QuoteVideoSection
+              eyebrow="What Our Community Is Saying"
+              quotes={resolveTrendQuotes(report.trendSections?.[6]?.expertQuotes, [
+                {
+                  name: 'Saadia Khan',
+                  title: 'Founder, Immigrantly Media',
+                  headshotUrl: '/anthem/headshots/saadia-khan.jpg',
+                  text: '"We\'ve found the most success in audio — in podcasting specifically. There\'s something about the intimacy of the medium that creates the conditions for real learning. People can engage on their own terms, in their own time, and that\'s where unlearning happens, quietly, without pressure. And the data backs it up. 63% of Gen Z is getting their information from podcasts and that number is still climbing. That\'s a cultural shift."',
+                },
+                {
+                  name: 'Kirill Karnovich-Valua',
+                  title: 'Founder, Creative Director, AI Content Creator, Digital Da Vincis',
+                  headshotUrl: '/anthem/headshots/kirill-karnovich-valua.jpg',
+                  text: '"As a content-creating agency, I see this as my mission — to bring more positive and social stories into the world especially in such a tense time. So we tried to do just that — focus on mission-driven storytelling and social good stories."',
+                },
+              ])}
+              videoSrc="/anthem/storytelling-video.mp4"
+              videoLabel="Watch Video"
+              videoName="Michael Bellavia"
+              videoTitle="CEO, HelpGood"
+              accentColor={report.trendSections?.[6]?.accentColor || '#00B469'}
+            />
 
-                  {/* Heading */}
-                  <h2 className="text-[28px] leading-[36px] md:text-[48px] md:leading-[58px]" style={{
-                    fontWeight: 400,
-                    color: '#fff',
-                    letterSpacing: '-2px',
-                    marginBottom: 40,
-                    maxWidth: 750,
-                  }}>
-                    {report.thankYouHeading || "You're Part of What Makes the Internet Worth Being On."}
-                  </h2>
+            {/* Trend 08 */}
+            <TrendContent
+              trendNumber="08"
+              title={report.trendSections?.[7]?.trendTitle || 'The sector is adopting AI cautiously, and pushing back when needed.'}
+              body={portableTextToBody(report.trendSections?.[7]?.trendBody, [
+                <>About <strong>58% of respondents named AI-powered workflows as their top emerging opportunity in 2026.</strong> But the full picture is murky, with a clear divide in how for-profit and nonprofit leaders{"'"} ethical views of AI tools. Nonprofits are adopting AI more slowly than for-profits and agencies, not because they are behind, but because they are viewing AI through their values.</>,
+                "Organizations' top barriers to AI adoption include concerns around data privacy and ethical concerns, followed by environmental impact. At the root of sector-wide AI conversations is a split in values. For-profit and agency respondents are adopting AI faster than their nonprofit peers, who are more cautious of its environmental and ethical impact.",
+              ])}
+              accentColor="#00B469"
+              customRightColumn={
+                <div>
+                  <h4 className="leading-[1.4] mb-8 w-full" style={{ fontSize: 16, fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}>
+                    Where the for-profit / agency vs. nonprofit AI adoption gap is widest.
+                  </h4>
+                  {[
+                    { useCase: 'Workflow automation', forProfit: 35, nonprofit: 16 },
+                    { useCase: 'Audience segmentation & personalization', forProfit: 19, nonprofit: 3 },
+                    { useCase: 'Accessibility tools', forProfit: 17, nonprofit: 6 },
+                    { useCase: 'Data analysis', forProfit: 23, nonprofit: 16 },
+                  ].map((row, i) => (
+                    <div key={i} className="mb-6">
+                      <span className="text-[14px] md:text-[15px] font-medium block mb-2" style={{ color: '#21261A' }}>{row.useCase}</span>
 
-                  {/* Divider */}
-                  <div style={{ width: 80, height: 1, background: 'rgba(255,255,255,0.14)', marginBottom: 32 }} />
-
-                  {/* Body */}
-                  <div data-content style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 749, marginBottom: 40 }} className="[&_p]:mb-5">
-                    {report.thankYouBody ? (
-                      <PortableText value={report.thankYouBody} />
-                    ) : (
-                      <>
-                        <p style={{ marginBottom: 20 }}>Your participation helps us recognize the best of the Internet each year. As an entrant in the 30th Annual Webby Awards, you are part of the Webby community &mdash; and will continue to receive benefits like this report, access to research, invitations to Webby Talks, and exclusive event invites throughout the year.</p>
-                        <p>Use what you&rsquo;ve read here. The insights in this report come directly from the judges who will evaluate your next entry.</p>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Judging criteria banner */}
-                  <a
-                    href={report.thankYouLinkUrl || 'https://www.webbyawards.com/judging-criteria/'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="no-custom-cursor"
-                    style={{
-                      maxWidth: 700,
-                      padding: '32px 0',
-                      borderTop: '1px solid rgba(255,255,255,0.06)',
-                      borderBottom: '1px solid rgba(255,255,255,0.06)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 40,
-                      textAlign: 'left',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#8B70D1', fontWeight: 500, marginBottom: 10 }}>
-                        {report.thankYouLinkEyebrow || 'Learn More'}
-                      </div>
-                      <div style={{ fontSize: 18, fontWeight: 400, color: '#fff', lineHeight: 1.3, marginBottom: 6 }}>
-                        {report.thankYouLinkTitle || "How We Judge the Internet's Best Work"}
-                      </div>
-                      <div style={{ fontSize: 14, color: '#888', lineHeight: 1.5 }}>
-                        {report.thankYouLinkDescription || 'Explore the judging criteria behind every Webby Award.'}
+                      {/* Two floating bars sized to percentage */}
+                      <div className="flex gap-1.5" style={{ height: 56 }}>
+                        <div
+                          className="rounded-md flex items-center justify-center px-3"
+                          style={{ flex: row.forProfit, background: '#00B469', minWidth: 70 }}
+                        >
+                          <div className="text-center">
+                            <div className="text-[9px] uppercase tracking-[1.5px] font-medium" style={{ color: '#E3DDCA', opacity: 0.85 }}>For-profit</div>
+                            <div className="text-[18px] leading-none mt-[2px] md:mt-[1px]" style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 700 }}>{row.forProfit}%</div>
+                          </div>
+                        </div>
+                        <div
+                          className="rounded-md flex items-center justify-center px-3"
+                          style={{ flex: row.nonprofit, background: '#21261A', minWidth: 70 }}
+                        >
+                          <div className="text-center">
+                            <div className="text-[9px] uppercase tracking-[1.5px] font-medium" style={{ color: '#E3DDCA', opacity: 0.85 }}>Nonprofit</div>
+                            <div className="text-[18px] leading-none mt-[2px] md:mt-[1px]" style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 700 }}>{row.nonprofit}%</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div
-                      style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: '50%',
-                        border: '1px solid rgba(255,255,255,0.12)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B70D1" strokeWidth="1.5">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" />
-                      </svg>
-                    </div>
-                  </a>
-
-                  {/* CTA card */}
-                  <a
-                    href={report.thankYouCtaUrl || 'https://www.webbyawards.com'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-content
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 24,
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      padding: '28px 32px',
-                      textDecoration: 'none',
-                      color: 'inherit',
-                      marginTop: 40,
-                    }}
-                  >
-                    <svg
-                      width="36"
-                      height="36"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="rgba(255,255,255,0.9)"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      style={{ flexShrink: 0 }}
-                    >
-                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                    </svg>
-                    <div>
-                      <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
-                        {report.thankYouCtaTitle || 'Get in Touch'}
-                      </h4>
-                      <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
-                        {report.thankYouCtaDescription || 'Please feel free to contact Producer Evey Long at evey@webbyawards.com with questions or comments.'}
-                      </p>
-                    </div>
-                  </a>
+                  ))}
                 </div>
-              </section>
-            )}
+              }
+            />
 
-            <ReportFooter report={report} />
+            <QuoteVideoSection
+              eyebrow="What Our Community Is Saying"
+              quotes={resolveTrendQuotes(report.trendSections?.[7]?.expertQuotes, [
+                {
+                  name: "Tamara Toles O'Laughlin",
+                  title: 'Founder, Climate Critical',
+                  text: '"AI is not a social good for marginalized people, environmentalists or farmers. Please stop assuming it is. For folks whose work is building relationships there is no automation that can do that better than a person."',
+                },
+                {
+                  name: 'Dana Litwin, CVA',
+                  title: 'Consultant, Dana Litwin Consulting',
+                  text: '"It is increasingly a BAD thing by policy and PR to incorporate \'AI\' into any NPO operations. I understand the harms vs. the help that, especially, GenAI creates in the world that undermines the message of \'social good\' most nonprofits want to project."',
+                },
+              ])}
+              videoSrc="/anthem/innovation-video.mp4"
+              videoLabel="Watch Video"
+              videoName="KoAnn Vikoren Skrzyniarz"
+              videoTitle="Founder, CEO and Chairwoman, Sustainable Brands"
+              accentColor={report.trendSections?.[7]?.accentColor || '#00B469'}
+            />
+
+            {/* Section 4: Takeaways */}
+            <ReportSectionCover
+              sectionNumber={report.section04Cover?.sectionNumber || '04'}
+              title={report.section04Cover?.title || 'Takeaways'}
+              subtitle={report.section04Cover?.subtitle || 'How We Can Keep Going'}
+              copy={report.section04Cover?.copy || ''}
+              accentColor={report.section04Cover?.accentColor || '#066DBA'}
+              compact
+            />
+
+            {/* 5 Takeaways — KeyFindings-style hover cards */}
+            <Takeaways accentColor={report.section04Cover?.accentColor || '#066DBA'} />
+
+            <SurveyDemographics />
+
+            <Credits />
+
+            <AnthemFooter report={report} />
           </ReportScroll>
         </div>
       )}

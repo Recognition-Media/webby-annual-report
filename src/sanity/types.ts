@@ -64,6 +64,7 @@ export interface TrendVideo {
 export interface TrendSection {
   enabled?: boolean
   trendTitle: string
+  accentColor?: string
   moduleOrder?: { module: string }[]
   trendBody?: PortableTextBlock[]
   showFeaturedProjects?: boolean
@@ -98,6 +99,22 @@ export interface FormField {
 export interface FooterLink {
   label: string
   url: string
+}
+
+export interface KeyFinding {
+  number: string
+  title: string
+  description?: string
+  hoverColor?: string
+  anchor?: string
+}
+
+export interface SectionCover {
+  sectionNumber: string
+  title: string
+  subtitle?: string
+  copy?: string
+  accentColor?: string
 }
 
 export interface Report {
@@ -141,6 +158,11 @@ export interface Report {
   trendIntroBody?: PortableTextBlock[]
   trendIntroStats?: DataStat[]
   trendIntroCta?: string
+  keyFindings?: KeyFinding[]
+  section01Cover?: SectionCover
+  section02Cover?: SectionCover
+  section03Cover?: SectionCover
+  section04Cover?: SectionCover
   trendSections?: TrendSection[]
   thankYouEyebrow?: string
   thankYouHeading?: string
@@ -163,4 +185,9 @@ export interface Report {
   footerLinks?: FooterLink[]
   sponsorLogos?: SanityImage[]
   ceremonyDetails?: PortableTextBlock[]
+  footerEyebrow?: string
+  footerHeadline?: string
+  footerSubhead?: string
+  footerCtaUrl?: string
+  footerBody?: PortableTextBlock[]
 }

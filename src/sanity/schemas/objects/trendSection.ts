@@ -14,6 +14,22 @@ export default defineType({
   fields: [
     { name: 'enabled', title: 'Enabled', type: 'boolean', initialValue: true, description: 'Show or hide this entire trend' },
     { name: 'trendTitle', title: 'Title', type: 'string', validation: (r) => r.required(), fieldset: 'landing' },
+    {
+      name: 'accentColor',
+      title: 'Accent Color',
+      type: 'string',
+      description: 'Used in the Anthem vertical layout for accent dividers and stats',
+      options: {
+        list: [
+          { title: 'Anthem Red', value: '#8C001C' },
+          { title: 'Anthem Purple', value: '#D17DD0' },
+          { title: 'Anthem Blue', value: '#066DBA' },
+          { title: 'Anthem Green', value: '#00B469' },
+          { title: 'Anthem Moss', value: '#21261A' },
+        ],
+      },
+      fieldset: 'landing',
+    },
 
     // Module order — drag to reorder how modules appear in the report
     {

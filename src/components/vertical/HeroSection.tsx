@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Report, CarouselImage } from '@/sanity/types'
 import Image from 'next/image'
 import { ImageCarousel } from '../ImageCarousel'
+import { urlFor } from '@/sanity/image'
 
 const LOCAL_HERO_IMAGES = [
   '/anthem/hero-1.jpg',
@@ -41,8 +42,8 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
     <section id="hero" className="relative w-full h-screen overflow-hidden">
       {/* Full-bleed background carousel */}
       <div className="absolute inset-0">
-        {/* Use local Anthem hero images — CMS carousel can override later */}
-        <LocalHeroCarousel />
+        {/* CMS carousel images override the local fallback */}
+        <LocalHeroCarousel cmsImages={carouselImages} />
         {/* Gradient overlay — heavier at bottom-left for text, lighter elsewhere to let image show */}
         <div
           className="absolute inset-0"
@@ -197,25 +198,30 @@ function DraggableIcon({ icon, index }: { icon: typeof CAUSE_ICONS[number]; inde
   )
 }
 
-function LocalHeroCarousel() {
+function LocalHeroCarousel({ cmsImages }: { cmsImages?: CarouselImage[] }) {
   const [current, setCurrent] = useState(0)
+
+  const images: string[] = cmsImages && cmsImages.length > 0
+    ? cmsImages.map((c) => urlFor(c.image).width(2400).url())
+    : LOCAL_HERO_IMAGES
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % LOCAL_HERO_IMAGES.length)
+      setCurrent((prev) => (prev + 1) % images.length)
     }, 4000)
     return () => clearInterval(interval)
-  }, [])
+  }, [images.length])
 
   return (
     <div className="absolute inset-0">
       <div className="absolute inset-0">
         <Image
-          src={LOCAL_HERO_IMAGES[current]}
+          src={images[current]}
           alt=""
           fill
           className="object-cover object-[center_20%]"
           priority
+          unoptimized
         />
       </div>
     </div>
