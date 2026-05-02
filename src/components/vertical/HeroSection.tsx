@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Report, CarouselImage } from '@/sanity/types'
 import Image from 'next/image'
-import { ImageCarousel } from './ImageCarousel'
+import { ImageCarousel } from '../ImageCarousel'
 
 const LOCAL_HERO_IMAGES = [
   '/anthem/hero-1.jpg',
