@@ -89,6 +89,7 @@ export function ReportSectionCover({
 }: ReportSectionCoverProps) {
   return (
     <section
+      id={`section-${sectionNumber}`}
       className="relative px-5 md:px-[60px] md:min-h-screen md:flex md:flex-col md:items-center md:justify-center"
       style={{ background: '#E3DDCA', paddingTop: 50, paddingBottom: 50 }}
     >

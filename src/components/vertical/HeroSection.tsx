@@ -12,20 +12,22 @@ const LOCAL_HERO_IMAGES = [
   '/anthem/hero-3.jpg',
 ]
 
-// Scattered around sides and bottom — avoiding center text and faces
+// Scattered around sides and bottom — avoiding center text and faces.
+// Each icon has a unique float amplitude + duration so they don't bob in
+// lockstep, and is drag-enabled (Framer Motion `drag`) inside DraggableIcon.
 const CAUSE_ICONS = [
   // Left edge
-  { src: '/anthem/CAUSE_HEALTH.svg', top: '68%', left: '3%', size: 168, rotate: -8, float: { y: [-4, 4], duration: 4 } },
-  { src: '/anthem/CAUSE_DIVERSITY.svg', top: '85%', left: '12%', size: 149, rotate: 10, float: { y: [-3, 3], duration: 5 } },
+  { src: '/anthem/CAUSE_HEALTH.svg', top: '68%', left: '3%', size: 168, rotate: -8, float: { y: [-14, 14], duration: 3.6 } },
+  { src: '/anthem/CAUSE_DIVERSITY.svg', top: '85%', left: '12%', size: 149, rotate: 10, float: { y: [-10, 10], duration: 4.4 } },
   // Bottom left
-  { src: '/anthem/CAUSE_EDUCATION.svg', bottom: '3%', left: '28%', size: 139, rotate: -12, float: { y: [-5, 5], duration: 4.5 } },
+  { src: '/anthem/CAUSE_EDUCATION.svg', bottom: '3%', left: '28%', size: 139, rotate: -12, float: { y: [-16, 16], duration: 4 } },
   // Bottom center-right
-  { src: '/anthem/CAUSE_SUSTAINABILITY.svg', bottom: '2%', right: '30%', size: 156, rotate: 6, float: { y: [-3, 3], duration: 5.5 } },
+  { src: '/anthem/CAUSE_SUSTAINABILITY.svg', bottom: '2%', right: '30%', size: 156, rotate: 6, float: { y: [-11, 11], duration: 4.8 } },
   // Right edge
-  { src: '/anthem/CAUSE_HUMINATARIAN.svg', top: '65%', right: '3%', size: 163, rotate: -6, float: { y: [-4, 4], duration: 4.2 } },
-  { src: '/anthem/CAUSE_HUMANRIGHTS.svg', top: '82%', right: '14%', size: 144, rotate: 14, float: { y: [-5, 5], duration: 5.2 } },
+  { src: '/anthem/CAUSE_HUMINATARIAN.svg', top: '65%', right: '3%', size: 163, rotate: -6, float: { y: [-13, 13], duration: 3.8 } },
+  { src: '/anthem/CAUSE_HUMANRIGHTS.svg', top: '82%', right: '14%', size: 144, rotate: 14, float: { y: [-15, 15], duration: 4.6 } },
   // Bottom right
-  { src: '/anthem/CAUSE_TECHNOLOGY.svg', bottom: '4%', right: '5%', size: 154, rotate: -10, float: { y: [-3, 3], duration: 4.8 } },
+  { src: '/anthem/CAUSE_TECHNOLOGY.svg', bottom: '4%', right: '5%', size: 154, rotate: -10, float: { y: [-12, 12], duration: 4.2 } },
 ]
 
 interface HeroSectionProps {
@@ -51,7 +53,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
       </div>
 
       {/* Minimal top bar */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 md:px-10 py-6">
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 md:px-[60px] py-6">
         {/* Anthem sticker logo — top left */}
         <motion.img
           src="/anthem/anthem-sticker.svg"
@@ -87,8 +89,11 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         <DraggableIcon key={i} icon={icon} index={i} />
       ))}
 
-      {/* Center-aligned content — shifted down 40% */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-end text-center px-6 md:px-10" style={{ paddingBottom: '10vh' }}>
+      {/* Center-aligned content — shifted down 40%.
+          pointer-events-none on the wrapper so the empty space lets click+drag
+          pass through to the cause icons underneath; the button below opts
+          back in via pointer-events-auto. */}
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-end text-center px-6 md:px-10 pointer-events-none" style={{ paddingBottom: '10vh' }}>
         <motion.h1
           className="text-[40px] md:text-[78px] lg:text-[100px] leading-[1.0] font-normal mb-3"
           style={{ fontFamily: 'var(--font-display)', color: 'var(--anthem-cream)', letterSpacing: '-2px' }}
@@ -122,7 +127,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         {/* Explore button */}
         <motion.button
           onClick={onSeeReport}
-          className="inline-flex items-center gap-3 bg-[#8C001C] text-[#E3DDCA] uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full hover:bg-[#a50022] transition-colors cursor-pointer"
+          className="inline-flex items-center gap-3 bg-[#8C001C] text-[#E3DDCA] uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full hover:bg-[#a50022] transition-colors cursor-pointer pointer-events-auto"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.65 }}
@@ -137,46 +142,58 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
 }
 
 function DraggableIcon({ icon, index }: { icon: typeof CAUSE_ICONS[number]; index: number }) {
-  const [isDragging, setIsDragging] = useState(false)
+  // Two-layer setup so Framer's drag system and the continuous bob don't
+  // fight over the same transform:
+  //   - Outer motion.div owns drag + the entrance "snowflake" fall
+  //   - Inner motion.img owns the bob (kicks in after the fall settles)
+  const sizeClamp = `clamp(${Math.round(icon.size * 0.45)}px, ${Math.round(icon.size / 16)}vw + 40px, ${icon.size}px)`
+
+  // Stagger entrance so they don't all drop at once
+  const fallDelay = 0.3 + index * 0.18
+  // Estimate fall duration so the bob can start once the icon has settled
+  const settleDelay = fallDelay + 1.2
 
   return (
-    <motion.img
-      src={icon.src}
-      alt=""
-      drag
-      dragMomentum={false}
-      onDragStart={() => setIsDragging(true)}
-      onDragEnd={() => setIsDragging(false)}
-      whileDrag={{ scale: 1.15 }}
-      className="absolute z-10 cursor-grab active:cursor-grabbing"
+    <motion.div
+      className="absolute z-10 cursor-grab active:cursor-grabbing pointer-events-auto"
       style={{
-        width: `clamp(${Math.round(icon.size * 0.45)}px, ${Math.round(icon.size / 16)}vw + 40px, ${icon.size}px)`,
-        height: `clamp(${Math.round(icon.size * 0.45)}px, ${Math.round(icon.size / 16)}vw + 40px, ${icon.size}px)`,
+        width: sizeClamp,
+        height: sizeClamp,
         ...(icon.top ? { top: icon.top } : {}),
         ...(icon.bottom ? { bottom: icon.bottom } : {}),
         ...(icon.left ? { left: icon.left } : {}),
         ...(icon.right ? { right: icon.right } : {}),
-        rotate: icon.rotate,
       }}
-      initial={{ opacity: 0, scale: 0.7 }}
-      animate={{
-        opacity: 1,
-        scale: isDragging ? 1.15 : 1,
-        y: isDragging ? 0 : icon.float.y,
-      }}
+      drag
+      dragMomentum={false}
+      whileHover={{ scale: 1.05 }}
+      whileDrag={{ scale: 1.15, zIndex: 50 }}
+      // Drop in from above the viewport, with a tumbling rotation, and let
+      // a spring bring them to rest. damping/stiffness picked so they bounce
+      // a touch on landing rather than a hard stop.
+      initial={{ y: -900, rotate: icon.rotate - 80, opacity: 0 }}
+      animate={{ y: 0, rotate: icon.rotate, opacity: 1 }}
       transition={{
-        opacity: { duration: 0.6, delay: 0.3 + index * 0.1 },
-        scale: { duration: 0.2 },
-        y: isDragging
-          ? { duration: 0 }
-          : {
-              duration: icon.float.duration,
-              repeat: Infinity,
-              repeatType: 'reverse',
-              ease: 'easeInOut',
-            },
+        y: { type: 'spring', damping: 12, stiffness: 65, mass: 1, delay: fallDelay },
+        rotate: { type: 'spring', damping: 14, stiffness: 80, delay: fallDelay },
+        opacity: { duration: 0.4, delay: fallDelay },
       }}
-    />
+    >
+      <motion.img
+        src={icon.src}
+        alt=""
+        className="w-full h-full pointer-events-none select-none"
+        draggable={false}
+        animate={{ y: icon.float.y }}
+        transition={{
+          duration: icon.float.duration,
+          repeat: Infinity,
+          repeatType: 'reverse',
+          ease: 'easeInOut',
+          delay: settleDelay,
+        }}
+      />
+    </motion.div>
   )
 }
 

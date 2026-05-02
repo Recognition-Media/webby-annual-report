@@ -10,6 +10,7 @@ const SECTIONS = [
     description: 'Year-Over-Year Data Comparison',
     color: '#21261A',
     hoverBg: '#8C001C',
+    anchor: 'section-01',
   },
   {
     number: '02',
@@ -17,6 +18,7 @@ const SECTIONS = [
     description: 'Funding Challenges And Cultural Shifts',
     color: '#21261A',
     hoverBg: '#D17DD0',
+    anchor: 'section-02',
   },
   {
     number: '03',
@@ -24,6 +26,7 @@ const SECTIONS = [
     description: 'Three Emerging Themes',
     color: '#21261A',
     hoverBg: '#00B469',
+    anchor: 'section-03',
   },
   {
     number: '04',
@@ -31,8 +34,15 @@ const SECTIONS = [
     description: 'How We Can Keep Going',
     color: '#21261A',
     hoverBg: '#066DBA',
+    // No section-04 yet — anchor to thank-you (Takeaways content) for now.
+    anchor: 'thank-you',
   },
 ]
+
+function scrollToAnchor(anchor: string) {
+  const el = document.getElementById(anchor)
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 
 export function KeyFindings() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
@@ -79,6 +89,15 @@ export function KeyFindings() {
           {SECTIONS.map((section, i) => (
             <motion.div
               key={section.number}
+              role="button"
+              tabIndex={0}
+              onClick={() => scrollToAnchor(section.anchor)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  scrollToAnchor(section.anchor)
+                }
+              }}
               className="p-6 md:p-10 rounded-lg cursor-pointer min-h-[180px] md:min-h-[210px] flex flex-col justify-center transition-colors duration-300"
               style={{ background: hoveredIndex === i ? section.hoverBg : '#d5cfbc' }}
               onMouseEnter={() => setHoveredIndex(i)}

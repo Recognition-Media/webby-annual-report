@@ -14,6 +14,7 @@ import { TrendContainer } from '../TrendContainer'
 import { ReportFooter } from '../ReportFooter'
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
+import { AnthemBottomNav } from './AnthemBottomNav'
 import { QuoteVideoSection } from './QuoteVideoSection'
 import { BubbleChart } from './BubbleChart'
 import { PairedBarChart } from './PairedBarChart'
@@ -183,6 +184,9 @@ export function ReportView({ report }: { report: Report }) {
 
       {/* Idle navigation arrows — disabled for Anthem redesign */}
       {/* <IdleArrows active={entered} /> */}
+
+      {/* Bottom progress / section nav (Anthem template) */}
+      <AnthemBottomNav active={entered} />
 
       {/* Mobile navigation */}
       <MobileNav
