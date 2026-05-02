@@ -117,23 +117,6 @@ export interface SectionCover {
   accentColor?: string
 }
 
-export interface QuoteBlockQuote {
-  name: string
-  title?: string
-  text: string
-  headshot?: SanityImage
-}
-
-export interface QuoteBlock {
-  eyebrow?: string
-  quotes?: QuoteBlockQuote[]
-  accentColor?: string
-  videoUrl?: string
-  videoLabel?: string
-  videoName?: string
-  videoTitle?: string
-}
-
 export interface Report {
   _id: string
   year: number
@@ -180,11 +163,6 @@ export interface Report {
   section02Cover?: SectionCover
   section03Cover?: SectionCover
   section04Cover?: SectionCover
-  quoteBlock1?: QuoteBlock
-  quoteBlock2?: QuoteBlock
-  quoteBlock3?: QuoteBlock
-  quoteBlock4?: QuoteBlock
-  quoteBlock5?: QuoteBlock
   trendSections?: TrendSection[]
   thankYouEyebrow?: string
   thankYouHeading?: string

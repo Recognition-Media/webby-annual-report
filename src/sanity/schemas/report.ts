@@ -15,7 +15,6 @@ export default defineType({
     { name: 'trendIntro', title: 'Trend Intro' },
     { name: 'keyFindings', title: 'Key Findings' },
     { name: 'sectionCovers', title: 'Section Covers' },
-    { name: 'quoteBlocks', title: 'Quote Blocks' },
     { name: 'trends', title: 'Trends' },
     { name: 'thankYou', title: 'Thank You' },
     { name: 'signup', title: 'Signup Form' },
@@ -121,13 +120,6 @@ export default defineType({
     { name: 'section02Cover', title: 'Section 02 Cover', type: 'sectionCover', group: 'sectionCovers' },
     { name: 'section03Cover', title: 'Section 03 Cover', type: 'sectionCover', group: 'sectionCovers' },
     { name: 'section04Cover', title: 'Section 04 Cover', type: 'sectionCover', group: 'sectionCovers' },
-
-    // Quote Blocks (Anthem vertical template — 5 inter-trend "Community Is Saying" sections)
-    { name: 'quoteBlock1', title: 'Quote Block 1 — After Trend 1', type: 'quoteBlock', group: 'quoteBlocks' },
-    { name: 'quoteBlock2', title: 'Quote Block 2 — After Trend 2', type: 'quoteBlock', group: 'quoteBlocks' },
-    { name: 'quoteBlock3', title: 'Quote Block 3 — After Trend 3', type: 'quoteBlock', group: 'quoteBlocks' },
-    { name: 'quoteBlock4', title: 'Quote Block 4 — After Trend 5', type: 'quoteBlock', group: 'quoteBlocks' },
-    { name: 'quoteBlock5', title: 'Quote Block 5 — After Trend 7', type: 'quoteBlock', group: 'quoteBlocks' },
 
     // Trends
     { name: 'trendSections', title: 'Trend Sections', type: 'array', of: [{ type: 'trendSection' }], group: 'trends' },

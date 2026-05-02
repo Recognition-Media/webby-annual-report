@@ -46,11 +46,6 @@ export const reportBySlugQuery = groq`
     section02Cover { sectionNumber, title, subtitle, copy, accentColor },
     section03Cover { sectionNumber, title, subtitle, copy, accentColor },
     section04Cover { sectionNumber, title, subtitle, copy, accentColor },
-    quoteBlock1 { eyebrow, quotes[] { name, title, text, headshot }, accentColor, videoUrl, videoLabel, videoName, videoTitle },
-    quoteBlock2 { eyebrow, quotes[] { name, title, text, headshot }, accentColor, videoUrl, videoLabel, videoName, videoTitle },
-    quoteBlock3 { eyebrow, quotes[] { name, title, text, headshot }, accentColor, videoUrl, videoLabel, videoName, videoTitle },
-    quoteBlock4 { eyebrow, quotes[] { name, title, text, headshot }, accentColor, videoUrl, videoLabel, videoName, videoTitle },
-    quoteBlock5 { eyebrow, quotes[] { name, title, text, headshot }, accentColor, videoUrl, videoLabel, videoName, videoTitle },
     trendSections[] {
       enabled,
       trendTitle,

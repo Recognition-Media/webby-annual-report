@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
-import type { Report, QuoteBlock } from '@/sanity/types'
+import type { Report, ExpertQuote } from '@/sanity/types'
+import type { PortableTextBlock } from '@portabletext/types'
 import { urlFor } from '@/sanity/image'
 import { HeroSection } from './HeroSection'
 import { SignupGate } from './SignupGate'
@@ -30,16 +31,26 @@ import { MobileNav } from '../MobileNav'
 
 type ResolvedQuote = { name: string; title: string; text: string; headshotUrl?: string; borderColor?: string }
 
-function resolveQuotes(cms: QuoteBlock | undefined, fallback: ResolvedQuote[]): ResolvedQuote[] {
-  if (cms?.quotes && cms.quotes.length > 0) {
-    return cms.quotes.map((q) => ({
-      name: q.name,
-      title: q.title || '',
-      text: q.text,
-      headshotUrl: q.headshot ? urlFor(q.headshot).width(400).url() : undefined,
-    }))
-  }
-  return fallback
+function portableTextToPlain(blocks: PortableTextBlock[] | undefined): string {
+  if (!blocks) return ''
+  return blocks
+    .map((block) => {
+      if (block._type !== 'block') return ''
+      const children = (block as { children?: { text?: string }[] }).children || []
+      return children.map((c) => c.text || '').join('')
+    })
+    .filter(Boolean)
+    .join(' ')
+}
+
+function resolveTrendQuotes(quotes: ExpertQuote[] | undefined, fallback: ResolvedQuote[]): ResolvedQuote[] {
+  if (!quotes || quotes.length === 0) return fallback
+  return quotes.map((q) => ({
+    name: q.name,
+    title: q.title || '',
+    text: portableTextToPlain(q.quoteText),
+    headshotUrl: q.headshot ? urlFor(q.headshot).width(400).url() : undefined,
+  }))
 }
 
 function getCookie(name: string): string | undefined {
@@ -258,8 +269,8 @@ export function ReportView({ report }: { report: Report }) {
             />
 
             <QuoteVideoSection
-              eyebrow={report.quoteBlock1?.eyebrow || 'What Our Community Is Saying'}
-              quotes={resolveQuotes(report.quoteBlock1, [
+              eyebrow="What Our Community Is Saying"
+              quotes={resolveTrendQuotes(report.trendSections?.[0]?.expertQuotes, [
                 {
                   name: 'Anonymous',
                   title: 'Survey respondent',
@@ -272,10 +283,10 @@ export function ReportView({ report }: { report: Report }) {
                 },
               ])}
               videoSrc="/anthem/rollbacks-video.mp4"
-              videoLabel={report.quoteBlock1?.videoLabel || 'Watch Video'}
-              videoName={report.quoteBlock1?.videoName || 'Jim Stengel'}
-              videoTitle={report.quoteBlock1?.videoTitle || 'President & CEO, The Jim Stengel Group'}
-              accentColor={report.quoteBlock1?.accentColor || '#8C001C'}
+              videoLabel="Watch Video"
+              videoName="Jim Stengel"
+              videoTitle="President & CEO, The Jim Stengel Group"
+              accentColor={report.trendSections?.[0]?.accentColor || '#8C001C'}
             />
 
             {/* Trend 2 — still within Section 1 */}
@@ -296,8 +307,8 @@ export function ReportView({ report }: { report: Report }) {
             />
 
             <QuoteVideoSection
-              eyebrow={report.quoteBlock2?.eyebrow || 'What Our Community Is Saying'}
-              quotes={resolveQuotes(report.quoteBlock2, [
+              eyebrow="What Our Community Is Saying"
+              quotes={resolveTrendQuotes(report.trendSections?.[1]?.expertQuotes, [
                 {
                   name: 'Olive Mwangi',
                   title: 'Head of Social Media, Dentsu Creative Kenya',
@@ -311,10 +322,10 @@ export function ReportView({ report }: { report: Report }) {
                 },
               ])}
               videoSrc="/anthem/state-of-impact-video.mp4"
-              videoLabel={report.quoteBlock2?.videoLabel || 'Watch Video'}
-              videoName={report.quoteBlock2?.videoName || 'Jim Stengel'}
-              videoTitle={report.quoteBlock2?.videoTitle || 'President & CEO, The Jim Stengel Group'}
-              accentColor={report.quoteBlock2?.accentColor || '#8C001C'}
+              videoLabel="Watch Video"
+              videoName="Jim Stengel"
+              videoTitle="President & CEO, The Jim Stengel Group"
+              accentColor={report.trendSections?.[1]?.accentColor || '#8C001C'}
             />
 
             {/* Section 2: Where the Pressure Is Landing */}
@@ -367,8 +378,8 @@ export function ReportView({ report }: { report: Report }) {
             />
 
             <QuoteVideoSection
-              eyebrow={report.quoteBlock3?.eyebrow || 'What Our Community Is Saying'}
-              quotes={resolveQuotes(report.quoteBlock3, [
+              eyebrow="What Our Community Is Saying"
+              quotes={resolveTrendQuotes(report.trendSections?.[2]?.expertQuotes, [
                 {
                   name: 'M M De Voe',
                   title: 'Executive Director, Pen Parentis',
@@ -382,7 +393,7 @@ export function ReportView({ report }: { report: Report }) {
               ])}
               imageSrc="/anthem/hero-3.jpg"
               imageAlt="Anthem Awards winner"
-              accentColor={report.quoteBlock3?.accentColor || '#D17DD0'}
+              accentColor={report.trendSections?.[2]?.accentColor || '#D17DD0'}
             />
 
             {/* Trend 4 — still within Section 2 */}
@@ -477,8 +488,8 @@ export function ReportView({ report }: { report: Report }) {
             />
 
             <QuoteVideoSection
-              eyebrow={report.quoteBlock4?.eyebrow || 'What Our Community Is Saying'}
-              quotes={resolveQuotes(report.quoteBlock4, [
+              eyebrow="What Our Community Is Saying"
+              quotes={resolveTrendQuotes(report.trendSections?.[4]?.expertQuotes, [
                 {
                   name: 'M M De Voe',
                   title: 'Executive Director, Pen Parentis',
@@ -492,7 +503,7 @@ export function ReportView({ report }: { report: Report }) {
               ])}
               imageSrc="/anthem/hero-2.jpg"
               imageAlt="Anthem Awards winner"
-              accentColor={report.quoteBlock4?.accentColor || '#D17DD0'}
+              accentColor={report.trendSections?.[4]?.accentColor || '#D17DD0'}
             />
 
             {/* Section 3: How the Sector Is Responding */}
@@ -546,8 +557,8 @@ export function ReportView({ report }: { report: Report }) {
             />
 
             <QuoteVideoSection
-              eyebrow={report.quoteBlock5?.eyebrow || 'What Our Community Is Saying'}
-              quotes={resolveQuotes(report.quoteBlock5, [
+              eyebrow="What Our Community Is Saying"
+              quotes={resolveTrendQuotes(report.trendSections?.[7]?.expertQuotes, [
                 {
                   name: '[Name]',
                   title: '[Title, Organization]',
@@ -560,7 +571,7 @@ export function ReportView({ report }: { report: Report }) {
                 },
               ])}
               imageSrc=""
-              accentColor={report.quoteBlock5?.accentColor || '#00B469'}
+              accentColor={report.trendSections?.[7]?.accentColor || '#00B469'}
             />
 
             {/* Section 4: Takeaways — renders only when populated in CMS */}

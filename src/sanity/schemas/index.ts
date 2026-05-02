@@ -10,7 +10,6 @@ import carouselImage from './objects/carouselImage'
 import formField from './objects/formField'
 import footerLink from './objects/footerLink'
 import sectionCover from './objects/sectionCover'
-import quoteBlock from './objects/quoteBlock'
 import keyFinding from './objects/keyFinding'
 
 export const schemaTypes = [
@@ -26,6 +25,5 @@ export const schemaTypes = [
   formField,
   footerLink,
   sectionCover,
-  quoteBlock,
   keyFinding,
 ]
