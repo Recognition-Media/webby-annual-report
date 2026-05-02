@@ -55,6 +55,28 @@ export function Takeaways({
       style={{ background: '#E3DDCA' }}
     >
       <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
+        {/* Eyebrow + heading — mirrors TabbedPriorities/BubbleChart pattern in Section 3 */}
+        <motion.p
+          className="uppercase font-medium mb-3 text-center"
+          style={{ fontSize: 11, letterSpacing: 4, color: accentColor }}
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          5 Key Takeaways
+        </motion.p>
+        <motion.h2
+          className="text-center mb-12 text-[28px] md:text-[40px] leading-[1.15]"
+          style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          Where We Go From Here
+        </motion.h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
           {takeaways.map((item, i) => {
             const isHovered = hoveredIndex === i

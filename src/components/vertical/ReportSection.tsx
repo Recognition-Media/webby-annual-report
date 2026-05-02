@@ -78,6 +78,7 @@ interface ReportSectionCoverProps {
   subtitle: string
   copy: string
   accentColor?: string
+  compact?: boolean
 }
 
 export function ReportSectionCover({
@@ -86,12 +87,13 @@ export function ReportSectionCover({
   subtitle,
   copy,
   accentColor = '#8C001C',
+  compact = false,
 }: ReportSectionCoverProps) {
   return (
     <section
       id={`section-${sectionNumber}`}
-      className="relative px-5 md:px-[60px] md:min-h-screen md:flex md:flex-col md:items-center md:justify-center"
-      style={{ background: '#E3DDCA', paddingTop: 50, paddingBottom: 50 }}
+      className={`relative px-5 md:px-[60px] ${compact ? '' : 'md:min-h-screen md:flex md:flex-col md:items-center md:justify-center'}`}
+      style={{ background: '#E3DDCA', paddingTop: compact ? 80 : 50, paddingBottom: compact ? 60 : 50 }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         {/* Center-aligned: number, title, rule, subtitle */}

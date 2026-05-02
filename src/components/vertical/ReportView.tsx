@@ -13,7 +13,7 @@ import { IadasSection } from '../IadasSection'
 import { IntroLetter } from './IntroLetter'
 import { TrendSection } from '../TrendSection'
 import { TrendContainer } from '../TrendContainer'
-import { ReportFooter } from '../ReportFooter'
+import { AnthemFooter } from './AnthemFooter'
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
@@ -22,6 +22,8 @@ import { BubbleChart } from './BubbleChart'
 import { PairedBarChart } from './PairedBarChart'
 import { TabbedPriorities } from './TabbedPriorities'
 import { Takeaways } from './Takeaways'
+import { SurveyDemographics } from './SurveyDemographics'
+import { Credits } from './Credits'
 import { AnalyticsScripts } from '../AnalyticsScripts'
 import { ScrollReveal } from '../ScrollReveal'
 import { ReportScroll } from '../SmoothScroll'
@@ -46,17 +48,29 @@ function portableTextToPlain(blocks: PortableTextBlock[] | undefined): string {
 
 function resolveTrendQuotes(quotes: ExpertQuote[] | undefined, fallback: ResolvedQuote[]): ResolvedQuote[] {
   if (!quotes || quotes.length === 0) return fallback
-  return quotes.map((q) => ({
+  return quotes.map((q, i) => ({
     name: q.name,
     title: q.title || '',
     text: portableTextToPlain(q.quoteText),
-    headshotUrl: q.headshot ? urlFor(q.headshot).width(400).url() : undefined,
+    headshotUrl: q.headshot ? urlFor(q.headshot).width(400).url() : fallback[i]?.headshotUrl,
   }))
 }
 
 const inlineBlockComponents = {
   block: {
     normal: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  },
+  marks: {
+    link: ({ value, children }: { value?: { href?: string }; children?: React.ReactNode }) => (
+      <a
+        href={value?.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ textDecoration: 'underline' }}
+      >
+        {children}
+      </a>
+    ),
   },
 }
 
@@ -298,8 +312,8 @@ export function ReportView({ report }: { report: Report }) {
               ])}
               videoSrc="/anthem/rollbacks-video.mp4"
               videoLabel="Watch Video"
-              videoName="Jim Stengel"
-              videoTitle="President & CEO, The Jim Stengel Group"
+              videoName="Michael Bellavia"
+              videoTitle="CEO, HelpGood"
               accentColor={report.trendSections?.[0]?.accentColor || '#8C001C'}
             />
 
@@ -337,8 +351,8 @@ export function ReportView({ report }: { report: Report }) {
               ])}
               videoSrc="/anthem/state-of-impact-video.mp4"
               videoLabel="Watch Video"
-              videoName="Jim Stengel"
-              videoTitle="President & CEO, The Jim Stengel Group"
+              videoName="Kyle Lierman"
+              videoTitle="CEO, Civic Nation"
               accentColor={report.trendSections?.[1]?.accentColor || '#8C001C'}
             />
 
@@ -402,6 +416,7 @@ export function ReportView({ report }: { report: Report }) {
                 {
                   name: 'Anonymous',
                   title: 'Mid-sized NGO',
+                  headshotUrl: '/anthem/CAUSE_HUMINATARIAN.svg',
                   text: '"With the fall of USAID, more nonprofits are battling for a smaller pool of funding from private sources. Economic uncertainty and inflation are making fundraising from individual donors more challenging as well."',
                 },
               ])}
@@ -515,8 +530,10 @@ export function ReportView({ report }: { report: Report }) {
                   text: '"We\'re a very small (2-person) company. Keeping up with ever-changing things is rapidly leading to burnout."',
                 },
               ])}
-              imageSrc="/anthem/hero-2.jpg"
-              imageAlt="Anthem Awards winner"
+              videoSrc="/anthem/touch-grass-video.mp4"
+              videoLabel="Watch Video"
+              videoName="KoAnn Vikoren Skrzyniarz"
+              videoTitle="Founder, CEO and Chairwoman, Sustainable Brands"
               accentColor={report.trendSections?.[4]?.accentColor || '#D17DD0'}
             />
 
@@ -612,6 +629,29 @@ export function ReportView({ report }: { report: Report }) {
               }
             />
 
+            <QuoteVideoSection
+              eyebrow="What Our Community Is Saying"
+              quotes={resolveTrendQuotes(report.trendSections?.[6]?.expertQuotes, [
+                {
+                  name: 'Saadia Khan',
+                  title: 'Founder, Immigrantly Media',
+                  headshotUrl: '/anthem/headshots/saadia-khan.jpg',
+                  text: '"We\'ve found the most success in audio — in podcasting specifically. There\'s something about the intimacy of the medium that creates the conditions for real learning. People can engage on their own terms, in their own time, and that\'s where unlearning happens, quietly, without pressure. And the data backs it up. 63% of Gen Z is getting their information from podcasts and that number is still climbing. That\'s a cultural shift."',
+                },
+                {
+                  name: 'Kirill Karnovich-Valua',
+                  title: 'Founder, Creative Director, AI Content Creator, Digital Da Vincis',
+                  headshotUrl: '/anthem/headshots/kirill-karnovich-valua.jpg',
+                  text: '"As a content-creating agency, I see this as my mission — to bring more positive and social stories into the world especially in such a tense time. So we tried to do just that — focus on mission-driven storytelling and social good stories."',
+                },
+              ])}
+              videoSrc="/anthem/storytelling-video.mp4"
+              videoLabel="Watch Video"
+              videoName="Michael Bellavia"
+              videoTitle="CEO, HelpGood"
+              accentColor={report.trendSections?.[6]?.accentColor || '#00B469'}
+            />
+
             {/* Trend 08 */}
             <TrendContent
               trendNumber="08"
@@ -687,164 +727,20 @@ export function ReportView({ report }: { report: Report }) {
             <ReportSectionCover
               sectionNumber={report.section04Cover?.sectionNumber || '04'}
               title={report.section04Cover?.title || 'Takeaways'}
-              subtitle={report.section04Cover?.subtitle || 'Set the New Standard'}
+              subtitle={report.section04Cover?.subtitle || 'How We Can Keep Going'}
               copy={report.section04Cover?.copy || ''}
               accentColor={report.section04Cover?.accentColor || '#066DBA'}
+              compact
             />
 
             {/* 5 Takeaways — KeyFindings-style hover cards */}
             <Takeaways accentColor={report.section04Cover?.accentColor || '#066DBA'} />
 
-            {/* Thank You section — always visible in Anthem redesign */}
-            {true && (
-              <section
-                id="thank-you"
-                className="px-5 md:px-[60px]"
-                style={{
-                  minHeight: '100vh',
-                  display: 'flex',
-                  alignItems: 'center',
-                  backgroundColor: '#191919',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Animated background */}
-                <AnimatedBg variant={3} />
+            <SurveyDemographics />
 
-                <div style={{ maxWidth: 1000, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-                  {/* Eyebrow */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
-                    <span style={{
-                      fontSize: 11,
-                      letterSpacing: 4,
-                      textTransform: 'uppercase',
-                      color: '#8B70D1',
-                      fontWeight: 500,
-                    }}>
-                      {report.thankYouEyebrow || 'Thank You'}
-                    </span>
-                    <div style={{ width: 60, height: 2, background: '#8B70D1', borderRadius: 2 }} />
-                  </div>
+            <Credits />
 
-                  {/* Heading */}
-                  <h2 className="text-[28px] leading-[36px] md:text-[48px] md:leading-[58px]" style={{
-                    fontWeight: 400,
-                    color: '#fff',
-                    letterSpacing: '-2px',
-                    marginBottom: 40,
-                    maxWidth: 750,
-                  }}>
-                    {report.thankYouHeading || "You're Part of What Makes the Internet Worth Being On."}
-                  </h2>
-
-                  {/* Divider */}
-                  <div style={{ width: 80, height: 1, background: 'rgba(255,255,255,0.14)', marginBottom: 32 }} />
-
-                  {/* Body */}
-                  <div data-content style={{ fontSize: 16, lineHeight: '28px', color: '#D4D4D4', maxWidth: 749, marginBottom: 40 }} className="[&_p]:mb-5">
-                    {report.thankYouBody ? (
-                      <PortableText value={report.thankYouBody} />
-                    ) : (
-                      <>
-                        <p style={{ marginBottom: 20 }}>Your participation helps us recognize the best of the Internet each year. As an entrant in the 30th Annual Webby Awards, you are part of the Webby community &mdash; and will continue to receive benefits like this report, access to research, invitations to Webby Talks, and exclusive event invites throughout the year.</p>
-                        <p>Use what you&rsquo;ve read here. The insights in this report come directly from the judges who will evaluate your next entry.</p>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Judging criteria banner */}
-                  <a
-                    href={report.thankYouLinkUrl || 'https://www.webbyawards.com/judging-criteria/'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="no-custom-cursor"
-                    style={{
-                      maxWidth: 700,
-                      padding: '32px 0',
-                      borderTop: '1px solid rgba(255,255,255,0.06)',
-                      borderBottom: '1px solid rgba(255,255,255,0.06)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 40,
-                      textAlign: 'left',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#8B70D1', fontWeight: 500, marginBottom: 10 }}>
-                        {report.thankYouLinkEyebrow || 'Learn More'}
-                      </div>
-                      <div style={{ fontSize: 18, fontWeight: 400, color: '#fff', lineHeight: 1.3, marginBottom: 6 }}>
-                        {report.thankYouLinkTitle || "How We Judge the Internet's Best Work"}
-                      </div>
-                      <div style={{ fontSize: 14, color: '#888', lineHeight: 1.5 }}>
-                        {report.thankYouLinkDescription || 'Explore the judging criteria behind every Webby Award.'}
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: '50%',
-                        border: '1px solid rgba(255,255,255,0.12)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B70D1" strokeWidth="1.5">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" />
-                      </svg>
-                    </div>
-                  </a>
-
-                  {/* CTA card */}
-                  <a
-                    href={report.thankYouCtaUrl || 'https://www.webbyawards.com'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-content
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 24,
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      padding: '28px 32px',
-                      textDecoration: 'none',
-                      color: 'inherit',
-                      marginTop: 40,
-                    }}
-                  >
-                    <svg
-                      width="36"
-                      height="36"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="rgba(255,255,255,0.9)"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      style={{ flexShrink: 0 }}
-                    >
-                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                    </svg>
-                    <div>
-                      <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>
-                        {report.thankYouCtaTitle || 'Get in Touch'}
-                      </h4>
-                      <p style={{ fontSize: 12, color: '#999', lineHeight: 1.6, margin: '4px 0 0' }}>
-                        {report.thankYouCtaDescription || 'Please feel free to contact Producer Evey Long at evey@webbyawards.com with questions or comments.'}
-                      </p>
-                    </div>
-                  </a>
-                </div>
-              </section>
-            )}
-
-            <ReportFooter report={report} />
+            <AnthemFooter report={report} />
           </ReportScroll>
         </div>
       )}

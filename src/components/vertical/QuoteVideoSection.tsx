@@ -21,6 +21,7 @@ interface QuoteVideoSectionProps {
   videoTitle?: string
   imageSrc?: string
   imageAlt?: string
+  imageVariant?: 'cover' | 'contain'
   accentColor?: string
 }
 
@@ -34,6 +35,7 @@ export function QuoteVideoSection({
   videoTitle = '',
   imageSrc,
   imageAlt = '',
+  imageVariant = 'cover',
   accentColor = '#8C001C',
 }: QuoteVideoSectionProps) {
   const defaultBorderColors = ['#8C001C', '#D17DD0', '#066DBA', '#00B469']
@@ -96,14 +98,23 @@ export function QuoteVideoSection({
                   >
                     {quote.headshotUrl ? (
                       <div
-                        className="w-[132px] h-[132px] rounded-full overflow-hidden flex-shrink-0"
-                        style={{ border: `2px solid ${color}` }}
+                        className="w-[132px] h-[132px] rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center"
+                        style={{ border: `2px solid ${color}`, background: quote.headshotUrl.endsWith('.svg') ? '#066DBA' : 'transparent' }}
                       >
-                        <img
-                          src={quote.headshotUrl}
-                          alt={quote.name}
-                          className="w-full h-full object-cover object-top scale-[1.4]"
-                        />
+                        {quote.headshotUrl.endsWith('.svg') ? (
+                          <img
+                            src={quote.headshotUrl}
+                            alt={quote.name}
+                            className="w-[95%] h-[95%]"
+                            style={{ objectFit: 'contain' }}
+                          />
+                        ) : (
+                          <img
+                            src={quote.headshotUrl}
+                            alt={quote.name}
+                            className="w-full h-full object-cover object-top scale-[1.4]"
+                          />
+                        )}
                       </div>
                     ) : (
                       <div
@@ -178,19 +189,37 @@ export function QuoteVideoSection({
                 </div>
               </>
             ) : imageSrc ? (
-              <motion.div
-                className="rounded-lg overflow-hidden"
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <img
-                  src={imageSrc}
-                  alt={imageAlt}
-                  className="w-full h-auto object-cover rounded-lg"
-                />
-              </motion.div>
+              imageVariant === 'contain' ? (
+                <motion.div
+                  className="rounded-lg flex items-center justify-center"
+                  style={{ background: 'rgba(33, 38, 26, 0.06)', aspectRatio: '4 / 3', padding: '8% 10%' }}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <img
+                    src={imageSrc}
+                    alt={imageAlt}
+                    className="max-w-full max-h-full"
+                    style={{ objectFit: 'contain' }}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="rounded-lg overflow-hidden"
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <img
+                    src={imageSrc}
+                    alt={imageAlt}
+                    className="w-full h-auto object-cover rounded-lg"
+                  />
+                </motion.div>
+              )
             ) : null}
           </div>
         </div>
