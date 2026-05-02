@@ -185,4 +185,9 @@ export interface Report {
   footerLinks?: FooterLink[]
   sponsorLogos?: SanityImage[]
   ceremonyDetails?: PortableTextBlock[]
+  footerEyebrow?: string
+  footerHeadline?: string
+  footerSubhead?: string
+  footerCtaUrl?: string
+  footerBody?: PortableTextBlock[]
 }

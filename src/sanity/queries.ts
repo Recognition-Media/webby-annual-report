@@ -103,7 +103,12 @@ export const reportBySlugQuery = groq`
     googleAdsId,
     footerLinks,
     sponsorLogos,
-    ceremonyDetails
+    ceremonyDetails,
+    footerEyebrow,
+    footerHeadline,
+    footerSubhead,
+    footerCtaUrl,
+    footerBody
   }
 `
 
