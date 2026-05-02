@@ -53,6 +53,19 @@ function resolveTrendQuotes(quotes: ExpertQuote[] | undefined, fallback: Resolve
   }))
 }
 
+const inlineBlockComponents = {
+  block: {
+    normal: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  },
+}
+
+function portableTextToBody(blocks: PortableTextBlock[] | undefined, fallback: React.ReactNode[]): React.ReactNode[] {
+  if (!blocks || blocks.length === 0) return fallback
+  return blocks.map((block, i) => (
+    <PortableText key={i} value={[block]} components={inlineBlockComponents} />
+  ))
+}
+
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
@@ -249,10 +262,10 @@ export function ReportView({ report }: { report: Report }) {
             <TrendContent
               trendNumber="01"
               title={report.trendSections?.[0]?.trendTitle || 'Rollbacks Have Increased In Every Corner of the Sector in 2026'}
-              body={[
+              body={portableTextToBody(report.trendSections?.[0]?.trendBody, [
                 <>In 2025, the Anthem community observed rollbacks or gaps centered primarily around Racial and Social Equity. In 2026, impact leaders report witnessing regression across every area in the sector. <strong>Racial and Social Equity remains the most-cited rollback— at 77%— but it is no longer alone.</strong></>,
                 "Leaders report increased rollbacks in Human & Civil Rights by 10%, in Corporate Responsibility by 15%, and Climate Advocacy by 15%—and across mental health, reproductive health, affordable access to food, and more.",
-              ]}
+              ])}
               accentColor="#8C001C"
               dataModule={{
                 eyebrow: '',
@@ -293,10 +306,10 @@ export function ReportView({ report }: { report: Report }) {
             <TrendContent
               trendNumber="02"
               title={report.trendSections?.[1]?.trendTitle || 'Despite Hardships, the Community Has Accepted Its New Reality'}
-              body={[
+              body={portableTextToBody(report.trendSections?.[1]?.trendBody, [
                 <>Last year, 70% of respondents described the social impact landscape as negative, somewhat negative or negative. <strong>This year, the average score landed at 53.7.</strong> While some leaders feel exhausted, the community is stabilizing and not collapsing under the pressure.</>,
                 <>According to multiple leaders, they are digging in with a strengthened resolve rather than giving up. Respondents described their organizations as <strong>{'"'}constantly catching up{'"'}</strong> or <strong>{'"'}reimagining{'"'}</strong> new strategies to move the work forward.</>,
-              ]}
+              ])}
               accentColor="#8C001C"
               sentimentGauge={{
                 score: 53.9,
@@ -354,10 +367,10 @@ export function ReportView({ report }: { report: Report }) {
             <TrendContent
               trendNumber="03"
               title={report.trendSections?.[2]?.trendTitle || 'Health & Human Services Report Facing The Harshest Funding Crisis'}
-              body={[
+              body={portableTextToBody(report.trendSections?.[2]?.trendBody, [
                 <>Respondents <strong>described funding losses not as budget adjustments but as deliberate targeting</strong>, with Health and Humanitarian Action and Services-focused organizations facing the brunt. Following the collapse of USAID, humanitarian organizations are now competing for a shrinking pool of private funding, while immigration has become a new flashpoint.</>,
                 <>The pressure isn{"'"}t coming from one direction. When we asked leaders for the top challenges they are facing right now, three answers came back in near-equal measure: <strong>cultural and political shifts (59%)</strong>, <strong>private funding (58%)</strong>, and <strong>government funding (57%)</strong>.</>,
-              ]}
+              ])}
               accentColor="#D17DD0"
               customRightColumn={
                 <PairedBarChart
@@ -400,10 +413,10 @@ export function ReportView({ report }: { report: Report }) {
             <TrendContent
               trendNumber="04"
               title={report.trendSections?.[3]?.trendTitle || 'Attacks Against DEI Have Caused a Trickle-Down Effect Throughout the Sector'}
-              body={[
+              body={portableTextToBody(report.trendSections?.[3]?.trendBody, [
                 <>Targeted attacks on DEI are causing a cross-sector effect. <strong>71% of B&I-focused organizations reported experiencing challenges with public funding.</strong> Given the intersectional nature of inclusivity, the damage is spreading across cause areas.</>,
                 <>When DEI is defunded, it has devastating effects on every sector. The Trump administration{"'"}s attacks have <a href="https://www.teenvogue.com/story/trump-admins-attack-on-higher-education-and-dei-are-impacting-campuses" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>impacted college admissions</a>, put a strain on <a href="https://communitycatalyst.org/posts/ignoring-dei-isnt-neutral-its-actively-harming-patient-care/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>patient healthcare services</a>, stunted progress for <a href="https://www.axios.com/2025/01/24/dei-orders-disabled-workers-telework" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>disabled workers</a>, and lessened <a href="https://www.climatepeople.com/blog/why-dei-remains-essential-in-climate-work-despite-rollbacks" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>representation in the climate space</a>. Moreover, health equity research loses its language, educational programs like ESL lose funding, and gaps in technology access widen.</>,
-              ]}
+              ])}
               accentColor="#D17DD0"
               customRightColumn={
                 <motion.div
@@ -469,10 +482,10 @@ export function ReportView({ report }: { report: Report }) {
             <TrendContent
               trendNumber="05"
               title={report.trendSections?.[4]?.trendTitle || 'A Sector On the Brink of Burnout'}
-              body={[
+              body={portableTextToBody(report.trendSections?.[4]?.trendBody, [
                 <>Forty percent of all respondents chose burnout as a top challenge in 2026, making it the <strong>fourth most-cited issue overall</strong>. And burnout isn{"'"}t concentrated in one cause area; the entire industry is feeling the heat.</>,
                 <>The sector has spent two years absorbing hits, from funding cuts and DE&I rollbacks, to legislative hostility and the collapse of USAID. Most organizations reported responding by doing more with less — pivoting strategies, rewriting grant applications, rethinking messaging — all while keeping programs running for the communities depending on them.</>,
-              ]}
+              ])}
               accentColor="#D17DD0"
               dataModule={{
                 eyebrow: '',
@@ -530,19 +543,34 @@ export function ReportView({ report }: { report: Report }) {
             <TrendContent
               trendNumber="06"
               title={report.trendSections?.[5]?.trendTitle || 'The Path Forward is Collaborative and Community-Led'}
-              body={[
-                "[First paragraph placeholder]",
-              ]}
+              body={portableTextToBody(report.trendSections?.[5]?.trendBody, [
+                "When asked what opportunities they see emerging in 2026, impact leaders pointed to a layered strategy that combines cross-sector collaboration and resource pooling (52%), community-led and grassroots organizing (47%), and short-form content (47%).",
+                <>Leaders noted shifting strategies from lobbying to collaboration and becoming more intentional with building partnerships. To mitigate the rapid decline in funding, the sector is building durable structures by partnering horizontally. <strong>Anthem Judges, specifically, see grassroots organizing as the way out;</strong> 67% ranked community-led grassroots organizing as a top opportunity in 2026, compared to 40% of our community.</>,
+              ])}
               accentColor="#00B469"
+              dataModule={{
+                eyebrow: '',
+                question: '"What do you see as the top emerging opportunities in your work?" Select all that apply.',
+                bars: [
+                  { label: 'AI-powered workflows and tools', value: 58.82, displayValue: '58.82%', color: '#066DBA' },
+                  { label: 'Cross-sector collaboration and resource pooling', value: 50.59, displayValue: '50.59%', color: '#00B469' },
+                  { label: 'Short-form content and digital storytelling', value: 49.41, displayValue: '49.41%', color: '#D17DD0' },
+                  { label: 'Increased community-led and grassroots organizing', value: 47.06, displayValue: '47.06%', color: '#00B469' },
+                  { label: 'Renewed public engagement and advocacy', value: 34.12, displayValue: '34.12%', color: '#8C001C' },
+                  { label: 'Growth in private and philanthropic funding', value: 25.88, displayValue: '25.88%', color: '#066DBA' },
+                  { label: 'Refined and effective impact measurement', value: 18.82, displayValue: '18.82%', color: '#D17DD0' },
+                  { label: 'Other (please specify)', value: 8.24, displayValue: '8.24%', color: '#21261A' },
+                ],
+              }}
             />
 
             {/* Trend 07 */}
             <TrendContent
               trendNumber="07"
               title={report.trendSections?.[6]?.trendTitle || 'Organizations are fighting a narrative battle. To win, they are prioritizing video.'}
-              body={[
+              body={portableTextToBody(report.trendSections?.[6]?.trendBody, [
                 "[First paragraph placeholder]",
-              ]}
+              ])}
               accentColor="#00B469"
             />
 
@@ -550,9 +578,9 @@ export function ReportView({ report }: { report: Report }) {
             <TrendContent
               trendNumber="08"
               title={report.trendSections?.[7]?.trendTitle || 'The sector is adopting AI cautiously, and pushing back when needed.'}
-              body={[
+              body={portableTextToBody(report.trendSections?.[7]?.trendBody, [
                 "[First paragraph placeholder]",
-              ]}
+              ])}
               accentColor="#00B469"
             />
 
