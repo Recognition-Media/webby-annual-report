@@ -544,22 +544,21 @@ export function ReportView({ report }: { report: Report }) {
               trendNumber="06"
               title={report.trendSections?.[5]?.trendTitle || 'The Path Forward is Collaborative and Community-Led'}
               body={portableTextToBody(report.trendSections?.[5]?.trendBody, [
-                "When asked what opportunities they see emerging in 2026, impact leaders pointed to a layered strategy that combines cross-sector collaboration and resource pooling (52%), community-led and grassroots organizing (47%), and short-form content (47%).",
-                <>Leaders noted shifting strategies from lobbying to collaboration and becoming more intentional with building partnerships. To mitigate the rapid decline in funding, the sector is building durable structures by partnering horizontally. <strong>Anthem Judges, specifically, see grassroots organizing as the way out;</strong> 67% ranked community-led grassroots organizing as a top opportunity in 2026, compared to 40% of our community.</>,
+                "[First paragraph placeholder]",
               ])}
               accentColor="#00B469"
               dataModule={{
                 eyebrow: '',
                 question: '"What do you see as the top emerging opportunities in your work?" Select all that apply.',
                 bars: [
-                  { label: 'AI-powered workflows and tools', value: 58.82, displayValue: '58.82%', color: '#066DBA' },
-                  { label: 'Cross-sector collaboration and resource pooling', value: 50.59, displayValue: '50.59%', color: '#00B469' },
-                  { label: 'Short-form content and digital storytelling', value: 49.41, displayValue: '49.41%', color: '#D17DD0' },
-                  { label: 'Increased community-led and grassroots organizing', value: 47.06, displayValue: '47.06%', color: '#00B469' },
-                  { label: 'Renewed public engagement and advocacy', value: 34.12, displayValue: '34.12%', color: '#8C001C' },
-                  { label: 'Growth in private and philanthropic funding', value: 25.88, displayValue: '25.88%', color: '#066DBA' },
-                  { label: 'Refined and effective impact measurement', value: 18.82, displayValue: '18.82%', color: '#D17DD0' },
-                  { label: 'Other (please specify)', value: 8.24, displayValue: '8.24%', color: '#21261A' },
+                  { label: 'AI-powered workflows and tools', value: 59, displayValue: '59%', color: '#066DBA' },
+                  { label: 'Cross-sector collaboration and resource pooling', value: 51, displayValue: '51%', color: '#00B469' },
+                  { label: 'Short-form content and digital storytelling', value: 49, displayValue: '49%', color: '#D17DD0' },
+                  { label: 'Increased community-led and grassroots organizing', value: 47, displayValue: '47%', color: '#00B469' },
+                  { label: 'Renewed public engagement and advocacy', value: 34, displayValue: '34%', color: '#8C001C' },
+                  { label: 'Growth in private and philanthropic funding', value: 26, displayValue: '26%', color: '#066DBA' },
+                  { label: 'Refined and effective impact measurement', value: 19, displayValue: '19%', color: '#D17DD0' },
+                  { label: 'Other (please specify)', value: 8, displayValue: '8%', color: '#21261A' },
                 ],
               }}
             />
