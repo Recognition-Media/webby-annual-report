@@ -10,9 +10,12 @@ export default defineType({
     { name: 'intro', title: 'Intro & Hero' },
     { name: 'letter', title: 'Welcome Letter' },
     { name: 'carousel', title: 'Hero Carousel' },
-    { name: 'byTheNumbers', title: 'By the Numbers' },
-    { name: 'howWeJudge', title: 'How We Judge' },
+    { name: 'byTheNumbers', title: 'By the Numbers', hidden: ({ document }) => document?.template === 'vertical' },
+    { name: 'howWeJudge', title: 'How We Judge', hidden: ({ document }) => document?.template === 'vertical' },
     { name: 'trendIntro', title: 'Trend Intro' },
+    { name: 'keyFindings', title: 'Key Findings' },
+    { name: 'sectionCovers', title: 'Section Covers' },
+    { name: 'quoteBlocks', title: 'Quote Blocks' },
     { name: 'trends', title: 'Trends' },
     { name: 'thankYou', title: 'Thank You' },
     { name: 'signup', title: 'Signup Form' },
@@ -109,6 +112,22 @@ export default defineType({
     { name: 'trendIntroBody', title: 'Body', type: 'array', of: [{ type: 'block' }], group: 'trendIntro' },
     { name: 'trendIntroStats', title: 'Stats', type: 'array', of: [{ type: 'dataStat' }], group: 'trendIntro', description: 'Percentage bars (same as trend data modules)' },
     { name: 'trendIntroCta', title: 'CTA Button Text', type: 'string', group: 'trendIntro', initialValue: 'SEE THE TRENDS', description: 'Button that starts the trend journey' },
+
+    // Key Findings (Anthem vertical template — preview grid above section 01)
+    { name: 'keyFindings', title: 'Key Findings', type: 'array', of: [{ type: 'keyFinding' }], group: 'keyFindings', description: 'Top-of-report navigation grid (typically 4 items)' },
+
+    // Section Covers (Anthem vertical template — 01, 02, 03, 04)
+    { name: 'section01Cover', title: 'Section 01 Cover', type: 'sectionCover', group: 'sectionCovers' },
+    { name: 'section02Cover', title: 'Section 02 Cover', type: 'sectionCover', group: 'sectionCovers' },
+    { name: 'section03Cover', title: 'Section 03 Cover', type: 'sectionCover', group: 'sectionCovers' },
+    { name: 'section04Cover', title: 'Section 04 Cover', type: 'sectionCover', group: 'sectionCovers' },
+
+    // Quote Blocks (Anthem vertical template — 5 inter-trend "Community Is Saying" sections)
+    { name: 'quoteBlock1', title: 'Quote Block 1 — After Trend 1', type: 'quoteBlock', group: 'quoteBlocks' },
+    { name: 'quoteBlock2', title: 'Quote Block 2 — After Trend 2', type: 'quoteBlock', group: 'quoteBlocks' },
+    { name: 'quoteBlock3', title: 'Quote Block 3 — After Trend 3', type: 'quoteBlock', group: 'quoteBlocks' },
+    { name: 'quoteBlock4', title: 'Quote Block 4 — After Trend 5', type: 'quoteBlock', group: 'quoteBlocks' },
+    { name: 'quoteBlock5', title: 'Quote Block 5 — After Trend 7', type: 'quoteBlock', group: 'quoteBlocks' },
 
     // Trends
     { name: 'trendSections', title: 'Trend Sections', type: 'array', of: [{ type: 'trendSection' }], group: 'trends' },

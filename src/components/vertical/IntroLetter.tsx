@@ -5,6 +5,9 @@ import { motion } from 'framer-motion'
 import type { Report } from '@/sanity/types'
 
 export function IntroLetter({ report }: { report: Report }) {
+  const author = report.letterAuthors?.[0]
+  const authorName = author?.name || 'Patricia McLoughlin'
+  const authorTitle = author?.title || 'General Manager, The Anthem Awards'
   return (
     <section
       id="welcome-letter"
@@ -32,13 +35,13 @@ export function IntroLetter({ report }: { report: Report }) {
           <div className="w-[200px] h-[250px] md:w-[300px] md:h-[390px] relative rounded-lg overflow-hidden mb-4">
             <Image
               src="/anthem/patricia-headshot.png"
-              alt="Patricia McLoughlin"
+              alt={authorName}
               fill
               className="object-cover object-[center_5%] scale-[1.2]"
             />
           </div>
-          <p className="font-medium text-[15px] text-[#E3DDCA]">Patricia McLoughlin</p>
-          <p className="text-[13px] text-[#E3DDCA]/50">General Manager, The Anthem Awards</p>
+          <p className="font-medium text-[15px] text-[#E3DDCA]">{authorName}</p>
+          <p className="text-[13px] text-[#E3DDCA]/50">{authorTitle}</p>
         </div>
 
         {/* Right: letter content */}

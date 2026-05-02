@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
-import type { Report } from '@/sanity/types'
+import type { Report, QuoteBlock } from '@/sanity/types'
+import { urlFor } from '@/sanity/image'
 import { HeroSection } from './HeroSection'
 import { SignupGate } from './SignupGate'
 import { EntryStats } from '../EntryStats'
@@ -26,6 +27,20 @@ import { AnimatedBg } from '../AnimatedBg'
 import { IdleArrows } from '../IdleArrows'
 import { TrendIntro } from '../TrendIntro'
 import { MobileNav } from '../MobileNav'
+
+type ResolvedQuote = { name: string; title: string; text: string; headshotUrl?: string; borderColor?: string }
+
+function resolveQuotes(cms: QuoteBlock | undefined, fallback: ResolvedQuote[]): ResolvedQuote[] {
+  if (cms?.quotes && cms.quotes.length > 0) {
+    return cms.quotes.map((q) => ({
+      name: q.name,
+      title: q.title || '',
+      text: q.text,
+      headshotUrl: q.headshot ? urlFor(q.headshot).width(400).url() : undefined,
+    }))
+  }
+  return fallback
+}
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -208,21 +223,21 @@ export function ReportView({ report }: { report: Report }) {
 
             {/* IADAS — hidden for Anthem redesign */}
             {/* <IadasSection report={report} /> */}
-            <KeyFindings />
+            <KeyFindings findings={report.keyFindings} />
 
             {/* Old trends — hidden for Anthem redesign */}
             {/* Section 1: The State of Social Impact */}
             <ReportSectionCover
-              sectionNumber="01"
-              title="The State of Social Impact"
-              subtitle="Rollbacks have increased across the sector, but leaders have settled into their new reality, becoming more resilient and strategic in the process."
-              copy="Last year, we asked the Anthem Awards community how the shifting landscape was impacting their work. This year, we see how the community is adapting."
-              accentColor="#8C001C"
+              sectionNumber={report.section01Cover?.sectionNumber || '01'}
+              title={report.section01Cover?.title || 'The State of Social Impact'}
+              subtitle={report.section01Cover?.subtitle || 'Rollbacks have increased across the sector, but leaders have settled into their new reality, becoming more resilient and strategic in the process.'}
+              copy={report.section01Cover?.copy || 'Last year, we asked the Anthem Awards community how the shifting landscape was impacting their work. This year, we see how the community is adapting.'}
+              accentColor={report.section01Cover?.accentColor || '#8C001C'}
             />
 
             <TrendContent
               trendNumber="01"
-              title="Rollbacks Have Increased In Every Corner of the Sector in 2026"
+              title={report.trendSections?.[0]?.trendTitle || 'Rollbacks Have Increased In Every Corner of the Sector in 2026'}
               body={[
                 <>In 2025, the Anthem community observed rollbacks or gaps centered primarily around Racial and Social Equity. In 2026, impact leaders report witnessing regression across every area in the sector. <strong>Racial and Social Equity remains the most-cited rollback— at 77%— but it is no longer alone.</strong></>,
                 "Leaders report increased rollbacks in Human & Civil Rights by 10%, in Corporate Responsibility by 15%, and Climate Advocacy by 15%—and across mental health, reproductive health, affordable access to food, and more.",
@@ -243,8 +258,8 @@ export function ReportView({ report }: { report: Report }) {
             />
 
             <QuoteVideoSection
-              eyebrow="What Our Community Is Saying"
-              quotes={[
+              eyebrow={report.quoteBlock1?.eyebrow || 'What Our Community Is Saying'}
+              quotes={resolveQuotes(report.quoteBlock1, [
                 {
                   name: 'Anonymous',
                   title: 'Survey respondent',
@@ -255,18 +270,18 @@ export function ReportView({ report }: { report: Report }) {
                   title: 'Producer, Working Voices on KPFK',
                   text: '"We witnessed the dismantling of public cultural institutions and feel threatened but breathe a sigh of relief that we had not been reliant on funds from the Corporation for Public Broadcasting."',
                 },
-              ]}
+              ])}
               videoSrc="/anthem/rollbacks-video.mp4"
-              videoLabel="Watch Video"
-              videoName="Jim Stengel"
-              videoTitle="President & CEO, The Jim Stengel Group"
-              accentColor="#8C001C"
+              videoLabel={report.quoteBlock1?.videoLabel || 'Watch Video'}
+              videoName={report.quoteBlock1?.videoName || 'Jim Stengel'}
+              videoTitle={report.quoteBlock1?.videoTitle || 'President & CEO, The Jim Stengel Group'}
+              accentColor={report.quoteBlock1?.accentColor || '#8C001C'}
             />
 
             {/* Trend 2 — still within Section 1 */}
             <TrendContent
               trendNumber="02"
-              title="Despite Hardships, the Community Has Accepted Its New Reality"
+              title={report.trendSections?.[1]?.trendTitle || 'Despite Hardships, the Community Has Accepted Its New Reality'}
               body={[
                 <>Last year, 70% of respondents described the social impact landscape as negative, somewhat negative or negative. <strong>This year, the average score landed at 53.7.</strong> While some leaders feel exhausted, the community is stabilizing and not collapsing under the pressure.</>,
                 <>According to multiple leaders, they are digging in with a strengthened resolve rather than giving up. Respondents described their organizations as <strong>{'"'}constantly catching up{'"'}</strong> or <strong>{'"'}reimagining{'"'}</strong> new strategies to move the work forward.</>,
@@ -281,8 +296,8 @@ export function ReportView({ report }: { report: Report }) {
             />
 
             <QuoteVideoSection
-              eyebrow="What Our Community Is Saying"
-              quotes={[
+              eyebrow={report.quoteBlock2?.eyebrow || 'What Our Community Is Saying'}
+              quotes={resolveQuotes(report.quoteBlock2, [
                 {
                   name: 'Olive Mwangi',
                   title: 'Head of Social Media, Dentsu Creative Kenya',
@@ -294,21 +309,21 @@ export function ReportView({ report }: { report: Report }) {
                   title: 'Founder, CEO, Paper Crane Factory',
                   text: '"We are all doing the heavy lifting. The current administration is devastating both the planet and the morale of those trying to save it. But it\'s a battle. The war is there to win. And it will take all of us."',
                 },
-              ]}
+              ])}
               videoSrc="/anthem/state-of-impact-video.mp4"
-              videoLabel="Watch Video"
-              videoName="Jim Stengel"
-              videoTitle="President & CEO, The Jim Stengel Group"
-              accentColor="#8C001C"
+              videoLabel={report.quoteBlock2?.videoLabel || 'Watch Video'}
+              videoName={report.quoteBlock2?.videoName || 'Jim Stengel'}
+              videoTitle={report.quoteBlock2?.videoTitle || 'President & CEO, The Jim Stengel Group'}
+              accentColor={report.quoteBlock2?.accentColor || '#8C001C'}
             />
 
             {/* Section 2: Where the Pressure Is Landing */}
             <ReportSectionCover
-              sectionNumber="02"
-              title="Where the Pressure Is Landing"
-              subtitle={'"No one feels generous in a time of enormous stress."'}
-              copy="The burden isn't shared evenly across the sector. Funding losses have put the largest strain on Health and Humanitarian Action and Services, while attacks on DE&I have impacted anyone doing this work, regardless of org size or cause area."
-              accentColor="#D17DD0"
+              sectionNumber={report.section02Cover?.sectionNumber || '02'}
+              title={report.section02Cover?.title || 'Where the Pressure Is Landing'}
+              subtitle={report.section02Cover?.subtitle || '"No one feels generous in a time of enormous stress."'}
+              copy={report.section02Cover?.copy || "The burden isn't shared evenly across the sector. Funding losses have put the largest strain on Health and Humanitarian Action and Services, while attacks on DE&I have impacted anyone doing this work, regardless of org size or cause area."}
+              accentColor={report.section02Cover?.accentColor || '#D17DD0'}
             />
 
             <BubbleChart
@@ -327,7 +342,7 @@ export function ReportView({ report }: { report: Report }) {
 
             <TrendContent
               trendNumber="03"
-              title="Health & Human Services Report Facing The Harshest Funding Crisis"
+              title={report.trendSections?.[2]?.trendTitle || 'Health & Human Services Report Facing The Harshest Funding Crisis'}
               body={[
                 <>Respondents <strong>described funding losses not as budget adjustments but as deliberate targeting</strong>, with Health and Humanitarian Action and Services-focused organizations facing the brunt. Following the collapse of USAID, humanitarian organizations are now competing for a shrinking pool of private funding, while immigration has become a new flashpoint.</>,
                 <>The pressure isn{"'"}t coming from one direction. When we asked leaders for the top challenges they are facing right now, three answers came back in near-equal measure: <strong>cultural and political shifts (59%)</strong>, <strong>private funding (58%)</strong>, and <strong>government funding (57%)</strong>.</>,
@@ -352,8 +367,8 @@ export function ReportView({ report }: { report: Report }) {
             />
 
             <QuoteVideoSection
-              eyebrow="What Our Community Is Saying"
-              quotes={[
+              eyebrow={report.quoteBlock3?.eyebrow || 'What Our Community Is Saying'}
+              quotes={resolveQuotes(report.quoteBlock3, [
                 {
                   name: 'M M De Voe',
                   title: 'Executive Director, Pen Parentis',
@@ -364,16 +379,16 @@ export function ReportView({ report }: { report: Report }) {
                   title: 'Mid-sized NGO',
                   text: '"With the fall of USAID, more nonprofits are battling for a smaller pool of funding from private sources. Economic uncertainty and inflation are making fundraising from individual donors more challenging as well."',
                 },
-              ]}
+              ])}
               imageSrc="/anthem/hero-3.jpg"
               imageAlt="Anthem Awards winner"
-              accentColor="#D17DD0"
+              accentColor={report.quoteBlock3?.accentColor || '#D17DD0'}
             />
 
             {/* Trend 4 — still within Section 2 */}
             <TrendContent
               trendNumber="04"
-              title="Attacks Against DEI Have Caused a Trickle-Down Effect Throughout the Sector"
+              title={report.trendSections?.[3]?.trendTitle || 'Attacks Against DEI Have Caused a Trickle-Down Effect Throughout the Sector'}
               body={[
                 <>Targeted attacks on DEI are causing a cross-sector effect. <strong>71% of B&I-focused organizations reported experiencing challenges with public funding.</strong> Given the intersectional nature of inclusivity, the damage is spreading across cause areas.</>,
                 <>When DEI is defunded, it has devastating effects on every sector. The Trump administration{"'"}s attacks have <a href="https://www.teenvogue.com/story/trump-admins-attack-on-higher-education-and-dei-are-impacting-campuses" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>impacted college admissions</a>, put a strain on <a href="https://communitycatalyst.org/posts/ignoring-dei-isnt-neutral-its-actively-harming-patient-care/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>patient healthcare services</a>, stunted progress for <a href="https://www.axios.com/2025/01/24/dei-orders-disabled-workers-telework" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>disabled workers</a>, and lessened <a href="https://www.climatepeople.com/blog/why-dei-remains-essential-in-climate-work-despite-rollbacks" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>representation in the climate space</a>. Moreover, health equity research loses its language, educational programs like ESL lose funding, and gaps in technology access widen.</>,
@@ -442,7 +457,7 @@ export function ReportView({ report }: { report: Report }) {
             {/* Trend 5 — still within Section 2 */}
             <TrendContent
               trendNumber="05"
-              title="A Sector On the Brink of Burnout"
+              title={report.trendSections?.[4]?.trendTitle || 'A Sector On the Brink of Burnout'}
               body={[
                 <>Forty percent of all respondents chose burnout as a top challenge in 2026, making it the <strong>fourth most-cited issue overall</strong>. And burnout isn{"'"}t concentrated in one cause area; the entire industry is feeling the heat.</>,
                 <>The sector has spent two years absorbing hits, from funding cuts and DE&I rollbacks, to legislative hostility and the collapse of USAID. Most organizations reported responding by doing more with less — pivoting strategies, rewriting grant applications, rethinking messaging — all while keeping programs running for the communities depending on them.</>,
@@ -462,8 +477,8 @@ export function ReportView({ report }: { report: Report }) {
             />
 
             <QuoteVideoSection
-              eyebrow="What Our Community Is Saying"
-              quotes={[
+              eyebrow={report.quoteBlock4?.eyebrow || 'What Our Community Is Saying'}
+              quotes={resolveQuotes(report.quoteBlock4, [
                 {
                   name: 'M M De Voe',
                   title: 'Executive Director, Pen Parentis',
@@ -474,19 +489,19 @@ export function ReportView({ report }: { report: Report }) {
                   title: 'Co-Founder, Artist & Design Principal, A Gang of Three',
                   text: '"We\'re a very small (2-person) company. Keeping up with ever-changing things is rapidly leading to burnout."',
                 },
-              ]}
+              ])}
               imageSrc="/anthem/hero-2.jpg"
               imageAlt="Anthem Awards winner"
-              accentColor="#D17DD0"
+              accentColor={report.quoteBlock4?.accentColor || '#D17DD0'}
             />
 
             {/* Section 3: How the Sector Is Responding */}
             <ReportSectionCover
-              sectionNumber="03"
-              title="How the Sector Is Responding"
-              subtitle="Despite resources tightening and the cultural climate shifting, the sector isn't deterred."
-              copy="Leaders are making deliberate bets to win public support: investing in storytelling that travels, building cross-sector coalitions, and using AI —when appropriate— to scale their mission."
-              accentColor="#00B469"
+              sectionNumber={report.section03Cover?.sectionNumber || '03'}
+              title={report.section03Cover?.title || 'How the Sector Is Responding'}
+              subtitle={report.section03Cover?.subtitle || "Despite resources tightening and the cultural climate shifting, the sector isn't deterred."}
+              copy={report.section03Cover?.copy || 'Leaders are making deliberate bets to win public support: investing in storytelling that travels, building cross-sector coalitions, and using AI —when appropriate— to scale their mission.'}
+              accentColor={report.section03Cover?.accentColor || '#00B469'}
             />
 
             <TabbedPriorities
@@ -502,8 +517,8 @@ export function ReportView({ report }: { report: Report }) {
 
             {/* Trend placeholder — ready for content */}
             <TrendContent
-              trendNumber="01"
-              title="[Trend Title Placeholder]"
+              trendNumber="06"
+              title={report.trendSections?.[5]?.trendTitle || '[Trend Title Placeholder]'}
               body={[
                 "[First paragraph placeholder]",
               ]}
@@ -511,8 +526,8 @@ export function ReportView({ report }: { report: Report }) {
             />
 
             <QuoteVideoSection
-              eyebrow="What Our Community Is Saying"
-              quotes={[
+              eyebrow={report.quoteBlock5?.eyebrow || 'What Our Community Is Saying'}
+              quotes={resolveQuotes(report.quoteBlock5, [
                 {
                   name: '[Name]',
                   title: '[Title, Organization]',
@@ -523,10 +538,21 @@ export function ReportView({ report }: { report: Report }) {
                   title: '[Title, Organization]',
                   text: '"[Quote placeholder]"',
                 },
-              ]}
+              ])}
               imageSrc=""
-              accentColor="#00B469"
+              accentColor={report.quoteBlock5?.accentColor || '#00B469'}
             />
+
+            {/* Section 4: Takeaways — renders only when populated in CMS */}
+            {report.section04Cover?.title && (
+              <ReportSectionCover
+                sectionNumber={report.section04Cover.sectionNumber || '04'}
+                title={report.section04Cover.title}
+                subtitle={report.section04Cover.subtitle || ''}
+                copy={report.section04Cover.copy || ''}
+                accentColor={report.section04Cover.accentColor || '#066DBA'}
+              />
+            )}
 
             {/* Thank You section — always visible in Anthem redesign */}
             {true && (

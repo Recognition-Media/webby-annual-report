@@ -64,6 +64,7 @@ export interface TrendVideo {
 export interface TrendSection {
   enabled?: boolean
   trendTitle: string
+  accentColor?: string
   moduleOrder?: { module: string }[]
   trendBody?: PortableTextBlock[]
   showFeaturedProjects?: boolean
@@ -98,6 +99,39 @@ export interface FormField {
 export interface FooterLink {
   label: string
   url: string
+}
+
+export interface KeyFinding {
+  number: string
+  title: string
+  description?: string
+  hoverColor?: string
+  anchor?: string
+}
+
+export interface SectionCover {
+  sectionNumber: string
+  title: string
+  subtitle?: string
+  copy?: string
+  accentColor?: string
+}
+
+export interface QuoteBlockQuote {
+  name: string
+  title?: string
+  text: string
+  headshot?: SanityImage
+}
+
+export interface QuoteBlock {
+  eyebrow?: string
+  quotes?: QuoteBlockQuote[]
+  accentColor?: string
+  videoUrl?: string
+  videoLabel?: string
+  videoName?: string
+  videoTitle?: string
 }
 
 export interface Report {
@@ -141,6 +175,16 @@ export interface Report {
   trendIntroBody?: PortableTextBlock[]
   trendIntroStats?: DataStat[]
   trendIntroCta?: string
+  keyFindings?: KeyFinding[]
+  section01Cover?: SectionCover
+  section02Cover?: SectionCover
+  section03Cover?: SectionCover
+  section04Cover?: SectionCover
+  quoteBlock1?: QuoteBlock
+  quoteBlock2?: QuoteBlock
+  quoteBlock3?: QuoteBlock
+  quoteBlock4?: QuoteBlock
+  quoteBlock5?: QuoteBlock
   trendSections?: TrendSection[]
   thankYouEyebrow?: string
   thankYouHeading?: string

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" type="image/jpeg" />
         <link rel="stylesheet" href="https://use.typekit.net/ona0hkt.css" />
@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             theme scoping happens via body class set by template */}
         <link rel="stylesheet" href="https://use.typekit.net/ods5cgw.css" />
       </head>
-      <body className="bg-white text-black">{children}</body>
+      <body className="bg-white text-black" suppressHydrationWarning>{children}</body>
     </html>
   )
 }
