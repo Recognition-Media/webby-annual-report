@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useShowOnScroll } from '@/lib/useShowOnScroll'
 
 // Sections the bottom nav tracks. Each maps to a DOM id rendered by the
 // Anthem ReportView (KeyFindings, the three ReportSectionCovers, and the
@@ -17,6 +18,7 @@ const SECTIONS = [
 
 export function AnthemBottomNav({ active }: { active: boolean }) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const isScrolling = useShowOnScroll()
 
   // Track which section is currently in view via IntersectionObserver.
   // Threshold 0.4 = a section becomes "active" once 40% of it is visible,
@@ -60,9 +62,10 @@ export function AnthemBottomNav({ active }: { active: boolean }) {
   return (
     <motion.div
       initial={{ y: 80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-      className="fixed bottom-0 left-0 right-0 z-40"
+      animate={{ y: isScrolling ? 0 : 80, opacity: isScrolling ? 1 : 0 }}
+      transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+      className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none"
+      style={{ pointerEvents: isScrolling ? 'auto' : 'none' }}
     >
       {/* Progress line */}
       <div className="relative h-[2px]" style={{ background: 'rgba(227, 221, 202, 0.1)' }}>

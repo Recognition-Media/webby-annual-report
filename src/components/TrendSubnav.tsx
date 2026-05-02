@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useShowOnScroll } from '@/lib/useShowOnScroll'
 
 // Colors by slide index:
 // 0=Welcome Letter, 1=By the Numbers, 2=How We Judge, 3=Quick Summary,
@@ -33,10 +34,11 @@ interface TrendSubnavProps {
 export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProps) {
   const activeTitle = titles[activeTrend] || ''
   const activeColor = getColor(activeTrend)
+  const isScrolling = useShowOnScroll()
   return (
     <motion.div
       initial={{ y: 80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
+      animate={{ y: isScrolling ? 0 : 80, opacity: isScrolling ? 1 : 0 }}
       transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
       style={{
         position: 'fixed',
@@ -44,6 +46,7 @@ export function TrendSubnav({ titles, activeTrend, onNavigate }: TrendSubnavProp
         left: 0,
         right: 0,
         zIndex: 55,
+        pointerEvents: isScrolling ? 'auto' : 'none',
       }}
     >
       {/* Progress line */}
