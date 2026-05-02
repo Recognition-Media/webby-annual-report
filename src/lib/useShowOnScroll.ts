@@ -1,43 +1,58 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
- * Returns `true` while the user is actively scrolling/navigating, `false`
- * after the page has been idle for `idleMs` (default 1.5s).
+ * Returns `{ visible, pin, unpin }` for show-on-scroll UI.
  *
- * Listens for scroll, wheel, keydown, and touchmove so it works for the
- * Webby horizontal carousel (which navigates via wheel/key/swipe rather
- * than actual page scroll) as well as the Anthem vertical scroll.
+ * Visible while the user is actively scrolling/navigating (scroll, wheel,
+ * touchmove, keydown), then fades out after `idleMs` (default 1.5s).
  *
- * Used by AnthemBottomNav (vertical) and TrendSubnav (horizontal) so the
- * bottom UI only appears when the visitor is engaged with navigation.
+ * `pin()` / `unpin()` let consumers force-keep the UI visible (e.g. while
+ * the mouse is hovering over the nav itself, so it doesn't disappear out
+ * from under the cursor). On unpin, the idle timer restarts so the UI
+ * stays one more idle window before fading.
+ *
+ * Listens for wheel/touchmove/keydown alongside scroll so it works for
+ * the Webby horizontal carousel (which navigates via wheel/key/swipe
+ * rather than actual page scroll) as well as the Anthem vertical scroll.
  */
 export function useShowOnScroll(idleMs = 1500) {
   const [visible, setVisible] = useState(false)
+  const [pinned, setPinned] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null
-
-    function show() {
-      setVisible(true)
-      if (timer) clearTimeout(timer)
-      timer = setTimeout(() => setVisible(false), idleMs)
-    }
-
-    window.addEventListener('scroll', show, { passive: true })
-    window.addEventListener('wheel', show, { passive: true })
-    window.addEventListener('touchmove', show, { passive: true })
-    window.addEventListener('keydown', show)
-
-    return () => {
-      window.removeEventListener('scroll', show)
-      window.removeEventListener('wheel', show)
-      window.removeEventListener('touchmove', show)
-      window.removeEventListener('keydown', show)
-      if (timer) clearTimeout(timer)
-    }
+  const keepAlive = useCallback(() => {
+    setVisible(true)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => setVisible(false), idleMs)
   }, [idleMs])
 
-  return visible
+  const pin = useCallback(() => {
+    setPinned(true)
+  }, [])
+
+  const unpin = useCallback(() => {
+    setPinned(false)
+    // Reset the idle window so the nav stays for one more `idleMs` after
+    // the cursor leaves, instead of disappearing instantly.
+    keepAlive()
+  }, [keepAlive])
+
+  useEffect(() => {
+    window.addEventListener('scroll', keepAlive, { passive: true })
+    window.addEventListener('wheel', keepAlive, { passive: true })
+    window.addEventListener('touchmove', keepAlive, { passive: true })
+    window.addEventListener('keydown', keepAlive)
+
+    return () => {
+      window.removeEventListener('scroll', keepAlive)
+      window.removeEventListener('wheel', keepAlive)
+      window.removeEventListener('touchmove', keepAlive)
+      window.removeEventListener('keydown', keepAlive)
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [keepAlive])
+
+  return { visible: visible || pinned, pin, unpin }
 }

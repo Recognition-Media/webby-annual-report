@@ -18,7 +18,7 @@ const SECTIONS = [
 
 export function AnthemBottomNav({ active }: { active: boolean }) {
   const [activeIndex, setActiveIndex] = useState(0)
-  const isScrolling = useShowOnScroll()
+  const { visible, pin, unpin } = useShowOnScroll()
 
   // Track which section is currently in view via IntersectionObserver.
   // Threshold 0.4 = a section becomes "active" once 40% of it is visible,
@@ -62,10 +62,12 @@ export function AnthemBottomNav({ active }: { active: boolean }) {
   return (
     <motion.div
       initial={{ y: 80, opacity: 0 }}
-      animate={{ y: isScrolling ? 0 : 80, opacity: isScrolling ? 1 : 0 }}
-      transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-      className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none"
-      style={{ pointerEvents: isScrolling ? 'auto' : 'none' }}
+      animate={{ y: visible ? 0 : 80, opacity: visible ? 1 : 0 }}
+      transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
+      onMouseEnter={pin}
+      onMouseLeave={unpin}
+      className="fixed bottom-0 left-0 right-0 z-40"
+      style={{ pointerEvents: visible ? 'auto' : 'none' }}
     >
       {/* Progress line */}
       <div className="relative h-[2px]" style={{ background: 'rgba(227, 221, 202, 0.1)' }}>
