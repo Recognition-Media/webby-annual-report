@@ -107,6 +107,15 @@ export const latestReportSlugQuery = groq`
   }
 `
 
+// Latest live report restricted to a single property (e.g. 'webby', 'anthem').
+// Used by the per-property landing routes (/webby, /anthem) so each subdomain
+// resolves to its own report regardless of which is "newest" overall.
+export const latestReportSlugByPropertyQuery = groq`
+  *[_type == "report" && status == "live" && property == $property] | order(year desc)[0] {
+    slug
+  }
+`
+
 export const allReportSlugsQuery = groq`
   *[_type == "report" && status == "live"] {
     "slug": slug.current
