@@ -25,20 +25,43 @@ export default defineType({
     { name: 'title', title: 'Title', type: 'string', validation: (r) => r.required(), group: 'core' },
     { name: 'slug', title: 'Slug', type: 'slug', options: { source: 'title' }, validation: (r) => r.required(), group: 'core' },
     {
-      name: 'property',
-      title: 'Property',
-      type: 'string',
-      options: { list: ['webby', 'anthem', 'telly', 'lovie'] },
-      initialValue: 'webby',
-      group: 'core',
-      description: 'Which awards property this report belongs to',
-    },
-    {
       name: 'status',
       title: 'Status',
       type: 'string',
       options: { list: ['draft', 'live'] },
       initialValue: 'draft',
+      group: 'core',
+    },
+    {
+      name: 'property',
+      title: 'Property (brand)',
+      type: 'string',
+      description: 'Drives branding (logo, palette). Independent of layout template.',
+      options: {
+        list: [
+          { title: 'Webby', value: 'webby' },
+          { title: 'Anthem', value: 'anthem' },
+          { title: 'Telly', value: 'telly' },
+          { title: 'Lovie', value: 'lovie' },
+        ],
+      },
+      initialValue: 'webby',
+      group: 'core',
+    },
+    {
+      name: 'template',
+      title: 'Layout Template',
+      type: 'string',
+      description:
+        'Picks the layout/scroll pattern. Horizontal = Webby-style snap-scroll trend slides. Vertical = Anthem-style top-to-bottom scroll. Independent of brand.',
+      options: {
+        list: [
+          { title: 'Horizontal (Webby-style)', value: 'horizontal' },
+          { title: 'Vertical (Anthem-style)', value: 'vertical' },
+        ],
+      },
+      initialValue: 'horizontal',
+      validation: (r) => r.required(),
       group: 'core',
     },
 
@@ -103,6 +126,14 @@ export default defineType({
     { name: 'thankYouCtaUrl', title: 'CTA Card URL', type: 'url', group: 'thankYou' },
 
     // Signup Form
+    {
+      name: 'signupGateEnabled',
+      title: 'Show Signup Form',
+      type: 'boolean',
+      description: 'When on, visitors see a signup form before viewing the report. When off, "Explore the report" takes them straight in. Applies to both Webby and Anthem report templates.',
+      initialValue: true,
+      group: 'signup',
+    },
     { name: 'signupTitle', title: 'Form Title', type: 'text', rows: 2, group: 'signup', description: 'Supports line breaks. e.g. "Welcome to the\\n30th Annual Webby Awards"' },
     { name: 'signupSubhead', title: 'Form Subhead', type: 'text', rows: 2, group: 'signup', description: 'e.g. "Please provide us with some basic info..."' },
     { name: 'formFields', title: 'Signup Form Fields', type: 'array', of: [{ type: 'formField' }], group: 'signup' },

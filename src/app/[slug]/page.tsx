@@ -29,21 +29,26 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params
   const report = await client.fetch<Report | null>(reportBySlugQuery, { slug })
 
-  const ogImage = report?.shareImage ? urlFor(report.shareImage).width(1200).height(630).url() : undefined
+  const title = report?.metaTitle || report?.title || 'Annual Report'
+  const description = report?.metaDescription || ''
+  const ogImage = report?.shareImage
+    ? urlFor(report.shareImage).width(1200).height(630).fit('crop').url()
+    : undefined
 
   return {
-    title: report?.metaTitle || report?.title || 'Annual Report',
-    description: report?.metaDescription || '',
+    title,
+    description,
     openGraph: {
-      title: report?.metaTitle || report?.title || 'Annual Report',
-      description: report?.metaDescription || '',
-      ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630 }] }),
+      title,
+      description,
+      type: 'website',
+      ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630 }] } : {}),
     },
     twitter: {
-      card: 'summary_large_image',
-      title: report?.metaTitle || report?.title || 'Annual Report',
-      description: report?.metaDescription || '',
-      ...(ogImage && { images: [ogImage] }),
+      card: ogImage ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      ...(ogImage ? { images: [ogImage] } : {}),
     },
   }
 }

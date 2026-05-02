@@ -106,6 +106,8 @@ export interface Report {
   title: string
   slug: { current: string }
   property?: 'webby' | 'anthem' | 'telly' | 'lovie'
+  template?: 'vertical' | 'horizontal'
+  signupGateEnabled?: boolean
   status: 'draft' | 'live'
   metaTitle?: string
   metaDescription?: string

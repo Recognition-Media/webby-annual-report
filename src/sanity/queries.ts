@@ -7,6 +7,8 @@ export const reportBySlugQuery = groq`
     title,
     slug,
     property,
+    template,
+    signupGateEnabled,
     status,
     metaTitle,
     metaDescription,

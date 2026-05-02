@@ -212,3 +212,32 @@ html.snap-active section[data-snap] {
     cursor: auto !important;
   }
 }
+
+/* =========================================================================
+   Anthem (horizontal template) theme overrides
+   Applied when body has class `anthem-template` (set by horizontal/ReportView).
+   Webby reports never receive this class, so they keep their original styling.
+   ========================================================================= */
+
+:root {
+  --anthem-moss: #21261A;
+  --anthem-red: #8C001C;
+  --anthem-blue: #066DBA;
+  --anthem-cream: #E3DDCA;
+  --anthem-purple: #D17DD0;
+  --anthem-green: #00B469;
+}
+
+body.anthem-template {
+  background: var(--anthem-moss);
+  color: var(--anthem-cream);
+  font-family: 'roc-grotesk-variable', -apple-system, sans-serif;
+  --font-sans: 'roc-grotesk-variable', -apple-system, sans-serif;
+  --font-display: 'decoy', Georgia, serif;
+  /* Anthem palette overrides for color tokens used across the app */
+  --color-primary-blue: #066DBA;
+  --color-primary-green: #00B469;
+  --color-lime-accent: #00B469;
+  --color-blue-gradient: #066DBA;
+}
+
