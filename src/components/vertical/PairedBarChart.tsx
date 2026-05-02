@@ -83,7 +83,7 @@ export function PairedBarChart({
       <div className="flex justify-center gap-3 md:gap-4">
         {data.map((item, i) => (
           <div key={i} className="text-center" style={{ width: singleYear ? 36 : 75 }}>
-            <p className="text-[8px] md:text-[9px] leading-tight" style={{ color: '#21261A', opacity: 0.6, whiteSpace: 'pre-line' }}>
+            <p className="text-[9px] leading-tight" style={{ color: '#21261A', opacity: 0.6, whiteSpace: 'pre-line' }}>
               {item.shortLabel}
             </p>
             {!singleYear && item.value2025 === null && (

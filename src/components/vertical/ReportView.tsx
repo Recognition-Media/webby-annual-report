@@ -21,6 +21,7 @@ import { QuoteVideoSection } from './QuoteVideoSection'
 import { BubbleChart } from './BubbleChart'
 import { PairedBarChart } from './PairedBarChart'
 import { TabbedPriorities } from './TabbedPriorities'
+import { Takeaways } from './Takeaways'
 import { AnalyticsScripts } from '../AnalyticsScripts'
 import { ScrollReveal } from '../ScrollReveal'
 import { ReportScroll } from '../SmoothScroll'
@@ -622,38 +623,41 @@ export function ReportView({ report }: { report: Report }) {
               accentColor="#00B469"
               customRightColumn={
                 <div>
-                  <p className="uppercase font-medium mb-3" style={{ fontSize: 11, letterSpacing: 4, color: '#00B469' }}>
-                    A Tale of Two Sectors
-                  </p>
                   <h4 className="leading-[1.4] mb-8 w-full" style={{ fontSize: 16, fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}>
                     Where the for-profit / agency vs. nonprofit AI adoption gap is widest.
                   </h4>
-                  <div style={{ background: '#21261A', borderRadius: 4, padding: '24px 28px', color: '#E3DDCA' }}>
-                    {/* Header row */}
-                    <div className="grid grid-cols-[1.6fr_1fr_0.8fr_0.6fr] gap-3 pb-3" style={{ borderBottom: '1px solid rgba(227,221,202,0.18)' }}>
-                      <span className="text-[11px] uppercase tracking-[2px] opacity-60" style={{ fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>Use case</span>
-                      <span className="text-[11px] uppercase tracking-[2px] opacity-60" style={{ fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>For-profit / Agency</span>
-                      <span className="text-[11px] uppercase tracking-[2px] opacity-60" style={{ fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>Nonprofit</span>
-                      <span className="text-[11px] uppercase tracking-[2px] opacity-60 text-right" style={{ fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>Gap</span>
-                    </div>
-                    {[
-                      { useCase: 'Workflow automation', forProfit: '35%', nonprofit: '16%', gap: '+20pp' },
-                      { useCase: 'Audience segmentation & personalization', forProfit: '19%', nonprofit: '3%', gap: '+16pp' },
-                      { useCase: 'Accessibility tools', forProfit: '17%', nonprofit: '6%', gap: '+10pp' },
-                      { useCase: 'Data analysis', forProfit: '23%', nonprofit: '16%', gap: '+7pp' },
-                    ].map((row, i, arr) => (
-                      <div
-                        key={i}
-                        className="grid grid-cols-[1.6fr_1fr_0.8fr_0.6fr] gap-3 py-4 items-center"
-                        style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid rgba(227,221,202,0.10)' }}
-                      >
-                        <span className="text-[14px]" style={{ fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>{row.useCase}</span>
-                        <span className="text-[16px]" style={{ fontFamily: 'var(--font-display)' }}>{row.forProfit}</span>
-                        <span className="text-[16px]" style={{ fontFamily: 'var(--font-display)' }}>{row.nonprofit}</span>
-                        <span className="text-[14px] font-medium text-right" style={{ color: '#00B469' }}>{row.gap}</span>
+                  {[
+                    { useCase: 'Workflow automation', forProfit: 35, nonprofit: 16 },
+                    { useCase: 'Audience segmentation & personalization', forProfit: 19, nonprofit: 3 },
+                    { useCase: 'Accessibility tools', forProfit: 17, nonprofit: 6 },
+                    { useCase: 'Data analysis', forProfit: 23, nonprofit: 16 },
+                  ].map((row, i) => (
+                    <div key={i} className="mb-6">
+                      <span className="text-[14px] md:text-[15px] font-medium block mb-2" style={{ color: '#21261A' }}>{row.useCase}</span>
+
+                      {/* Two floating bars sized to percentage */}
+                      <div className="flex gap-1.5" style={{ height: 56 }}>
+                        <div
+                          className="rounded-md flex items-center justify-center px-3"
+                          style={{ flex: row.forProfit, background: '#00B469', minWidth: 70 }}
+                        >
+                          <div className="text-center">
+                            <div className="text-[9px] uppercase tracking-[1.5px] font-medium" style={{ color: '#E3DDCA', opacity: 0.85 }}>For-profit</div>
+                            <div className="text-[18px] leading-none mt-[2px] md:mt-[1px]" style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 700 }}>{row.forProfit}%</div>
+                          </div>
+                        </div>
+                        <div
+                          className="rounded-md flex items-center justify-center px-3"
+                          style={{ flex: row.nonprofit, background: '#21261A', minWidth: 70 }}
+                        >
+                          <div className="text-center">
+                            <div className="text-[9px] uppercase tracking-[1.5px] font-medium" style={{ color: '#E3DDCA', opacity: 0.85 }}>Nonprofit</div>
+                            <div className="text-[18px] leading-none mt-[2px] md:mt-[1px]" style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 700 }}>{row.nonprofit}%</div>
+                          </div>
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               }
             />
@@ -679,16 +683,17 @@ export function ReportView({ report }: { report: Report }) {
               accentColor={report.trendSections?.[7]?.accentColor || '#00B469'}
             />
 
-            {/* Section 4: Takeaways — renders only when populated in CMS */}
-            {report.section04Cover?.title && (
-              <ReportSectionCover
-                sectionNumber={report.section04Cover.sectionNumber || '04'}
-                title={report.section04Cover.title}
-                subtitle={report.section04Cover.subtitle || ''}
-                copy={report.section04Cover.copy || ''}
-                accentColor={report.section04Cover.accentColor || '#066DBA'}
-              />
-            )}
+            {/* Section 4: Takeaways */}
+            <ReportSectionCover
+              sectionNumber={report.section04Cover?.sectionNumber || '04'}
+              title={report.section04Cover?.title || 'Takeaways'}
+              subtitle={report.section04Cover?.subtitle || 'Set the New Standard'}
+              copy={report.section04Cover?.copy || ''}
+              accentColor={report.section04Cover?.accentColor || '#066DBA'}
+            />
+
+            {/* 5 Takeaways — KeyFindings-style hover cards */}
+            <Takeaways accentColor={report.section04Cover?.accentColor || '#066DBA'} />
 
             {/* Thank You section — always visible in Anthem redesign */}
             {true && (
