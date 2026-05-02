@@ -616,26 +616,66 @@ export function ReportView({ report }: { report: Report }) {
               trendNumber="08"
               title={report.trendSections?.[7]?.trendTitle || 'The sector is adopting AI cautiously, and pushing back when needed.'}
               body={portableTextToBody(report.trendSections?.[7]?.trendBody, [
-                "[First paragraph placeholder]",
+                <>About <strong>58% of respondents named AI-powered workflows as their top emerging opportunity in 2026.</strong> But the full picture is murky, with a clear divide in how for-profit and nonprofit leaders{"'"} ethical views of AI tools. Nonprofits are adopting AI more slowly than for-profits and agencies, not because they are behind, but because they are viewing AI through their values.</>,
+                "Organizations' top barriers to AI adoption include concerns around data privacy and ethical concerns, followed by environmental impact. At the root of sector-wide AI conversations is a split in values. For-profit and agency respondents are adopting AI faster than their nonprofit peers, who are more cautious of its environmental and ethical impact.",
               ])}
               accentColor="#00B469"
+              customRightColumn={
+                <div>
+                  <p className="uppercase font-medium mb-3" style={{ fontSize: 11, letterSpacing: 4, color: '#00B469' }}>
+                    A Tale of Two Sectors
+                  </p>
+                  <h4 className="leading-[1.4] mb-8 w-full" style={{ fontSize: 16, fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}>
+                    Where the for-profit / agency vs. nonprofit AI adoption gap is widest.
+                  </h4>
+                  <div style={{ background: '#21261A', borderRadius: 4, padding: '24px 28px', color: '#E3DDCA' }}>
+                    {/* Header row */}
+                    <div className="grid grid-cols-[1.6fr_1fr_0.8fr_0.6fr] gap-3 pb-3" style={{ borderBottom: '1px solid rgba(227,221,202,0.18)' }}>
+                      <span className="text-[11px] uppercase tracking-[2px] opacity-60" style={{ fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>Use case</span>
+                      <span className="text-[11px] uppercase tracking-[2px] opacity-60" style={{ fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>For-profit / Agency</span>
+                      <span className="text-[11px] uppercase tracking-[2px] opacity-60" style={{ fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>Nonprofit</span>
+                      <span className="text-[11px] uppercase tracking-[2px] opacity-60 text-right" style={{ fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>Gap</span>
+                    </div>
+                    {[
+                      { useCase: 'Workflow automation', forProfit: '35%', nonprofit: '16%', gap: '+20pp' },
+                      { useCase: 'Audience segmentation & personalization', forProfit: '19%', nonprofit: '3%', gap: '+16pp' },
+                      { useCase: 'Accessibility tools', forProfit: '17%', nonprofit: '6%', gap: '+10pp' },
+                      { useCase: 'Data analysis', forProfit: '23%', nonprofit: '16%', gap: '+7pp' },
+                    ].map((row, i, arr) => (
+                      <div
+                        key={i}
+                        className="grid grid-cols-[1.6fr_1fr_0.8fr_0.6fr] gap-3 py-4 items-center"
+                        style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid rgba(227,221,202,0.10)' }}
+                      >
+                        <span className="text-[14px]" style={{ fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>{row.useCase}</span>
+                        <span className="text-[16px]" style={{ fontFamily: 'var(--font-display)' }}>{row.forProfit}</span>
+                        <span className="text-[16px]" style={{ fontFamily: 'var(--font-display)' }}>{row.nonprofit}</span>
+                        <span className="text-[14px] font-medium text-right" style={{ color: '#00B469' }}>{row.gap}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              }
             />
 
             <QuoteVideoSection
               eyebrow="What Our Community Is Saying"
               quotes={resolveTrendQuotes(report.trendSections?.[7]?.expertQuotes, [
                 {
-                  name: '[Name]',
-                  title: '[Title, Organization]',
-                  text: '"[Quote placeholder]"',
+                  name: "Tamara Toles O'Laughlin",
+                  title: 'Founder, Climate Critical',
+                  text: '"AI is not a social good for marginalized people, environmentalists or farmers. Please stop assuming it is. For folks whose work is building relationships there is no automation that can do that better than a person."',
                 },
                 {
-                  name: '[Name]',
-                  title: '[Title, Organization]',
-                  text: '"[Quote placeholder]"',
+                  name: 'Dana Litwin, CVA',
+                  title: 'Consultant, Dana Litwin Consulting',
+                  text: '"It is increasingly a BAD thing by policy and PR to incorporate \'AI\' into any NPO operations. I understand the harms vs. the help that, especially, GenAI creates in the world that undermines the message of \'social good\' most nonprofits want to project."',
                 },
               ])}
-              imageSrc=""
+              videoSrc="/anthem/innovation-video.mp4"
+              videoLabel="Watch Video"
+              videoName="KoAnn Vikoren Skrzyniarz"
+              videoTitle="Founder, CEO and Chairwoman, Sustainable Brands"
               accentColor={report.trendSections?.[7]?.accentColor || '#00B469'}
             />
 
