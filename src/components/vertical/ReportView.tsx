@@ -515,10 +515,30 @@ export function ReportView({ report }: { report: Report }) {
               ]}
             />
 
-            {/* Trend placeholder — ready for content */}
+            {/* Trend 06 */}
             <TrendContent
               trendNumber="06"
-              title={report.trendSections?.[5]?.trendTitle || '[Trend Title Placeholder]'}
+              title={report.trendSections?.[5]?.trendTitle || 'The Path Forward is Collaborative and Community-Led'}
+              body={[
+                "[First paragraph placeholder]",
+              ]}
+              accentColor="#00B469"
+            />
+
+            {/* Trend 07 */}
+            <TrendContent
+              trendNumber="07"
+              title={report.trendSections?.[6]?.trendTitle || 'Organizations are fighting a narrative battle. To win, they are prioritizing video.'}
+              body={[
+                "[First paragraph placeholder]",
+              ]}
+              accentColor="#00B469"
+            />
+
+            {/* Trend 08 */}
+            <TrendContent
+              trendNumber="08"
+              title={report.trendSections?.[7]?.trendTitle || 'The sector is adopting AI cautiously, and pushing back when needed.'}
               body={[
                 "[First paragraph placeholder]",
               ]}
