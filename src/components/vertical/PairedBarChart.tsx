@@ -24,6 +24,7 @@ export function PairedBarChart({
   data,
   accentColor = '#D17DD0',
 }: PairedBarChartProps) {
+  const singleYear = data.every((d) => d.value2025 === null || d.value2025 === undefined)
   const maxVal = Math.max(...data.map(d => Math.max(d.value2025 || 0, d.value2026)))
   const barHeight = (val: number) => (val / maxVal) * 360
   const chartRef = useRef<HTMLDivElement>(null)
@@ -52,25 +53,27 @@ export function PairedBarChart({
 
         {data.map((item, i) => (
           <div key={i} className="flex gap-[3px] items-end">
-            {/* 2025 bar — appears immediately on view */}
-            {item.value2025 !== null ? (
-              <motion.div
-                className="rounded-t-[3px]"
-                style={{ width: 36, background: `${accentColor}40` }}
-                initial={{ height: 0 }}
-                animate={isInView ? { height: barHeight(item.value2025) } : { height: 0 }}
-                transition={{ duration: 0.4, delay: 0.05 + i * 0.03, ease: 'easeOut' }}
-              />
-            ) : (
-              <div style={{ width: 36 }} />
+            {/* 2025 bar — only rendered when comparing years */}
+            {!singleYear && (
+              item.value2025 !== null ? (
+                <motion.div
+                  className="rounded-t-[3px]"
+                  style={{ width: 36, background: `${accentColor}40` }}
+                  initial={{ height: 0 }}
+                  animate={isInView ? { height: barHeight(item.value2025) } : { height: 0 }}
+                  transition={{ duration: 0.4, delay: 0.05 + i * 0.03, ease: 'easeOut' }}
+                />
+              ) : (
+                <div style={{ width: 36 }} />
+              )
             )}
-            {/* 2026 bar — grows after 1s pause */}
+            {/* 2026 bar — grows after 1s pause when paired, immediately in single-year mode */}
             <motion.div
               className="rounded-t-[3px]"
               style={{ width: 36, background: accentColor }}
               initial={{ height: 0 }}
               animate={isInView ? { height: barHeight(item.value2026) } : { height: 0 }}
-              transition={{ duration: 0.5, delay: 0.7 + i * 0.03, ease: 'easeOut' }}
+              transition={{ duration: 0.5, delay: (singleYear ? 0.1 : 0.7) + i * 0.03, ease: 'easeOut' }}
             />
           </div>
         ))}
@@ -79,11 +82,11 @@ export function PairedBarChart({
       {/* Labels */}
       <div className="flex justify-center gap-3 md:gap-4">
         {data.map((item, i) => (
-          <div key={i} className="text-center" style={{ width: 75 }}>
-            <p className="text-[8px] md:text-[9px] leading-tight" style={{ color: '#21261A', opacity: 0.6 }}>
+          <div key={i} className="text-center" style={{ width: singleYear ? 36 : 75 }}>
+            <p className="text-[8px] md:text-[9px] leading-tight" style={{ color: '#21261A', opacity: 0.6, whiteSpace: 'pre-line' }}>
               {item.shortLabel}
             </p>
-            {item.value2025 === null && (
+            {!singleYear && item.value2025 === null && (
               <motion.p
                 className="text-[7px] font-bold uppercase tracking-[1px] mt-1"
                 style={{ color: accentColor }}
@@ -98,15 +101,17 @@ export function PairedBarChart({
         ))}
       </div>
 
-      {/* Legend */}
-      <div className="flex gap-4 mt-4 justify-center">
-        <span className="flex items-center gap-1.5 text-[11px]" style={{ color: '#21261A', opacity: 0.5 }}>
-          <span className="inline-block w-3 h-2 rounded-sm" style={{ background: `${accentColor}40` }} /> 2025
-        </span>
-        <span className="flex items-center gap-1.5 text-[11px]" style={{ color: '#21261A', opacity: 0.5 }}>
-          <span className="inline-block w-3 h-2 rounded-sm" style={{ background: accentColor }} /> 2026
-        </span>
-      </div>
+      {/* Legend — only shown when comparing two years */}
+      {!singleYear && (
+        <div className="flex gap-4 mt-4 justify-center">
+          <span className="flex items-center gap-1.5 text-[11px]" style={{ color: '#21261A', opacity: 0.5 }}>
+            <span className="inline-block w-3 h-2 rounded-sm" style={{ background: `${accentColor}40` }} /> 2025
+          </span>
+          <span className="flex items-center gap-1.5 text-[11px]" style={{ color: '#21261A', opacity: 0.5 }}>
+            <span className="inline-block w-3 h-2 rounded-sm" style={{ background: accentColor }} /> 2026
+          </span>
+        </div>
+      )}
     </div>
   )
 }

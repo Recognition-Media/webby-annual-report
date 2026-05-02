@@ -563,6 +563,27 @@ export function ReportView({ report }: { report: Report }) {
               }}
             />
 
+            <QuoteVideoSection
+              eyebrow="What Our Community Is Saying"
+              quotes={resolveTrendQuotes(report.trendSections?.[5]?.expertQuotes, [
+                {
+                  name: 'Shirley Senn',
+                  title: "Chief Community Impact Officer, New Orleans Firemen's FCU",
+                  text: '"One of our biggest takeaways was the importance of listening—engaging more deeply with members and local partners helped us better understand where we could make the greatest impact, particularly in financial wellness and community resilience."',
+                },
+                {
+                  name: 'Mifa Adejumo',
+                  title: 'Communications Lead, The Special Youth Leadership Foundation',
+                  text: '"2025 forced us to move beyond short-term interventions and think more intentionally about continuity and scale. We saw that access alone isn\'t enough; what matters is sustained support, quality delivery, and measurable outcomes over time. As a result, we\'re approaching this year with a stronger focus on deepening impact within existing communities, strengthening our program structure, and being more deliberate about partnerships that enable long-term growth."',
+                },
+              ])}
+              videoSrc="/anthem/community-led-video.mp4"
+              videoLabel="Watch Video"
+              videoName="Kyle Lierman"
+              videoTitle="CEO, Civic Nation"
+              accentColor={report.trendSections?.[5]?.accentColor || '#00B469'}
+            />
+
             {/* Trend 07 */}
             <TrendContent
               trendNumber="07"
@@ -571,6 +592,23 @@ export function ReportView({ report }: { report: Report }) {
                 "[First paragraph placeholder]",
               ])}
               accentColor="#00B469"
+              customRightColumn={
+                <PairedBarChart
+                  title=""
+                  question={'Where Organizations Are Investing in 2026'}
+                  accentColor="#00B469"
+                  data={[
+                    { label: 'Written content and editorial', shortLabel: 'Written', value2025: null, value2026: 77 },
+                    { label: 'Short-form video (Reels, TikTok, Shorts)', shortLabel: 'Short-form Video', value2025: null, value2026: 71 },
+                    { label: 'Long-form video or documentary', shortLabel: 'Long-form Video', value2025: null, value2026: 47 },
+                    { label: 'Creator or brand collaborations', shortLabel: 'Creator/\nBrand', value2025: null, value2026: 47 },
+                    { label: 'Podcast or audio content', shortLabel: 'Podcast', value2025: null, value2026: 45 },
+                    { label: 'Live events or live streaming', shortLabel: 'Live Events', value2025: null, value2026: 43 },
+                    { label: 'User-generated or community storytelling', shortLabel: 'UGC', value2025: null, value2026: 37 },
+                    { label: 'Data visualization or interactive reports', shortLabel: 'Data Viz', value2025: null, value2026: 28 },
+                  ]}
+                />
+              }
             />
 
             {/* Trend 08 */}
