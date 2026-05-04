@@ -18,26 +18,38 @@ const LOCAL_HERO_IMAGES = [
 // lockstep, and is drag-enabled (Framer Motion `drag`) inside DraggableIcon.
 const CAUSE_ICONS = [
   // Left edge
-  { src: '/anthem/CAUSE_HEALTH.svg', top: '68%', left: '3%', size: 168, rotate: -8, float: { y: [-14, 14], duration: 3.6 } },
-  { src: '/anthem/CAUSE_DIVERSITY.svg', top: '85%', left: '12%', size: 149, rotate: 10, float: { y: [-10, 10], duration: 4.4 } },
+  { src: '/anthem/CAUSE_HEALTH.svg', top: '44%', left: '3%', size: 168, rotate: -8, float: { y: [-14, 14], duration: 3.6 } },
+  { src: '/anthem/CAUSE_DIVERSITY.svg', top: '67%', left: '10%', size: 149, rotate: 10, float: { y: [-10, 10], duration: 4.4 } },
   // Bottom left
-  { src: '/anthem/CAUSE_EDUCATION.svg', bottom: '3%', left: '28%', size: 139, rotate: -12, float: { y: [-16, 16], duration: 4 } },
-  // Bottom center-right
-  { src: '/anthem/CAUSE_SUSTAINABILITY.svg', bottom: '2%', right: '30%', size: 156, rotate: 6, float: { y: [-11, 11], duration: 4.8 } },
+  { src: '/anthem/CAUSE_EDUCATION.svg', bottom: '3%', left: '5%', size: 139, rotate: -12, float: { y: [-16, 16], duration: 4 } },
+  // Bottom-center
+  { src: '/anthem/CAUSE_SUSTAINABILITY.svg', bottom: '1%', left: '42%', size: 156, rotate: 6, float: { y: [-11, 11], duration: 4.8 } },
   // Right edge
-  { src: '/anthem/CAUSE_HUMINATARIAN.svg', top: '65%', right: '3%', size: 163, rotate: -6, float: { y: [-13, 13], duration: 3.8 } },
-  { src: '/anthem/CAUSE_HUMANRIGHTS.svg', top: '82%', right: '14%', size: 144, rotate: 14, float: { y: [-15, 15], duration: 4.6 } },
+  { src: '/anthem/CAUSE_HUMINATARIAN.svg', top: '42%', right: '3%', size: 163, rotate: -6, float: { y: [-13, 13], duration: 3.8 } },
+  { src: '/anthem/CAUSE_HUMANRIGHTS.svg', top: '67%', right: '10%', size: 144, rotate: 14, float: { y: [-15, 15], duration: 4.6 } },
   // Bottom right
   { src: '/anthem/CAUSE_TECHNOLOGY.svg', bottom: '4%', right: '5%', size: 154, rotate: -10, float: { y: [-12, 12], duration: 4.2 } },
+]
+
+const NAV_SECTIONS = [
+  { id: 'section-01', label: 'The State of Social Impact' },
+  { id: 'section-02', label: 'Where the Pressure Is Landing' },
+  { id: 'section-03', label: 'How the Sector Is Responding' },
+  { id: 'section-04', label: 'Takeaways' },
 ]
 
 interface HeroSectionProps {
   report: Report
   carouselImages?: CarouselImage[]
-  onSeeReport?: () => void
+  onSeeReport?: (anchor?: string) => void
 }
 
 export function HeroSection({ report, carouselImages, onSeeReport }: HeroSectionProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  function handleNavClick(anchor: string) {
+    setMenuOpen(false)
+    onSeeReport?.(anchor)
+  }
   return (
     <section id="hero" className="relative w-full h-screen overflow-hidden">
       {/* Full-bleed background carousel */}
@@ -72,16 +84,81 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <span className="hidden md:block text-[10px] text-[#E3DDCA] tracking-[2px] uppercase bg-[#8C001C] rounded-full py-2.5 px-6">Explore The Report</span>
-          <button
-            className="w-11 h-11 rounded-full border border-[#E3DDCA]/30 flex items-center justify-center hover:border-[#E3DDCA]/60 transition-colors cursor-pointer"
+          <a
+            href="https://www.anthemawards.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:block text-[10px] text-[#E3DDCA] tracking-[2px] uppercase bg-[#8C001C] rounded-full py-2.5 px-6 hover:bg-[#a30022] transition-colors"
           >
-            <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-              <line x1="0" y1="1" x2="16" y2="1" stroke="#E3DDCA" strokeWidth="1.5" />
-              <line x1="0" y1="5" x2="16" y2="5" stroke="#E3DDCA" strokeWidth="1.5" />
-              <line x1="0" y1="9" x2="16" y2="9" stroke="#E3DDCA" strokeWidth="1.5" />
-            </svg>
-          </button>
+            Enter Now
+          </a>
+          <div className="relative">
+            <button
+              type="button"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setMenuOpen((v) => !v)}
+              className="w-11 h-11 rounded-full border border-[#E3DDCA]/30 flex items-center justify-center hover:border-[#E3DDCA]/60 transition-colors cursor-pointer"
+            >
+              {menuOpen ? (
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <line x1="1" y1="1" x2="13" y2="13" stroke="#E3DDCA" strokeWidth="1.5" />
+                  <line x1="13" y1="1" x2="1" y2="13" stroke="#E3DDCA" strokeWidth="1.5" />
+                </svg>
+              ) : (
+                <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+                  <line x1="0" y1="1" x2="16" y2="1" stroke="#E3DDCA" strokeWidth="1.5" />
+                  <line x1="0" y1="5" x2="16" y2="5" stroke="#E3DDCA" strokeWidth="1.5" />
+                  <line x1="0" y1="9" x2="16" y2="9" stroke="#E3DDCA" strokeWidth="1.5" />
+                </svg>
+              )}
+            </button>
+
+            <AnimatePresence>
+              {menuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className="absolute top-[52px] right-0 w-[280px] rounded-lg overflow-hidden z-50"
+                  style={{ background: 'rgba(33, 38, 26, 0.96)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(227, 221, 202, 0.14)' }}
+                >
+                  {NAV_SECTIONS.map((section, i) => (
+                    <button
+                      key={section.id}
+                      type="button"
+                      onClick={() => handleNavClick(section.id)}
+                      className="w-full text-left px-5 py-4 transition-colors hover:bg-[#8C001C]/30 flex items-baseline gap-3"
+                      style={{
+                        borderBottom: '1px solid rgba(227, 221, 202, 0.1)',
+                      }}
+                    >
+                      <span className="text-[10px] tracking-[2px] uppercase" style={{ color: 'rgba(227, 221, 202, 0.5)' }}>
+                        {`0${i + 1}`}
+                      </span>
+                      <span className="text-[13px] tracking-[1px] uppercase" style={{ color: '#E3DDCA' }}>
+                        {section.label}
+                      </span>
+                    </button>
+                  ))}
+
+                  {/* Mobile-only CTA — desktop has the Enter Now pill in the header */}
+                  <a
+                    href="https://www.anthemawards.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="md:hidden w-full text-left px-5 py-4 flex items-center justify-between gap-3 transition-colors hover:brightness-110"
+                    style={{ background: '#8C001C' }}
+                  >
+                    <span className="text-[13px] tracking-[1px] uppercase font-medium" style={{ color: '#E3DDCA' }}>
+                      Enter Now
+                    </span>
+                    <span className="text-base" style={{ color: '#E3DDCA' }}>→</span>
+                  </a>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
       </div>
 

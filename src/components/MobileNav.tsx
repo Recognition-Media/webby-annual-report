@@ -215,7 +215,7 @@ export function MobileNav({ active, trendTitles }: MobileNavProps) {
                 fontSize: 11,
                 letterSpacing: 2,
                 textTransform: 'uppercase',
-                color: activeSectionData.color || 'rgba(255,255,255,0.5)',
+                color: '#E3DDCA',
                 fontWeight: 500,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',

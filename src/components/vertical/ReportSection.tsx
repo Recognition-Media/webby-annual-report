@@ -17,7 +17,7 @@ function ScrollGauge({ sentimentGauge, accentColor }: { sentimentGauge: { score:
 
   return (
     <div ref={gaugeRef} className="mb-12 flex flex-col items-center">
-      <div className="relative w-[480px] md:w-[640px]" style={{ aspectRatio: '240/160' }}>
+      <div className="relative w-full max-w-[480px] md:max-w-[640px]" style={{ aspectRatio: '240/160' }}>
         <svg viewBox="0 0 240 160" className="w-full h-full">
           <path
             d="M 20 140 A 100 100 0 0 1 220 140"
@@ -43,12 +43,12 @@ function ScrollGauge({ sentimentGauge, accentColor }: { sentimentGauge: { score:
         </svg>
         <div className="absolute bottom-[15%] left-1/2 -translate-x-1/2 text-center">
           <div
-            className="text-[80px] md:text-[112px] leading-none"
+            className="text-[56px] md:text-[112px] leading-none"
             style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 700 }}
           >
             {sentimentGauge.score}
           </div>
-          <p className="text-[14px] md:text-[16px] mt-11" style={{ color: '#21261A', opacity: 0.5 }}>
+          <p className="text-[12px] md:text-[16px] mt-6 md:mt-11" style={{ color: '#21261A', opacity: 0.5 }}>
             Average Sentiment Score
           </p>
         </div>
@@ -275,7 +275,7 @@ export function TrendContent({
             {body.map((paragraph, i) => (
               <motion.p
                 key={i}
-                className="text-[16px] md:text-[18px] leading-[30px] mb-6"
+                className="text-[15px] md:text-[18px] leading-[1.6] md:leading-[30px] mb-6"
                 style={{
                   fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
                   color: '#21261A',

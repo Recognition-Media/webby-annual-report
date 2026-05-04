@@ -74,8 +74,8 @@ export function QuoteVideoSection({
           {/* Left: quotes with headshots + border-left accent */}
           <div className="md:w-[50%]">
             <motion.p
-              className="mb-6"
-              style={{ fontSize: 36, fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
+              className="mb-6 text-[24px] md:text-[36px]"
+              style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

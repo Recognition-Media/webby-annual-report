@@ -37,7 +37,7 @@ export function IntroLetter({ report }: { report: Report }) {
               src="/anthem/patricia-headshot.png"
               alt={authorName}
               fill
-              className="object-cover object-[center_5%] scale-[1.2]"
+              className="object-cover object-[center_5%] scale-[1.05]"
             />
           </div>
           <p className="font-medium text-[15px] text-[#E3DDCA]">{authorName}</p>
@@ -48,7 +48,7 @@ export function IntroLetter({ report }: { report: Report }) {
         <div className="flex-1">
           {/* Header */}
           <motion.h2
-            className="mb-6 text-[24px] md:text-[32px] leading-[1.2]"
+            className="mb-6 text-[32px] md:text-[32px] leading-[1.2]"
             style={{
               fontFamily: 'var(--font-display)',
               color: '#E3DDCA',
@@ -95,27 +95,6 @@ export function IntroLetter({ report }: { report: Report }) {
               If you{"'"}re reading this report, you probably aren{"'"}t surprised to hear that 2025 wasn{"'"}t a blip. The collapse of USAID, continued federal funding freezes, and the erosion of diversity initiatives have compounded into something that our community is still carrying.
             </motion.p>
 
-            {/* Inline pull quote — breaks the text flow */}
-            <motion.blockquote
-              className="my-6 md:my-9 py-4 border-none"
-              style={{ borderLeft: 'none' }}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <p
-                className="!text-[20px] md:!text-[26px] !leading-[1.3] !mb-0"
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  color: '#D17DD0',
-                  fontStyle: 'italic',
-                }}
-              >
-                We{"'"}ve seen something that no policy can easily dismantle: people showing up. From No Kings Day to the Flotilla, and the fight for our neighbors and friends in Minneapolis, collective action is alive, and it is loud.
-              </p>
-            </motion.blockquote>
-
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -124,6 +103,28 @@ export function IntroLetter({ report }: { report: Report }) {
             >
               But we are also seeing renewed investment in grassroots organizing, in new tools and strategies, in cross-sector collaboration, and in the art of telling stories that change perspectives.
             </motion.p>
+
+            {/* Inline pull quote — breaks the text flow */}
+            <motion.blockquote
+              className="mb-5 mt-0 py-0 border-none not-italic"
+              style={{ borderLeft: 'none', fontStyle: 'normal' }}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <p
+                className="!text-[16px] !leading-[1.5] !mb-0 not-italic"
+                style={{
+                  fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                  color: '#D17DD0',
+                  fontWeight: 700,
+                  fontStyle: 'normal',
+                }}
+              >
+                We{"'"}ve seen something that no policy can easily dismantle: people showing up. From No Kings Day to the Flotilla, and the fight for our neighbors and friends in Minneapolis, collective action is alive, and it is loud.
+              </p>
+            </motion.blockquote>
 
             <motion.p
               initial={{ opacity: 0, y: 10 }}

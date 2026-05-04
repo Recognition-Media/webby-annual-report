@@ -43,8 +43,8 @@ export function TabbedPriorities({
         )}
 
         <motion.p
-          className="mb-10 text-center"
-          style={{ fontFamily: 'var(--font-display)', fontSize: 36, color: '#21261A' }}
+          className="mb-10 text-center text-[24px] md:text-[36px]"
+          style={{ fontFamily: 'var(--font-display)', lineHeight: 1.2, color: '#21261A' }}
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -66,7 +66,7 @@ export function TabbedPriorities({
               transition={{ duration: 0.6, delay: 0.2 + i * 0.15, ease: 'easeOut' }}
             >
               <span
-                className="text-[9px] md:text-[11px] font-semibold text-center leading-tight"
+                className="text-[12px] font-semibold text-center leading-tight"
                 style={{ color: '#E3DDCA' }}
               >
                 {item.priority}
@@ -86,10 +86,10 @@ export function TabbedPriorities({
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.5 + i * 0.1 }}
             >
-              <p className="text-[10px] md:text-[11px] mb-1" style={{ color: '#21261A', opacity: 0.4 }}>
-                {item.count} of {item.total} causes
+              <p className="text-[11px] mb-1" style={{ color: '#21261A', opacity: 0.4 }}>
+                {item.count} of {item.total}
               </p>
-              <p className="text-[9px] md:text-[10px] leading-[1.5]" style={{ color: '#21261A', opacity: 0.5 }}>
+              <p className="text-[11px] leading-[1.5]" style={{ color: '#21261A', opacity: 0.5 }}>
                 {item.causes}
               </p>
             </motion.div>
