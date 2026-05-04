@@ -62,7 +62,7 @@ export function Credits({ report }: { report?: Report } = {}) {
       <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         {/* Section heading */}
         <motion.h2
-          className="text-center text-[36px] md:text-[56px] leading-[1.1] mb-16 md:mb-20"
+          className="text-center text-[32px] md:text-[56px] leading-[1.1] mb-16 md:mb-20"
           style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 400 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}

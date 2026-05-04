@@ -66,7 +66,7 @@ export function SurveyDemographics() {
 
         {/* Heading */}
         <motion.h2
-          className="text-[28px] md:text-[40px] leading-[1.15] mb-12 text-center"
+          className="text-[32px] md:text-[40px] leading-[1.15] mb-12 text-center"
           style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}

@@ -92,10 +92,10 @@ export function KeyFindings({ findings }: KeyFindingsProps = {}) {
           <img
             src="/anthem/CAUSE_EDUCATION.svg"
             alt=""
-            className="w-[60px] h-[60px] md:w-[100px] md:h-[100px] absolute"
-            style={{ transform: 'rotate(-12deg)', top: '-0.15em', left: 'calc(50% - 4.2em + 10px)' }}
+            className="w-[60px] h-[60px] md:w-[100px] md:h-[100px] absolute left-[8%] md:left-[calc(50%_-_5.2em_+_10px)]"
+            style={{ transform: 'rotate(-12deg)', top: '-0.15em' }}
           />
-          Key Findings
+          Inside The Report
         </motion.h2>
 
         <motion.p
@@ -106,52 +106,55 @@ export function KeyFindings({ findings }: KeyFindingsProps = {}) {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          What the numbers say about where social impact stands in 2026.
+          A look at how the social impact sector is responding in 2026.
         </motion.p>
 
         {/* 2x2 Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 max-w-[800px] mx-auto">
-          {sections.map((section, i) => (
-            <motion.div
-              key={section.number}
-              role="button"
-              tabIndex={0}
-              onClick={() => scrollToAnchor(section.anchor)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  scrollToAnchor(section.anchor)
-                }
-              }}
-              className="p-6 md:p-10 rounded-lg cursor-pointer min-h-[180px] md:min-h-[210px] flex flex-col justify-center transition-colors duration-300"
-              style={{ background: hoveredIndex === i ? section.hoverBg : '#d5cfbc' }}
-              onMouseEnter={() => setHoveredIndex(i)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
-            >
-              <div
-                className="text-[36px] md:text-[48px] leading-none mb-3 transition-colors duration-300"
-                style={{ fontFamily: 'var(--font-display)', color: hoveredIndex === i ? '#E3DDCA' : section.color, fontWeight: 700 }}
+          {sections.map((section, i) => {
+            const isHovered = hoveredIndex === i
+            return (
+              <motion.div
+                key={section.number}
+                role="button"
+                tabIndex={0}
+                onClick={() => scrollToAnchor(section.anchor)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    scrollToAnchor(section.anchor)
+                  }
+                }}
+                className="p-5 md:p-10 rounded-lg cursor-pointer min-h-[140px] md:min-h-[210px] flex flex-col justify-center transition-colors duration-300"
+                style={{ background: isHovered ? section.hoverBg : '#d5cfbc' }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
               >
-                {section.number}
-              </div>
-              <h3
-                className="text-[16px] md:text-[18px] font-medium mb-2 leading-tight transition-colors duration-300"
-                style={{ color: hoveredIndex === i ? '#E3DDCA' : '#21261A' }}
-              >
-                {section.title}
-              </h3>
-              <p
-                className="text-[12px] md:text-[13px] transition-colors duration-300"
-                style={{ color: hoveredIndex === i ? '#E3DDCA' : '#21261A', opacity: hoveredIndex === i ? 0.7 : 0.55 }}
-              >
-                {section.description}
-              </p>
-            </motion.div>
-          ))}
+                <div
+                  className="text-[32px] md:text-[48px] leading-none mb-2 md:mb-3 transition-colors duration-300"
+                  style={{ fontFamily: 'var(--font-display)', color: isHovered ? '#E3DDCA' : section.hoverBg, fontWeight: 700 }}
+                >
+                  {section.number}
+                </div>
+                <h3
+                  className="text-[15px] md:text-[18px] font-medium mb-2 leading-tight transition-colors duration-300"
+                  style={{ color: isHovered ? '#E3DDCA' : '#21261A' }}
+                >
+                  {section.title}
+                </h3>
+                <p
+                  className="text-[12px] md:text-[13px] transition-colors duration-300"
+                  style={{ color: isHovered ? '#E3DDCA' : '#21261A', opacity: isHovered ? 0.7 : 0.55 }}
+                >
+                  {section.description}
+                </p>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </section>

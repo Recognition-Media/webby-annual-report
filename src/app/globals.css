@@ -211,6 +211,14 @@ html.snap-active section[data-snap] {
   * {
     cursor: auto !important;
   }
+
+  /* Prevent horizontal scroll — content overflowing the viewport on mobile
+     is almost always a layout bug we want to clip rather than enable
+     side-scrolling for. */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
 }
 
 /* =========================================================================

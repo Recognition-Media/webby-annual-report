@@ -47,42 +47,71 @@ export function PairedBarChart({
       )}
 
       {/* Bars */}
-      <div className="flex items-end justify-center gap-3 md:gap-4" style={{ height: 420, paddingBottom: 28, position: 'relative' }}>
+      <div className={`flex items-end justify-center ${singleYear ? 'gap-[4px]' : 'gap-[8px]'} md:gap-4`} style={{ height: 420, paddingBottom: 28, position: 'relative' }}>
         {/* Baseline */}
         <div style={{ position: 'absolute', bottom: 26, left: 0, right: 0, height: 1, background: 'rgba(33,38,26,0.1)' }} />
 
-        {data.map((item, i) => (
-          <div key={i} className="flex gap-[3px] items-end">
-            {/* 2025 bar — only rendered when comparing years */}
-            {!singleYear && (
-              item.value2025 !== null ? (
+        {data.map((item, i) => {
+          const delay2025 = 0.05 + i * 0.03
+          const delay2026 = (singleYear ? 0.1 : 0.7) + i * 0.03
+          return (
+            <div key={i} className="flex gap-[3px] items-end">
+              {/* 2025 bar — only rendered when comparing years */}
+              {!singleYear && (
+                item.value2025 !== null ? (
+                  <div className="flex flex-col items-center w-[19px] md:w-[36px]">
+                    <motion.span
+                      className="text-[10px] md:text-[12px] tabular-nums leading-none"
+                      style={{ color: '#21261A', opacity: 0.55, fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: 4 }}
+                      initial={{ opacity: 0 }}
+                      animate={isInView ? { opacity: 0.55 } : { opacity: 0 }}
+                      transition={{ duration: 0.3, delay: delay2025 + 0.4 }}
+                    >
+                      {Math.round(item.value2025)}%
+                    </motion.span>
+                    <motion.div
+                      className="rounded-t-[3px] w-full"
+                      style={{ background: `${accentColor}40` }}
+                      initial={{ height: 0 }}
+                      animate={isInView ? { height: barHeight(item.value2025) } : { height: 0 }}
+                      transition={{ duration: 0.4, delay: delay2025, ease: 'easeOut' }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-[19px] md:w-[36px]" />
+                )
+              )}
+              {/* 2026 bar — grows after 1s pause when paired, immediately in single-year mode */}
+              <div className={`flex flex-col items-center ${singleYear ? 'w-[38px] md:w-[36px]' : 'w-[19px] md:w-[36px]'}`}>
+                <motion.span
+                  className="text-[10px] md:text-[12px] tabular-nums leading-none"
+                  style={{ color: '#21261A', fontFamily: 'var(--font-display)', fontWeight: 700, marginBottom: 4 }}
+                  initial={{ opacity: 0 }}
+                  animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+                  transition={{ duration: 0.3, delay: delay2026 + 0.5 }}
+                >
+                  {Math.round(item.value2026)}%
+                </motion.span>
                 <motion.div
-                  className="rounded-t-[3px]"
-                  style={{ width: 36, background: `${accentColor}40` }}
+                  className={`rounded-t-[3px] ${singleYear ? 'w-[19px] md:w-full' : 'w-full'}`}
+                  style={{ background: accentColor }}
                   initial={{ height: 0 }}
-                  animate={isInView ? { height: barHeight(item.value2025) } : { height: 0 }}
-                  transition={{ duration: 0.4, delay: 0.05 + i * 0.03, ease: 'easeOut' }}
+                  animate={isInView ? { height: barHeight(item.value2026) } : { height: 0 }}
+                  transition={{ duration: 0.5, delay: delay2026, ease: 'easeOut' }}
                 />
-              ) : (
-                <div style={{ width: 36 }} />
-              )
-            )}
-            {/* 2026 bar — grows after 1s pause when paired, immediately in single-year mode */}
-            <motion.div
-              className="rounded-t-[3px]"
-              style={{ width: 36, background: accentColor }}
-              initial={{ height: 0 }}
-              animate={isInView ? { height: barHeight(item.value2026) } : { height: 0 }}
-              transition={{ duration: 0.5, delay: (singleYear ? 0.1 : 0.7) + i * 0.03, ease: 'easeOut' }}
-            />
-          </div>
-        ))}
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {/* Labels */}
-      <div className="flex justify-center gap-3 md:gap-4">
+      <div className={`flex justify-center ${singleYear ? 'gap-[4px]' : 'gap-[8px]'} md:gap-4`}>
         {data.map((item, i) => (
-          <div key={i} className="text-center" style={{ width: singleYear ? 36 : 75 }}>
+          <div
+            key={i}
+            className={`text-center ${singleYear ? 'w-[38px] md:w-[36px]' : 'w-[41px] md:w-[75px]'}`}
+          >
             <p className="text-[9px] leading-tight" style={{ color: '#21261A', opacity: 0.6, whiteSpace: 'pre-line' }}>
               {item.shortLabel}
             </p>

@@ -67,7 +67,7 @@ export function Takeaways({
           5 Key Takeaways
         </motion.p>
         <motion.h2
-          className="text-center mb-12 text-[28px] md:text-[40px] leading-[1.15]"
+          className="text-center mb-12 text-[32px] md:text-[40px] leading-[1.15]"
           style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}

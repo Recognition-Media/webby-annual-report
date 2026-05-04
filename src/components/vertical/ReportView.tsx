@@ -180,6 +180,23 @@ export function ReportView({ report }: { report: Report }) {
     }
   }, [cookieKey, report.signupGateEnabled])
 
+  // Optional target anchor (e.g. "section-02") set when the user picks an item
+  // from the hero nav menu — after the signup gate completes we scroll there
+  // instead of the report top.
+  const [scrollTarget, setScrollTarget] = useState<string | null>(null)
+
+  function scrollToTargetOrReport() {
+    if (scrollTarget) {
+      const el = document.getElementById(scrollTarget)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        setScrollTarget(null)
+        return
+      }
+    }
+    reportRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   // Once access is granted, scroll to report and hide hero — but only for
   // returning visitors who already have the cookie. When the signup gate is
   // disabled in the CMS, hasAccess is also true from mount, but we want
@@ -189,16 +206,29 @@ export function ReportView({ report }: { report: Report }) {
     if (report.signupGateEnabled === false) return
     // Small delay to let report content render
     setTimeout(() => {
-      reportRef.current?.scrollIntoView({ behavior: 'smooth' })
+      scrollToTargetOrReport()
       // After scroll animation completes, hide the hero
       setTimeout(() => setEntered(true), 800)
     }, 100)
   }, [hasAccess])
 
-  function handleSeeReport() {
+  function handleSeeReport(anchor?: string) {
+    if (anchor) setScrollTarget(anchor)
     if (hasAccess) {
-      reportRef.current?.scrollIntoView({ behavior: 'smooth' })
-      setTimeout(() => setEntered(true), 800)
+      // Same delay so that, on the first click after entry, the section has
+      // a frame to mount before we try scrolling to it.
+      setTimeout(() => {
+        if (anchor) {
+          const el = document.getElementById(anchor)
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            setTimeout(() => setEntered(true), 800)
+            return
+          }
+        }
+        reportRef.current?.scrollIntoView({ behavior: 'smooth' })
+        setTimeout(() => setEntered(true), 800)
+      }, 50)
     } else {
       setShowGate(true)
     }
@@ -369,13 +399,13 @@ export function ReportView({ report }: { report: Report }) {
               eyebrow="Top Challenge By Cause Area"
               title="Where the Pressure Hits Hardest"
               data={[
-                { cause: 'Technology', challenge: 'Cultural/Political Shifts', percentage: 100, respondents: 4, totalRespondents: 4, color: '#21261A' },
+                { cause: 'Technology', challenge: 'Cultural Shifts', percentage: 100, respondents: 4, totalRespondents: 4, color: '#21261A' },
                 { cause: 'Humanitarian Action', challenge: 'Gov Funding', percentage: 89, respondents: 8, totalRespondents: 9, color: '#066DBA' },
-                { cause: 'Sustainability & Climate', challenge: 'Cultural/Political Shifts', percentage: 86, respondents: 12, totalRespondents: 14, color: '#00B469' },
-                { cause: 'Belonging & Inclusion', challenge: 'Gov Funding', percentage: 71, respondents: 10, totalRespondents: 14, color: '#D17DD0' },
+                { cause: 'Sustainability & Climate', challenge: 'Cultural Shifts', percentage: 86, respondents: 12, totalRespondents: 14, color: '#00B469' },
+                { cause: 'Belonging & Inclusion', challenge: 'Gov Funding & Cultural Shifts', percentage: 71, respondents: 10, totalRespondents: 14, color: '#D17DD0' },
                 { cause: 'Human & Civil Rights', challenge: 'Public Perception', percentage: 65, respondents: 11, totalRespondents: 17, color: '#8C001C' },
                 { cause: 'Education & Culture', challenge: 'Private & Gov Funding', percentage: 62, respondents: 13, totalRespondents: 21, color: '#8C001C' },
-                { cause: 'Health', challenge: '4-way tie', percentage: 50, respondents: 4, totalRespondents: 8, color: '#21261A' },
+                { cause: 'Health', challenge: 'Gov Funding & Cultural Shifts', percentage: 50, respondents: 4, totalRespondents: 8, color: '#21261A' },
               ]}
             />
 
@@ -551,8 +581,8 @@ export function ReportView({ report }: { report: Report }) {
               title="What Each Cause Is Prioritizing"
               accentColor="#00B469"
               data={[
-                { count: 5, total: 7, priority: 'Brand Awareness & Storytelling', causes: 'Belonging & Inclusion · Education · Health · Sustainability · Technology (#2)', color: '#00B469' },
-                { count: 3, total: 7, priority: 'Community Engagement & Collaboration', causes: 'Human & Civil Rights · Humanitarian · Education (#2)', color: '#066DBA' },
+                { count: 4, total: 7, priority: 'Brand Awareness & Storytelling', causes: 'Belonging & Inclusion · Education · Health · Sustainability', color: '#00B469' },
+                { count: 2, total: 7, priority: 'Community Engagement & Collaboration', causes: 'Human & Civil Rights · Humanitarian', color: '#066DBA' },
                 { count: 1, total: 7, priority: 'Technology Adoption & Innovation', causes: 'Technology', color: '#8C001C' },
               ]}
             />
@@ -567,16 +597,16 @@ export function ReportView({ report }: { report: Report }) {
               accentColor="#00B469"
               dataModule={{
                 eyebrow: '',
-                question: '"What do you see as the top emerging opportunities in your work?" Select all that apply.',
+                question: '"What Do You See as the Top Emerging Opportunities in Your Work?" Select All That Apply.',
                 bars: [
-                  { label: 'AI-powered workflows and tools', value: 59, displayValue: '59%', color: '#066DBA' },
-                  { label: 'Cross-sector collaboration and resource pooling', value: 51, displayValue: '51%', color: '#00B469' },
-                  { label: 'Short-form content and digital storytelling', value: 49, displayValue: '49%', color: '#D17DD0' },
-                  { label: 'Increased community-led and grassroots organizing', value: 47, displayValue: '47%', color: '#00B469' },
-                  { label: 'Renewed public engagement and advocacy', value: 34, displayValue: '34%', color: '#8C001C' },
-                  { label: 'Growth in private and philanthropic funding', value: 26, displayValue: '26%', color: '#066DBA' },
-                  { label: 'Refined and effective impact measurement', value: 19, displayValue: '19%', color: '#D17DD0' },
-                  { label: 'Other (please specify)', value: 8, displayValue: '8%', color: '#21261A' },
+                  { label: 'AI-Powered Workflows and Tools', value: 59, displayValue: '59%', color: '#066DBA' },
+                  { label: 'Cross-Sector Collaboration and Resource Pooling', value: 51, displayValue: '51%', color: '#00B469' },
+                  { label: 'Short-Form Content and Digital Storytelling', value: 49, displayValue: '49%', color: '#D17DD0' },
+                  { label: 'Increased Community-Led and Grassroots Organizing', value: 47, displayValue: '47%', color: '#00B469' },
+                  { label: 'Renewed Public Engagement and Advocacy', value: 34, displayValue: '34%', color: '#8C001C' },
+                  { label: 'Growth in Private and Philanthropic Funding', value: 26, displayValue: '26%', color: '#066DBA' },
+                  { label: 'Refined and Effective Impact Measurement', value: 19, displayValue: '19%', color: '#D17DD0' },
+                  { label: 'Other', value: 8, displayValue: '8%', color: '#21261A' },
                 ],
               }}
             />
@@ -613,7 +643,7 @@ export function ReportView({ report }: { report: Report }) {
               customRightColumn={
                 <PairedBarChart
                   title=""
-                  question={'Where Organizations Are Investing in 2026'}
+                  question={'Where Organizations Make Their Stories Heard'}
                   accentColor="#00B469"
                   data={[
                     { label: 'Written content and editorial', shortLabel: 'Written', value2025: null, value2026: 77 },
@@ -664,13 +694,13 @@ export function ReportView({ report }: { report: Report }) {
               customRightColumn={
                 <div>
                   <h4 className="leading-[1.4] mb-8 w-full" style={{ fontSize: 16, fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}>
-                    Where the for-profit / agency vs. nonprofit AI adoption gap is widest.
+                    Where The For-Profit / Agency Vs. Nonprofit AI Adoption Gap Is Widest
                   </h4>
                   {[
-                    { useCase: 'Workflow automation', forProfit: 35, nonprofit: 16 },
-                    { useCase: 'Audience segmentation & personalization', forProfit: 19, nonprofit: 3 },
-                    { useCase: 'Accessibility tools', forProfit: 17, nonprofit: 6 },
-                    { useCase: 'Data analysis', forProfit: 23, nonprofit: 16 },
+                    { useCase: 'Workflow Automation', forProfit: 35, nonprofit: 16 },
+                    { useCase: 'Audience Segmentation & Personalization', forProfit: 19, nonprofit: 3 },
+                    { useCase: 'Accessibility Tools', forProfit: 17, nonprofit: 6 },
+                    { useCase: 'Data Analysis', forProfit: 23, nonprofit: 16 },
                   ].map((row, i) => (
                     <div key={i} className="mb-6">
                       <span className="text-[14px] md:text-[15px] font-medium block mb-2" style={{ color: '#21261A' }}>{row.useCase}</span>
@@ -678,22 +708,18 @@ export function ReportView({ report }: { report: Report }) {
                       {/* Two floating bars sized to percentage */}
                       <div className="flex gap-1.5" style={{ height: 56 }}>
                         <div
-                          className="rounded-md flex items-center justify-center px-3"
+                          className="rounded-md flex items-center justify-center px-3 relative"
                           style={{ flex: row.forProfit, background: '#00B469', minWidth: 70 }}
                         >
-                          <div className="text-center">
-                            <div className="text-[9px] uppercase tracking-[1.5px] font-medium" style={{ color: '#E3DDCA', opacity: 0.85 }}>For-profit</div>
-                            <div className="text-[18px] leading-none mt-[2px] md:mt-[1px]" style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 700 }}>{row.forProfit}%</div>
-                          </div>
+                          <div className="text-[9px] uppercase tracking-[1.5px] font-medium absolute top-1 left-0 right-0 text-center" style={{ color: '#E3DDCA', opacity: 0.85 }}>For-profit</div>
+                          <div className="text-[18px] leading-none" style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 700, marginTop: 4 }}>{row.forProfit}%</div>
                         </div>
                         <div
-                          className="rounded-md flex items-center justify-center px-3"
+                          className="rounded-md flex items-center justify-center px-3 relative"
                           style={{ flex: row.nonprofit, background: '#21261A', minWidth: 70 }}
                         >
-                          <div className="text-center">
-                            <div className="text-[9px] uppercase tracking-[1.5px] font-medium" style={{ color: '#E3DDCA', opacity: 0.85 }}>Nonprofit</div>
-                            <div className="text-[18px] leading-none mt-[2px] md:mt-[1px]" style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 700 }}>{row.nonprofit}%</div>
-                          </div>
+                          <div className="text-[9px] uppercase tracking-[1.5px] font-medium absolute top-1 left-0 right-0 text-center" style={{ color: '#E3DDCA', opacity: 0.85 }}>Nonprofit</div>
+                          <div className="text-[18px] leading-none" style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 700, marginTop: 4 }}>{row.nonprofit}%</div>
                         </div>
                       </div>
                     </div>

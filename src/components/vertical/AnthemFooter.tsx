@@ -53,7 +53,7 @@ const portableTextComponents = {
   block: {
     normal: ({ children }: { children?: React.ReactNode }) => (
       <p
-        className="text-[18px] leading-[1.7] mb-5 text-center"
+        className="text-[15px] md:text-[18px] leading-[1.7] mb-5 text-center"
         style={{
           fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
           color: '#E3DDCA',
@@ -91,6 +91,7 @@ type FooterSticker = {
   size: number
   rotate: number
   float: { y: [number, number]; duration: number }
+  hideMobile?: boolean
 }
 
 // Mirror the HeroSection's cause-icon scatter so the report opens and closes
@@ -98,12 +99,12 @@ type FooterSticker = {
 // the edges, draggable, gently bobbing.
 const FOOTER_STICKERS: FooterSticker[] = [
   // Left edge
-  { src: '/anthem/CAUSE_HEALTH.svg', top: '8%', left: '3%', size: 140, rotate: -8, float: { y: [-14, 14], duration: 3.6 } },
-  { src: '/anthem/CAUSE_DIVERSITY.svg', top: '38%', left: '5%', size: 120, rotate: 10, float: { y: [-10, 10], duration: 4.4 } },
+  { src: '/anthem/CAUSE_HEALTH.svg', top: '3%', left: '3%', size: 140, rotate: -8, float: { y: [-14, 14], duration: 3.6 } },
+  { src: '/anthem/CAUSE_DIVERSITY.svg', top: '38%', left: '5%', size: 120, rotate: 10, float: { y: [-10, 10], duration: 4.4 }, hideMobile: true },
   { src: '/anthem/CAUSE_EDUCATION.svg', bottom: '14%', left: '4%', size: 130, rotate: -12, float: { y: [-16, 16], duration: 4 } },
   // Right edge
-  { src: '/anthem/anthem-sticker.svg', top: '6%', right: '3%', size: 150, rotate: 6, float: { y: [-13, 13], duration: 3.8 } },
-  { src: '/anthem/CAUSE_HUMANRIGHTS.svg', top: '34%', right: '4%', size: 124, rotate: 14, float: { y: [-15, 15], duration: 4.6 } },
+  { src: '/anthem/anthem-sticker.svg', top: '4%', right: '3%', size: 150, rotate: 6, float: { y: [-13, 13], duration: 3.8 } },
+  { src: '/anthem/CAUSE_HUMANRIGHTS.svg', top: '34%', right: '4%', size: 124, rotate: 14, float: { y: [-15, 15], duration: 4.6 }, hideMobile: true },
   { src: '/anthem/CAUSE_TECHNOLOGY.svg', bottom: '18%', right: '5%', size: 138, rotate: -10, float: { y: [-12, 12], duration: 4.2 } },
   // Bottom-center accent
   { src: '/anthem/CAUSE_SUSTAINABILITY.svg', bottom: '4%', right: '32%', size: 116, rotate: 4, float: { y: [-11, 11], duration: 4.8 } },
@@ -116,7 +117,7 @@ function DraggableSticker({ sticker, index }: { sticker: FooterSticker; index: n
 
   return (
     <motion.div
-      className="absolute z-10 cursor-grab active:cursor-grabbing pointer-events-auto"
+      className={`absolute z-10 cursor-grab active:cursor-grabbing pointer-events-auto ${sticker.hideMobile ? 'hidden md:block' : ''}`}
       style={{
         width: sizeClamp,
         height: sizeClamp,
@@ -195,7 +196,7 @@ export function AnthemFooter({ report }: { report: Report }) {
         </motion.p>
 
         <motion.h2
-          className="mb-12 text-center text-[36px] md:text-[56px] lg:text-[64px] leading-[1.05] pointer-events-auto whitespace-nowrap"
+          className="mb-12 text-center text-[32px] md:text-[56px] lg:text-[64px] leading-[1.05] pointer-events-auto md:whitespace-nowrap"
           style={{
             fontFamily: 'var(--font-display)',
             color: '#E3DDCA',
@@ -220,7 +221,7 @@ export function AnthemFooter({ report }: { report: Report }) {
 
           {/* Italic subhead */}
           <motion.p
-            className="text-[16px] md:text-[18px] leading-[1.5] mb-10 text-center"
+            className="text-[15px] md:text-[18px] leading-[1.5] mb-10 text-center"
             style={{
               fontFamily: 'var(--font-display)',
               color: '#E3DDCA',
