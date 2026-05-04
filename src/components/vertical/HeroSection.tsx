@@ -204,7 +204,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
 
         {/* Explore button */}
         <motion.button
-          onClick={onSeeReport}
+          onClick={() => onSeeReport?.()}
           className="inline-flex items-center gap-3 bg-[#8C001C] text-[#E3DDCA] uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full hover:bg-[#a50022] transition-colors cursor-pointer pointer-events-auto"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
