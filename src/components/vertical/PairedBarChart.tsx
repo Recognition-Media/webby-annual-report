@@ -110,7 +110,9 @@ export function PairedBarChart({
         {data.map((item, i) => (
           <div
             key={i}
-            className={`text-center ${singleYear ? 'w-[38px] md:w-[36px]' : 'w-[41px] md:w-[75px]'}`}
+            className={`text-center ${singleYear ? 'w-[38px] md:w-[36px]' : 'w-[41px] md:w-[75px]'} ${
+              !singleYear && item.value2025 === null ? 'pl-[22px] md:pl-[39px]' : ''
+            }`}
           >
             <p className="text-[9px] leading-tight" style={{ color: '#21261A', opacity: 0.6, whiteSpace: 'pre-line' }}>
               {item.shortLabel}
