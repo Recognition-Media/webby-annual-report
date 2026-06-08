@@ -2,14 +2,15 @@
 
 import { useEffect } from 'react'
 
-// Maps hostname → per-property landing route. The landing route at /webby
-// or /anthem then redirects to that property's latest live report.
+// Maps hostname → per-property landing route. The landing route at /webby,
+// /anthem, or /lovie then redirects to that property's latest live report.
 // Unknown hosts (localhost, raw cloudfront domain, future subdomains) fall
 // through to /anthem since it's the most recent. Update HOST_TO_PROPERTY
 // if a new branded subdomain is added.
 const HOST_TO_PROPERTY: Record<string, string> = {
   'reports.webbyawards.com': '/webby',
   'reports.anthemawards.com': '/anthem',
+  'reports.lovieawards.com': '/lovie',
 }
 
 export default function HomePage() {
