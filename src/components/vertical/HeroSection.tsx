@@ -66,7 +66,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         logoAlt: 'The Lovie Awards x Creative Hubs',
         // Lovie lockup is ~3x wider than tall — keep height the same so the
         // wider mark doesn't crowd the menu button.
-        logoClassName: 'h-[40px] md:h-[56px] lg:h-[68px] w-auto',
+        logoClassName: 'h-[44px] md:h-[62px] lg:h-[75px] w-auto',
         ctaUrl: 'https://www.lovieawards.com/',
         ctaBgClass: 'bg-[#ff6000] hover:bg-[#cc4d00]',
         ctaTextColorClass: 'text-white',

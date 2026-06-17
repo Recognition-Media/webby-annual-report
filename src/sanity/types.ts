@@ -61,6 +61,14 @@ export interface TrendVideo {
   description?: string
 }
 
+export interface InsideTheHubs {
+  eyebrow?: string
+  heading?: string
+  spainCopy?: PortableTextBlock[]
+  italyCopy?: PortableTextBlock[]
+  portugalCopy?: PortableTextBlock[]
+}
+
 export interface TrendSection {
   enabled?: boolean
   trendTitle: string
@@ -75,9 +83,12 @@ export interface TrendSection {
   dataSubheadline?: string
   dataContext?: string
   dataStats?: DataStat[]
+  showInsideTheHubs?: boolean
+  insideTheHubs?: InsideTheHubs
   showQuotes?: boolean
   expertQuotes?: ExpertQuote[]
   showVideo?: boolean
+  videoFeatureLabel?: string
   trendVideo?: TrendVideo
   videoType?: 'local' | 'youtube'
   videoUrl?: string

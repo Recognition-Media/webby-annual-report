@@ -283,12 +283,16 @@ body.anthem-template {
 :root {
   --lovie-lime: #eeffbb;
   --lovie-orange: #ff6000;
-  --lovie-cream: #f3eeed;
+  --lovie-cream: #f2eeed;
   --lovie-black: #000000;
 }
 
 body.lovie-template {
-  background: var(--lovie-lime);
+  /* Default page background is the brand cream/grey. The Opening Letter and
+     Inside-The-Report sections override this to lime (#eeffbb) via their
+     own component styles; everything in between (section covers, trend
+     content, charts, takeaways, etc.) inherits this cream. */
+  background: var(--lovie-cream);
   color: var(--lovie-black);
   font-family: 'Scto Grotesk A', -apple-system, sans-serif;
   --font-sans: 'Scto Grotesk A', -apple-system, sans-serif;
@@ -298,5 +302,12 @@ body.lovie-template {
   --color-primary-green: var(--lovie-orange);
   --color-lime-accent: var(--lovie-lime);
   --color-blue-gradient: var(--lovie-orange);
+  /* Anthem variables are referenced throughout the trend/section components
+     for text + dark backgrounds. Remap them so every Anthem-used cream
+     becomes black (text) and every Anthem-used moss becomes the Lovie cream
+     (background). Section components stay structurally identical but read
+     as light-on-light Lovie instead of light-on-dark Anthem. */
+  --anthem-cream: var(--lovie-black);
+  --anthem-moss: var(--lovie-cream);
 }
 

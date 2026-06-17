@@ -12,6 +12,7 @@ import footerLink from './objects/footerLink'
 import sectionCover from './objects/sectionCover'
 import keyFinding from './objects/keyFinding'
 import creditPerson from './objects/creditPerson'
+import insideTheHubs from './objects/insideTheHubs'
 
 export const schemaTypes = [
   report,
@@ -28,4 +29,5 @@ export const schemaTypes = [
   sectionCover,
   keyFinding,
   creditPerson,
+  insideTheHubs,
 ]

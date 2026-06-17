@@ -17,6 +17,7 @@ import { AnthemFooter } from './AnthemFooter'
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
+import { LovieTrendContent } from './LovieTrendContent'
 import { QuoteVideoSection } from './QuoteVideoSection'
 import { BubbleChart } from './BubbleChart'
 import { PairedBarChart } from './PairedBarChart'
@@ -297,16 +298,79 @@ export function ReportView({ report }: { report: Report }) {
             {/* <IadasSection report={report} /> */}
             <KeyFindings findings={report.keyFindings} property={report.property} />
 
-            {/* Old trends — hidden for Anthem redesign */}
-            {/* Section 1: The State of Social Impact */}
+            {/* Section 1 cover. CMS-driven; Lovie reports get the heart-token
+                SVG and Lovie-aware theming through the `property` prop. */}
             <ReportSectionCover
               sectionNumber={report.section01Cover?.sectionNumber || '01'}
-              title={report.section01Cover?.title || 'The State of Social Impact'}
-              subtitle={report.section01Cover?.subtitle || 'Rollbacks have increased across the sector, but leaders have settled into their new reality, becoming more resilient and strategic in the process.'}
-              copy={report.section01Cover?.copy || 'Last year, we asked the Anthem Awards community how the shifting landscape was impacting their work. This year, we see how the community is adapting.'}
-              accentColor={report.section01Cover?.accentColor || '#8C001C'}
+              title={
+                report.section01Cover?.title ||
+                (report.property === 'lovie'
+                  ? 'Across the Mediterranean'
+                  : 'The State of Social Impact')
+              }
+              subtitle={
+                report.section01Cover?.subtitle ||
+                (report.property === 'lovie'
+                  ? 'Work prioritises depth over volume, and cultural specificity over global reach.'
+                  : 'Rollbacks have increased across the sector, but leaders have settled into their new reality, becoming more resilient and strategic in the process.')
+              }
+              copy={
+                report.section01Cover?.copy ||
+                (report.property === 'lovie'
+                  ? 'Spain, Portugal, and Italy are producing digital work shaped by place, heritage, and a focus on digital infrastructure for both local and global innovation.'
+                  : 'Last year, we asked the Anthem Awards community how the shifting landscape was impacting their work. This year, we see how the community is adapting.')
+              }
+              accentColor={report.section01Cover?.accentColor || (report.property === 'lovie' ? '#ff6000' : '#8C001C')}
+              property={report.property}
+              sectionNumberSvg={report.property === 'lovie' ? '/lovie/no-1.svg' : undefined}
             />
 
+            {report.property === 'lovie' ? (
+              <>
+                {/* Lovie Trend 01 — hardcoded from the PDF draft. Will move to
+                    CMS once Sanity's trendSections[0] is populated with Lovie
+                    content (body, dataStats, insideTheHubs, video). */}
+                <LovieTrendContent
+                  trendNumber="01"
+                  title="A Creative Scene Building Beyond Capital Cities"
+                  accentColor="#ff6000"
+                  body={[
+                    <>The Mediterranean&rsquo;s significant tech and creative work is now being produced in its surrounding cities. Economic pressure, including rising housing costs, stagnant salaries, and youth unemployment, is <strong style={{ fontWeight: 700 }}>redistributing talent outside of Spain, Portugal, and Italy&rsquo;s primary business hubs</strong>.</>,
+                    <>As the creative scene decentralises into secondary cities, such as Bilbao, M&aacute;laga, Porto, and Coimbra, it is producing more distinctive work that merges local traditions with craft and emerging technologies.</>,
+                    <>Decentralisation is still in its early stages; <strong style={{ fontWeight: 700 }}>half of creative leaders in the Mediterranean believe the region&rsquo;s most exciting work is still concentrated in major cities, while others believe it is on the move</strong>.</>,
+                  ]}
+                  dataModule={{
+                    question: 'Where in your country is the most exciting creative work being produced?',
+                    bars: [
+                      { label: 'Predominantly in major cities (Madrid, Lisbon, Milan)', value: 50, displayValue: '50%' },
+                      { label: 'Increasingly from secondary cities and regional hubs', value: 30, displayValue: '30%' },
+                      { label: 'Hard to say', value: 20, displayValue: '20%' },
+                      { label: "It's distributed", value: 0, displayValue: '0%' },
+                    ],
+                  }}
+                  insideTheHubs={{
+                    eyebrow: 'Inside the Hubs',
+                    heading: 'Where the New Creative Hubs Are Emerging',
+                    spainCopy: (
+                      <p>While Barcelona and Madrid remain dominant creative centres, secondary cities are emerging as new ecosystems. Valencia has cultivated a thriving startup scene, with privacy-first cloud software company <strong>Internxt</strong> and <strong>Voicemod</strong>, which scales AI audio tools for creators. A Coru&ntilde;a, Spain&rsquo;s northern port city, houses film production and brand marketing powerhouses <strong>Portocabo</strong> and <strong>Estrella Galicia</strong>, respectively. Bilbao is an art centre, home to the Lovie Award-winning <strong>Fundaci&oacute;n del Museo Guggenheim Bilbao</strong>.</p>
+                    ),
+                    italyCopy: (
+                      <p>This trend is less strong in Italy, yet there are a few signals that Italian innovation is no longer confined to Milan or Rome. <strong>Cubbit</strong>, a Bologna-based encrypted cloud storage provider, is a leader in Italy&rsquo;s tech sector. Lovie Award-winning studios <strong>Mirror</strong> and <strong>Monogrid</strong> are pioneering branded immersive experiences in Florence. Lovie-recognised creative technology and design leader <strong>Sidewave</strong> is crafting new experiences in Northern Italy&rsquo;s Verona.</p>
+                    ),
+                    portugalCopy: (
+                      <p>In the small nation, most creative opportunities remain concentrated in Lisbon. However, its central cities have emerged as new sites. Lovie Award Winner and internationally recognised design studio <strong>B&uuml;rocratik</strong> operates from Porto and Coimbra.</p>
+                    ),
+                  }}
+                  featureMedia={{
+                    url: '/lovie/genesis.mp4',
+                    label: 'Standouts from the Mediterranean',
+                    name: "Inside Mirror's 'Genesis of a Terroir' for Masseto",
+                    title: '2025 Lovie Gold Winner, Craft — Best Installation or Experience',
+                  }}
+                />
+              </>
+            ) : (
+            <>
             <TrendContent
               trendNumber="01"
               title={report.trendSections?.[0]?.trendTitle || 'Rollbacks Have Increased In Every Corner of the Sector in 2026'}
@@ -766,6 +830,8 @@ export function ReportView({ report }: { report: Report }) {
             <Takeaways accentColor={report.section04Cover?.accentColor || '#066DBA'} />
 
             <SurveyDemographics />
+            </>
+            )}
 
             <Credits report={report} />
 
