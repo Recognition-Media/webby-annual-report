@@ -109,12 +109,14 @@ export function KeyFindings({ findings, property }: KeyFindingsProps = {}) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const isLovie = property === 'lovie'
 
-  // Color fork — Anthem uses warm cream + tan; Lovie sits on lime with
-  // cream cards and an Italy heart-sticker as the decorative heading mark.
+  // Color fork — Anthem uses warm cream + tan; Lovie sits on the same
+  // beige body color as the rest of the reading flow so the section
+  // doesn't feel like a separate "module". Cards lift slightly via a
+  // lighter cream so they still register as clickable.
   const theme = isLovie
     ? {
-        sectionBg: '#eeffbb',
-        cardDefaultBg: '#f2eeed',
+        sectionBg: '#f2eeed',
+        cardDefaultBg: '#fffaf3',
         headingIcon: '/lovie/country-italy.svg',
         headingIconRotation: '-8deg',
         subtitle: 'A look at the creative communities and ideas shaping the Mediterranean in 2026.',

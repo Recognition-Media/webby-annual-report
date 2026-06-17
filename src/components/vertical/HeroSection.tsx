@@ -6,6 +6,7 @@ import type { Report, CarouselImage } from '@/sanity/types'
 import Image from 'next/image'
 import { ImageCarousel } from '../ImageCarousel'
 import { urlFor } from '@/sanity/image'
+import { useImageBrightness, type Tone } from '@/lib/useImageBrightness'
 
 const LOCAL_HERO_IMAGES = [
   '/anthem/hero-1.jpg',
@@ -55,6 +56,10 @@ interface HeroSectionProps {
 
 export function HeroSection({ report, carouselImages, onSeeReport }: HeroSectionProps) {
   const [menuOpen, setMenuOpen] = useState(false)
+  // Tone of the current hero bg image — drives text-light vs text-dark on
+  // the section. Defaults to 'light' (white text) which matches the prior
+  // hardcoded behavior; LocalHeroCarousel updates this as images cycle.
+  const [textTone, setTextTone] = useState<Tone>('light')
   const isLovie = report.property === 'lovie'
 
   // Branding fork — every Anthem-specific value has a Lovie counterpart so
@@ -62,7 +67,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
   // hardcoded values; Lovie path swaps in palette, logo, and copy.
   const theme = isLovie
     ? {
-        logoSrc: '/lovie/lovie-logo-lockup-orange-white.svg',
+        logoSrc: '/lovie/lovie-logo-lockup.svg',
         logoAlt: 'The Lovie Awards x Creative Hubs',
         // Lovie lockup is ~3x wider than tall — keep height the same so the
         // wider mark doesn't crowd the menu button.
@@ -70,24 +75,80 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         ctaUrl: 'https://www.lovieawards.com/',
         ctaBgClass: 'bg-[#ff6000] hover:bg-[#cc4d00]',
         ctaTextColorClass: 'text-white',
-        brandLabel: 'By The Lovie Awards',
+        brandLabel: '',
         brandLabelColor: '#ff6000',
-        heroImages: [
-          '/lovie/portrait-mirror-italy.jpg',
-          '/lovie/portrait-havas-portugal.jpg',
-          '/lovie/portrait-ciaopeople-italy.jpg',
-        ],
-        heroCaptions: ['MIRROR. Italy', 'Havas Lisbon & Arena Media. Portugal', 'Ciaopeople. Italy'],
-        heroBgColor: '#21261A',
-        gradientOverlay:
-          'linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.25) 100%)',
-        titleColor: 'var(--anthem-cream)',
-        subtitleColor: '#E3DDCA',
-        // Lovie's title is ~2x the character count of Anthem's, so scale the
-        // font down to keep it on one visual line on common viewports.
-        titleClassName: 'text-[28px] md:text-[48px] lg:text-[64px] leading-[1.05] font-normal mb-3',
-        titleLine1: 'The Lovie Awards x Creative Hubs Series',
-        titleLine2: 'The Mediterranean',
+        // TEST: use the trend-report background PNG as a static hero image
+        // (single-frame "carousel"). Designer wants to evaluate the lime
+        // composition before deciding whether to keep portraits.
+        // v4 — designer's latest: three stickers staggered at top with a
+        // dotted curve, leaving the bottom 60–70% open for title + CTA.
+        heroImages: ['/lovie/trend-report-background-v4.png'],
+        heroCaptions: [] as string[],
+        heroBgColor: '#eeffbb',
+        gradientOverlay: 'none',
+        titleColor: '#000000',
+        subtitleColor: '#000000',
+        // Lovie title — three-line editorial stack, Scto Grotesk A Medium.
+        // Lines 1 & 2 are uppercase brand mark; line 3 (location) is title
+        // case + italic for an editorial accent.
+        titleClassName: 'mb-3',
+        titleStyle: {
+          fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+          // Black against the lime trend-background. If we switch the hero
+          // back to dark portraits, this becomes lime (#eeffbb) again.
+          color: '#000000',
+          fontWeight: 500,
+          fontSize: 'clamp(2.25rem, 6.5vw, 5.5rem)',
+          lineHeight: 1.05,
+          margin: 0,
+          maxWidth: '100%',
+          wordBreak: 'break-word' as const,
+        },
+        // titleLine1/2 unused for Lovie (a custom 3-span structure is rendered
+        // via theme.titleNode instead). Kept blank to preserve the type.
+        titleLine1: '',
+        titleLine2: '',
+        titleNode: (
+          <>
+            <span
+              style={{
+                display: 'block',
+                fontSize: 'clamp(2.25rem, 6.5vw, 5.5rem)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.02em',
+                lineHeight: 1.05,
+                fontWeight: 500,
+              }}
+            >
+              The Lovie Awards
+            </span>
+            <span
+              style={{
+                display: 'block',
+                fontSize: 'clamp(2.25rem, 6.5vw, 5.5rem)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.02em',
+                lineHeight: 1.05,
+                fontWeight: 500,
+                marginTop: 4,
+              }}
+            >
+              Creative Hubs Series
+            </span>
+            <span
+              style={{
+                display: 'block',
+                fontSize: 'clamp(2rem, 4vw, 3rem)',
+                fontStyle: 'italic',
+                lineHeight: 1.2,
+                marginTop: 18,
+                fontWeight: 500,
+              }}
+            >
+              The Mediterranean
+            </span>
+          </>
+        ),
         subtitle: 'Mapping the cities, communities, and ideas shaping Europe’s contributions to the Internet in 2026.',
       }
     : {
@@ -107,8 +168,14 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         titleColor: 'var(--anthem-cream)',
         subtitleColor: '#E3DDCA',
         titleClassName: 'text-[40px] md:text-[78px] lg:text-[100px] leading-[1.0] font-normal mb-3',
+        titleStyle: {
+          fontFamily: 'var(--font-display)',
+          color: 'var(--anthem-cream)',
+          letterSpacing: '-2px',
+        },
         titleLine1: '2026 State of',
         titleLine2: 'Social Impact Report',
+        titleNode: undefined as React.ReactNode,
         subtitle: 'A pulse check with Impact leaders on the pressures and opportunities defining their work in 2026',
       }
 
@@ -117,16 +184,20 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
     onSeeReport?.(anchor)
   }
   return (
-    <section id="hero" className="relative w-full h-screen overflow-hidden">
+    <section id="hero" className={`relative w-full h-screen overflow-hidden ${textTone === 'light' ? 'text-light' : 'text-dark'}`}>
       {/* Full-bleed background carousel */}
       <div className="absolute inset-0">
         {/* CMS carousel images override the local fallback */}
         <LocalHeroCarousel
-          cmsImages={carouselImages}
+          // While testing the lime trend-background hero, ignore CMS
+          // carouselImages for Lovie so the local PNG fallback wins.
+          // Revert to `carouselImages` for both when test is over.
+          cmsImages={isLovie ? undefined : carouselImages}
           localImages={theme.heroImages}
           solidFallbackColor={theme.heroBgColor}
           captions={theme.heroCaptions}
           captionEyebrow={isLovie ? 'Featured' : undefined}
+          onToneChange={setTextTone}
         />
         {/* Gradient overlay — heavier at bottom-left for text legibility
             against dark portrait photos. */}
@@ -170,18 +241,24 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
               type="button"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setMenuOpen((v) => !v)}
-              className="w-11 h-11 rounded-full border border-[#E3DDCA]/30 flex items-center justify-center hover:border-[#E3DDCA]/60 transition-colors cursor-pointer"
+              className="w-11 h-11 rounded-full flex items-center justify-center transition-colors cursor-pointer"
+              style={{
+                // Lovie gets a solid orange border to read against the lime
+                // hero background; Anthem keeps its faint cream border that
+                // reads on the dark moss hero.
+                border: isLovie ? '2px solid #ff6000' : '1px solid rgba(227,221,202,0.3)',
+              }}
             >
               {menuOpen ? (
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <line x1="1" y1="1" x2="13" y2="13" stroke="#E3DDCA" strokeWidth="1.5" />
-                  <line x1="13" y1="1" x2="1" y2="13" stroke="#E3DDCA" strokeWidth="1.5" />
+                  <line x1="1" y1="1" x2="13" y2="13" stroke={isLovie ? '#ff6000' : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="13" y1="1" x2="1" y2="13" stroke={isLovie ? '#ff6000' : '#E3DDCA'} strokeWidth="1.5" />
                 </svg>
               ) : (
                 <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-                  <line x1="0" y1="1" x2="16" y2="1" stroke="#E3DDCA" strokeWidth="1.5" />
-                  <line x1="0" y1="5" x2="16" y2="5" stroke="#E3DDCA" strokeWidth="1.5" />
-                  <line x1="0" y1="9" x2="16" y2="9" stroke="#E3DDCA" strokeWidth="1.5" />
+                  <line x1="0" y1="1" x2="16" y2="1" stroke={isLovie ? '#ff6000' : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="0" y1="5" x2="16" y2="5" stroke={isLovie ? '#ff6000' : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="0" y1="9" x2="16" y2="9" stroke={isLovie ? '#ff6000' : '#E3DDCA'} strokeWidth="1.5" />
                 </svg>
               )}
             </button>
@@ -250,28 +327,38 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-end text-center px-6 md:px-10 pointer-events-none" style={{ paddingBottom: '10vh' }}>
         <motion.h1
           className={theme.titleClassName}
-          style={{ fontFamily: 'var(--font-display)', color: theme.titleColor, letterSpacing: '-2px' }}
+          style={theme.titleStyle}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.3 }}
         >
-          {theme.titleLine1}<br />{theme.titleLine2}
+          {theme.titleNode ?? <>{theme.titleLine1}<br />{theme.titleLine2}</>}
         </motion.h1>
 
-        <motion.p
-          className="text-[10px] md:text-[11px] tracking-[4px] uppercase mb-6"
-          style={{ color: theme.brandLabelColor }}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-        >
-          {theme.brandLabel}
-        </motion.p>
+        {/* Brand label (e.g. "By The Anthem Awards"). Skipped when the
+            label is empty — Lovie's title already names the brand, so a
+            label here would be redundant. */}
+        {theme.brandLabel && (
+          <motion.p
+            className="text-[10px] md:text-[11px] tracking-[4px] uppercase mb-6"
+            style={{ color: theme.brandLabelColor }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            {theme.brandLabel}
+          </motion.p>
+        )}
 
-        {/* Subtitle */}
+        {/* Subtitle — inherits color from the section's text-light/text-dark
+            tone class so it adapts to whatever's behind it. */}
         <motion.p
-          className="text-[13px] md:text-[15px] tracking-[0.5px] mb-8 max-w-[500px]"
-          style={{ color: theme.subtitleColor }}
+          className="tracking-[0.5px] mb-8"
+          style={{
+            fontSize: 'clamp(1rem, 1.5vw, 1.25rem)',
+            maxWidth: 600,
+            lineHeight: 1.45,
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.55 }}
@@ -410,18 +497,31 @@ function LocalHeroCarousel({
   solidFallbackColor,
   captions,
   captionEyebrow,
+  onToneChange,
 }: {
   cmsImages?: CarouselImage[]
   localImages?: string[]
   solidFallbackColor?: string
   captions?: string[]
   captionEyebrow?: string
+  /** Fired whenever the current image's average brightness changes the
+   * recommended text tone. Parent uses it to swap text-light / text-dark
+   * on the hero section. */
+  onToneChange?: (tone: Tone) => void
 }) {
   const [current, setCurrent] = useState(0)
 
   const images: string[] = cmsImages && cmsImages.length > 0
     ? cmsImages.map((c) => urlFor(c.image).width(2400).url())
     : localImages ?? []
+
+  // Compute the tone of the currently visible image and let the parent
+  // section know so it can apply text-light / text-dark.
+  const currentSrc = images[current]
+  const tone = useImageBrightness(currentSrc)
+  useEffect(() => {
+    onToneChange?.(tone)
+  }, [tone, onToneChange])
 
   useEffect(() => {
     if (images.length === 0) return
@@ -454,12 +554,13 @@ function LocalHeroCarousel({
         />
       </div>
 
-      {/* Photo credit overlay — fades in/out as the carousel cycles. Lives
-          above the gradient overlay (z-20) so it's always readable. */}
+      {/* Photo credit overlay — fades in/out as the carousel cycles. Color
+          inherits from the section's text-light / text-dark tone class so
+          it adapts to whatever's behind it. */}
       {currentCaption && (
-        <div className="absolute left-5 md:left-10 bottom-10 md:bottom-12 z-20 pointer-events-none">
+        <div className="absolute left-5 md:left-10 bottom-10 md:bottom-12 z-20 pointer-events-none" style={{ opacity: 0.85 }}>
           {captionEyebrow && (
-            <p className="text-[10px] uppercase tracking-[3px] text-[#E3DDCA]/70 mb-1.5">
+            <p className="text-[10px] uppercase tracking-[3px] mb-1.5" style={{ opacity: 0.8 }}>
               {captionEyebrow}
             </p>
           )}
@@ -470,7 +571,7 @@ function LocalHeroCarousel({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.4 }}
-              className="text-[14px] md:text-[18px] text-[#E3DDCA] font-medium"
+              className="text-[14px] md:text-[18px] font-medium"
             >
               {currentCaption}
             </motion.p>

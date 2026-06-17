@@ -1,0 +1,6 @@
+<svg viewBox="0 0 364 352" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Diagonal "1" stripe only — extracted from No 1.svg. Same viewBox as
+       the heart variant so they layer in registration. Rendered as a
+       solid-color overlay (no portrait fill). -->
+  <path d="M39.2711 92.9079L156.443 21.172L335.289 240.613L242.06 323.123L39.2711 92.9079Z" fill="black"/>
+</svg>

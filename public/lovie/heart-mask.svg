@@ -1,0 +1,5 @@
+<svg viewBox="0 0 100 95" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <!-- Lovie-inspired single-lobe heart mask. Used as CSS mask-image on
+       quote headshots so portraits crop into the brand silhouette. -->
+  <path d="M50 92 C28 76 6 58 6 32 C6 18 18 8 32 8 C40 8 47 12 50 18 C53 12 60 8 68 8 C82 8 94 18 94 32 C94 58 72 76 50 92 Z" fill="black"/>
+</svg>
