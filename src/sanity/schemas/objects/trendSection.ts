@@ -7,6 +7,7 @@ export default defineType({
   fieldsets: [
     { name: 'landing', title: 'Intro Page', options: { collapsible: true, collapsed: true } },
     { name: 'data', title: 'Data Module', options: { collapsible: true, collapsed: true } },
+    { name: 'hubs', title: 'Inside the Hubs (Lovie)', options: { collapsible: true, collapsed: true } },
     { name: 'quotes', title: 'Expert Quotes', options: { collapsible: true, collapsed: true } },
     { name: 'video', title: 'Video Module', options: { collapsible: true, collapsed: true } },
     { name: 'images', title: 'Images', options: { collapsible: true, collapsed: true } },
@@ -80,12 +81,17 @@ export default defineType({
     { name: 'dataContext', title: 'Data Context Line (legacy)', type: 'string', hidden: () => true },
     { name: 'dataStats', title: 'Data Stats', type: 'array', of: [{ type: 'dataStat' }], description: 'Percentage bars shown in the data module', hidden: ({ parent }) => parent?.showData === false, fieldset: 'data' },
 
+    // Inside the Hubs (Lovie) — three-column country breakdown
+    { name: 'showInsideTheHubs', title: 'Show Inside the Hubs', type: 'boolean', initialValue: false, description: 'Lovie reports only. Adds a Spain / Italy / Portugal breakdown alongside this trend.', fieldset: 'hubs' },
+    { name: 'insideTheHubs', title: 'Inside the Hubs', type: 'insideTheHubs', hidden: ({ parent }) => parent?.showInsideTheHubs === false, fieldset: 'hubs' },
+
     // Expert Quotes
     { name: 'showQuotes', title: 'Show Expert Quotes', type: 'boolean', initialValue: true, fieldset: 'quotes' },
     { name: 'expertQuotes', title: 'Expert Quotes', type: 'array', of: [{ type: 'expertQuote' }], hidden: ({ parent }) => parent?.showQuotes === false, fieldset: 'quotes' },
 
     // Video Module
     { name: 'showVideo', title: 'Show Video Module', type: 'boolean', initialValue: false, fieldset: 'video' },
+    { name: 'videoFeatureLabel', title: 'Feature Label', type: 'string', description: 'Optional eyebrow above the video (e.g. "Standouts from the Mediterranean")', hidden: ({ parent }) => parent?.showVideo === false, fieldset: 'video' },
     { name: 'trendVideo', title: 'Video', type: 'trendVideo', hidden: ({ parent }) => parent?.showVideo === false, fieldset: 'video' },
     { name: 'videoType', title: 'Video Type (legacy)', type: 'string', hidden: () => true },
     { name: 'videoUrl', title: 'Video URL (legacy)', type: 'string', hidden: () => true },

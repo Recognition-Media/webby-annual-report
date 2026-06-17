@@ -18,7 +18,10 @@ export default async function ReportPage({ params }: Props) {
   const { slug } = await params
   const report = await client.fetch<Report | null>(reportBySlugQuery, { slug })
 
-  if (!report || report.status !== 'live') {
+  // In dev (`npm run dev`) we render drafts so designers can iterate without
+  // flipping a CMS field to 'live'. Production builds still 404 non-live docs.
+  const allowDrafts = process.env.NODE_ENV === 'development'
+  if (!report || (report.status !== 'live' && !allowDrafts)) {
     notFound()
   }
 

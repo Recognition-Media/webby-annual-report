@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import type { KeyFinding } from '@/sanity/types'
+import { CountryItaly, CountryPortugal, CountrySpain } from '../lovie/CountryStickers'
 
 const FALLBACK_SECTIONS = [
   {
@@ -40,6 +41,51 @@ const FALLBACK_SECTIONS = [
   },
 ]
 
+// Lovie's five Mediterranean trends. Used when CMS keyFindings are empty.
+// Once the editor populates 5 trend entries in Sanity, those take over.
+const LOVIE_FALLBACK_SECTIONS = [
+  {
+    number: '01',
+    title: 'A Creative Scene Building Beyond Capital Cities',
+    description: '',
+    color: '#000000',
+    hoverBg: '#ff6000',
+    anchor: 'section-01',
+  },
+  {
+    number: '02',
+    title: 'Smaller Players Are Setting the Standard',
+    description: '',
+    color: '#000000',
+    hoverBg: '#ff6000',
+    anchor: 'section-02',
+  },
+  {
+    number: '03',
+    title: 'Internationalism & Collaboration by Necessity',
+    description: '',
+    color: '#000000',
+    hoverBg: '#ff6000',
+    anchor: 'section-03',
+  },
+  {
+    number: '04',
+    title: 'Rooted in Local Culture for Global Reach',
+    description: '',
+    color: '#000000',
+    hoverBg: '#ff6000',
+    anchor: 'section-04',
+  },
+  {
+    number: '05',
+    title: 'Building Digital Sovereignty & AI Infrastructure',
+    description: '',
+    color: '#000000',
+    hoverBg: '#ff6000',
+    anchor: 'section-05',
+  },
+]
+
 function scrollToAnchor(anchor: string) {
   const el = document.getElementById(anchor)
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -56,28 +102,171 @@ type ResolvedSection = {
 
 interface KeyFindingsProps {
   findings?: KeyFinding[]
+  property?: 'webby' | 'anthem' | 'telly' | 'lovie'
 }
 
-export function KeyFindings({ findings }: KeyFindingsProps = {}) {
+export function KeyFindings({ findings, property }: KeyFindingsProps = {}) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const isLovie = property === 'lovie'
 
-  const sections: ResolvedSection[] = findings && findings.length > 0
+  // Color fork — Anthem uses warm cream + tan; Lovie sits on lime with
+  // cream cards and an Italy heart-sticker as the decorative heading mark.
+  const theme = isLovie
+    ? {
+        sectionBg: '#eeffbb',
+        cardDefaultBg: '#f2eeed',
+        headingIcon: '/lovie/country-italy.svg',
+        headingIconRotation: '-8deg',
+        subtitle: 'A look at the creative communities and ideas shaping the Mediterranean in 2026.',
+      }
+    : {
+        sectionBg: '#E3DDCA',
+        cardDefaultBg: '#d5cfbc',
+        headingIcon: '/anthem/CAUSE_EDUCATION.svg',
+        headingIconRotation: '-12deg',
+        subtitle: 'A look at how the social impact sector is responding in 2026.',
+      }
+
+  const fallback = isLovie ? LOVIE_FALLBACK_SECTIONS : FALLBACK_SECTIONS
+  // Lovie always renders the 5-trend fallback for now: the CMS doc was
+  // duplicated from Anthem and its keyFindings still carry the original
+  // four Anthem titles. Once those are rewritten as the five Lovie trends
+  // in Sanity, swap this back to CMS-driven (same branch as Anthem).
+  const sections: ResolvedSection[] = isLovie
+    ? LOVIE_FALLBACK_SECTIONS
+    : findings && findings.length > 0
     ? findings.map((f, i) => ({
         number: f.number,
         title: f.title,
         description: f.description || '',
         color: '#21261A',
-        hoverBg: f.hoverColor || FALLBACK_SECTIONS[i % FALLBACK_SECTIONS.length].hoverBg,
-        anchor: f.anchor || FALLBACK_SECTIONS[i % FALLBACK_SECTIONS.length].anchor,
+        hoverBg: f.hoverColor || fallback[i % fallback.length].hoverBg,
+        anchor: f.anchor || fallback[i % fallback.length].anchor,
       }))
-    : FALLBACK_SECTIONS
+    : fallback
+
+  // Lovie uses Option 1: cover-art banner on top + editorial numbered list
+  // below. Distinct layout from Anthem's card grid, so it gets its own
+  // render path rather than being squeezed into the same JSX tree.
+  if (isLovie) {
+    return (
+      <section
+        id="key-findings"
+        data-snap
+        className="relative overflow-hidden pt-20 md:pt-24 pb-16 md:pb-24"
+        style={{ background: theme.sectionBg }}
+      >
+        {/* Cover-art banner: 3 country stickers with a short dotted curve
+            connecting Italy (center) to Portugal/Spain (left/right). SVG
+            recreation rather than the static PNG so the curve/stickers
+            scale and respond independently. */}
+        <div className="relative w-full" style={{ height: 360 }}>
+          <svg
+            viewBox="0 0 1000 360" preserveAspectRatio="none"
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            aria-hidden="true"
+          >
+            <path
+              d="M 100 230 Q 360 100 500 210 Q 640 320 900 230"
+              fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeDasharray="2 14"
+            />
+          </svg>
+          <CountryPortugal
+            aria-hidden="true"
+            className="absolute pointer-events-none"
+            style={{ top: '38%', left: '2%', width: 'clamp(100px, 18vw, 220px)', height: 'auto', transform: 'rotate(-6deg)' }}
+          />
+          <CountryItaly
+            aria-hidden="true"
+            className="absolute pointer-events-none"
+            style={{ top: '12%', left: '50%', width: 'clamp(110px, 20vw, 240px)', height: 'auto', transform: 'translateX(-50%)' }}
+          />
+          <CountrySpain
+            aria-hidden="true"
+            className="absolute pointer-events-none"
+            style={{ top: '38%', right: '2%', width: 'clamp(100px, 18vw, 220px)', height: 'auto', transform: 'rotate(6deg)' }}
+          />
+        </div>
+
+        {/* Editorial trend list */}
+        <div className="px-5 md:px-[60px] mt-12 md:mt-16" style={{ maxWidth: 1100, margin: '60px auto 0' }}>
+          <motion.p
+            className="text-[11px] uppercase mb-3"
+            style={{ letterSpacing: 4, color: '#ff6000', fontWeight: 500 }}
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            Inside The Report
+          </motion.p>
+          <motion.h2
+            className="mb-10 md:mb-12 text-[32px] md:text-[48px] lg:text-[56px] leading-[1.1] font-bold"
+            style={{ color: '#000000' }}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            Five Trends Shaping the Mediterranean
+          </motion.h2>
+
+          <ol className="list-none p-0 m-0">
+            {sections.map((section, i) => {
+              const isHovered = hoveredIndex === i
+              return (
+                <motion.li
+                  key={section.number}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => scrollToAnchor(section.anchor)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      scrollToAnchor(section.anchor)
+                    }
+                  }}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  className="flex items-baseline gap-5 md:gap-8 py-5 md:py-6 cursor-pointer transition-colors duration-200"
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.15 + i * 0.06 }}
+                >
+                  <span
+                    className="text-[18px] md:text-[22px] font-bold flex-shrink-0"
+                    style={{ color: '#ff6000', minWidth: 36 }}
+                  >
+                    {section.number}
+                  </span>
+                  <span
+                    className="text-[18px] md:text-[24px] leading-[1.25] flex-1 transition-colors duration-200"
+                    style={{ fontWeight: 500, color: isHovered ? '#ff6000' : '#000000' }}
+                  >
+                    {section.title}
+                  </span>
+                  <span
+                    className="text-[18px] md:text-[22px] flex-shrink-0 transition-transform duration-200"
+                    style={{ color: '#ff6000', transform: isHovered ? 'translateX(6px)' : 'none' }}
+                  >
+                    →
+                  </span>
+                </motion.li>
+              )
+            })}
+          </ol>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section
       id="key-findings"
       data-snap
       className="relative overflow-hidden px-5 md:px-[60px] pt-20 md:pt-28 pb-10 md:pb-14"
-      style={{ background: '#E3DDCA' }}
+      style={{ background: theme.sectionBg }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         {/* Heading */}
@@ -90,10 +279,10 @@ export function KeyFindings({ findings }: KeyFindingsProps = {}) {
           transition={{ duration: 0.6, delay: 0.1 }}
         >
           <img
-            src="/anthem/CAUSE_EDUCATION.svg"
+            src={theme.headingIcon}
             alt=""
             className="w-[60px] h-[60px] md:w-[100px] md:h-[100px] absolute left-[8%] md:left-[calc(50%_-_5.2em_+_10px)]"
-            style={{ transform: 'rotate(-12deg)', top: '-0.15em' }}
+            style={{ transform: `rotate(${theme.headingIconRotation})`, top: '-0.15em' }}
           />
           Inside The Report
         </motion.h2>
@@ -106,7 +295,7 @@ export function KeyFindings({ findings }: KeyFindingsProps = {}) {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          A look at how the social impact sector is responding in 2026.
+          {theme.subtitle}
         </motion.p>
 
         {/* 2x2 Grid */}
@@ -126,7 +315,7 @@ export function KeyFindings({ findings }: KeyFindingsProps = {}) {
                   }
                 }}
                 className="p-5 md:p-10 rounded-lg cursor-pointer min-h-[140px] md:min-h-[210px] flex flex-col justify-center transition-colors duration-300"
-                style={{ background: isHovered ? section.hoverBg : '#d5cfbc' }}
+                style={{ background: isHovered ? section.hoverBg : theme.cardDefaultBg }}
                 onMouseEnter={() => setHoveredIndex(i)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 initial={{ opacity: 0, y: 20 }}

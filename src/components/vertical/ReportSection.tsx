@@ -79,6 +79,10 @@ interface ReportSectionCoverProps {
   copy: string
   accentColor?: string
   compact?: boolean
+  property?: 'webby' | 'anthem' | 'telly' | 'lovie'
+  /** Path to an SVG to render in place of the numeric `sectionNumber` text
+   * (e.g. the Lovie heart-token assets in /public/lovie/no-*.svg). */
+  sectionNumberSvg?: string
 }
 
 export function ReportSectionCover({
@@ -88,27 +92,44 @@ export function ReportSectionCover({
   copy,
   accentColor = '#8C001C',
   compact = false,
+  property,
+  sectionNumberSvg,
 }: ReportSectionCoverProps) {
+  const isLovie = property === 'lovie'
   return (
     <section
       id={`section-${sectionNumber}`}
       className={`relative px-5 md:px-[60px] ${compact ? '' : 'md:min-h-screen md:flex md:flex-col md:items-center md:justify-center'}`}
-      style={{ background: '#E3DDCA', paddingTop: compact ? 80 : 50, paddingBottom: compact ? 60 : 50 }}
+      style={{ background: isLovie ? '#f2eeed' : '#E3DDCA', paddingTop: compact ? 80 : 50, paddingBottom: compact ? 60 : 50 }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         {/* Center-aligned: number, title, rule, subtitle */}
         <div className="text-center">
-          {/* Section number */}
-          <motion.p
-            className="text-[48px] md:text-[72px] leading-none mb-4"
-            style={{ fontFamily: 'var(--font-display)', color: accentColor, fontWeight: 700 }}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            {sectionNumber}
-          </motion.p>
+          {/* Section number (or SVG token for Lovie) */}
+          {sectionNumberSvg ? (
+            <motion.img
+              src={sectionNumberSvg}
+              alt={`Section ${sectionNumber}`}
+              className="mx-auto mb-4 select-none"
+              draggable={false}
+              style={{ height: 'clamp(64px, 9vw, 120px)', width: 'auto' }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            />
+          ) : (
+            <motion.p
+              className="text-[48px] md:text-[72px] leading-none mb-4"
+              style={{ fontFamily: 'var(--font-display)', color: accentColor, fontWeight: 700 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              {sectionNumber}
+            </motion.p>
+          )}
 
           {/* Title */}
           <motion.h2
