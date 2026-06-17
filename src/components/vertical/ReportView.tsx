@@ -100,12 +100,15 @@ export function ReportView({ report }: { report: Report }) {
   const [showGoodbye, setShowGoodbye] = useState(false)
   const reportRef = useRef<HTMLDivElement>(null)
 
-  // Apply Anthem theme (background, fonts, palette) only while this template
-  // is mounted. Webby reports stay on the default (Aktiv Grotesk + white bg).
+  // Apply vertical-template theme (background, fonts, palette) only while this
+  // template is mounted. Lovie reports get `lovie-template`; everything else
+  // using the vertical layout (Anthem) keeps `anthem-template`. Webby reports
+  // use the horizontal template and stay on the default styling.
   useEffect(() => {
-    document.body.classList.add('anthem-template')
-    return () => { document.body.classList.remove('anthem-template') }
-  }, [])
+    const themeClass = report.property === 'lovie' ? 'lovie-template' : 'anthem-template'
+    document.body.classList.add(themeClass)
+    return () => { document.body.classList.remove(themeClass) }
+  }, [report.property])
 
   // Show goodbye only when all trends are complete (desktop)
   // On mobile, always show it since trends are just vertical scroll

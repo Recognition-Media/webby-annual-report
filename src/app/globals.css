@@ -249,3 +249,54 @@ body.anthem-template {
   --color-blue-gradient: #066DBA;
 }
 
+/* =========================================================================
+   Lovie (vertical template) theme overrides
+   Applied when body has class `lovie-template` (set by vertical/ReportView
+   when report.property === 'lovie'). Anthem reports keep `anthem-template`.
+   ========================================================================= */
+
+@font-face {
+  font-family: 'Scto Grotesk A';
+  src: url('/lovie/fonts/Scto Grotesk A Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Scto Grotesk A';
+  src: url('/lovie/fonts/Scto Grotesk A Regular Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Scto Grotesk A';
+  src: url('/lovie/fonts/Scto Grotesk A Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Scto Grotesk A';
+  src: url('/lovie/fonts/Scto Grotesk A Medium Italic.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+}
+
+:root {
+  --lovie-lime: #eeffbb;
+  --lovie-orange: #ff6000;
+  --lovie-cream: #f3eeed;
+  --lovie-black: #000000;
+}
+
+body.lovie-template {
+  background: var(--lovie-lime);
+  color: var(--lovie-black);
+  font-family: 'Scto Grotesk A', -apple-system, sans-serif;
+  --font-sans: 'Scto Grotesk A', -apple-system, sans-serif;
+  --font-display: 'Scto Grotesk A', -apple-system, sans-serif;
+  /* Lovie palette overrides for color tokens used across the app */
+  --color-primary-blue: var(--lovie-orange);
+  --color-primary-green: var(--lovie-orange);
+  --color-lime-accent: var(--lovie-lime);
+  --color-blue-gradient: var(--lovie-orange);
+}
+
