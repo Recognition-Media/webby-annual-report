@@ -295,7 +295,7 @@ export function ReportView({ report }: { report: Report }) {
 
             {/* IADAS — hidden for Anthem redesign */}
             {/* <IadasSection report={report} /> */}
-            <KeyFindings findings={report.keyFindings} />
+            <KeyFindings findings={report.keyFindings} property={report.property} />
 
             {/* Old trends — hidden for Anthem redesign */}
             {/* Section 1: The State of Social Impact */}

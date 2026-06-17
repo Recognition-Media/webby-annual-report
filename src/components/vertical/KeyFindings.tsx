@@ -56,10 +56,30 @@ type ResolvedSection = {
 
 interface KeyFindingsProps {
   findings?: KeyFinding[]
+  property?: 'webby' | 'anthem' | 'telly' | 'lovie'
 }
 
-export function KeyFindings({ findings }: KeyFindingsProps = {}) {
+export function KeyFindings({ findings, property }: KeyFindingsProps = {}) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const isLovie = property === 'lovie'
+
+  // Color fork — Anthem uses warm cream + tan; Lovie sits on lime with
+  // cream cards and an Italy heart-sticker as the decorative heading mark.
+  const theme = isLovie
+    ? {
+        sectionBg: '#eeffbb',
+        cardDefaultBg: '#f3eeed',
+        headingIcon: '/lovie/country-italy.svg',
+        headingIconRotation: '-8deg',
+        subtitle: 'A look at the creative communities and ideas shaping the Mediterranean in 2026.',
+      }
+    : {
+        sectionBg: '#E3DDCA',
+        cardDefaultBg: '#d5cfbc',
+        headingIcon: '/anthem/CAUSE_EDUCATION.svg',
+        headingIconRotation: '-12deg',
+        subtitle: 'A look at how the social impact sector is responding in 2026.',
+      }
 
   const sections: ResolvedSection[] = findings && findings.length > 0
     ? findings.map((f, i) => ({
@@ -77,7 +97,7 @@ export function KeyFindings({ findings }: KeyFindingsProps = {}) {
       id="key-findings"
       data-snap
       className="relative overflow-hidden px-5 md:px-[60px] pt-20 md:pt-28 pb-10 md:pb-14"
-      style={{ background: '#E3DDCA' }}
+      style={{ background: theme.sectionBg }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         {/* Heading */}
@@ -90,10 +110,10 @@ export function KeyFindings({ findings }: KeyFindingsProps = {}) {
           transition={{ duration: 0.6, delay: 0.1 }}
         >
           <img
-            src="/anthem/CAUSE_EDUCATION.svg"
+            src={theme.headingIcon}
             alt=""
             className="w-[60px] h-[60px] md:w-[100px] md:h-[100px] absolute left-[8%] md:left-[calc(50%_-_5.2em_+_10px)]"
-            style={{ transform: 'rotate(-12deg)', top: '-0.15em' }}
+            style={{ transform: `rotate(${theme.headingIconRotation})`, top: '-0.15em' }}
           />
           Inside The Report
         </motion.h2>
@@ -106,7 +126,7 @@ export function KeyFindings({ findings }: KeyFindingsProps = {}) {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          A look at how the social impact sector is responding in 2026.
+          {theme.subtitle}
         </motion.p>
 
         {/* 2x2 Grid */}
@@ -126,7 +146,7 @@ export function KeyFindings({ findings }: KeyFindingsProps = {}) {
                   }
                 }}
                 className="p-5 md:p-10 rounded-lg cursor-pointer min-h-[140px] md:min-h-[210px] flex flex-col justify-center transition-colors duration-300"
-                style={{ background: isHovered ? section.hoverBg : '#d5cfbc' }}
+                style={{ background: isHovered ? section.hoverBg : theme.cardDefaultBg }}
                 onMouseEnter={() => setHoveredIndex(i)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 initial={{ opacity: 0, y: 20 }}
