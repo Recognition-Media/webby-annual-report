@@ -680,7 +680,7 @@ export function ReportView({ report }: { report: Report }) {
                   copy="How Spain, Portugal, and Italy are reshaping Europe's contribution to the internet — from decentralised creative scenes to AI infrastructure."
                   accentColor="#ff6000"
                   property="lovie"
-                  sectionNumberSvg="/lovie/no-1-heart.svg"
+                  sectionNumberSvg="/lovie/no-1.svg"
                   compact
                 />
 
