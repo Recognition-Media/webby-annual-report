@@ -226,29 +226,36 @@ export function ReportView({ report }: { report: Report }) {
     }
 
     // Hide the hero FIRST so ReportScroll's "active" effect can fire
-    // its window.scrollTo(0, 0) before our smooth scroll begins. If we
-    // scrolled first, that scrollTo would stomp the page back to the
-    // top of the report (= the Opening Letter) ~800ms later, exactly
-    // the symptom we were seeing for trend-* anchors.
+    // its window.scrollTo(0, 0) before any smooth scroll begins. If
+    // we scrolled first, that scrollTo would stomp the page back to
+    // the top of the report ~800ms later — the bug we hit for trend-*
+    // anchors before.
     setEntered(true)
 
-    // After the entered=true effect settles, look up the anchor and
-    // smooth-scroll there. Poll briefly in case the target hasn't
-    // hydrated yet (framer-motion wrappers around the trend sections
-    // can delay the id landing in the DOM by a frame or two).
+    // No anchor → user just clicked "Explore the Report". ReportScroll's
+    // own scrollTo(0, 0) effect already lands them at the top of the
+    // report (= the Opening Letter). Don't fire an additional smooth
+    // scroll on top of that: the ~700ms retry loop + smooth animation
+    // would fight any scrolling the user does in the meantime and
+    // make it feel like the page is locked at the Opening Letter
+    // (reported by Chrome users).
+    if (!anchor) return
+
+    // Anchor specified → poll briefly in case the target hasn't
+    // hydrated yet (framer-motion wrappers around trend sections can
+    // delay the id landing in the DOM by a frame or two).
     function tryScroll(remainingTries: number) {
-      if (anchor) {
-        const el = document.getElementById(anchor)
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          setScrollTarget(null)
-          return
-        }
+      const el = document.getElementById(anchor!)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        setScrollTarget(null)
+        return
       }
       if (remainingTries > 0) {
         setTimeout(() => tryScroll(remainingTries - 1), 100)
         return
       }
+      // Target never appeared — fall back to top-of-report.
       reportRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
