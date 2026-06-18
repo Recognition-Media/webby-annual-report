@@ -7,6 +7,7 @@ import { TREND_COLORS, TREND_OVERRIDES } from './TrendSection'
 interface MobileNavProps {
   active: boolean
   trendTitles: string[]
+  property?: 'webby' | 'anthem' | 'telly' | 'lovie'
 }
 
 interface NavSection {
@@ -17,7 +18,24 @@ interface NavSection {
   trendIndex?: number
 }
 
-export function MobileNav({ active, trendTitles }: MobileNavProps) {
+// Lovie mobile nav — mirrors the hero menu's short, scannable labels
+// and the live anchor ids (trend-01..trend-05, section-takeaways, etc.).
+// Indicator dots use Lovie orange so they read against the dark drawer.
+const LOVIE_SECTIONS: NavSection[] = [
+  { id: 'welcome-letter', label: 'Welcome Letter', color: '#ff6000' },
+  { id: 'key-findings', label: 'Inside The Report', color: '#ff6000' },
+  { id: 'trend-01', label: 'Beyond Capital Cities', color: '#ff6000', isTrend: true, trendIndex: 0 },
+  { id: 'trend-02', label: 'Smaller Players', color: '#ff6000', isTrend: true, trendIndex: 1 },
+  { id: 'trend-03', label: 'Internationalism', color: '#ff6000', isTrend: true, trendIndex: 2 },
+  { id: 'trend-04', label: 'Cultural Specificity', color: '#ff6000', isTrend: true, trendIndex: 3 },
+  { id: 'trend-05', label: 'Digital Sovereignty', color: '#ff6000', isTrend: true, trendIndex: 4 },
+  { id: 'section-takeaways', label: 'Takeaways', color: '#ff6000' },
+  { id: 'credits', label: 'Credits', color: '#ff6000' },
+  { id: 'about-lovie', label: 'About The Lovie Awards', color: '#ff6000' },
+]
+
+export function MobileNav({ active, trendTitles, property }: MobileNavProps) {
+  const isLovie = property === 'lovie'
   const [open, setOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [activeSection, setActiveSection] = useState('')
@@ -31,30 +49,39 @@ export function MobileNav({ active, trendTitles }: MobileNavProps) {
   }, [])
 
 
-  // Track which section is currently visible using scroll position
+  // Track which section is currently visible using scroll position.
+  // The id pools differ per property: Lovie has its own anchor ids
+  // (welcome-letter, key-findings, trend-01..05, section-takeaways,
+  // etc.); other templates use the legacy Anthem/Webby pool.
   useEffect(() => {
     if (!active || !isMobile) return
 
     function updateActive() {
       const scrollTop = window.scrollY + 120
 
-      // Build list fresh each time (elements may appear after initial render)
       const allSections: { id: string; top: number }[] = []
 
-      ;['welcome-letter', 'entry-stats', 'how-judged', 'trend-intro'].forEach((id) => {
-        const el = document.getElementById(id)
-        if (el) allSections.push({ id, top: el.offsetTop })
-      })
+      if (isLovie) {
+        ;['welcome-letter', 'key-findings', 'trend-01', 'trend-02', 'trend-03', 'trend-04', 'trend-05', 'section-takeaways', 'credits', 'about-lovie'].forEach((id) => {
+          const el = document.getElementById(id)
+          if (el) allSections.push({ id, top: el.offsetTop })
+        })
+      } else {
+        ;['welcome-letter', 'entry-stats', 'how-judged', 'trend-intro'].forEach((id) => {
+          const el = document.getElementById(id)
+          if (el) allSections.push({ id, top: el.offsetTop })
+        })
 
-      // Trends: query the DOM directly each time
-      for (let i = 0; i < 20; i++) {
-        const el = document.getElementById(`mobile-trend-${i}`)
-          || document.querySelector(`[data-mobile-trend="${i}"]`)
-        if (el) allSections.push({ id: `mobile-trend-${i}`, top: (el as HTMLElement).offsetTop })
+        // Trends: query the DOM directly each time
+        for (let i = 0; i < 20; i++) {
+          const el = document.getElementById(`mobile-trend-${i}`)
+            || document.querySelector(`[data-mobile-trend="${i}"]`)
+          if (el) allSections.push({ id: `mobile-trend-${i}`, top: (el as HTMLElement).offsetTop })
+        }
+
+        const thankYou = document.getElementById('thank-you')
+        if (thankYou) allSections.push({ id: 'thank-you', top: thankYou.offsetTop })
       }
-
-      const thankYou = document.getElementById('thank-you')
-      if (thankYou) allSections.push({ id: 'thank-you', top: thankYou.offsetTop })
 
       // Sort by position
       allSections.sort((a, b) => a.top - b.top)
@@ -77,30 +104,34 @@ export function MobileNav({ active, trendTitles }: MobileNavProps) {
       clearTimeout(t1)
       clearTimeout(t2)
     }
-  }, [active, isMobile, trendTitles])
+  }, [active, isMobile, isLovie, trendTitles])
 
   if (!active || !isMobile) return null
 
-  const sections: NavSection[] = [
-    { id: 'welcome-letter', label: 'Welcome Letter', color: '#8B70D1' },
-    { id: 'entry-stats', label: 'By the Numbers', color: '#80D064' },
-    { id: 'how-judged', label: 'How We Judge', color: '#8B70D1' },
-    { id: 'trend-intro', label: 'Quick Summary', color: '#82D8EB' },
-    ...trendTitles.map((title, i) => ({
-      id: `mobile-trend-${i}`,
-      label: title,
-      color: TREND_COLORS[i % TREND_COLORS.length],
-      isTrend: true,
-      trendIndex: i,
-    })),
-    { id: 'thank-you', label: 'Thank You', color: '#8B70D1' },
-  ]
+  const sections: NavSection[] = isLovie
+    ? LOVIE_SECTIONS
+    : [
+        { id: 'welcome-letter', label: 'Welcome Letter', color: '#8B70D1' },
+        { id: 'entry-stats', label: 'By the Numbers', color: '#80D064' },
+        { id: 'how-judged', label: 'How We Judge', color: '#8B70D1' },
+        { id: 'trend-intro', label: 'Quick Summary', color: '#82D8EB' },
+        ...trendTitles.map((title, i) => ({
+          id: `mobile-trend-${i}`,
+          label: title,
+          color: TREND_COLORS[i % TREND_COLORS.length],
+          isTrend: true,
+          trendIndex: i,
+        })),
+        { id: 'thank-you', label: 'Thank You', color: '#8B70D1' },
+      ]
 
   function scrollToSection(section: NavSection) {
     setOpen(false)
     setTimeout(() => {
       let el: Element | null = null
-      if (section.isTrend) {
+      // Lovie trends are real id'd sections (trend-01..05); other
+      // templates use the legacy data-mobile-trend lookup.
+      if (section.isTrend && !isLovie) {
         el = document.querySelector(`[data-mobile-trend="${section.trendIndex}"]`)
       } else {
         el = document.getElementById(section.id)
@@ -116,7 +147,7 @@ export function MobileNav({ active, trendTitles }: MobileNavProps) {
   }
 
   const activeSectionData = sections.find((s) => {
-    if (s.isTrend) return activeSection === `mobile-trend-${s.trendIndex}`
+    if (s.isTrend && !isLovie) return activeSection === `mobile-trend-${s.trendIndex}`
     return activeSection === s.id
   })
 
@@ -222,7 +253,7 @@ export function MobileNav({ active, trendTitles }: MobileNavProps) {
                 whiteSpace: 'nowrap',
               }}
             >
-              {activeSectionData.isTrend
+              {activeSectionData.isTrend && !isLovie
                 ? `Trend ${String((activeSectionData.trendIndex ?? 0) + 1).padStart(2, '0')}`
                 : activeSectionData.label}
             </span>
@@ -270,7 +301,7 @@ export function MobileNav({ active, trendTitles }: MobileNavProps) {
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {sections.map((section, i) => {
-                  const isActive = section.isTrend
+                  const isActive = section.isTrend && !isLovie
                     ? activeSection === `mobile-trend-${section.trendIndex}`
                     : activeSection === section.id
 
