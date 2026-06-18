@@ -11,6 +11,7 @@ const FALLBACK_BODY = [
   "The Lovie Awards is the Webby Awards' benchmark for European digital excellence, recognising the people, projects, and ideas shaping Europe's contributions to the internet.",
   "Launched in 2010, The Lovie Award is presented by the European arm of the International Academy of Digital Arts and Sciences (IADAS)—a 3,000+ membership body which also judges The Webby Awards. The Academy is comprised of leading Internet experts, business figures, luminaries, visionaries, artists, and talented entertainers and creators. Work is judged in seven native languages, including Spanish, Italian, Dutch, French, German, Swedish, and English.",
 ]
+const FALLBACK_CLOSING_LINE = "If you're redefining digital creativity from the Mediterranean, in ways only your country can, we want to see your work in the Lovie Awards."
 const FALLBACK_CTA_URL = 'https://www.lovieawards.com/'
 const FALLBACK_CTA_TEXT = 'Enter Your Work'
 
@@ -129,6 +130,28 @@ export function LovieFooter({ report }: { report: Report }) {
           )}
         </motion.div>
 
+        {/* Closing transitional line — leads into the CTA. Italic so it
+            reads as a final editorial beat, not another body paragraph. */}
+        <motion.p
+          style={{
+            fontSize: 18,
+            fontStyle: 'italic',
+            fontWeight: 400,
+            color: '#ffffff',
+            lineHeight: 1.55,
+            margin: '8px 0 0',
+            maxWidth: 640,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.35 }}
+        >
+          {FALLBACK_CLOSING_LINE}
+        </motion.p>
+
         <motion.a
           href={ctaUrl}
           target="_blank"
@@ -137,7 +160,7 @@ export function LovieFooter({ report }: { report: Report }) {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 12,
-            marginTop: 24,
+            marginTop: 32,
             background: LIME,
             color: '#000000',
             padding: '14px 28px',
