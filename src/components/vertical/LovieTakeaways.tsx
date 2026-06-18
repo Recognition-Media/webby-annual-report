@@ -1,8 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import type { LovieTakeaway } from '@/sanity/types'
 
-const TAKEAWAYS = [
+const FALLBACK_TAKEAWAYS = [
   {
     title: 'Creative innovation is decentralising towards the margins',
     body: "Distinctive digital work across Mediterranean countries is increasingly being produced outside of its capital cities. Emerging markets like Coimbra, Bilbao, Verona, Bologna, and Málaga have become sites for new ideas. Creative leaders are split on whether decentralisation has happened or is underway.",
@@ -33,47 +34,61 @@ function NumberedHeart({ n }: { n: number }) {
     <img
       src={`/lovie/takeaway-${n}.png`}
       alt={`Takeaway ${n}`}
-      style={{ width: 110, height: 'auto', flexShrink: 0 }}
+      style={{ width: 80, height: 'auto', flexShrink: 0 }}
     />
   )
 }
 
-export function LovieTakeaways() {
+export function LovieTakeaways({ takeaways }: { takeaways?: LovieTakeaway[] } = {}) {
+  // CMS-driven when populated, otherwise the fallback list ships.
+  const items = takeaways && takeaways.length > 0 ? takeaways : FALLBACK_TAKEAWAYS
+
   return (
     <section
       data-snap
       style={{
         background: '#f2eeed',
-        // No top padding — the cover above (compact mode) already
-        // contributes ~60px of bottom padding, which lands the first
-        // takeaway in the 48–64px target gap from the cover copy.
         padding: '0 24px 120px',
         fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
       }}
     >
-      <div style={{ maxWidth: 880, margin: '0 auto' }}>
-        {TAKEAWAYS.map((item, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.5, delay: i * 0.05 }}
-            style={{
-              display: 'flex',
-              gap: 32,
-              alignItems: 'flex-start',
-              marginBottom: i === TAKEAWAYS.length - 1 ? 0 : 56,
-            }}
-          >
-            <NumberedHeart n={i + 1} />
-            <div style={{ flex: 1, paddingTop: 8 }}>
+      <div
+        style={{
+          maxWidth: 1100,
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))',
+          gap: 20,
+        }}
+      >
+        {items.map((item, i) => {
+          // 5-item layout: 2 per row, with the 5th card spanning both
+          // columns on its own row. Matches the Anthem Takeaways pattern.
+          const isOdd5th = items.length === 5 && i === 4
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.5, delay: i * 0.05 }}
+              style={{
+                background: '#fffaf3',
+                borderRadius: 12,
+                padding: '32px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 16,
+                gridColumn: isOdd5th ? '1 / -1' : 'auto',
+              }}
+            >
+              <NumberedHeart n={i + 1} />
               <h3
                 style={{
                   fontSize: 20,
                   fontWeight: 700,
                   color: '#000',
-                  marginBottom: 12,
+                  marginBottom: 0,
                   lineHeight: 1.2,
                 }}
               >
@@ -81,17 +96,18 @@ export function LovieTakeaways() {
               </h3>
               <p
                 style={{
-                  fontSize: 16,
+                  fontSize: 15,
                   color: '#000',
                   lineHeight: 1.6,
                   fontWeight: 400,
+                  margin: 0,
                 }}
               >
                 {item.body}
               </p>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          )
+        })}
       </div>
     </section>
   )

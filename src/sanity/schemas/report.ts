@@ -16,6 +16,7 @@ export default defineType({
     { name: 'keyFindings', title: 'Key Findings' },
     { name: 'sectionCovers', title: 'Section Covers' },
     { name: 'trends', title: 'Trends' },
+    { name: 'takeaways', title: 'Takeaways (Lovie)' },
     { name: 'thankYou', title: 'Thank You' },
     { name: 'signup', title: 'Signup Form' },
     { name: 'analytics', title: 'Analytics' },
@@ -124,6 +125,9 @@ export default defineType({
 
     // Trends
     { name: 'trendSections', title: 'Trend Sections', type: 'array', of: [{ type: 'trendSection' }], group: 'trends' },
+
+    // Takeaways (Lovie vertical template — 5 numbered conclusions after the final trend)
+    { name: 'lovieTakeaways', title: 'Takeaways (Lovie)', type: 'array', of: [{ type: 'lovieTakeaway' }], group: 'takeaways', description: 'Numbered conclusions shown after the trends. Typically 5 items.' },
 
     // Thank You
     { name: 'thankYouEyebrow', title: 'Eyebrow', type: 'string', group: 'thankYou', description: 'e.g. "Thank You"' },

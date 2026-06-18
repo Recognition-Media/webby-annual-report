@@ -120,6 +120,11 @@ export interface KeyFinding {
   anchor?: string
 }
 
+export interface LovieTakeaway {
+  title: string
+  body: string
+}
+
 export interface CreditPerson {
   name: string
   title?: string
@@ -181,6 +186,7 @@ export interface Report {
   section03Cover?: SectionCover
   section04Cover?: SectionCover
   trendSections?: TrendSection[]
+  lovieTakeaways?: LovieTakeaway[]
   thankYouEyebrow?: string
   thankYouHeading?: string
   thankYouBody?: import('@portabletext/types').PortableTextBlock[]

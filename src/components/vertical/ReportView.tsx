@@ -14,6 +14,7 @@ import { IntroLetter } from './IntroLetter'
 import { TrendSection } from '../TrendSection'
 import { TrendContainer } from '../TrendContainer'
 import { AnthemFooter } from './AnthemFooter'
+import { LovieFooter } from './LovieFooter'
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
@@ -328,18 +329,19 @@ export function ReportView({ report }: { report: Report }) {
 
             {report.property === 'lovie' ? (
               <>
-                {/* Lovie Trend 01 — hardcoded from the PDF draft. Will move to
-                    CMS once Sanity's trendSections[0] is populated with Lovie
-                    content (body, dataStats, insideTheHubs, video). */}
+                {/* Lovie Trend 01 — title + body are CMS-driven through
+                    trendSections[0]. Data module, Inside the Hubs, and
+                    feature video are still hardcoded (no schema fields
+                    for those Lovie-specific structures yet). */}
                 <LovieTrendContent
                   trendNumber="01"
-                  title="A Creative Scene Building Beyond Capital Cities"
+                  title={report.trendSections?.[0]?.trendTitle?.trim() || 'A Creative Scene Building Beyond Capital Cities'}
                   accentColor="#ff6000"
-                  body={[
+                  body={portableTextToBody(report.trendSections?.[0]?.trendBody, [
                     <>The Mediterranean&rsquo;s significant tech and creative work is now being produced in its surrounding cities. Economic pressure, including rising housing costs, stagnant salaries, and youth unemployment, is <strong style={{ fontWeight: 700 }}>redistributing talent outside of Spain, Portugal, and Italy&rsquo;s primary business hubs</strong>.</>,
                     <>As the creative scene decentralises into secondary cities, such as Bilbao, M&aacute;laga, Porto, and Coimbra, it is producing more distinctive work that merges local traditions with craft and emerging technologies.</>,
                     <>Decentralisation is still in its early stages; <strong style={{ fontWeight: 700 }}>half of creative leaders in the Mediterranean believe the region&rsquo;s most exciting work is still concentrated in major cities, while others believe it is on the move</strong>.</>,
-                  ]}
+                  ])}
                   dataModule={{
                     question: 'Where in your country is the most exciting creative work being produced?',
                     bars: [
@@ -663,7 +665,7 @@ export function ReportView({ report }: { report: Report }) {
                   compact
                 />
 
-                <LovieTakeaways />
+                <LovieTakeaways takeaways={report.lovieTakeaways} />
               </>
             ) : (
             <>
@@ -1131,7 +1133,11 @@ export function ReportView({ report }: { report: Report }) {
 
             <Credits report={report} />
 
-            <AnthemFooter report={report} />
+            {report.property === 'lovie' ? (
+              <LovieFooter report={report} />
+            ) : (
+              <AnthemFooter report={report} />
+            )}
           </ReportScroll>
         </div>
       )}

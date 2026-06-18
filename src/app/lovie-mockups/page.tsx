@@ -30,6 +30,12 @@ export default function LovieMockupsPage() {
     <main>
       <TopNav />
       <PageHeader />
+      <section id="about-a"><AboutOptionA /></section>
+      <section id="about-b"><AboutOptionB /></section>
+      <Divider />
+      <section id="credits-a"><CreditsOptionA /></section>
+      <section id="credits-b"><CreditsOptionB /></section>
+      <Divider />
       <section id="take-a"><TakeawaysOptionA /></section>
       <section id="take-b"><TakeawaysOptionB /></section>
       <Divider />
@@ -1073,6 +1079,12 @@ function TopNav() {
       borderBottom: `2px solid ${ORANGE}`,
     }}>
       <span style={{ fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', opacity: 0.7, marginRight: 16 }}>Jump to:</span>
+      <a href="#about-a" style={linkStyle}>About A</a>
+      <a href="#about-b" style={linkStyle}>About B</a>
+      <span style={{ fontSize: 12, opacity: 0.4 }}>|</span>
+      <a href="#credits-a" style={linkStyle}>Credits A</a>
+      <a href="#credits-b" style={linkStyle}>Credits B</a>
+      <span style={{ fontSize: 12, opacity: 0.4 }}>|</span>
       <a href="#take-a" style={linkStyle}>Takeaways A</a>
       <a href="#take-b" style={linkStyle}>Takeaways B</a>
       <span style={{ fontSize: 12, opacity: 0.4 }}>|</span>
@@ -1338,6 +1350,359 @@ function Option3() {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+/* =========================================================================
+ * CREDITS — 2 fresh layouts that feel more Lovie than Anthem.
+ * Both lean into the actual lovieawards.com visual language: light
+ * backgrounds, asymmetric layouts, generous whitespace, editorial
+ * typography with selective brand accents.
+ * ======================================================================= */
+
+const CREDITS_CREATED_BY = [
+  { name: 'Selin Clayton', title: 'Research Lead & Strategist' },
+  { name: 'Jordana Jarrett', title: 'Head of Brand Strategy' },
+  { name: 'Jesse Feister', title: 'Executive Director' },
+  { name: 'Nick Farnhill', title: 'Founder of FOOD' },
+  { name: 'Nick Shizeng Ni', title: 'Lead Designer' },
+  { name: 'Nidha Kattil Veetil', title: 'Marketing Director' },
+]
+
+const CREDITS_CONTRIBUTORS = [
+  { name: 'Christine McGinnis', title: 'Director of Design, Wave Design Consultants' },
+  { name: 'Enrique Dans', title: 'Professor of Innovation, IE UNIVERSITY' },
+  { name: 'Fabrizio Piccolini', title: 'Executive Creative Director, Mirror' },
+  { name: 'Giacomo Scandolara', title: 'CEO, Giga Design Studio Srl' },
+  { name: 'Miguel Priera', title: 'Senior Visual & Interaction Designer, Hanzo' },
+  { name: 'Pepe Garcia', title: 'Executive Creative Director, Now Independent (exMcCann, exFCB, exGrey, exJellyfish)' },
+  { name: 'Stefanie Palomino', title: 'Vice President Product, Marketing and Innovation, Middelhoffconsulting S.L.' },
+]
+
+// Option A — "Cream Asymmetric Editorial"
+// No hard dark break. Continues the beige body of the report. Asymmetric
+// magazine-style grid: section label sits as a big display heading in
+// the left rail, names stack cleanly on the right. Single orange
+// hairline under each label. Most restrained / most "Lovie site" feel.
+function CreditsOptionA() {
+  return (
+    <div>
+      <OptionLabel
+        n={1}
+        title="Credits Option A — Cream Asymmetric Editorial"
+        description="Light cream background continues from the body. Asymmetric magazine layout: section label as a display heading on the left, names listed on the right. Thin orange hairlines mark each section. Restraint > drama. Closest to lovieawards.com."
+      />
+      <div style={{ background: CREAM, padding: '96px 40px 120px', fontFamily: "'Scto Grotesk A', -apple-system, sans-serif" }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          {/* Top wordmark — left aligned, big. No center treatment. */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 80, gap: 24 }}>
+            <h2 style={{ fontSize: 'clamp(48px, 8vw, 96px)', fontWeight: 700, color: BLACK, lineHeight: 1, letterSpacing: '-0.02em', margin: 0 }}>
+              Credits
+            </h2>
+            <img src="/lovie/no-1-heart.svg" alt="" aria-hidden style={{ width: 80, height: 'auto', marginTop: 8 }} />
+          </div>
+
+          {/* Two sections — same grid pattern, different content */}
+          <CreditsSectionA label="Created By" people={CREDITS_CREATED_BY} />
+          <div style={{ height: 64 }} />
+          <CreditsSectionA label="Contributors" people={CREDITS_CONTRIBUTORS} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CreditsSectionA({ label, people }: { label: string; people: { name: string; title: string }[] }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 56, alignItems: 'start' }}>
+      {/* Left rail — display-sized section label */}
+      <div>
+        <div style={{ height: 2, background: ORANGE, width: 48, marginBottom: 24 }} />
+        <h3 style={{ fontSize: 'clamp(28px, 3.5vw, 44px)', fontWeight: 700, color: BLACK, lineHeight: 1.05, letterSpacing: '-0.01em', margin: 0 }}>
+          {label}
+        </h3>
+      </div>
+
+      {/* Right — clean stacked list */}
+      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {people.map((p) => (
+          <li key={p.name}>
+            <p style={{ fontSize: 18, fontWeight: 500, color: BLACK, lineHeight: 1.3, margin: 0 }}>{p.name}</p>
+            <p style={{ fontSize: 14, color: BLACK, opacity: 0.55, lineHeight: 1.5, margin: '4px 0 0' }}>{p.title}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// Option B — "Lime Brand Moment"
+// Lime ground floods the section as a closing brand statement,
+// bookending the hero. Black text throughout for max contrast. Centered
+// composition but with editorial typography weight. A single black
+// heart sticker tops the section. Bolder than Option A but still light
+// and restrained — no decorative clutter.
+function CreditsOptionB() {
+  return (
+    <div>
+      <OptionLabel
+        n={2}
+        title="Credits Option B — Lime Brand Moment"
+        description="Lime ground bookends the hero. Black text throughout. Centered composition with editorial weight. Bolder than Option A but still light — no decorative clutter. Functions as a closing brand statement."
+      />
+      <div style={{ background: LIME, padding: '96px 40px 120px', fontFamily: "'Scto Grotesk A', -apple-system, sans-serif" }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', textAlign: 'center' }}>
+          {/* Heart wordmark + Credits title */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 72 }}>
+            <img src="/lovie/no-1-heart.svg" alt="" aria-hidden style={{ width: 64, height: 'auto', marginBottom: 24 }} />
+            <h2 style={{ fontSize: 'clamp(56px, 9vw, 112px)', fontWeight: 700, color: BLACK, lineHeight: 1, letterSpacing: '-0.02em', margin: 0 }}>
+              Credits
+            </h2>
+          </div>
+
+          {/* Created By — 2-col grid */}
+          <CreditsSectionB label="Created By" people={CREDITS_CREATED_BY} columns={2} />
+          <div style={{ height: 72 }} />
+
+          {/* Contributors — 3-col grid */}
+          <CreditsSectionB label="Contributors" people={CREDITS_CONTRIBUTORS} columns={3} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CreditsSectionB({ label, people, columns }: { label: string; people: { name: string; title: string }[]; columns: 2 | 3 }) {
+  return (
+    <div>
+      {/* Label — small caps eyebrow with a black hairline rule across the full width */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+        <div style={{ flex: 1, height: 1, background: BLACK, opacity: 0.4 }} />
+        <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: 4, textTransform: 'uppercase', color: BLACK, margin: 0 }}>
+          {label}
+        </p>
+        <div style={{ flex: 1, height: 1, background: BLACK, opacity: 0.4 }} />
+      </div>
+
+      {/* Grid of names */}
+      <ul
+        style={{
+          listStyle: 'none',
+          padding: 0,
+          margin: 0,
+          display: 'grid',
+          gridTemplateColumns: `repeat(${columns}, 1fr)`,
+          gap: '32px 40px',
+          textAlign: 'left',
+        }}
+      >
+        {people.map((p) => (
+          <li key={p.name}>
+            <p style={{ fontSize: 16, fontWeight: 700, color: BLACK, lineHeight: 1.25, margin: 0 }}>{p.name}</p>
+            <p style={{ fontSize: 13, color: BLACK, opacity: 0.65, lineHeight: 1.45, margin: '4px 0 0' }}>{p.title}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/* =========================================================================
+ * ABOUT THE LOVIE AWARDS — 2 mockups on the purple report background.
+ * Both share the same copy. Option A is a centered editorial statement.
+ * Option B mimics the 2024 Lovie report scrapbook collage with
+ * browser-window-style cards and hand-drawn squiggles.
+ * ======================================================================= */
+
+const ABOUT_HEADLINE = 'Enter Your Work Before the Final Entry Deadline on 26 June 2026'
+const ABOUT_BODY = [
+  "The Lovie Awards is the Webby Awards' benchmark for European digital excellence, recognising the people, projects, and ideas shaping Europe's contributions to the internet.",
+  'Launched in 2010, The Lovie Award is presented by the European arm of the International Academy of Digital Arts and Sciences (IADAS)—a 3,000+ membership body which also judges The Webby Awards. The Academy is comprised of leading Internet experts, business figures, luminaries, visionaries, artists, and talented entertainers and creators. Work is judged in seven native languages, including Spanish, Italian, Dutch, French, German, Swedish, and English.',
+]
+const ABOUT_CTA_URL = 'https://www.lovieawards.com/'
+
+// Option A — Centered Editorial Statement on Purple.
+// Purple report background as the stage. Single-column centered layout.
+// White body text, lime accents on eyebrow + CTA. Restrained.
+function AboutOptionA() {
+  return (
+    <div>
+      <OptionLabel
+        n={1}
+        title="About Option A — Centered Editorial Statement"
+        description="Purple report background as the stage. Centered single-column layout, white body text, lime accents on eyebrow + CTA. Restrained, big editorial typography. Functions as a closing brand statement."
+      />
+      <div
+        style={{
+          backgroundImage: 'url(/lovie/about-bg-purple.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          padding: '120px 24px 140px',
+          fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+          color: '#ffffff',
+        }}
+      >
+        <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ fontSize: 11, letterSpacing: 4, textTransform: 'uppercase', fontWeight: 500, color: LIME, margin: '0 0 24px' }}>
+            About The Lovie Awards
+          </p>
+          <h2 style={{ fontSize: 'clamp(34px, 5vw, 56px)', fontWeight: 700, lineHeight: 1.08, letterSpacing: '-0.01em', color: '#ffffff', margin: '0 0 40px' }}>
+            {ABOUT_HEADLINE}
+          </h2>
+          <div style={{ width: 48, height: 2, background: LIME, margin: '0 auto 32px' }} />
+          {ABOUT_BODY.map((p, i) => (
+            <p key={i} style={{ fontSize: 16, lineHeight: 1.7, color: '#ffffff', margin: '0 0 20px', opacity: 0.92 }}>
+              {p}
+            </p>
+          ))}
+          <a
+            href={ABOUT_CTA_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 12,
+              marginTop: 32,
+              background: LIME,
+              color: BLACK,
+              padding: '14px 28px',
+              borderRadius: 999,
+              fontSize: 13,
+              fontWeight: 600,
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+            }}
+          >
+            Enter Your Work
+            <span aria-hidden>→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Option B — Scrapbook Collage. Mimics the 2024 Lovie report:
+// browser-window-style cards on the purple ground, hand-drawn squiggles
+// in lime/orange between them. Playful, layered, magazine-spread feel.
+function AboutOptionB() {
+  return (
+    <div>
+      <OptionLabel
+        n={2}
+        title="About Option B — Scrapbook Collage"
+        description="Purple report background. Browser-window-style cards (mimicking the 2024 Lovie report) hold the about copy and CTA separately. Hand-drawn squiggles in lime/orange weave between them. Playful, layered, magazine-spread feel."
+      />
+      <div
+        style={{
+          backgroundImage: 'url(/lovie/about-bg-purple.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          padding: '96px 24px 140px',
+          fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+          position: 'relative',
+          minHeight: 720,
+        }}
+      >
+        {/* Decorative hand-drawn squiggles */}
+        <svg aria-hidden style={{ position: 'absolute', top: 60, left: '46%', width: 80, height: 60, pointerEvents: 'none' }} viewBox="0 0 80 60">
+          <path d="M 5 30 Q 20 5 35 30 Q 50 55 65 30 Q 75 18 78 24" stroke={LIME} strokeWidth="3" strokeLinecap="round" fill="none" />
+        </svg>
+        <svg aria-hidden style={{ position: 'absolute', bottom: 100, right: '8%', width: 70, height: 100, pointerEvents: 'none' }} viewBox="0 0 70 100">
+          <path d="M 10 10 Q 30 30 20 60 Q 10 85 35 95" stroke={ORANGE} strokeWidth="3" strokeLinecap="round" fill="none" />
+          <path d="M 35 95 L 28 85 M 35 95 L 45 92" stroke={ORANGE} strokeWidth="3" strokeLinecap="round" fill="none" />
+        </svg>
+
+        <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative' }}>
+          {/* Main about card — browser-window style */}
+          <BrowserWindowCard offset={{ top: 0, left: 0 }} width={620} accent={ORANGE}>
+            <p style={{ fontSize: 11, letterSpacing: 4, textTransform: 'uppercase', fontWeight: 500, color: ORANGE, margin: '0 0 16px' }}>
+              About The Lovie Awards
+            </p>
+            <h2 style={{ fontSize: 'clamp(28px, 3.5vw, 40px)', fontWeight: 700, lineHeight: 1.1, color: BLACK, margin: '0 0 24px', letterSpacing: '-0.01em' }}>
+              The benchmark for European digital excellence
+            </h2>
+            {ABOUT_BODY.map((p, i) => (
+              <p key={i} style={{ fontSize: 14, lineHeight: 1.6, color: BLACK, margin: '0 0 16px' }}>
+                {p}
+              </p>
+            ))}
+          </BrowserWindowCard>
+
+          {/* Smaller CTA card — offset to the right */}
+          <BrowserWindowCard offset={{ top: 420, left: 480 }} width={420} accent={LIME}>
+            <p style={{ fontSize: 18, fontWeight: 700, color: BLACK, lineHeight: 1.35, margin: '0 0 8px' }}>
+              {ABOUT_HEADLINE}
+            </p>
+            <div style={{ marginTop: 20 }}>
+              <a
+                href={ABOUT_CTA_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  background: ORANGE,
+                  color: '#ffffff',
+                  padding: '12px 22px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  letterSpacing: 2,
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                }}
+              >
+                Enter Your Work
+                <span aria-hidden>→</span>
+              </a>
+            </div>
+          </BrowserWindowCard>
+
+          {/* Spacer so the absolutely-positioned cards have room */}
+          <div style={{ height: 620 }} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BrowserWindowCard({
+  children,
+  offset,
+  width,
+  accent,
+}: {
+  children: React.ReactNode
+  offset: { top: number; left: number }
+  width: number
+  accent: string
+}) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: offset.top,
+        left: offset.left,
+        width,
+        maxWidth: 'calc(100% - 32px)',
+        background: '#ffffff',
+        borderRadius: 12,
+        boxShadow: '0 24px 60px -20px rgba(0,0,0,0.35)',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Window title bar — accent stripe with 3 traffic lights */}
+      <div style={{ background: accent, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ width: 11, height: 11, borderRadius: '50%', background: BLACK, opacity: 0.85 }} />
+        <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ffffff', opacity: 0.85 }} />
+        <span style={{ width: 11, height: 11, borderRadius: '50%', background: BLACK, opacity: 0.4 }} />
+      </div>
+      <div style={{ padding: '32px 32px 36px' }}>{children}</div>
     </div>
   )
 }

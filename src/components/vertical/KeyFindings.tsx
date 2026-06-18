@@ -41,8 +41,11 @@ const FALLBACK_SECTIONS = [
   },
 ]
 
-// Lovie's five Mediterranean trends. Used when CMS keyFindings are empty.
-// Once the editor populates 5 trend entries in Sanity, those take over.
+// Lovie's five Mediterranean trends + Takeaways. Used when CMS
+// keyFindings is empty. Anchor ids match the live DOM:
+// LovieTrendContent renders id={`trend-${trendNumber}`}, and the
+// Takeaways cover (ReportSectionCover with sectionNumber="takeaways")
+// renders id="section-takeaways".
 const LOVIE_FALLBACK_SECTIONS = [
   {
     number: '01',
@@ -50,7 +53,7 @@ const LOVIE_FALLBACK_SECTIONS = [
     description: '',
     color: '#000000',
     hoverBg: '#ff6000',
-    anchor: 'section-01',
+    anchor: 'trend-01',
   },
   {
     number: '02',
@@ -58,7 +61,7 @@ const LOVIE_FALLBACK_SECTIONS = [
     description: '',
     color: '#000000',
     hoverBg: '#ff6000',
-    anchor: 'section-02',
+    anchor: 'trend-02',
   },
   {
     number: '03',
@@ -66,7 +69,7 @@ const LOVIE_FALLBACK_SECTIONS = [
     description: '',
     color: '#000000',
     hoverBg: '#ff6000',
-    anchor: 'section-03',
+    anchor: 'trend-03',
   },
   {
     number: '04',
@@ -74,7 +77,7 @@ const LOVIE_FALLBACK_SECTIONS = [
     description: '',
     color: '#000000',
     hoverBg: '#ff6000',
-    anchor: 'section-04',
+    anchor: 'trend-04',
   },
   {
     number: '05',
@@ -82,7 +85,15 @@ const LOVIE_FALLBACK_SECTIONS = [
     description: '',
     color: '#000000',
     hoverBg: '#ff6000',
-    anchor: 'section-05',
+    anchor: 'trend-05',
+  },
+  {
+    number: '06',
+    title: 'Takeaways',
+    description: '',
+    color: '#000000',
+    hoverBg: '#ff6000',
+    anchor: 'section-takeaways',
   },
 ]
 
@@ -130,22 +141,21 @@ export function KeyFindings({ findings, property }: KeyFindingsProps = {}) {
       }
 
   const fallback = isLovie ? LOVIE_FALLBACK_SECTIONS : FALLBACK_SECTIONS
-  // Lovie always renders the 5-trend fallback for now: the CMS doc was
-  // duplicated from Anthem and its keyFindings still carry the original
-  // four Anthem titles. Once those are rewritten as the five Lovie trends
-  // in Sanity, swap this back to CMS-driven (same branch as Anthem).
-  const sections: ResolvedSection[] = isLovie
-    ? LOVIE_FALLBACK_SECTIONS
-    : findings && findings.length > 0
-    ? findings.map((f, i) => ({
-        number: f.number,
-        title: f.title,
-        description: f.description || '',
-        color: '#21261A',
-        hoverBg: f.hoverColor || fallback[i % fallback.length].hoverBg,
-        anchor: f.anchor || fallback[i % fallback.length].anchor,
-      }))
-    : fallback
+  // CMS-driven when keyFindings is populated; otherwise the property's
+  // hardcoded fallback list ships. Default text color is brand-aware:
+  // dark moss for Anthem, true black for Lovie.
+  const defaultTextColor = isLovie ? '#000000' : '#21261A'
+  const sections: ResolvedSection[] =
+    findings && findings.length > 0
+      ? findings.map((f, i) => ({
+          number: f.number,
+          title: f.title,
+          description: f.description || '',
+          color: defaultTextColor,
+          hoverBg: f.hoverColor || fallback[i % fallback.length].hoverBg,
+          anchor: f.anchor || fallback[i % fallback.length].anchor,
+        }))
+      : fallback
 
   // Lovie uses Option 1: cover-art banner on top + editorial numbered list
   // below. Distinct layout from Anthem's card grid, so it gets its own
@@ -243,7 +253,7 @@ export function KeyFindings({ findings, property }: KeyFindingsProps = {}) {
                     {section.number}
                   </span>
                   <span
-                    className="text-[18px] md:text-[24px] leading-[1.25] flex-1 transition-colors duration-200"
+                    className="text-[16px] md:text-[22px] leading-[1.25] flex-1 transition-colors duration-200"
                     style={{ fontWeight: 500, color: isHovered ? '#ff6000' : '#000000' }}
                   >
                     {section.title}
