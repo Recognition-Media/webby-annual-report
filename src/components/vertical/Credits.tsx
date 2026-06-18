@@ -38,7 +38,26 @@ const CONTRIBUTORS: Person[] = [
   { name: 'Lashanna Williams', title: 'Executive Director, A Sacred Passing', url: 'https://www.linkedin.com/in/lashannawilliams/' },
 ]
 
-const ACCENT = '#D17DD0'
+// Lovie fallbacks — names and titles for the Lovie Mediterranean report.
+// LinkedIn URLs will fill in once Jordana adds them to the CMS.
+const LOVIE_CREATED_BY: Person[] = [
+  { name: 'Selin Clayton', title: 'Research Lead & Strategist' },
+  { name: 'Jordana Jarrett', title: 'Head of Brand Strategy' },
+  { name: 'Jesse Feister', title: 'Executive Director' },
+  { name: 'Nick Farnhill', title: 'Founder of FOOD' },
+  { name: 'Nick Shizeng Ni', title: 'Lead Designer' },
+  { name: 'Nidha Kattil Veetil', title: 'Marketing Director' },
+]
+
+const LOVIE_CONTRIBUTORS: Person[] = [
+  { name: 'Christine McGinnis', title: 'Director of Design, Wave Design Consultants' },
+  { name: 'Enrique Dans', title: 'Professor of Innovation, IE UNIVERSITY' },
+  { name: 'Fabrizio Piccolini', title: 'Executive Creative Director, Mirror' },
+  { name: 'Giacomo Scandolara', title: 'CEO, Giga Design Studio Srl' },
+  { name: 'Miguel Priera', title: 'Senior Visual & Interaction Designer, Hanzo' },
+  { name: 'Pepe Garcia', title: 'Executive Creative Director, Now Independent (exMcCann, exFCB, exGrey, exJellyfish)' },
+  { name: 'Stefanie Palomino', title: 'Vice President Product, Marketing and Innovation, Middelhoffconsulting S.L.' },
+]
 
 function fromCms(list: CreditPerson[] | undefined, fallback: Person[]): Person[] {
   if (!list || list.length === 0) return fallback
@@ -50,6 +69,14 @@ function fromCms(list: CreditPerson[] | undefined, fallback: Person[]): Person[]
 }
 
 export function Credits({ report }: { report?: Report } = {}) {
+  const isLovie = report?.property === 'lovie'
+
+  if (isLovie) return <LovieCredits report={report} />
+  return <AnthemCredits report={report} />
+}
+
+// Anthem credits — dark moss block with cream text + lilac accents.
+function AnthemCredits({ report }: { report: Report | undefined }) {
   const createdBy = fromCms(report?.creditsCreatedBy, CREATED_BY)
   const contributors = fromCms(report?.creditsContributors, CONTRIBUTORS)
 
@@ -60,7 +87,6 @@ export function Credits({ report }: { report?: Report } = {}) {
       style={{ background: '#21261A', color: '#E3DDCA' }}
     >
       <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        {/* Section heading */}
         <motion.h2
           className="text-center text-[32px] md:text-[56px] leading-[1.1] mb-16 md:mb-20"
           style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 400 }}
@@ -72,12 +98,10 @@ export function Credits({ report }: { report?: Report } = {}) {
           Credits
         </motion.h2>
 
-        {/* Editorial credits column */}
         <div className="mx-auto" style={{ maxWidth: 880 }}>
-          <PeopleGroup title="Created By" people={createdBy} columns={2} delay={0.1} />
-
+          <AnthemPeopleGroup title="Created By" people={createdBy} columns={2} delay={0.1} />
           <div className="mt-14 md:mt-16">
-            <PeopleGroup title="Contributors" people={contributors} columns={3} delay={0.2} />
+            <AnthemPeopleGroup title="Contributors" people={contributors} columns={3} delay={0.2} />
           </div>
         </div>
       </div>
@@ -85,32 +109,17 @@ export function Credits({ report }: { report?: Report } = {}) {
   )
 }
 
-function PeopleGroup({
-  title,
-  people,
-  columns,
-  delay,
-}: {
-  title: string
-  people: Person[]
-  columns: 2 | 3
-  delay: number
-}) {
+function AnthemPeopleGroup({ title, people, columns, delay }: { title: string; people: Person[]; columns: 2 | 3; delay: number }) {
+  const accent = '#D17DD0'
   const gridClass =
     columns === 3
       ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4'
       : 'grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4'
-
   return (
     <div>
-      {/* Subhead — left-aligned label, with thin underline */}
       <motion.h3
         className="text-[11px] md:text-[12px] uppercase tracking-[3px] font-semibold mb-5 pb-2 text-left"
-        style={{
-          color: ACCENT,
-          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
-          borderBottom: `1px solid rgba(209, 125, 208, 0.25)`,
-        }}
+        style={{ color: accent, fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif", borderBottom: `1px solid rgba(209, 125, 208, 0.25)` }}
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -118,7 +127,6 @@ function PeopleGroup({
       >
         {title}
       </motion.h3>
-
       <ul className={gridClass} style={{ listStyle: 'none', padding: 0, margin: 0 }}>
         {people.map((person, i) => (
           <motion.li
@@ -129,20 +137,125 @@ function PeopleGroup({
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.35, delay: delay + 0.05 + i * 0.025 }}
           >
-            <p
-              className="text-[14px] md:text-[15px] font-medium leading-tight"
-              style={{
-                color: '#E3DDCA',
-                fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
-              }}
-            >
+            <p className="text-[14px] md:text-[15px] font-medium leading-tight" style={{ color: '#E3DDCA', fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>
+              {person.url ? (
+                <a href={person.url} target="_blank" rel="noopener noreferrer" className="transition-colors hover:opacity-100" style={{ color: '#E3DDCA', textDecoration: 'none', borderBottom: `1px solid rgba(209, 125, 208, 0.4)` }}>
+                  {person.name}
+                </a>
+              ) : (
+                person.name
+              )}
+            </p>
+            <p className="text-[11px] md:text-[12px] leading-[1.4] mt-0.5" style={{ color: '#E3DDCA', opacity: 0.55, fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>
+              {person.title}
+            </p>
+          </motion.li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// Lovie credits — lime ground (bookends the hero), asymmetric magazine
+// layout: section label as a display-sized heading on the left rail,
+// names stacked on the right. Dotted divider (strokeDasharray="2 14"
+// matches the hero/key-findings curves) sits above each section label.
+function LovieCredits({ report }: { report: Report | undefined }) {
+  const createdBy = fromCms(report?.creditsCreatedBy, LOVIE_CREATED_BY)
+  const contributors = fromCms(report?.creditsContributors, LOVIE_CONTRIBUTORS)
+
+  return (
+    <section
+      id="credits"
+      data-snap
+      className="relative"
+      style={{
+        background: '#eeffbb',
+        padding: '96px 24px 120px',
+        fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+        color: '#000000',
+      }}
+    >
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        {/* Top wordmark — left aligned, big. Heart sticker tucked to the right. */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 80, gap: 24 }}>
+          <motion.h2
+            style={{ fontSize: 'clamp(48px, 8vw, 96px)', fontWeight: 700, color: '#000000', lineHeight: 1, letterSpacing: '-0.02em', margin: 0 }}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.05 }}
+          >
+            Credits
+          </motion.h2>
+          <motion.img
+            src="/lovie/no-1-heart.svg"
+            alt=""
+            aria-hidden
+            style={{ width: 80, height: 'auto', marginTop: 8 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+          />
+        </div>
+
+        <LoviePeopleGroup label="Created By" people={createdBy} delay={0.1} />
+        <div style={{ height: 64 }} />
+        <LoviePeopleGroup label="Contributors" people={contributors} delay={0.2} />
+      </div>
+    </section>
+  )
+}
+
+// Dotted divider — matches the visual rhythm of the hero / Inside the
+// Report dotted curves. Those curves use strokeDasharray="2 14" on a
+// path stretched non-uniformly (preserveAspectRatio="none"), so the
+// dashes appear visually elongated. For a non-stretched rule we bake
+// that elongation into the values: 8px dash + 14px gap, 3px stroke.
+function DottedRule() {
+  return (
+    <svg width="140" height="8" viewBox="0 0 140 8" aria-hidden style={{ display: 'block', marginBottom: 28 }}>
+      <line x1="4" y1="4" x2="136" y2="4" stroke="#000000" strokeWidth="3" strokeLinecap="round" strokeDasharray="8 14" />
+    </svg>
+  )
+}
+
+function LoviePeopleGroup({ label, people, delay }: { label: string; people: Person[]; delay: number }) {
+  return (
+    <motion.div
+      className="grid grid-cols-1 md:grid-cols-[1fr_2fr]"
+      style={{ gap: 56, alignItems: 'start' }}
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.5, delay }}
+    >
+      {/* Left rail — dotted rule + display-sized section label */}
+      <div>
+        <DottedRule />
+        <h3 style={{ fontSize: 'clamp(28px, 3.5vw, 44px)', fontWeight: 700, color: '#000000', lineHeight: 1.05, letterSpacing: '-0.01em', margin: 0 }}>
+          {label}
+        </h3>
+      </div>
+
+      {/* Right — clean stacked list */}
+      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {people.map((person, i) => (
+          <motion.li
+            key={person.name}
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.35, delay: delay + 0.05 + i * 0.04 }}
+          >
+            <p style={{ fontSize: 18, fontWeight: 500, color: '#000000', lineHeight: 1.3, margin: 0 }}>
               {person.url ? (
                 <a
                   href={person.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="transition-colors hover:opacity-100"
-                  style={{ color: '#E3DDCA', textDecoration: 'none', borderBottom: '1px solid rgba(209, 125, 208, 0.4)' }}
+                  style={{ color: '#000000', textDecoration: 'none', borderBottom: '1px solid rgba(0,0,0,0.35)' }}
                 >
                   {person.name}
                 </a>
@@ -150,19 +263,12 @@ function PeopleGroup({
                 person.name
               )}
             </p>
-            <p
-              className="text-[11px] md:text-[12px] leading-[1.4] mt-0.5"
-              style={{
-                color: '#E3DDCA',
-                opacity: 0.55,
-                fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
-              }}
-            >
+            <p style={{ fontSize: 14, color: '#000000', opacity: 0.55, lineHeight: 1.5, margin: '4px 0 0' }}>
               {person.title}
             </p>
           </motion.li>
         ))}
       </ul>
-    </div>
+    </motion.div>
   )
 }

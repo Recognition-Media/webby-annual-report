@@ -13,6 +13,7 @@ import sectionCover from './objects/sectionCover'
 import keyFinding from './objects/keyFinding'
 import creditPerson from './objects/creditPerson'
 import insideTheHubs from './objects/insideTheHubs'
+import lovieTakeaway from './objects/lovieTakeaway'
 
 export const schemaTypes = [
   report,
@@ -30,4 +31,5 @@ export const schemaTypes = [
   keyFinding,
   creditPerson,
   insideTheHubs,
+  lovieTakeaway,
 ]

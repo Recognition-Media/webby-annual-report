@@ -14,6 +14,7 @@ import { IntroLetter } from './IntroLetter'
 import { TrendSection } from '../TrendSection'
 import { TrendContainer } from '../TrendContainer'
 import { AnthemFooter } from './AnthemFooter'
+import { LovieFooter } from './LovieFooter'
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
@@ -23,6 +24,7 @@ import { BubbleChart } from './BubbleChart'
 import { PairedBarChart } from './PairedBarChart'
 import { TabbedPriorities } from './TabbedPriorities'
 import { Takeaways } from './Takeaways'
+import { LovieTakeaways } from './LovieTakeaways'
 import { SurveyDemographics } from './SurveyDemographics'
 import { Credits } from './Credits'
 import { AnalyticsScripts } from '../AnalyticsScripts'
@@ -218,24 +220,39 @@ export function ReportView({ report }: { report: Report }) {
 
   function handleSeeReport(anchor?: string) {
     if (anchor) setScrollTarget(anchor)
-    if (hasAccess) {
-      // Same delay so that, on the first click after entry, the section has
-      // a frame to mount before we try scrolling to it.
-      setTimeout(() => {
-        if (anchor) {
-          const el = document.getElementById(anchor)
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            setTimeout(() => setEntered(true), 800)
-            return
-          }
-        }
-        reportRef.current?.scrollIntoView({ behavior: 'smooth' })
-        setTimeout(() => setEntered(true), 800)
-      }, 50)
-    } else {
+    if (!hasAccess) {
       setShowGate(true)
+      return
     }
+
+    // Hide the hero FIRST so ReportScroll's "active" effect can fire
+    // its window.scrollTo(0, 0) before our smooth scroll begins. If we
+    // scrolled first, that scrollTo would stomp the page back to the
+    // top of the report (= the Opening Letter) ~800ms later, exactly
+    // the symptom we were seeing for trend-* anchors.
+    setEntered(true)
+
+    // After the entered=true effect settles, look up the anchor and
+    // smooth-scroll there. Poll briefly in case the target hasn't
+    // hydrated yet (framer-motion wrappers around the trend sections
+    // can delay the id landing in the DOM by a frame or two).
+    function tryScroll(remainingTries: number) {
+      if (anchor) {
+        const el = document.getElementById(anchor)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          setScrollTarget(null)
+          return
+        }
+      }
+      if (remainingTries > 0) {
+        setTimeout(() => tryScroll(remainingTries - 1), 100)
+        return
+      }
+      reportRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    setTimeout(() => tryScroll(7), 200)
   }
 
   function handleSignupComplete() {
@@ -274,7 +291,7 @@ export function ReportView({ report }: { report: Report }) {
       {/* <IdleArrows active={entered} /> */}
 
       {/* Bottom progress / section nav (Anthem template) */}
-      <AnthemBottomNav active={entered} />
+      <AnthemBottomNav active={entered} property={report.property} />
 
       {/* Mobile navigation */}
       <MobileNav
@@ -327,18 +344,19 @@ export function ReportView({ report }: { report: Report }) {
 
             {report.property === 'lovie' ? (
               <>
-                {/* Lovie Trend 01 — hardcoded from the PDF draft. Will move to
-                    CMS once Sanity's trendSections[0] is populated with Lovie
-                    content (body, dataStats, insideTheHubs, video). */}
+                {/* Lovie Trend 01 — title + body are CMS-driven through
+                    trendSections[0]. Data module, Inside the Hubs, and
+                    feature video are still hardcoded (no schema fields
+                    for those Lovie-specific structures yet). */}
                 <LovieTrendContent
                   trendNumber="01"
-                  title="A Creative Scene Building Beyond Capital Cities"
+                  title={report.trendSections?.[0]?.trendTitle?.trim() || 'A Creative Scene Building Beyond Capital Cities'}
                   accentColor="#ff6000"
-                  body={[
+                  body={portableTextToBody(report.trendSections?.[0]?.trendBody, [
                     <>The Mediterranean&rsquo;s significant tech and creative work is now being produced in its surrounding cities. Economic pressure, including rising housing costs, stagnant salaries, and youth unemployment, is <strong style={{ fontWeight: 700 }}>redistributing talent outside of Spain, Portugal, and Italy&rsquo;s primary business hubs</strong>.</>,
                     <>As the creative scene decentralises into secondary cities, such as Bilbao, M&aacute;laga, Porto, and Coimbra, it is producing more distinctive work that merges local traditions with craft and emerging technologies.</>,
                     <>Decentralisation is still in its early stages; <strong style={{ fontWeight: 700 }}>half of creative leaders in the Mediterranean believe the region&rsquo;s most exciting work is still concentrated in major cities, while others believe it is on the move</strong>.</>,
-                  ]}
+                  ])}
                   dataModule={{
                     question: 'Where in your country is the most exciting creative work being produced?',
                     bars: [
@@ -368,6 +386,305 @@ export function ReportView({ report }: { report: Report }) {
                     title: '2025 Lovie Gold Winner, Craft — Best Installation or Experience',
                   }}
                 />
+
+                {/* Lovie Trend 02 — Smaller Players Are Setting the Standard.
+                    Body + quotes pulled from CMS so editor link/strong marks
+                    render; hardcoded values are fallbacks for when CMS is
+                    unpopulated. insideTheHubs is still hardcoded — that field
+                    isn't populated in Sanity yet for this trend. */}
+                <LovieTrendContent
+                  trendNumber="02"
+                  title={report.trendSections?.[1]?.trendTitle?.trim() || 'Smaller Players Are Setting the Standard'}
+                  accentColor="#ff6000"
+                  body={portableTextToBody(report.trendSections?.[1]?.trendBody, [
+                    <>Some of the most awarded work in the region is coming from smaller, independent structures: leaner agencies, tech startups, and small design studios.</>,
+                    <>In Spain, <strong>Elkanodata</strong> is a small, Lovie Award-winning agency that is implementing social change through digital design. In Italy, Lovie-recognised design leader <strong>Sidewave</strong> is crafting new branded experiences.</>,
+                    <><>Although smaller to mid-sized companies produce work that benchmarks globally, </>{' '}<strong style={{ fontWeight: 700 }}>they are struggling to keep pace with the technological changes being set by larger, more resourced organisations</strong>, according to creative leaders.</>,
+                  ])}
+                  quotes={(() => {
+                    const lovieBorders = ['#eeffbb', '#ff6000']
+                    const cms = report.trendSections?.[1]?.expertQuotes ?? []
+                    if (cms.length > 0) {
+                      return cms.map((q, i) => ({
+                        text: portableTextToPlain(q.quoteText),
+                        attribution: q.name,
+                        role: q.title || '',
+                        linkedInUrl: q.linkedInUrl,
+                        headshotUrl: q.headshot ? urlFor(q.headshot).width(240).height(240).fit('crop').url() : undefined,
+                        borderColor: lovieBorders[i % lovieBorders.length],
+                      }))
+                    }
+                    return [
+                      {
+                        text: '“The tension between cultural relevance and commercial sustainability is, in my view, the most underestimated structural challenge for independent creative studios in Europe right now — and nobody talks about it honestly.”',
+                        attribution: 'Giacomo Scando',
+                        role: 'CEO, Giga Design Studio Srl',
+                        headshotUrl: '/lovie/quote-giacomo.jpg',
+                        borderColor: lovieBorders[0],
+                      },
+                      {
+                        text: '“We live in a moment where mid-sized companies face the challenge of building the digital solidity needed to compete at the level of the great ones — while large companies must spend less time focused on the day-to-day and instead set the direction for their sector. Not simply shipping features in rapid sprints, but deliberately prioritizing transformative, high-impact change.”',
+                        attribution: 'Miguel Priera',
+                        role: 'Senior Visual & Interaction Designer, Hanzo',
+                        headshotUrl: '/lovie/quote-miguel.jpg',
+                        borderColor: lovieBorders[1],
+                      },
+                    ]
+                  })()}
+                  insideTheHubs={{
+                    eyebrow: 'Inside the Hubs',
+                    heading: 'Where Independents Are Winning',
+                    spainCopy: (
+                      <p>Independent agencies <strong>DAVID Madrid</strong>, <strong>LOLA MullenLowe</strong>, and <strong>&amp;Ros&agrave;s</strong> have placed in Spain&rsquo;s national Top 20 creative rankings every year from 2021&ndash;2025.</p>
+                    ),
+                    italyCopy: (
+                      <p>Two agencies, <strong>Small</strong> and <strong>LePub</strong>, are leaders in Italian creativity, while <strong>Mirror</strong>, a Lovie Award-winning studio, is producing some of Italy&rsquo;s most ambitious brand experiences from outside the network model.</p>
+                    ),
+                    portugalCopy: (
+                      <p>In Portugal, <strong>B&uuml;rocratik</strong> holds five consecutive years in European digital design rankings. The country&rsquo;s most internationally recognised creative output is consistently coming from outside its largest institutions.</p>
+                    ),
+                  }}
+                  featureMedia={{
+                    url: '/lovie/monogrid.mp4',
+                    label: 'Standouts from the Mediterranean',
+                    name: 'Fiorucci — Loveclub WebAR',
+                    title: 'by MONOGRID Srl',
+                  }}
+                />
+
+                {/* Lovie Trend 03 — Internationalism & Collaboration by
+                    Necessity. Data module uses ranked scores from the PDF
+                    survey (1–10 scale displayed as raw values, scaled to
+                    percentage for bar width). Final chart treatment TBD. */}
+                <LovieTrendContent
+                  trendNumber="03"
+                  title={report.trendSections?.[2]?.trendTitle?.trim() || 'Internationalism & Collaboration by Necessity'}
+                  accentColor="#ff6000"
+                  body={portableTextToBody(report.trendSections?.[2]?.trendBody, [
+                    <>The domestic markets across the Mediterranean aren&rsquo;t big enough to sustain commercial ambition at scale. As a reaction, organisations have embraced internationalism as a necessity. Creative leaders agree; <strong style={{ fontWeight: 700 }}>&ldquo;difficulty scaling beyond local markets&rdquo; was named the third challenge shaping work in their respective countries</strong>.</>,
+                    <>This is most evident in Portugal, which has become a global startup hub for AI and digital infrastructure. From the Web Summit conference to startups like <strong>Unbabel</strong> and <strong>Feedzai</strong>, they are building client and revenue systems outside of Portugal.</>,
+                    <>In the video and film industries, companies have embraced &ldquo;co-production&rdquo; to scale. Spain&rsquo;s most visible model is <strong>Funicular Films&rsquo; This Is Not Sweden</strong> series, a five-broadcaster European co-production spanning RTVE, 3Cat, SVT, NDR, and YLE, funded via ICEC Catalan grants and Creative Europe Media.</>,
+                  ])}
+                  dataModule={{
+                    question: 'In ranked order, what are the top challenges currently shaping your career in your country?',
+                    // Lollipop chart — better fit for ranked / score data
+                    // than horizontal bars. Module sits inside a lime tile
+                    // as an editorial color block.
+                    chartType: 'lollipop',
+                    footnote: 'Average score out of 10',
+                    bars: [
+                      { label: 'AI and automation', value: 53, displayValue: '5.3' },
+                      { label: 'Concentration of opportunity in major hubs', value: 45, displayValue: '4.5' },
+                      { label: 'Difficulty scaling beyond local markets', value: 44, displayValue: '4.4' },
+                      { label: 'Competition and market saturation', value: 42, displayValue: '4.2' },
+                      { label: 'Economic instability or funding gaps', value: 40, displayValue: '4.0' },
+                      { label: 'Regulatory complexity', value: 29, displayValue: '2.9' },
+                      { label: 'Talent scarcity and/or brain drain', value: 27, displayValue: '2.7' },
+                    ],
+                  }}
+                  insideTheHubs={{
+                    eyebrow: 'Inside the Hubs',
+                    heading: 'Reaching Beyond Their Borders',
+                    spainCopy: (
+                      <p>Companies here are straightforward in their approach: <strong>leveraging the Spanish language</strong>. With five hundred million Spanish speakers across the Americas, Spanish companies have a built-in audience and access to scale that no other European market contains. This, in part, fuels Spain&rsquo;s success in the creator economy. <strong>La Ruina</strong>, a comedy podcast built on personal stories, added live video formats and recorded a 190%+ increase in viewing hours after adding video. Spanish SVOD original commissions grew from 43 to 75 between 2023 and 2024.</p>
+                    ),
+                    italyCopy: (
+                      <p>The nation&rsquo;s most visible companies across tech operate at a global scale, from <strong>LePub</strong>, with ten offices across New York, Latin America, and EMEA, to <strong>Bending Spoons</strong>, which acquired Vimeo, AOL, and Eventbrite on its way to an $11B valuation.</p>
+                    ),
+                    portugalCopy: (
+                      <p>Portugal has intentionally become the international startup hub in the EU by investing in infrastructure. Tech companies <strong>Feedzai</strong>, <strong>Unbabel</strong>, and <strong>Talkdesk</strong> built their primary client relationships outside of Portugal while maintaining Portuguese headquarters.</p>
+                    ),
+                  }}
+                  quotes={(() => {
+                    const lovieBorders = ['#eeffbb', '#ff6000']
+                    const cms = report.trendSections?.[2]?.expertQuotes ?? []
+                    if (cms.length > 0) {
+                      return cms.map((q, i) => ({
+                        text: portableTextToPlain(q.quoteText),
+                        attribution: q.name,
+                        role: q.title || '',
+                        linkedInUrl: q.linkedInUrl,
+                        headshotUrl: q.headshot ? urlFor(q.headshot).width(240).height(240).fit('crop').url() : undefined,
+                        borderColor: lovieBorders[i % lovieBorders.length],
+                      }))
+                    }
+                    return [
+                      {
+                        text: '“Europe should grow closer together, and it should be much easier to do business together. We have the talent but often not the confidence and trust.”',
+                        attribution: 'Stefanie Palomino',
+                        role: 'VP Product, Marketing & Innovation, Middelhoff Consulting',
+                        borderColor: lovieBorders[0],
+                      },
+                      {
+                        text: '“We need to move from exporting creatives to importing briefs. We need to stop positioning our talent as a low-cost resource and start attracting global business, leading it from here — just as happens in Amsterdam.”',
+                        attribution: 'Pepe Garcia',
+                        role: 'Executive Creative Director, Now Independent',
+                        borderColor: lovieBorders[1],
+                      },
+                    ]
+                  })()}
+                />
+
+                {/* Lovie Trend 04 — Rooted in Local Culture for Global Reach.
+                    Data module = "select up to 3" percentages (bar chart, since
+                    these are share-of-respondents, not ranked scores). Two
+                    quotes spill into row 3 because both data + media slots
+                    are full above. */}
+                <LovieTrendContent
+                  trendNumber="04"
+                  title={report.trendSections?.[3]?.trendTitle?.trim() || 'Rooted in Local Culture for Global Reach'}
+                  accentColor="#ff6000"
+                  body={portableTextToBody(report.trendSections?.[3]?.trendBody, [
+                    <>As hyperoptimisation and AI increasingly homogenise the global creative industry, the Mediterranean&rsquo;s most internationally recognised work resists this flattening. Here, cultural specificity is a competitive advantage, from weaving concepts like Portugal&rsquo;s <em>&ldquo;Saudade&rdquo;</em> into digital storytelling to blending Italy&rsquo;s deep craft traditions with creative technologies.</>,
+                    <>Creative leaders across Spain, Portugal, and Italy agree; <strong style={{ fontWeight: 700 }}>about 60% of jurors in Southern Europe cited &ldquo;cultural specificity&rdquo; as defining the creative identity of digital work in their countries</strong>. Nurturing local stories is helping digital work find a larger audience.</>,
+                  ])}
+                  dataModule={{
+                    question: 'What do you think most defines the creative identity of digital work coming out of your country right now? Select up to 3.',
+                    chartType: 'verticalBar',
+                    bars: [
+                      { label: 'Strong aesthetic sensibility', shortLabel: 'Aesthetic Sensibility', value: 60, displayValue: '60%' },
+                      { label: 'Cultural specificity', shortLabel: 'Cultural Specificity', value: 60, displayValue: '60%' },
+                      { label: 'Personality-led storytelling', shortLabel: 'Personality-led', value: 40, displayValue: '40%' },
+                      { label: 'Technical innovation', shortLabel: 'Tech Innovation', value: 40, displayValue: '40%' },
+                      { label: 'Internationalism and cross-cultural reach', shortLabel: "Int'l Reach", value: 20, displayValue: '20%' },
+                      { label: 'Collaborative structures', shortLabel: 'Collab.', value: 20, displayValue: '20%' },
+                      { label: 'Social purpose', shortLabel: 'Social Purpose', value: 10, displayValue: '10%' },
+                      { label: "I don't think a single creative identity defines us", shortLabel: 'No Single Identity', value: 10, displayValue: '10%' },
+                    ],
+                  }}
+                  insideTheHubs={{
+                    eyebrow: 'Inside the Hubs',
+                    heading: 'Speaking to Each Unique Internet Culture',
+                    spainCopy: (
+                      <p>Cultural embeddedness drives successful work in Spain. <strong>Estrella Galicia</strong> has grown into one of Spain&rsquo;s most valuable brands while remaining explicitly Galician. A mature creator economy is also deeply embedded in Spanish culture, driven by high youth unemployment and the need for creator-led careers. Burger brand <strong>Vicio</strong>, co-founded by MasterChef Espa&ntilde;a winner Alex Puig, plugs its marketing into Spanish Internet culture: influencer-generated hype and drop-model strategies.</p>
+                    ),
+                    italyCopy: (
+                      <p>As the home of deep craft traditions across architecture, fashion, cinema, and design, Italy&rsquo;s approach to the Internet blends this heritage with sharp storytelling — a digital culture that prioritises strong visual language and narrative-led content. <strong>Bottega Veneta&rsquo;s Bottega for Bottegas</strong> campaign, which celebrated local workshops, increased the brand&rsquo;s visibility by 94%. <strong>Giga Design Studio&rsquo;s Loewe Craft Foundation Prize</strong> exemplified the merging of strong digital design with craft.</p>
+                    ),
+                    portugalCopy: (
+                      <p><em>&ldquo;Saudade,&rdquo;</em> Portugal&rsquo;s concept of deep longing, translates into creative work that is slower, visually minimalistic, and prioritises emotional depth. Beer brand <strong>Super Bock&rsquo;s</strong> breakthrough spot &ldquo;Pelas amizades que n&atilde;o querem ser outra coisa&rdquo; exemplifies this with its ode to friendship. Its connection to Lusophone-speaking nations like Brazil, Angola, and Mozambique creates a digital economy that inherently has global reach.</p>
+                    ),
+                  }}
+                  quotes={(() => {
+                    // Trend 4 features ONE quote (Pepe Garcia) under the
+                    // video — Rosalía / "local is global" lands directly on
+                    // the thesis. Pulls from CMS by name so we keep Pepe's
+                    // entry even if the CMS quote order changes.
+                    const cms = report.trendSections?.[3]?.expertQuotes ?? []
+                    const pepeCms = cms.find((q) => q.name?.toLowerCase().includes('pepe'))
+                    if (pepeCms) {
+                      return [{
+                        text: portableTextToPlain(pepeCms.quoteText),
+                        attribution: pepeCms.name,
+                        role: pepeCms.title || '',
+                        linkedInUrl: pepeCms.linkedInUrl,
+                        headshotUrl: pepeCms.headshot ? urlFor(pepeCms.headshot).width(240).height(240).fit('crop').url() : undefined,
+                        borderColor: '#ff6000',
+                      }]
+                    }
+                    return [
+                      {
+                        text: '“Spanish creative and cultural authenticity is what makes us global. Do you know Rosalía? Does she move you? Is she local or global? I think she’s simply authentic, and that’s something human beings can recognise, no matter where in the world it comes from.”',
+                        attribution: 'Pepe Garcia',
+                        role: 'Executive Creative Director (formerly JellyFish)',
+                        borderColor: '#ff6000',
+                      },
+                    ]
+                  })()}
+                  featureMedia={{
+                    url: '/lovie/super-bock.mp4',
+                    label: 'Standouts from the Mediterranean',
+                    name: "Super Bock — 'Pelas Amizades Que Não Querem Ser Outra Coisa'",
+                    title: 'Advert',
+                  }}
+                />
+
+                {/* Lovie Trend 05 — Building Digital Sovereignty & AI
+                    Infrastructure. Data module = single-choice sentiment
+                    question (5 responses, sums ≈ 100%). Using horizontal
+                    bar as placeholder until the viz design is picked from
+                    the /lovie-mockups options. Only Spain + Portugal in
+                    Inside the Hubs — Italy is covered in the body. */}
+                <LovieTrendContent
+                  trendNumber="05"
+                  title={report.trendSections?.[4]?.trendTitle?.trim() || 'Building Digital Sovereignty & AI Infrastructure'}
+                  accentColor="#ff6000"
+                  body={portableTextToBody(report.trendSections?.[4]?.trendBody, [
+                    <>Beyond consumer AI products, Mediterranean companies are investing in building sovereign, ethical digital infrastructure.</>,
+                    <>Italy became the first EU member state to pass a comprehensive AI framework with <strong>Law No. 132/2025</strong> in October 2025. Spain is focusing on AI compliance, passing <strong>AESIA</strong>, its dedicated AI supervisory agency. Portugal already touts a robust startup scene, with more credible role models and international visibility through Web Summit. Now, it is focusing on ethical AI.</>,
+                    <>However, <strong style={{ fontWeight: 700 }}>for nearly half of creative leaders living and working in Mediterranean countries, it is still too early to see a real effect of AI guardrails</strong>.</>,
+                  ])}
+                  dataModule={{
+                    question: 'How are European regulations around AI and digital platforms affecting creative work in your market?',
+                    chartType: 'donut',
+                    bars: [
+                      { label: 'Adding compliance burdens that affect small players', shortLabel: 'Compliance burdens', value: 11.11, displayValue: '11%', color: '#ffb986' },
+                      { label: 'Doing both, depending on the organisation', shortLabel: 'Both, depending', value: 33.33, displayValue: '33%', color: '#ca86ff' },
+                      { label: 'Too early to see a real effect', shortLabel: 'Too early', value: 44.44, displayValue: '44%', color: '#ff6000' },
+                      { label: 'No direct effect on the work I do', shortLabel: 'No direct effect', value: 11.11, displayValue: '11%', color: '#6D48FF' },
+                      { label: 'Creating useful guardrails', shortLabel: 'Useful guardrails', value: 0, displayValue: '0%', color: '#000000' },
+                    ],
+                  }}
+                  insideTheHubs={{
+                    eyebrow: 'Inside the Hubs',
+                    heading: 'Two Approaches to Sovereign AI',
+                    spainCopy: (
+                      <p>Spain is experiencing a tension between its booming creator economy and dependency on foreign platforms to fuel it. Spain&rsquo;s most successful creators — <strong>Ibai Llanos</strong>, <strong>AuronPlay</strong>, <strong>IlloJuan</strong>, and beyond — have built large audiences on Twitch and YouTube. However, it is investing in sovereign deep-tech infrastructure through companies like <strong>Multiverse Computing</strong>, a quantum and AI software provider known for compressing large language models while maintaining performance.</p>
+                    ),
+                    portugalCopy: (
+                      <p>Portugal has embedded responsible AI as a national strategy. The cluster around <strong>Feedzai</strong> is building AI fraud detection tools for financial institutions. <strong>YData</strong> applies AI to profiling synthetic data quality for machine learning teams navigating EU AI Act compliance. <strong>Talkdesk</strong> and <strong>DefinedCrowd</strong> represent an AI ecosystem built around real-world infrastructure: fraud detection and language translation.</p>
+                    ),
+                  }}
+                  quotes={(() => {
+                    const lovieBorders = ['#eeffbb', '#ff6000']
+                    const cms = report.trendSections?.[4]?.expertQuotes ?? []
+                    if (cms.length > 0) {
+                      return cms.map((q, i) => ({
+                        text: portableTextToPlain(q.quoteText),
+                        attribution: q.name,
+                        role: q.title || '',
+                        linkedInUrl: q.linkedInUrl,
+                        headshotUrl: q.headshot ? urlFor(q.headshot).width(240).height(240).fit('crop').url() : undefined,
+                        borderColor: lovieBorders[i % lovieBorders.length],
+                      }))
+                    }
+                    return [
+                      {
+                        text: '“The real tension is that clients risk reducing Gen AI to a mere ‘faster and cheaper’ shortcut. The true evolutionary leap requires deep care for the social and cultural relevance of projects, solving real human tensions. Technology must stop being a gimmick to impress and become an executive tool to make meaningful messages resonate.”',
+                        attribution: 'Fabrizio Piccolini',
+                        role: 'Executive Creative Director, Mirror',
+                        borderColor: lovieBorders[0],
+                      },
+                      {
+                        text: '“[European regulations on AI are] adding a compliance burden that affects smaller players.”',
+                        attribution: 'Stefanie Palomino',
+                        role: 'VP Product, Marketing and Innovation, Middelhoff Consulting S.L.',
+                        borderColor: lovieBorders[1],
+                      },
+                    ]
+                  })()}
+                />
+
+                {/* Takeaways transition — mirrors the Section 1 cover so
+                    the section break visually rhymes with the trend
+                    sections we just finished. Heart token + title + orange
+                    divider + italic standfirst + body copy. */}
+                {/* sectionNumber drives the DOM id (`section-${n}`). Use
+                    `takeaways-cover` here so the cover's id doesn't
+                    collide with the LovieTakeaways content below, which
+                    owns `section-takeaways` for anchor links. */}
+                <ReportSectionCover
+                  sectionNumber="takeaways-cover"
+                  title="Takeaways"
+                  subtitle="Five conclusions on the Mediterranean's creative hubs."
+                  copy="How Spain, Portugal, and Italy are reshaping Europe's contribution to the internet — from decentralised creative scenes to AI infrastructure."
+                  accentColor="#ff6000"
+                  property="lovie"
+                  sectionNumberSvg="/lovie/no-1.svg"
+                  compact
+                />
+
+                <LovieTakeaways takeaways={report.lovieTakeaways} />
               </>
             ) : (
             <>
@@ -835,7 +1152,11 @@ export function ReportView({ report }: { report: Report }) {
 
             <Credits report={report} />
 
-            <AnthemFooter report={report} />
+            {report.property === 'lovie' ? (
+              <LovieFooter report={report} />
+            ) : (
+              <AnthemFooter report={report} />
+            )}
           </ReportScroll>
         </div>
       )}

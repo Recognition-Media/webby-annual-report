@@ -14,7 +14,11 @@ export function IntroLetter({ report }: { report: Report }) {
   // Lovie sits on the lime brand background with orange accents and dark text.
   const theme = isLovie
     ? {
-        sectionBg: '#eeffbb',
+        // Beige reading surface — the hero is the only lime moment; the
+        // Opening Letter through to the trend sections share this calm
+        // base so long-form copy stays editorial and the lime "moments"
+        // (hero, Inside The Report cover-art banner) hit harder.
+        sectionBg: '#f2eeed',
         eyebrowColor: '#ff6000',
         textColor: '#000000',
         textColorMuted: 'rgba(0,0,0,0.55)',
@@ -106,7 +110,12 @@ export function IntroLetter({ report }: { report: Report }) {
               color: theme.textColor,
               fontSize: 16,
               lineHeight: '28px',
-              fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+              // Lovie body copy uses Scto Grotesk A Regular (matches the
+              // trend body + Inside the Hubs typography). Anthem keeps its
+              // Roc Grotesk variable typeface.
+              fontFamily: isLovie
+                ? "'Scto Grotesk A', -apple-system, sans-serif"
+                : "'roc-grotesk-variable', -apple-system, sans-serif",
             }}
           >
             {isLovie ? (
@@ -210,23 +219,11 @@ export function IntroLetter({ report }: { report: Report }) {
             )}
           </div>
 
-          {/* Closing line — Lovie signs with a team byline + highlighted name;
-              Anthem closes with the italic tagline. */}
-          {isLovie ? (
-            <motion.p
-              className="mt-6 text-[15px] md:text-[16px]"
-              style={{
-                fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
-                color: theme.textColor,
-              }}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              — <span style={{ color: '#ff6000', fontWeight: 700 }}>The Lovie Awards team</span>
-            </motion.p>
-          ) : (
+          {/* Closing line — Anthem closes with an italic tagline. Lovie has
+              no closing signature (the author column on the left already
+              names "Jesse Feister, Group Executive Director, The Lovie
+              Awards", so a team byline below would be redundant). */}
+          {!isLovie && (
             <motion.p
               className="mt-6 text-[15px] md:text-[16px]"
               style={{

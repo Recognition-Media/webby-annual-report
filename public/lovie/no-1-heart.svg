@@ -1,0 +1,5 @@
+<svg viewBox="0 0 364 352" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Heart silhouette only — extracted from No 1.svg. Used as the photo
+       mask so portraits crop into the rounded heart container. -->
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M286.026 258.396C328.989 258.277 363.721 223.352 363.602 180.39L363.35 89.5333C363.351 89.3007 363.352 89.0679 363.351 88.8348C363.232 45.8721 328.307 11.1405 285.344 11.2596L193.795 11.5133C150.832 11.6324 116.1 46.5571 116.219 89.5198C116.339 132.483 151.263 167.214 194.226 167.095L207.982 167.057L208.02 180.821C208.139 223.784 243.064 258.515 286.026 258.396Z" fill="black"/>
+</svg>

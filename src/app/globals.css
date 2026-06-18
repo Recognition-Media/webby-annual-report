@@ -250,6 +250,21 @@ body.anthem-template {
 }
 
 /* =========================================================================
+   Brightness-aware text classes
+   Applied to sections that have a background image. JS computes the
+   average brightness of the bg image at load time and toggles between
+   these classes so child text reads cleanly. Elements with their own
+   inline color (title, accent labels, buttons) override these naturally
+   via specificity.
+   ========================================================================= */
+.text-light {
+  color: #FFFFFF;
+}
+.text-dark {
+  color: #1A1A1A;
+}
+
+/* =========================================================================
    Lovie (vertical template) theme overrides
    Applied when body has class `lovie-template` (set by vertical/ReportView
    when report.property === 'lovie'). Anthem reports keep `anthem-template`.

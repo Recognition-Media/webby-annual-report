@@ -175,7 +175,9 @@ export function ReportSectionCover({
           <motion.p
             className="text-[16px] md:text-[18px] leading-[30px] text-center"
             style={{
-              fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+              fontFamily: isLovie
+                ? "'Scto Grotesk A', -apple-system, sans-serif"
+                : "'roc-grotesk-variable', -apple-system, sans-serif",
               color: '#21261A',
               opacity: 0.65,
             }}

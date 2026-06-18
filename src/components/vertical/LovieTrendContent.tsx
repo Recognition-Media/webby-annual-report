@@ -11,12 +11,24 @@ export interface LovieDataBar {
   value: number
   displayValue: string
   color?: string
+  /** Shorter caption used under vertical bars where space is tight.
+   * Falls back to `label` if not provided. */
+  shortLabel?: string
 }
 
 export interface LovieDataModule {
   eyebrow?: string
   question: string
   bars: LovieDataBar[]
+  /** Visualization style:
+   *   `bar`         — horizontal bars (default; share-of-respondents data)
+   *   `lollipop`    — thin stem with a dot at the value (ranked / scores)
+   *   `verticalBar` — column chart (Anthem-style; many parallel categories)
+   *   `donut`       — interactive donut with hover-to-highlight wedges
+   *                   (single-choice / share-of-total data) */
+  chartType?: 'bar' | 'lollipop' | 'verticalBar' | 'donut'
+  /** Optional footnote rendered under the chart (e.g. "Avg. score out of 10"). */
+  footnote?: string
 }
 
 export interface LovieInsideTheHubsContent {
@@ -47,6 +59,14 @@ export interface LovieQuote {
   text: string
   attribution: string
   role?: string
+  /** Optional LinkedIn (or any) URL. When set, the attribution name becomes
+   * a link. Source text typically already includes its own quote marks. */
+  linkedInUrl?: string
+  /** Optional circular headshot displayed to the left of the quote. */
+  headshotUrl?: string
+  /** Border color for the headshot circle. Defaults to the trend accent
+   * color if not specified. */
+  borderColor?: string
 }
 
 interface LovieTrendContentProps {
@@ -72,8 +92,35 @@ export function LovieTrendContent({
   featureMedia,
   quotes = [],
 }: LovieTrendContentProps) {
-  const row1Right = dataModule ?? (quotes[0] && { quote: quotes[0] })
-  const row2Right = featureMedia ?? (quotes[1] && { quote: quotes[1] })
+  // Right-column composition. Quotes act as a flexible fill so trends with
+  // different module combinations all read cleanly:
+  //   - dataModule present → row1 = data
+  //   - dataModule absent → row1 stacks ALL quotes alongside the body
+  //   - featureMedia present → row2 = media
+  //   - featureMedia absent → row2 stacks remaining quotes
+  //   - anything still leftover → row3 (full-width pulled quotes)
+  let quoteCursor = 0
+  let row1Right:
+    | { kind: 'data'; module: LovieDataModule }
+    | { kind: 'quotes'; quotes: LovieQuote[] }
+    | undefined
+  if (dataModule) {
+    row1Right = { kind: 'data', module: dataModule }
+  } else if (quotes.length > 0) {
+    row1Right = { kind: 'quotes', quotes }
+    quoteCursor = quotes.length
+  }
+  let row2Right:
+    | { kind: 'media'; media: LovieFeatureMedia }
+    | { kind: 'quotes'; quotes: LovieQuote[] }
+    | undefined
+  if (featureMedia) {
+    row2Right = { kind: 'media', media: featureMedia }
+  } else if (quotes.length > quoteCursor) {
+    row2Right = { kind: 'quotes', quotes: quotes.slice(quoteCursor) }
+    quoteCursor = quotes.length
+  }
+  const leftoverQuotes = quotes.slice(quoteCursor)
 
   return (
     <section
@@ -109,8 +156,12 @@ export function LovieTrendContent({
             {body.map((para, i) => (
               <motion.p
                 key={i}
-                className="text-[15px] md:text-[18px] leading-[1.6] md:leading-[30px] mb-6"
-                style={{ color: '#000' }}
+                className="text-[16px] leading-[1.6] mb-6"
+                style={{
+                  color: '#000',
+                  fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                  fontWeight: 400,
+                }}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -123,10 +174,14 @@ export function LovieTrendContent({
 
           {row1Right && (
             <div className="md:w-[50%] md:pt-[38px]">
-              {'bars' in row1Right ? (
-                <DataModuleBlock module={row1Right} accentColor={accentColor} />
+              {row1Right.kind === 'data' ? (
+                <DataModuleBlock module={row1Right.module} accentColor={accentColor} />
               ) : (
-                <QuoteBlock quote={row1Right.quote} accentColor={accentColor} />
+                <div className="flex flex-col gap-10">
+                  {row1Right.quotes.map((quote, i) => (
+                    <QuoteBlock key={i} quote={quote} accentColor={accentColor} />
+                  ))}
+                </div>
               )}
             </div>
           )}
@@ -142,13 +197,43 @@ export function LovieTrendContent({
             )}
             {row2Right && (
               <div className="md:w-[50%]">
-                {'url' in row2Right ? (
-                  <FeatureMediaBlock media={row2Right} accentColor={accentColor} />
+                {row2Right.kind === 'media' ? (
+                  <>
+                    <FeatureMediaBlock media={row2Right.media} accentColor={accentColor} />
+                    {/* When the feature media slot consumed the right column
+                        but quotes are still left over, stack them directly
+                        under the media so the column reads as one composed
+                        unit (rather than throwing a pulled quote into row 3). */}
+                    {leftoverQuotes.length > 0 && (
+                      <div className="mt-10 flex flex-col gap-10">
+                        {leftoverQuotes.map((quote, i) => (
+                          <QuoteBlock key={i} quote={quote} accentColor={accentColor} />
+                        ))}
+                      </div>
+                    )}
+                  </>
                 ) : (
-                  <QuoteBlock quote={row2Right.quote} accentColor={accentColor} />
+                  <div className="flex flex-col gap-10">
+                    {row2Right.quotes.map((quote, i) => (
+                      <QuoteBlock key={i} quote={quote} accentColor={accentColor} />
+                    ))}
+                  </div>
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ROW 3 — fallback pulled quotes for trends WITHOUT a feature
+            media. (Trends with media route leftovers below the media in
+            row 2 instead — see above.) */}
+        {leftoverQuotes.length > 0 && row2Right?.kind !== 'media' && (
+          <div className="mt-16 md:mt-24 mx-auto" style={{ maxWidth: 900 }}>
+            <div className="flex flex-col gap-10">
+              {leftoverQuotes.map((quote, i) => (
+                <QuoteBlock key={i} quote={quote} accentColor={accentColor} />
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -157,12 +242,22 @@ export function LovieTrendContent({
 }
 
 function DataModuleBlock({ module, accentColor }: { module: LovieDataModule; accentColor: string }) {
+  const chartType = module.chartType ?? 'bar'
+  // Donut charts sit on the beige section directly (no lime tile) — the
+  // colored wedges are already strong enough that an additional color
+  // block underneath fights for attention.
+  const useLimeTile = chartType !== 'donut'
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
+      style={useLimeTile ? {
+        background: '#eeffbb',
+        borderRadius: 14,
+        padding: '28px 28px',
+      } : undefined}
     >
       {module.eyebrow && (
         <p className="uppercase font-medium mb-3" style={{ fontSize: 11, letterSpacing: 4, color: accentColor }}>
@@ -172,32 +267,311 @@ function DataModuleBlock({ module, accentColor }: { module: LovieDataModule; acc
       <h4 className="leading-[1.35] mb-8 w-full" style={{ fontSize: 18, color: '#000', fontWeight: 700 }}>
         {module.question}
       </h4>
-      <div className="flex flex-col gap-6 w-full">
-        {module.bars.map((bar, i) => (
-          <motion.div
+
+      {chartType === 'lollipop' ? (
+        <div className="flex flex-col gap-5 w-full">
+          {module.bars.map((bar, i) => (
+            <LollipopRow key={i} bar={bar} accentColor={accentColor} delay={0.1 + i * 0.08} />
+          ))}
+        </div>
+      ) : chartType === 'verticalBar' ? (
+        <VerticalBarChart bars={module.bars} accentColor={accentColor} />
+      ) : chartType === 'donut' ? (
+        <DonutChart bars={module.bars} />
+      ) : (
+        <div className="flex flex-col gap-6 w-full">
+          {module.bars.map((bar, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -10 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
+            >
+              <div className="flex justify-between items-baseline mb-2 gap-3">
+                <span className="text-[13px] md:text-[14px]" style={{ color: '#000' }}>{bar.label}</span>
+                <span className="text-[18px] md:text-[22px] flex-shrink-0" style={{ color: '#000', fontWeight: 700 }}>{bar.displayValue}</span>
+              </div>
+              <div className="h-[8px] rounded-full" style={{ background: 'rgba(0,0,0,0.1)' }}>
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: bar.color || accentColor }}
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${bar.value}%` }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: 0.2 + i * 0.1, ease: 'easeOut' }}
+                />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {module.footnote && (
+        <p className="mt-5" style={{ fontSize: 11, color: '#000', opacity: 0.6 }}>
+          {module.footnote}
+        </p>
+      )}
+    </motion.div>
+  )
+}
+
+// Vertical bar chart — Anthem-style column chart for many parallel
+// categories. Bars animate from 0 → value height on scroll-in. Each bar
+// hovers to highlight; percentages sit above, short labels below.
+function VerticalBarChart({ bars, accentColor }: { bars: LovieDataBar[]; accentColor: string }) {
+  const max = Math.max(...bars.map((b) => b.value), 1)
+  const CHART_HEIGHT = 240
+  return (
+    <div
+      className="flex items-end w-full"
+      style={{ height: CHART_HEIGHT + 90, gap: 12, paddingTop: 28 }}
+    >
+      {bars.map((bar, i) => (
+        <VerticalBarColumn
+          key={i}
+          bar={bar}
+          accentColor={accentColor}
+          maxValue={max}
+          chartHeight={CHART_HEIGHT}
+          delay={0.08 + i * 0.06}
+        />
+      ))}
+    </div>
+  )
+}
+
+function VerticalBarColumn({
+  bar,
+  accentColor,
+  maxValue,
+  chartHeight,
+  delay,
+}: {
+  bar: LovieDataBar
+  accentColor: string
+  maxValue: number
+  chartHeight: number
+  delay: number
+}) {
+  const [hover, setHover] = useState(false)
+  const targetHeight = (bar.value / maxValue) * chartHeight
+  return (
+    <div
+      className="flex flex-col items-center justify-end"
+      style={{ flex: 1, minWidth: 0, cursor: 'default' }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      {/* Percentage label above bar */}
+      <span
+        className="mb-1"
+        style={{ fontSize: 13, fontWeight: 700, color: '#000' }}
+      >
+        {bar.displayValue}
+      </span>
+      {/* The bar itself */}
+      <motion.div
+        style={{
+          width: '100%',
+          background: bar.color || accentColor,
+          borderRadius: '4px 4px 0 0',
+          opacity: hover ? 1 : 0.92,
+          transition: 'opacity 0.2s ease',
+        }}
+        initial={{ height: 0 }}
+        whileInView={{ height: targetHeight }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7, delay, ease: 'easeOut' }}
+      />
+      {/* Short label below — block-level + hyphenation so single long
+          words ("Internationalism", "Collaborations") can break instead
+          of spilling across into the next column. */}
+      <span
+        className="mt-2 text-center"
+        style={{
+          fontSize: 9,
+          lineHeight: 1.2,
+          color: '#000',
+          minHeight: 28,
+          display: 'block',
+          width: '100%',
+          overflowWrap: 'break-word',
+          wordBreak: 'normal',
+          hyphens: 'auto',
+        }}
+      >
+        {bar.shortLabel || bar.label}
+      </span>
+    </div>
+  )
+}
+
+// Donut chart — interactive single-choice viz. Each wedge is a bar in the
+// data, sized by its share. Hover any wedge or legend row → wedge expands
+// outward, others fade, center reveals the label and percentage.
+function DonutChart({ bars }: { bars: LovieDataBar[] }) {
+  const [activeIdx, setActiveIdx] = useState<number | null>(null)
+  const total = bars.reduce((sum, b) => sum + b.value, 0) || 1
+  let cursor = -90 // start at top
+  const arcs = bars.map((bar) => {
+    const angleSpan = (bar.value / total) * 360
+    const slice = { ...bar, start: cursor, end: cursor + angleSpan }
+    cursor += angleSpan
+    return slice
+  })
+  const SIZE = 300
+  const center = SIZE / 2
+  const radius = 115
+  const innerRadius = 72
+  const focused = activeIdx !== null ? arcs[activeIdx] : null
+  return (
+    <div className="flex items-center gap-8 flex-wrap" style={{ rowGap: 24 }}>
+      <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ flexShrink: 0 }}>
+        {arcs.map((arc, i) => {
+          if (arc.value === 0) return null
+          const isActive = activeIdx === i
+          const expand = isActive ? 8 : 0
+          const r = radius + expand
+          const startRad = (arc.start * Math.PI) / 180
+          const endRad = (arc.end * Math.PI) / 180
+          const x1 = center + r * Math.cos(startRad)
+          const y1 = center + r * Math.sin(startRad)
+          const x2 = center + r * Math.cos(endRad)
+          const y2 = center + r * Math.sin(endRad)
+          const ix1 = center + innerRadius * Math.cos(startRad)
+          const iy1 = center + innerRadius * Math.sin(startRad)
+          const ix2 = center + innerRadius * Math.cos(endRad)
+          const iy2 = center + innerRadius * Math.sin(endRad)
+          const largeArc = arc.end - arc.start > 180 ? 1 : 0
+          const d = [
+            `M ${x1} ${y1}`,
+            `A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`,
+            `L ${ix2} ${iy2}`,
+            `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${ix1} ${iy1}`,
+            'Z',
+          ].join(' ')
+          return (
+            <motion.path
+              key={i}
+              d={d}
+              fill={arc.color || '#ff6000'}
+              style={{
+                cursor: 'pointer',
+                opacity: activeIdx === null || isActive ? 1 : 0.35,
+                transition: 'opacity 0.18s ease, d 0.18s ease',
+              }}
+              onMouseEnter={() => setActiveIdx(i)}
+              onMouseLeave={() => setActiveIdx(null)}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: activeIdx === null || isActive ? 1 : 0.35 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            />
+          )
+        })}
+        {/* Center label */}
+        <text
+          x={center}
+          y={center - 6}
+          textAnchor="middle"
+          fontSize={focused ? 34 : 13}
+          fontWeight={700}
+          fill="#000"
+          style={{ pointerEvents: 'none', transition: 'font-size 0.18s ease' }}
+        >
+          {focused ? `${focused.displayValue}` : 'Hover to'}
+        </text>
+        <text
+          x={center}
+          y={center + 20}
+          textAnchor="middle"
+          fontSize={12}
+          fill="#000"
+          opacity={focused ? 0.7 : 0.5}
+          style={{ pointerEvents: 'none' }}
+        >
+          {focused ? (focused.shortLabel || focused.label) : 'explore'}
+        </text>
+      </svg>
+
+      {/* Legend */}
+      <div className="flex flex-col" style={{ gap: 10, flex: 1, minWidth: 220 }}>
+        {bars.map((bar, i) => (
+          <div
             key={i}
-            initial={{ opacity: 0, x: -10 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 10,
+              cursor: 'pointer',
+              opacity: activeIdx === null || activeIdx === i ? 1 : 0.45,
+              transition: 'opacity 0.18s ease',
+            }}
+            onMouseEnter={() => setActiveIdx(i)}
+            onMouseLeave={() => setActiveIdx(null)}
           >
-            <div className="flex justify-between items-baseline mb-2 gap-3">
-              <span className="text-[13px] md:text-[14px]" style={{ color: '#000' }}>{bar.label}</span>
-              <span className="text-[18px] md:text-[22px] flex-shrink-0" style={{ color: '#000', fontWeight: 700 }}>{bar.displayValue}</span>
-            </div>
-            <div className="h-[8px] rounded-full" style={{ background: 'rgba(0,0,0,0.1)' }}>
-              <motion.div
-                className="h-full rounded-full"
-                style={{ background: bar.color || accentColor }}
-                initial={{ width: 0 }}
-                whileInView={{ width: `${bar.value}%` }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.2 + i * 0.1, ease: 'easeOut' }}
-              />
-            </div>
-          </motion.div>
+            <span style={{ width: 12, height: 12, background: bar.color || '#ff6000', borderRadius: 3, marginTop: 4, flexShrink: 0 }} />
+            <span style={{ fontSize: 13, color: '#000', flex: 1, lineHeight: 1.35 }}>{bar.label}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#000', minWidth: 56, textAlign: 'right' }}>{bar.displayValue}</span>
+          </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+// Lollipop row — thin orange stem ending in a dot at the data value, with
+// the score on the right. Dot scales up on hover with a soft orange halo.
+function LollipopRow({ bar, accentColor, delay }: { bar: LovieDataBar; accentColor: string; delay: number }) {
+  const [hover, setHover] = useState(false)
+  return (
+    <motion.div
+      className="flex items-center gap-3"
+      initial={{ opacity: 0, x: -10 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, delay }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{ cursor: 'default' }}
+    >
+      <span className="text-[12px] md:text-[13px]" style={{ color: '#000', flex: '0 0 40%', lineHeight: 1.3 }}>
+        {bar.label}
+      </span>
+      <div style={{ position: 'relative', flex: 1, height: 24, display: 'flex', alignItems: 'center' }}>
+        {/* Track */}
+        <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 2, background: 'rgba(0,0,0,0.12)', transform: 'translateY(-50%)' }} />
+        {/* Filled stem */}
+        <motion.div
+          style={{ position: 'absolute', left: 0, top: '50%', height: 2, background: bar.color || accentColor, transform: 'translateY(-50%)' }}
+          initial={{ width: 0 }}
+          whileInView={{ width: `${bar.value}%` }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: delay + 0.1, ease: 'easeOut' }}
+        />
+        {/* Dot */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            width: hover ? 22 : 14,
+            height: hover ? 22 : 14,
+            background: bar.color || accentColor,
+            borderRadius: '50%',
+            transform: 'translate(-50%, -50%)',
+            boxShadow: hover ? '0 0 0 5px rgba(255,96,0,0.18)' : 'none',
+            transition: 'width 0.2s ease, height 0.2s ease, box-shadow 0.2s ease',
+          }}
+          initial={{ left: '0%' }}
+          whileInView={{ left: `${bar.value}%` }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: delay + 0.1, ease: 'easeOut' }}
+        />
+      </div>
+      <span className="text-[16px] md:text-[18px]" style={{ color: '#000', fontWeight: 700, minWidth: 36, textAlign: 'right' }}>
+        {bar.displayValue}
+      </span>
     </motion.div>
   )
 }
@@ -261,7 +635,16 @@ function InsideTheHubsBlock({ content, accentColor }: { content: LovieInsideTheH
                 >
                   {row.label}
                 </h5>
-                <div className="text-[14px] md:text-[15px] leading-[1.55]" style={{ color: '#000' }}>
+                {/* Match body-paragraph typography exactly so the trend
+                    copy and hubs copy read as one continuous voice. */}
+                <div
+                  className="text-[16px] leading-[1.6]"
+                  style={{
+                    color: '#000',
+                    fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                    fontWeight: 400,
+                  }}
+                >
                   {Array.isArray(row.copy)
                     ? <PortableText value={row.copy as PortableTextBlock[]} />
                     : row.copy}
@@ -396,24 +779,57 @@ function FeatureMediaBlock({ media, accentColor }: { media: LovieFeatureMedia; a
 }
 
 function QuoteBlock({ quote, accentColor }: { quote: LovieQuote; accentColor: string }) {
+  // The source text often already includes its own quote marks (CMS PortableText
+  // preserves curly quotes from the editor). Render the text as-is rather than
+  // wrapping it in straight double-quotes ourselves — avoids double-quoting.
+  const nameNode = quote.linkedInUrl ? (
+    <a
+      href={quote.linkedInUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ color: 'inherit', textDecoration: 'underline' }}
+    >
+      <strong style={{ fontWeight: 700 }}>{quote.attribution}</strong>
+    </a>
+  ) : (
+    <strong style={{ fontWeight: 700 }}>{quote.attribution}</strong>
+  )
+  const borderColor = quote.borderColor ?? accentColor
   return (
     <motion.figure
       initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className="md:pt-[38px]"
+      className="md:pt-[38px] flex gap-4 md:gap-5 items-start"
+      style={{ margin: 0 }}
     >
-      <blockquote
-        className="text-[18px] md:text-[22px] leading-[1.35] mb-5 pl-5"
-        style={{ color: '#000', borderLeft: `3px solid ${accentColor}`, fontWeight: 500 }}
-      >
-        {`"${quote.text}"`}
-      </blockquote>
-      <figcaption className="text-[13px] md:text-[14px] pl-5" style={{ color: '#000' }}>
-        — <strong style={{ fontWeight: 700 }}>{quote.attribution}</strong>
-        {quote.role && <span style={{ opacity: 0.7 }}>{`, ${quote.role}`}</span>}
-      </figcaption>
+      {quote.headshotUrl && (
+        <img
+          src={quote.headshotUrl}
+          alt={quote.attribution}
+          className="flex-shrink-0"
+          style={{
+            width: 92,
+            height: 92,
+            borderRadius: '50%',
+            objectFit: 'cover',
+            border: `3px solid ${borderColor}`,
+          }}
+        />
+      )}
+      <div className="flex-1 min-w-0">
+        <blockquote
+          className="text-[16px] md:text-[19px] leading-[1.4] mb-4 pl-5"
+          style={{ color: '#000', borderLeft: `3px solid ${borderColor}`, fontWeight: 500, margin: 0 }}
+        >
+          {quote.text}
+        </blockquote>
+        <figcaption className="text-[13px] md:text-[14px] pl-5" style={{ color: '#000' }}>
+          — {nameNode}
+          {quote.role && <span style={{ opacity: 0.7 }}>{`, ${quote.role}`}</span>}
+        </figcaption>
+      </div>
     </motion.figure>
   )
 }
