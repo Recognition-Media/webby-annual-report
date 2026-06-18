@@ -8,7 +8,7 @@ import { useShowOnScroll } from '@/lib/useShowOnScroll'
 // Anthem ReportView (KeyFindings, the three ReportSectionCovers, and the
 // thank-you / takeaways block). Color comes from the Anthem palette so the
 // progress line + label tint match the section accent.
-const SECTIONS = [
+const ANTHEM_SECTIONS = [
   { id: 'key-findings', label: 'Key Findings', color: '#8C001C' },
   { id: 'section-01', label: 'The State of Social Impact', color: '#8C001C' },
   { id: 'section-02', label: 'Where the Pressure Is Landing', color: '#D17DD0' },
@@ -16,7 +16,51 @@ const SECTIONS = [
   { id: 'section-04', label: 'Takeaways', color: '#066DBA' },
 ]
 
-export function AnthemBottomNav({ active }: { active: boolean }) {
+// Lovie sections — match "Inside the Report" labels and anchor ids.
+// Orange accent throughout for consistency with the rest of the brand
+// palette (the bar runs on black, so progress + dot in orange read).
+const LOVIE_SECTIONS = [
+  { id: 'key-findings', label: 'Inside The Report', color: '#ff6000' },
+  { id: 'trend-01', label: 'Beyond Capital Cities', color: '#ff6000' },
+  { id: 'trend-02', label: 'Smaller Players', color: '#ff6000' },
+  { id: 'trend-03', label: 'Internationalism', color: '#ff6000' },
+  { id: 'trend-04', label: 'Cultural Specificity', color: '#ff6000' },
+  { id: 'trend-05', label: 'Digital Sovereignty', color: '#ff6000' },
+  { id: 'section-takeaways', label: 'Takeaways', color: '#ff6000' },
+]
+
+type Property = 'webby' | 'anthem' | 'telly' | 'lovie'
+
+export function AnthemBottomNav({ active, property }: { active: boolean; property?: Property }) {
+  const isLovie = property === 'lovie'
+  const SECTIONS = isLovie ? LOVIE_SECTIONS : ANTHEM_SECTIONS
+
+  // Lovie palette — black bar, cream label, orange accents, Scto
+  // Grotesk A. Anthem keeps dark moss + cream + Roc Grotesk.
+  const theme = isLovie
+    ? {
+        barBg: 'rgba(0, 0, 0, 0.92)',
+        progressTrack: 'rgba(238, 255, 187, 0.15)',
+        labelColor: '#f2eeed',
+        labelFont: "'Scto Grotesk A', -apple-system, sans-serif",
+        counterColor: 'rgba(242, 238, 237, 0.5)',
+        homeBorder: 'rgba(238, 255, 187, 0.4)',
+        homeBorderHover: 'rgba(238, 255, 187, 0.9)',
+        homeColor: 'rgba(242, 238, 237, 0.85)',
+        homeColorHover: '#f2eeed',
+      }
+    : {
+        barBg: 'rgba(33, 38, 26, 0.92)',
+        progressTrack: 'rgba(227, 221, 202, 0.1)',
+        labelColor: 'var(--anthem-cream)',
+        labelFont: "'roc-grotesk-variable', -apple-system, sans-serif",
+        counterColor: 'rgba(227, 221, 202, 0.4)',
+        homeBorder: 'rgba(227, 221, 202, 0.3)',
+        homeBorderHover: 'rgba(227, 221, 202, 0.7)',
+        homeColor: 'rgba(227, 221, 202, 0.8)',
+        homeColorHover: 'rgba(227, 221, 202, 1)',
+      }
+
   const [activeIndex, setActiveIndex] = useState(0)
   const { visible, pin, unpin } = useShowOnScroll()
 
@@ -70,7 +114,7 @@ export function AnthemBottomNav({ active }: { active: boolean }) {
       style={{ pointerEvents: visible ? 'auto' : 'none' }}
     >
       {/* Progress line */}
-      <div className="relative h-[2px]" style={{ background: 'rgba(227, 221, 202, 0.1)' }}>
+      <div className="relative h-[2px]" style={{ background: theme.progressTrack }}>
         <motion.div
           className="h-[2px]"
           style={{ background: section.color }}
@@ -83,18 +127,15 @@ export function AnthemBottomNav({ active }: { active: boolean }) {
       <div
         className="px-5 md:px-[60px] py-4"
         style={{
-          background: 'rgba(33, 38, 26, 0.92)',
+          background: theme.barBg,
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
         }}
       >
         <div className="max-w-[1280px] mx-auto flex items-center gap-4">
-          {/* Animated current-section label.
-              Color is always cream for legibility on the dark moss bar
-              (the section's accent color was unreadable on dark — e.g.
-              #8C001C on moss). Section identity comes through the
-              progress line above. A small cream-tinted dot before the
-              label pairs the label with the progress bar's accent. */}
+          {/* Animated current-section label. Color stays cream/white for
+              legibility on the dark bar; section identity comes through
+              the progress line + the small accent-coloured dot. */}
           <span
             className="inline-block w-1.5 h-1.5 rounded-full transition-colors"
             style={{ background: section.color }}
@@ -108,7 +149,7 @@ export function AnthemBottomNav({ active }: { active: boolean }) {
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.25 }}
               className="text-[10px] md:text-[11px] tracking-[3px] uppercase font-medium"
-              style={{ color: 'var(--anthem-cream)', fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}
+              style={{ color: theme.labelColor, fontFamily: theme.labelFont }}
             >
               {section.label}
             </motion.span>
@@ -117,7 +158,7 @@ export function AnthemBottomNav({ active }: { active: boolean }) {
           {/* Counter */}
           <span
             className="text-[10px] tracking-[1px] ml-auto"
-            style={{ color: 'rgba(227, 221, 202, 0.4)', fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}
+            style={{ color: theme.counterColor, fontFamily: theme.labelFont }}
           >
             {activeIndex + 1} / {SECTIONS.length}
           </span>
@@ -128,17 +169,17 @@ export function AnthemBottomNav({ active }: { active: boolean }) {
               onClick={goHome}
               className="text-[9px] md:text-[10px] tracking-[2px] uppercase px-3 py-1.5 rounded transition-colors cursor-pointer"
               style={{
-                border: '1px solid rgba(227, 221, 202, 0.3)',
-                color: 'rgba(227, 221, 202, 0.8)',
-                fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                border: `1px solid ${theme.homeBorder}`,
+                color: theme.homeColor,
+                fontFamily: theme.labelFont,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(227, 221, 202, 0.7)'
-                e.currentTarget.style.color = 'rgba(227, 221, 202, 1)'
+                e.currentTarget.style.borderColor = theme.homeBorderHover
+                e.currentTarget.style.color = theme.homeColorHover
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(227, 221, 202, 0.3)'
-                e.currentTarget.style.color = 'rgba(227, 221, 202, 0.8)'
+                e.currentTarget.style.borderColor = theme.homeBorder
+                e.currentTarget.style.color = theme.homeColor
               }}
             >
               Home

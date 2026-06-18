@@ -48,6 +48,18 @@ const NAV_SECTIONS = [
   { id: 'section-04', label: 'Takeaways' },
 ]
 
+// Lovie nav — short keywords that mirror "Inside the Report" while
+// staying readable in the menu tile. Full trend titles in KeyFindings
+// run 4–7 words each, which wraps awkwardly in the 280px-wide menu.
+const LOVIE_NAV_SECTIONS = [
+  { id: 'trend-01', label: 'Beyond Capital Cities' },
+  { id: 'trend-02', label: 'Smaller Players' },
+  { id: 'trend-03', label: 'Internationalism' },
+  { id: 'trend-04', label: 'Cultural Specificity' },
+  { id: 'trend-05', label: 'Digital Sovereignty' },
+  { id: 'section-takeaways', label: 'Takeaways' },
+]
+
 interface HeroSectionProps {
   report: Report
   carouselImages?: CarouselImage[]
@@ -273,7 +285,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
                   className="absolute top-[52px] right-0 w-[280px] rounded-lg overflow-hidden z-50"
                   style={{ background: 'rgba(33, 38, 26, 0.96)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(227, 221, 202, 0.14)' }}
                 >
-                  {NAV_SECTIONS.map((section, i) => (
+                  {(isLovie ? LOVIE_NAV_SECTIONS : NAV_SECTIONS).map((section, i) => (
                     <button
                       key={section.id}
                       type="button"

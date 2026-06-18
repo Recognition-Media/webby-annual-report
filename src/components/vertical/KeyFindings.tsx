@@ -98,8 +98,29 @@ const LOVIE_FALLBACK_SECTIONS = [
 ]
 
 function scrollToAnchor(anchor: string) {
-  const el = document.getElementById(anchor)
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const raw = (anchor || '').trim()
+  if (!raw) return
+
+  // Try the exact value first, then a couple of forgiving variants so
+  // small CMS inconsistencies (missing/extra `section-` prefix, etc.)
+  // don't silently break the link.
+  const candidates = [
+    raw,
+    raw.startsWith('section-') ? raw.slice('section-'.length) : `section-${raw}`,
+  ]
+
+  for (const id of candidates) {
+    const el = document.getElementById(id)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      return
+    }
+  }
+
+  // Help during local dev — surface mis-typed anchors instead of failing silently.
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn(`[KeyFindings] No element found for anchor "${raw}". Check the CMS keyFinding anchor or the section id.`)
+  }
 }
 
 type ResolvedSection = {

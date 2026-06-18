@@ -220,24 +220,39 @@ export function ReportView({ report }: { report: Report }) {
 
   function handleSeeReport(anchor?: string) {
     if (anchor) setScrollTarget(anchor)
-    if (hasAccess) {
-      // Same delay so that, on the first click after entry, the section has
-      // a frame to mount before we try scrolling to it.
-      setTimeout(() => {
-        if (anchor) {
-          const el = document.getElementById(anchor)
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            setTimeout(() => setEntered(true), 800)
-            return
-          }
-        }
-        reportRef.current?.scrollIntoView({ behavior: 'smooth' })
-        setTimeout(() => setEntered(true), 800)
-      }, 50)
-    } else {
+    if (!hasAccess) {
       setShowGate(true)
+      return
     }
+
+    // Hide the hero FIRST so ReportScroll's "active" effect can fire
+    // its window.scrollTo(0, 0) before our smooth scroll begins. If we
+    // scrolled first, that scrollTo would stomp the page back to the
+    // top of the report (= the Opening Letter) ~800ms later, exactly
+    // the symptom we were seeing for trend-* anchors.
+    setEntered(true)
+
+    // After the entered=true effect settles, look up the anchor and
+    // smooth-scroll there. Poll briefly in case the target hasn't
+    // hydrated yet (framer-motion wrappers around the trend sections
+    // can delay the id landing in the DOM by a frame or two).
+    function tryScroll(remainingTries: number) {
+      if (anchor) {
+        const el = document.getElementById(anchor)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          setScrollTarget(null)
+          return
+        }
+      }
+      if (remainingTries > 0) {
+        setTimeout(() => tryScroll(remainingTries - 1), 100)
+        return
+      }
+      reportRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    setTimeout(() => tryScroll(7), 200)
   }
 
   function handleSignupComplete() {
@@ -276,7 +291,7 @@ export function ReportView({ report }: { report: Report }) {
       {/* <IdleArrows active={entered} /> */}
 
       {/* Bottom progress / section nav (Anthem template) */}
-      <AnthemBottomNav active={entered} />
+      <AnthemBottomNav active={entered} property={report.property} />
 
       {/* Mobile navigation */}
       <MobileNav
@@ -654,8 +669,12 @@ export function ReportView({ report }: { report: Report }) {
                     the section break visually rhymes with the trend
                     sections we just finished. Heart token + title + orange
                     divider + italic standfirst + body copy. */}
+                {/* sectionNumber drives the DOM id (`section-${n}`). Use
+                    `takeaways-cover` here so the cover's id doesn't
+                    collide with the LovieTakeaways content below, which
+                    owns `section-takeaways` for anchor links. */}
                 <ReportSectionCover
-                  sectionNumber="takeaways"
+                  sectionNumber="takeaways-cover"
                   title="Takeaways"
                   subtitle="Five conclusions on the Mediterranean's creative hubs."
                   copy="How Spain, Portugal, and Italy are reshaping Europe's contribution to the internet — from decentralised creative scenes to AI infrastructure."

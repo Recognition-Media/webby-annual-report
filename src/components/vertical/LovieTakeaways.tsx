@@ -45,10 +45,14 @@ export function LovieTakeaways({ takeaways }: { takeaways?: LovieTakeaway[] } = 
 
   return (
     <section
+      id="section-takeaways"
       data-snap
       style={{
-        background: '#f2eeed',
-        padding: '0 24px 120px',
+        // Lovie-style light grey ground — cleaner break from the beige
+        // body and the lime credits below. Cards sit directly on this
+        // surface with no fill of their own.
+        background: '#E8E8E8',
+        padding: '40px 24px 120px',
         fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
       }}
     >
@@ -73,9 +77,7 @@ export function LovieTakeaways({ takeaways }: { takeaways?: LovieTakeaway[] } = 
               viewport={{ once: true, margin: '-80px' }}
               transition={{ duration: 0.5, delay: i * 0.05 }}
               style={{
-                background: '#fffaf3',
-                borderRadius: 12,
-                padding: '32px 28px',
+                // No card fill — items sit directly on the grey ground.
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 16,
