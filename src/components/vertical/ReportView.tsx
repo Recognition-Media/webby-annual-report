@@ -303,6 +303,7 @@ export function ReportView({ report }: { report: Report }) {
       {/* Mobile navigation */}
       <MobileNav
         active={entered}
+        property={report.property}
         trendTitles={(report.trendSections || [])
           .filter((s) => s.enabled !== false)
           .map((s) => s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim())
