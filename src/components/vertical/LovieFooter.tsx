@@ -62,7 +62,7 @@ export function LovieFooter({ report }: { report: Report }) {
         // portion lands behind "About The Lovie Awards." instead of
         // sitting fully above the headline.
         backgroundPosition: 'center -144px',
-        padding: '120px 24px 140px',
+        padding: '120px 24px 220px',
         fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
         color: '#ffffff',
       }}

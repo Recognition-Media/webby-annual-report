@@ -186,14 +186,15 @@ export function KeyFindings({ findings, property }: KeyFindingsProps = {}) {
       <section
         id="key-findings"
         data-snap
-        className="relative overflow-hidden pt-20 md:pt-24 pb-16 md:pb-24"
+        className="relative overflow-hidden pt-4 md:pt-24 pb-16 md:pb-24"
         style={{ background: theme.sectionBg }}
       >
         {/* Cover-art banner: 3 country stickers with a short dotted curve
             connecting Italy (center) to Portugal/Spain (left/right). SVG
             recreation rather than the static PNG so the curve/stickers
-            scale and respond independently. */}
-        <div className="relative w-full" style={{ height: 360 }}>
+            scale and respond independently. Mobile uses a shorter banner
+            so the artwork sits tight against the opening letter above. */}
+        <div className="relative w-full h-[220px] md:h-[360px]">
           <svg
             viewBox="0 0 1000 360" preserveAspectRatio="none"
             className="absolute inset-0 w-full h-full pointer-events-none"

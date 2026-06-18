@@ -249,7 +249,7 @@ function LoviePeopleGroup({ label, people, delay }: { label: string; people: Per
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.35, delay: delay + 0.05 + i * 0.04 }}
           >
-            <p style={{ fontSize: 18, fontWeight: 500, color: '#000000', lineHeight: 1.3, margin: 0 }}>
+            <p style={{ fontSize: 16, fontWeight: 500, color: '#000000', lineHeight: 1.3, margin: 0 }}>
               {person.url ? (
                 <a
                   href={person.url}

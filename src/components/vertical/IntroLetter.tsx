@@ -2,7 +2,41 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
+import { PortableText } from '@portabletext/react'
+import type { PortableTextComponents } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
+
+// Custom renderers so Lovie's CMS-driven letter body matches the
+// styling of the hardcoded fallback: paragraphs fade in on scroll,
+// bold marks render at 700, links stay editorial.
+const loviePortableTextComponents: PortableTextComponents = {
+  block: {
+    normal: ({ children }) => (
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        {children}
+      </motion.p>
+    ),
+  },
+  marks: {
+    strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+    em: ({ children }) => <em style={{ fontStyle: 'italic' }}>{children}</em>,
+    link: ({ value, children }) => (
+      <a
+        href={value?.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: '#ff6000', textDecoration: 'underline', textUnderlineOffset: 3 }}
+      >
+        {children}
+      </a>
+    ),
+  },
+}
 
 export function IntroLetter({ report }: { report: Report }) {
   const author = report.letterAuthors?.[0]
@@ -47,7 +81,7 @@ export function IntroLetter({ report }: { report: Report }) {
     <section
       id="welcome-letter"
       data-snap
-      className="relative overflow-hidden px-5 md:px-[60px] py-16 md:py-28"
+      className="relative overflow-hidden px-5 md:px-[60px] pt-16 pb-4 md:py-28"
       style={{
         background: theme.sectionBg,
       }}
@@ -119,43 +153,51 @@ export function IntroLetter({ report }: { report: Report }) {
             }}
           >
             {isLovie ? (
-              <>
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                >
-                  It is a creative mosaic: multiple languages, creative traditions, and ways of imagining what technology should do, all working in tandem. From the Nordics to the Mediterranean, each region brings its own realities, strengths, and ambitions, shaping Europe{"'"}s contribution to the Internet in distinct ways.
-                </motion.p>
+              report.letterBody && report.letterBody.length > 0 ? (
+                // CMS-driven path — renders whatever Jordana has written
+                // in Studio's "Welcome Letter" rich text field.
+                <PortableText value={report.letterBody} components={loviePortableTextComponents} />
+              ) : (
+                // Hardcoded fallback — used only when the CMS field is
+                // empty. Mirrors what shipped before the field was wired.
+                <>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    It is a creative mosaic: multiple languages, creative traditions, and ways of imagining what technology should do, all working in tandem. From the Nordics to the Mediterranean, each region brings its own realities, strengths, and ambitions, shaping Europe{"'"}s contribution to the Internet in distinct ways.
+                  </motion.p>
 
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <strong style={{ fontWeight: 700 }}>The Lovie Awards x Creative Hubs series</strong> explores those differences. Each report maps a different European region: the communities producing its most influential digital work, the forces shaping its creative identity, and the ideas the rest of the world should be paying attention to.
-                </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <strong style={{ fontWeight: 700 }}>The Lovie Awards x Creative Hubs series</strong> explores those differences. Each report maps a different European region: the communities producing its most influential digital work, the forces shaping its creative identity, and the ideas the rest of the world should be paying attention to.
+                  </motion.p>
 
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <strong style={{ fontWeight: 700 }}>The series begins in the Mediterranean, a region that deserves more recognition in global narratives</strong> about creativity and technology in Europe. Spain, Portugal, and Italy approach the internet on their own terms, drawing on deep cultural traditions while experimenting with new forms of storytelling and technology. Their success suggests some of the most interesting ideas are emerging outside the industry{"'"}s usual centres of attention.
-                </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <strong style={{ fontWeight: 700 }}>The series begins in the Mediterranean, a region that deserves more recognition in global narratives</strong> about creativity and technology in Europe. Spain, Portugal, and Italy approach the internet on their own terms, drawing on deep cultural traditions while experimenting with new forms of storytelling and technology. Their success suggests some of the most interesting ideas are emerging outside the industry{"'"}s usual centres of attention.
+                  </motion.p>
 
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                >
-                  At a pivotal moment for creativity and technology, these regions offer different pathways of building the internet, which the rest of the world can learn from.
-                </motion.p>
-              </>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    At a pivotal moment for creativity and technology, these regions offer different pathways of building the internet, which the rest of the world can learn from.
+                  </motion.p>
+                </>
+              )
             ) : (
               <>
                 <motion.p

@@ -95,6 +95,10 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         // v4 — designer's latest: three stickers staggered at top with a
         // dotted curve, leaving the bottom 60–70% open for title + CTA.
         heroImages: ['/lovie/trend-report-background-v4.png'],
+        // Portrait-orientation variant used when the viewport is mobile-
+        // sized; the desktop image's three-hearts-with-curve composition
+        // doesn't crop well below ~768px wide.
+        heroImagesMobile: ['/lovie/trend-report-background-mobile.png'],
         heroCaptions: [] as string[],
         heroBgColor: '#eeffbb',
         gradientOverlay: 'none',
@@ -173,6 +177,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         brandLabel: 'By The Anthem Awards',
         brandLabelColor: 'var(--anthem-green)',
         heroImages: LOCAL_HERO_IMAGES,
+        heroImagesMobile: undefined as string[] | undefined,
         heroCaptions: [] as string[],
         heroBgColor: '#21261A',
         gradientOverlay:
@@ -196,7 +201,11 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
     onSeeReport?.(anchor)
   }
   return (
-    <section id="hero" className={`relative w-full h-screen overflow-hidden ${textTone === 'light' ? 'text-light' : 'text-dark'}`}>
+    <section
+      id="hero"
+      className={`relative w-full h-screen overflow-hidden ${textTone === 'light' ? 'text-light' : 'text-dark'}`}
+      style={{ background: theme.heroBgColor }}
+    >
       {/* Full-bleed background carousel */}
       <div className="absolute inset-0">
         {/* CMS carousel images override the local fallback */}
@@ -206,6 +215,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           // Revert to `carouselImages` for both when test is over.
           cmsImages={isLovie ? undefined : carouselImages}
           localImages={theme.heroImages}
+          localImagesMobile={theme.heroImagesMobile}
           solidFallbackColor={theme.heroBgColor}
           captions={theme.heroCaptions}
           captionEyebrow={isLovie ? 'Featured' : undefined}
@@ -221,9 +231,12 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         )}
       </div>
 
-      {/* Minimal top bar */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 md:px-[60px] py-6">
-        {/* Brand logo — top left */}
+      {/* Minimal top bar. On mobile the logo sits centered (justify-center)
+          and the menu is absolutely positioned in the top-right corner.
+          On desktop the layout reverts to a standard justify-between with
+          logo on the left, menu on the right. */}
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center md:justify-between px-5 md:px-[60px] py-6">
+        {/* Brand logo */}
         <motion.img
           src={theme.logoSrc}
           alt={theme.logoAlt}
@@ -233,9 +246,9 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           transition={{ duration: 0.8, delay: 0.1 }}
         />
 
-        {/* Circular menu button — top right */}
+        {/* Menu cluster — absolute on mobile so the logo stays centered. */}
         <motion.div
-          className="flex items-center gap-4"
+          className="absolute right-5 top-1/2 -translate-y-1/2 md:static md:translate-y-0 flex items-center gap-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -336,7 +349,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           pointer-events-none on the wrapper so the empty space lets click+drag
           pass through to the cause icons underneath; the button below opts
           back in via pointer-events-auto. */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-end text-center px-6 md:px-10 pointer-events-none" style={{ paddingBottom: '10vh' }}>
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-end text-center px-6 md:px-10 pointer-events-none pb-[23vh] md:pb-[10vh]">
         <motion.h1
           className={theme.titleClassName}
           style={theme.titleStyle}
@@ -381,7 +394,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         {/* Explore button */}
         <motion.button
           onClick={() => onSeeReport?.()}
-          className={`inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full transition-colors cursor-pointer pointer-events-auto ${theme.ctaBgClass} ${theme.ctaTextColorClass}`}
+          className={`inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full transition-colors cursor-pointer pointer-events-auto mt-6 md:mt-0 ${theme.ctaBgClass} ${theme.ctaTextColorClass}`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.65 }}
@@ -506,6 +519,7 @@ function LovieCountryRow() {
 function LocalHeroCarousel({
   cmsImages,
   localImages,
+  localImagesMobile,
   solidFallbackColor,
   captions,
   captionEyebrow,
@@ -513,6 +527,8 @@ function LocalHeroCarousel({
 }: {
   cmsImages?: CarouselImage[]
   localImages?: string[]
+  /** Portrait-orientation variant rendered when the viewport is ≤ 768px. */
+  localImagesMobile?: string[]
   solidFallbackColor?: string
   captions?: string[]
   captionEyebrow?: string
@@ -523,9 +539,24 @@ function LocalHeroCarousel({
 }) {
   const [current, setCurrent] = useState(0)
 
+  // Track whether we're on a mobile viewport so we can pick the
+  // portrait-cropped artwork over the landscape one when available.
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  const localToUse = isMobile && localImagesMobile && localImagesMobile.length > 0
+    ? localImagesMobile
+    : localImages
+
   const images: string[] = cmsImages && cmsImages.length > 0
     ? cmsImages.map((c) => urlFor(c.image).width(2400).url())
-    : localImages ?? []
+    : localToUse ?? []
 
   // Compute the tone of the currently visible image and let the parent
   // section know so it can apply text-light / text-dark.
@@ -555,7 +586,11 @@ function LocalHeroCarousel({
 
   return (
     <div className="absolute inset-0">
-      <div className="absolute inset-0">
+      {/* Inner wrapper holds the actual image. On mobile it starts 100px
+          down so the section's lime background shows through at the top,
+          giving the Lovie logo clean negative space to sit in. Desktop
+          stays full-bleed. */}
+      <div className="absolute inset-x-0 bottom-0 top-[100px] md:top-0">
         <Image
           src={images[current]}
           alt=""

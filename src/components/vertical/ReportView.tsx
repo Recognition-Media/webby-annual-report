@@ -618,11 +618,11 @@ export function ReportView({ report }: { report: Report }) {
                     question: 'How are European regulations around AI and digital platforms affecting creative work in your market?',
                     chartType: 'donut',
                     bars: [
+                      { label: 'Creating useful guardrails', shortLabel: 'Useful guardrails', value: 0, displayValue: '0%', color: '#000000' },
                       { label: 'Adding compliance burdens that affect small players', shortLabel: 'Compliance burdens', value: 11.11, displayValue: '11%', color: '#ffb986' },
                       { label: 'Doing both, depending on the organisation', shortLabel: 'Both, depending', value: 33.33, displayValue: '33%', color: '#ca86ff' },
                       { label: 'Too early to see a real effect', shortLabel: 'Too early', value: 44.44, displayValue: '44%', color: '#ff6000' },
                       { label: 'No direct effect on the work I do', shortLabel: 'No direct effect', value: 11.11, displayValue: '11%', color: '#6D48FF' },
-                      { label: 'Creating useful guardrails', shortLabel: 'Useful guardrails', value: 0, displayValue: '0%', color: '#000000' },
                     ],
                   }}
                   insideTheHubs={{

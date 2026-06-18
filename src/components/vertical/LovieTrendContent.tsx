@@ -426,7 +426,7 @@ function DonutChart({ bars }: { bars: LovieDataBar[] }) {
   const innerRadius = 72
   const focused = activeIdx !== null ? arcs[activeIdx] : null
   return (
-    <div className="flex items-center gap-8 flex-wrap" style={{ rowGap: 24 }}>
+    <div className="flex items-center justify-center md:justify-start gap-8 flex-wrap" style={{ rowGap: 24 }}>
       <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ flexShrink: 0 }}>
         {arcs.map((arc, i) => {
           if (arc.value === 0) return null
