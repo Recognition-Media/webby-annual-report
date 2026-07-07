@@ -186,7 +186,7 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
                     className="w-[30%] text-sm font-bold text-right pr-4"
                     style={{ color: theme.text }}
                   >
-                    {field.label}{(field.required || field.label.toLowerCase() === 'company') ? <span className="ml-0.5" style={{ color: theme.accent }}>*</span> : ''}
+                    {field.label}{field.required ? <span className="ml-0.5" style={{ color: theme.accent }}>*</span> : ''}
                   </label>
                   <div className="w-[70%]">
                     <FieldInput
