@@ -326,3 +326,23 @@ body.lovie-template {
   --anthem-moss: var(--lovie-cream);
 }
 
+/* =========================================================================
+   Signup gate field theming (vertical template — Anthem + Lovie)
+   The gate sets --gate-text / --gate-accent / --gate-font inline per property.
+   Input border/focus/placeholder colors can't be done with inline styles
+   (pseudo-classes + ::placeholder), so they live here and read the vars.
+   ========================================================================= */
+.signup-gate-scope input,
+.signup-gate-scope select {
+  color: var(--gate-text);
+  border-color: color-mix(in srgb, var(--gate-text) 30%, transparent);
+  font-family: var(--gate-font);
+}
+.signup-gate-scope input::placeholder {
+  color: color-mix(in srgb, var(--gate-text) 40%, transparent);
+}
+.signup-gate-scope input:focus,
+.signup-gate-scope select:focus {
+  border-color: var(--gate-accent);
+}
+
