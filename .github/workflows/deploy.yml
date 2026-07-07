@@ -6,6 +6,11 @@ on:
   repository_dispatch:
     types: [sanity-publish]
   workflow_dispatch:
+  # Safety net: rebuild nightly so the live site is never more than ~24h
+  # stale even if the Sanity publish webhook (repository_dispatch above)
+  # stops firing. Runs on the default branch (main) = production deploy.
+  schedule:
+    - cron: '0 8 * * *' # 08:00 UTC daily (~03:00/04:00 ET)
 
 jobs:
   deploy:
