@@ -6,6 +6,11 @@ on:
   repository_dispatch:
     types: [sanity-publish]
   workflow_dispatch:
+  # Safety net: rebuild nightly so the live site is never more than ~24h
+  # stale even if the Sanity publish webhook (repository_dispatch above)
+  # stops firing. Runs on the default branch (main) = production deploy.
+  schedule:
+    - cron: '0 8 * * *' # 08:00 UTC daily (~03:00/04:00 ET)
 
 jobs:
   deploy:
@@ -38,13 +43,28 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      # Two passes so cache headers differ by asset type:
+      #  1. Sync everything with `no-cache` — HTML (and other non-hashed
+      #     assets) must revalidate on every load so a new deploy's chunk
+      #     filenames are picked up immediately. Without this, a browser
+      #     holding stale HTML requests a just-deleted old chunk → 404 →
+      #     "Application error: a client-side exception has occurred".
+      #     `--delete` stays on this single root pass, so delete behavior
+      #     is identical to before (only stale app assets removed).
+      #  2. Re-set the content-hashed `_next/static/*` files to a 1-year
+      #     immutable cache — their names change on every build, so they're
+      #     safe to cache forever and this keeps repeat loads fast.
       - name: Deploy to S3 (production)
         if: github.ref_name == 'main'
-        run: aws s3 sync out/ s3://webbyawards-com-assets --delete --exact-timestamps
+        run: |
+          aws s3 sync out/ s3://webbyawards-com-assets --delete --exact-timestamps --cache-control "no-cache"
+          aws s3 cp out/_next/static/ s3://webbyawards-com-assets/_next/static/ --recursive --cache-control "public, max-age=31536000, immutable"
 
       - name: Deploy to S3 (preview)
         if: github.ref_name == 'preview'
-        run: aws s3 sync out/ s3://webbyawards-com-assets/preview/report-redesign/ --delete --exact-timestamps
+        run: |
+          aws s3 sync out/ s3://webbyawards-com-assets/preview/report-redesign/ --delete --exact-timestamps --cache-control "no-cache"
+          aws s3 cp out/_next/static/ s3://webbyawards-com-assets/preview/report-redesign/_next/static/ --recursive --cache-control "public, max-age=31536000, immutable"
 
       - name: Invalidate CloudFront cache
         run: aws cloudfront create-invalidation --distribution-id E120I5KFQNYFYO --paths "/*"
