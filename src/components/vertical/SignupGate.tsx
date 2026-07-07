@@ -4,9 +4,57 @@ import { useState } from 'react'
 import type { Report, FormField } from '@/sanity/types'
 import { trackSignupConversion } from '@/lib/analytics'
 
+// Per-property theming for the vertical-template signup gate. The vertical
+// layout serves both Anthem and Lovie, so the gate must brand itself from
+// report.property (mirrors the property branching used across ReportView).
+// Anthem is the default/fallback so behavior is unchanged for it.
+type GateTheme = {
+  overlay: string
+  frame: string
+  card: string
+  logo: string
+  logoAlt: string
+  font: string
+  text: string
+  accent: string
+  buttonText: string
+  privacyUrl: string
+  privacyName: string
+  rounded: boolean
+}
+
+const GATE_THEMES: Record<string, GateTheme> = {
+  anthem: {
+    overlay: 'rgba(33, 38, 26, 0.8)', // #21261A moss
+    frame: '#8C001C',
+    card: '#E3DDCA',
+    logo: '/anthem/anthem-logo-green.svg',
+    logoAlt: 'Anthem Awards',
+    font: "'roc-grotesk-variable', -apple-system, sans-serif",
+    text: '#21261A',
+    accent: '#8C001C',
+    buttonText: '#E3DDCA',
+    privacyUrl: 'https://www.anthemawards.com/privacy-policy/',
+    privacyName: 'Anthem Awards',
+    rounded: false,
+  },
+  lovie: {
+    overlay: 'rgba(0, 0, 0, 0.7)',
+    frame: '#ff6000', // lovie orange
+    card: '#f2eeed', // lovie cream
+    logo: '/lovie/lovie-logo-black.svg',
+    logoAlt: 'The Lovie Awards',
+    font: "'Scto Grotesk A', -apple-system, sans-serif",
+    text: '#000000',
+    accent: '#ff6000',
+    buttonText: '#f2eeed',
+    privacyUrl: 'https://www.lovieawards.com/privacy-policy/',
+    privacyName: 'Lovie Awards',
+    rounded: true,
+  },
+}
+
 function FieldInput({ field, value, onChange }: { field: FormField; value: string; onChange: (v: string) => void }) {
-  const baseClass = "w-full border-0 border-b-2 border-[#21261A]/30 bg-transparent px-1 py-2 text-base text-[#21261A] outline-none focus:border-[#8C001C] transition-colors placeholder:text-[#21261A]/40"
-  const fontStyle = { fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }
   const placeholder = field.label
 
   if (field.fieldType === 'dropdown') {
@@ -14,8 +62,7 @@ function FieldInput({ field, value, onChange }: { field: FormField; value: strin
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border-2 border-[#21261A]/30 bg-transparent px-1 py-2 text-base text-[#21261A] outline-none focus:border-[#8C001C] transition-colors"
-        style={fontStyle}
+        className="w-full border-2 bg-transparent px-1 py-2 text-base outline-none transition-colors"
       >
         <option value="">{placeholder}</option>
         {field.dropdownOptions?.map((opt) => (
@@ -32,8 +79,7 @@ function FieldInput({ field, value, onChange }: { field: FormField; value: strin
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       required={field.required}
-      className={baseClass}
-      style={fontStyle}
+      className="w-full border-0 border-b-2 bg-transparent px-1 py-2 text-base outline-none transition-colors"
     />
   )
 }
@@ -43,6 +89,7 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const theme = GATE_THEMES[report.property as string] ?? GATE_THEMES.anthem
   const fields = report.formFields || []
 
   function updateField(label: string, value: string) {
@@ -74,36 +121,45 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
   }
 
   return (
-    <div className="fixed inset-0 bg-[#21261A]/80 z-50 flex items-center justify-center px-3 md:px-4 overflow-y-auto">
+    <div
+      className="signup-gate-scope fixed inset-0 z-50 flex items-center justify-center px-3 md:px-4 overflow-y-auto"
+      style={{
+        background: theme.overlay,
+        // CSS vars consumed by the .signup-gate-scope rules in globals.css
+        // for input border / focus / placeholder colors + font.
+        ['--gate-text' as string]: theme.text,
+        ['--gate-accent' as string]: theme.accent,
+        ['--gate-font' as string]: theme.font,
+      }}
+    >
       <div
-        className="w-full max-w-[575px] p-[3px] md:p-[4px] text-center my-4"
-        style={{ background: '#8C001C' }}
+        className={`w-full max-w-[575px] p-[3px] md:p-[4px] text-center my-4 ${theme.rounded ? 'rounded-3xl' : ''}`}
+        style={{ background: theme.frame }}
       >
         <div
-          className="p-5 md:p-10"
+          className={`p-5 md:p-10 ${theme.rounded ? 'rounded-[21px]' : ''}`}
           style={{
-            background: '#E3DDCA',
-            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            background: theme.card,
+            fontFamily: theme.font,
           }}
         >
-          {/* Anthem Awards logo — moss green */}
           <div className="mb-4 md:mb-6">
             <img
-              src="/anthem/anthem-logo-green.svg"
-              alt="6th Annual Anthem Awards"
+              src={theme.logo}
+              alt={theme.logoAlt}
               className="mx-auto h-[50px] md:h-[70px] w-auto"
             />
           </div>
 
           <h3
             className="uppercase font-bold text-xs md:text-sm tracking-wider pb-3 md:pb-4 whitespace-pre-line"
-            style={{ color: '#21261A' }}
+            style={{ color: theme.text }}
           >
             {report.signupTitle || '2026 State of Social Impact Report'}
           </h3>
           <p
             className="text-xs md:text-sm mb-5 md:mb-8 leading-relaxed whitespace-pre-line"
-            style={{ color: '#21261A', opacity: 0.7 }}
+            style={{ color: theme.text, opacity: 0.7 }}
           >
             {report.signupSubhead || "Hear directly from impact leaders on what's shaping the work in 2026. Sign up to explore the report."}
           </p>
@@ -128,9 +184,9 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
                 <div key={field.label} className="flex flex-row items-center mb-5 text-left">
                   <label
                     className="w-[30%] text-sm font-bold text-right pr-4"
-                    style={{ color: '#21261A' }}
+                    style={{ color: theme.text }}
                   >
-                    {field.label}{(field.required || field.label.toLowerCase() === 'company') ? <span className="text-[#8C001C] ml-0.5">*</span> : ''}
+                    {field.label}{(field.required || field.label.toLowerCase() === 'company') ? <span className="ml-0.5" style={{ color: theme.accent }}>*</span> : ''}
                   </label>
                   <div className="w-[70%]">
                     <FieldInput
@@ -143,11 +199,11 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
               ))}
             </div>
 
-            {error && <p className="text-xs md:text-sm text-[#8C001C]">{error}</p>}
+            {error && <p className="text-xs md:text-sm" style={{ color: theme.accent }}>{error}</p>}
 
-            <p className="text-[10px] md:text-xs mt-3 md:mt-4" style={{ color: '#21261A', opacity: 0.5 }}>
+            <p className="text-[10px] md:text-xs mt-3 md:mt-4" style={{ color: theme.text, opacity: 0.5 }}>
               By logging in you agree to our{' '}
-              <a href="https://www.anthemawards.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#21261A' }}>
+              <a href={theme.privacyUrl} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: theme.text }}>
                 Privacy Policy
               </a>
             </p>
@@ -156,7 +212,7 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
               type="submit"
               disabled={submitting}
               className="flex items-center justify-between w-full max-w-[280px] mx-auto uppercase font-medium py-3 md:py-4 px-5 md:px-6 mt-4 md:mt-6 text-xs md:text-sm tracking-wider transition-colors disabled:opacity-50 cursor-pointer rounded-full"
-              style={{ background: '#8C001C', color: '#E3DDCA' }}
+              style={{ background: theme.accent, color: theme.buttonText }}
             >
               <span>{submitting ? 'Submitting...' : (report.submitButtonText || 'Explore The Report')}</span>
               <span className="text-base md:text-lg">→</span>
