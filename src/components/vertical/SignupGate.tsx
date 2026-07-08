@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { Report, FormField } from '@/sanity/types'
 import { trackSignupConversion } from '@/lib/analytics'
+import { buildCioIdentity } from '@/lib/cioIdentity'
 
 // Per-property theming for the vertical-template signup gate. The vertical
 // layout serves both Anthem and Lovie, so the gate must brand itself from
@@ -86,6 +87,7 @@ function FieldInput({ field, value, onChange }: { field: FormField; value: strin
 
 export function SignupGate({ report, onComplete }: { report: Report; onComplete: () => void }) {
   const [formData, setFormData] = useState<Record<string, string>>({})
+  const [consented, setConsented] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -107,7 +109,12 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reportSlug: report.slug.current,
+          reportTitle: report.title,
+          property: report.property || 'anthem',
           formData,
+          cioIdentity: buildCioIdentity(fields, formData),
+          consented,
+          consentedAt: new Date().toISOString(),
         }),
       }).catch(() => {})
 
@@ -201,16 +208,29 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
 
             {error && <p className="text-xs md:text-sm" style={{ color: theme.accent }}>{error}</p>}
 
-            <p className="text-[10px] md:text-xs mt-3 md:mt-4" style={{ color: theme.text, opacity: 0.5 }}>
-              By logging in you agree to our{' '}
-              <a href={theme.privacyUrl} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: theme.text }}>
-                Privacy Policy
-              </a>
-            </p>
+            <label
+              className="flex items-start gap-2 text-left text-[10px] md:text-xs mt-3 md:mt-4 cursor-pointer"
+              style={{ color: theme.text, opacity: 0.7 }}
+            >
+              <input
+                type="checkbox"
+                checked={consented}
+                onChange={(e) => setConsented(e.target.checked)}
+                required
+                className="mt-0.5"
+              />
+              <span>
+                I agree to the{' '}
+                <a href={theme.privacyUrl} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: theme.text }}>
+                  Privacy Policy
+                </a>{' '}
+                and consent to receive communications from {theme.privacyName}.
+              </span>
+            </label>
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || !consented}
               className="flex items-center justify-between w-full max-w-[280px] mx-auto uppercase font-medium py-3 md:py-4 px-5 md:px-6 mt-4 md:mt-6 text-xs md:text-sm tracking-wider transition-colors disabled:opacity-50 cursor-pointer rounded-full"
               style={{ background: theme.accent, color: theme.buttonText }}
             >
