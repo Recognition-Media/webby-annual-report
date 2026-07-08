@@ -5,6 +5,14 @@ import Image from 'next/image'
 import type { Report, FormField } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
 import { trackSignupConversion } from '@/lib/analytics'
+import { buildCioIdentity } from '@/lib/cioIdentity'
+
+const PRIVACY_BY_PROPERTY: Record<string, { url: string; name: string }> = {
+  webby: { url: 'https://www.webbyawards.com/privacy-policy/', name: 'Webby Awards' },
+  anthem: { url: 'https://www.anthemawards.com/privacy-policy/', name: 'Anthem Awards' },
+  lovie: { url: 'https://www.lovieawards.com/privacy-policy/', name: 'Lovie Awards' },
+  telly: { url: 'https://www.tellyawards.com/privacy-policy/', name: 'Telly Awards' },
+}
 
 function FieldInput({ field, value, onChange }: { field: FormField; value: string; onChange: (v: string) => void }) {
   const baseClass = "w-full border-0 border-b-2 border-[#ccc] bg-transparent px-1 py-2 text-base outline-none focus:border-black transition-colors"
@@ -42,10 +50,12 @@ function FieldInput({ field, value, onChange }: { field: FormField; value: strin
 
 export function SignupGate({ report, onComplete }: { report: Report; onComplete: () => void }) {
   const [formData, setFormData] = useState<Record<string, string>>({})
+  const [consented, setConsented] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const fields = report.formFields || []
+  const privacy = PRIVACY_BY_PROPERTY[report.property || 'webby'] || PRIVACY_BY_PROPERTY.webby
 
   function updateField(label: string, value: string) {
     setFormData((prev) => ({ ...prev, [label]: value }))
@@ -62,7 +72,12 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reportSlug: report.slug.current,
+          reportTitle: report.title,
+          property: report.property || 'webby',
           formData,
+          cioIdentity: buildCioIdentity(fields, formData),
+          consented,
+          consentedAt: new Date().toISOString(),
         }),
       }).catch(() => {})
 
@@ -146,16 +161,26 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
 
           {error && <p className="text-xs md:text-sm text-red-600">{error}</p>}
 
-          <p className="text-[10px] md:text-xs text-[#999] mt-3 md:mt-4">
-            By logging in you agree to our{' '}
-            <a href="https://www.webbyawards.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline text-black">
-              Privacy Policy
-            </a>
-          </p>
+          <label className="flex items-start gap-2 text-left text-[10px] md:text-xs text-[#999] mt-3 md:mt-4 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={consented}
+              onChange={(e) => setConsented(e.target.checked)}
+              required
+              className="mt-0.5"
+            />
+            <span>
+              I agree to the{' '}
+              <a href={privacy.url} target="_blank" rel="noopener noreferrer" className="underline text-black">
+                Privacy Policy
+              </a>{' '}
+              and consent to receive communications from {privacy.name}.
+            </span>
+          </label>
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !consented}
             className="flex items-center justify-center gap-2 w-full max-w-[280px] mx-auto bg-black text-white uppercase font-medium py-3 md:py-4 px-5 md:px-6 mt-4 md:mt-6 text-xs md:text-sm tracking-wider hover:bg-[#333] transition-colors disabled:opacity-50 cursor-pointer"
           >
             <span>{submitting ? 'Submitting...' : (report.submitButtonText || 'Access Report')}</span>
