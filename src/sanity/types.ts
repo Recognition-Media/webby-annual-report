@@ -105,6 +105,7 @@ export interface FormField {
   fieldType: 'text' | 'email' | 'url' | 'dropdown'
   required: boolean
   dropdownOptions?: string[]
+  ciofield?: 'none' | 'email' | 'firstName' | 'lastName' | 'company' | 'jobTitle'
 }
 
 export interface FooterLink {
