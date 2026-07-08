@@ -23,6 +23,8 @@
     "sanity": "^5.8.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1082.0",
+    "@aws-sdk/lib-dynamodb": "^3.1082.0",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20",
