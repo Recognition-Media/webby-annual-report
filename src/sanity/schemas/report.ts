@@ -155,6 +155,7 @@ export default defineType({
     { name: 'formFields', title: 'Signup Form Fields', type: 'array', of: [{ type: 'formField' }], group: 'signup' },
     { name: 'submitButtonText', title: 'Submit Button Text', type: 'string', initialValue: 'Access Report', group: 'signup' },
     { name: 'successMessage', title: 'Success Message', type: 'text', group: 'signup' },
+    { name: 'specifier', title: 'CIO Specifier', type: 'string', group: 'signup', description: 'e.g. "Trend Report 2026" — sent to Customer.io on signup as the `specifier` event attribute. Set manually per report.' },
 
     // Analytics
     { name: 'gaTrackingId', title: 'GA Tracking ID', type: 'string', group: 'analytics' },
