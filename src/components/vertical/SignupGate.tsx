@@ -115,6 +115,7 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
           cioIdentity: buildCioIdentity(fields, formData),
           consented,
           consentedAt: new Date().toISOString(),
+          specifier: report.specifier,
         }),
       }).catch(() => {})
 
