@@ -40,26 +40,50 @@ test('buildIdentifyPayload defaults missing optional fields to empty strings', (
   assert.equal(payload.attributes.job_title, '')
 })
 
-test('buildEventPayload names the event report_signup with report attributes', () => {
+test('buildEventPayload names the event form_submitted with propertyName, source, and specifier', () => {
   const payload = buildEventPayload({
     cioIdentity: { email: 'jane@example.com' },
     property: 'lovie',
     reportSlug: 'lovie-creative-hubs-mediterranean',
     reportTitle: 'The Lovie Awards Creative Hubs Series',
+    specifier: 'Trend Report 2026',
   })
 
   assert.deepEqual(payload, {
     type: 'person',
     identifiers: { email: 'jane@example.com' },
     action: 'event',
-    name: 'report_signup',
+    name: 'form_submitted',
     attributes: {
       reportSlug: 'lovie-creative-hubs-mediterranean',
       reportTitle: 'The Lovie Awards Creative Hubs Series',
-      property: 'lovie',
-      source: 'report-gate',
+      propertyName: 'Lovie Awards',
+      source: 'The Lovie Awards Creative Hubs Series',
+      specifier: 'Trend Report 2026',
     },
   })
+})
+
+test('buildEventPayload falls back to an empty propertyName for an unrecognized property', () => {
+  const payload = buildEventPayload({
+    cioIdentity: { email: 'jane@example.com' },
+    property: 'not-a-real-property',
+    reportSlug: 'some-slug',
+    reportTitle: 'Some Report',
+  })
+
+  assert.equal(payload.attributes.propertyName, '')
+})
+
+test('buildEventPayload defaults specifier to an empty string when omitted', () => {
+  const payload = buildEventPayload({
+    cioIdentity: { email: 'jane@example.com' },
+    property: 'webby',
+    reportSlug: 'some-slug',
+    reportTitle: 'Some Report',
+  })
+
+  assert.equal(payload.attributes.specifier, '')
 })
 
 test('corsHeaders allows all three report origins', () => {

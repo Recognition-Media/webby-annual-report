@@ -18,6 +18,13 @@ export const ALLOWED_ORIGINS = [
   'http://localhost:3001',
 ]
 
+const PROPERTY_DISPLAY_NAMES = {
+  webby: 'Webby Awards',
+  anthem: 'Anthem Awards',
+  lovie: 'Lovie Awards',
+  telly: 'Telly Awards',
+}
+
 export function corsHeaders(origin) {
   const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
   return {
@@ -52,22 +59,23 @@ export function buildIdentifyPayload({ cioIdentity, property, consented, consent
   }
 }
 
-export function buildEventPayload({ cioIdentity, property, reportSlug, reportTitle }) {
+export function buildEventPayload({ cioIdentity, property, reportSlug, reportTitle, specifier }) {
   return {
     type: 'person',
     identifiers: { email: cioIdentity.email },
     action: 'event',
-    name: 'report_signup',
+    name: 'form_submitted',
     attributes: {
       reportSlug: reportSlug || '',
       reportTitle: reportTitle || '',
-      property: property || '',
-      source: 'report-gate',
+      propertyName: PROPERTY_DISPLAY_NAMES[property] || '',
+      source: reportTitle || '',
+      specifier: specifier || '',
     },
   }
 }
 
-export async function syncToCustomerIo({ cioIdentity, property, reportSlug, reportTitle, consented, consentedAt }) {
+export async function syncToCustomerIo({ cioIdentity, property, reportSlug, reportTitle, consented, consentedAt, specifier }) {
   if (!cioIdentity?.email) return
 
   if (!CIO_SITE_ID || !CIO_API_KEY) {
@@ -78,7 +86,7 @@ export async function syncToCustomerIo({ cioIdentity, property, reportSlug, repo
   const authHeader = 'Basic ' + Buffer.from(`${CIO_SITE_ID}:${CIO_API_KEY}`).toString('base64')
   const payloads = [
     buildIdentifyPayload({ cioIdentity, property, consented, consentedAt }),
-    buildEventPayload({ cioIdentity, property, reportSlug, reportTitle }),
+    buildEventPayload({ cioIdentity, property, reportSlug, reportTitle, specifier }),
   ]
 
   for (const payload of payloads) {
@@ -109,7 +117,7 @@ export async function handler(event) {
   try {
     if (method === 'POST' && path.endsWith('/signup')) {
       const body = JSON.parse(event.body || '{}')
-      const { reportSlug, reportTitle, property, formData, cioIdentity, consented, consentedAt } = body
+      const { reportSlug, reportTitle, property, formData, cioIdentity, consented, consentedAt, specifier } = body
 
       if (!reportSlug || !formData) {
         return response(400, { error: 'Missing required fields' }, origin)
@@ -129,7 +137,7 @@ export async function handler(event) {
         },
       }))
 
-      await syncToCustomerIo({ cioIdentity, property, reportSlug, reportTitle, consented, consentedAt })
+      await syncToCustomerIo({ cioIdentity, property, reportSlug, reportTitle, consented, consentedAt, specifier })
 
       return response(200, { success: true }, origin)
     }
