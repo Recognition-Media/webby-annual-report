@@ -15,9 +15,9 @@ test('buildIdentifyPayload maps cioIdentity fields to CIO attributes', () => {
     identifiers: { email: 'jane@example.com' },
     action: 'identify',
     attributes: {
-      first_name: 'Jane',
-      last_name: 'Doe',
-      company: 'Acme',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      organizationName: 'Acme',
       job_title: 'CTO',
       property: 'anthem',
       consented: true,
@@ -34,9 +34,9 @@ test('buildIdentifyPayload defaults missing optional fields to empty strings', (
     consentedAt: '2026-07-08T12:00:00.000Z',
   })
 
-  assert.equal(payload.attributes.first_name, '')
-  assert.equal(payload.attributes.last_name, '')
-  assert.equal(payload.attributes.company, '')
+  assert.equal(payload.attributes.firstName, '')
+  assert.equal(payload.attributes.lastName, '')
+  assert.equal(payload.attributes.organizationName, '')
   assert.equal(payload.attributes.job_title, '')
 })
 

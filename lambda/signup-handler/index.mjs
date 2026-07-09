@@ -41,9 +41,9 @@ export function buildIdentifyPayload({ cioIdentity, property, consented, consent
     identifiers: { email: cioIdentity.email },
     action: 'identify',
     attributes: {
-      first_name: cioIdentity.firstName || '',
-      last_name: cioIdentity.lastName || '',
-      company: cioIdentity.company || '',
+      firstName: cioIdentity.firstName || '',
+      lastName: cioIdentity.lastName || '',
+      organizationName: cioIdentity.company || '',
       job_title: cioIdentity.jobTitle || '',
       property: property || '',
       consented: consented === true,
