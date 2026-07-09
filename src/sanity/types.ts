@@ -203,6 +203,7 @@ export interface Report {
   formFields?: FormField[]
   submitButtonText?: string
   successMessage?: string
+  specifier?: string
   gaTrackingId?: string
   facebookPixelId?: string
   googleAdsId?: string

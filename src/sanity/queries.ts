@@ -98,6 +98,7 @@ export const reportBySlugQuery = groq`
     formFields,
     submitButtonText,
     successMessage,
+    specifier,
     gaTrackingId,
     facebookPixelId,
     googleAdsId,
