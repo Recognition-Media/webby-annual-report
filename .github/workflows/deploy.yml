@@ -68,3 +68,11 @@ jobs:
 
       - name: Invalidate CloudFront cache
         run: aws cloudfront create-invalidation --distribution-id E120I5KFQNYFYO --paths "/*"
+
+      - name: Test and deploy signup Lambda
+        if: github.ref_name == 'main'
+        run: |
+          node --test lambda/signup-handler/
+          cd lambda/signup-handler
+          zip -j function.zip index.mjs
+          aws lambda update-function-code --function-name webby-report-signups --zip-file fileb://function.zip
