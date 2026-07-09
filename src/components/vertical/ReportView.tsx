@@ -175,6 +175,13 @@ export function ReportView({ report }: { report: Report }) {
       window.location.replace(window.location.pathname)
       return
     }
+    // Shareable "skip the gate" link: ?access=direct grants access for this
+    // page load only — no cookie, no signup capture — same as a returning
+    // visitor who already has the cookie.
+    if (new URLSearchParams(window.location.search).get('access') === 'direct') {
+      setHasAccess(true)
+      return
+    }
     // If the signup gate is turned off in the CMS, grant access without
     // checking the cookie — visitors enter the report directly.
     if (report.signupGateEnabled === false) {
