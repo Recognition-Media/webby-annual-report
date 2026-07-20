@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextBlock } from '@portabletext/types'
 import type { Report } from '@/sanity/types'
+import { trackCtaClick } from '@/lib/analytics'
 
 const FALLBACK_BODY: PortableTextBlock[] = [
   {
@@ -252,6 +253,7 @@ export function AnthemFooter({ report }: { report: Report }) {
             href={ctaUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackCtaClick('footer', ctaUrl, report.property, report.slug.current)}
             className="inline-flex items-center justify-between gap-4 uppercase font-medium py-4 px-8 text-xs md:text-sm tracking-wider rounded-full transition-transform hover:scale-[1.02] mt-6"
             style={{
               background: '#8C001C',

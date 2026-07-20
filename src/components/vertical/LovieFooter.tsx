@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
+import { trackCtaClick } from '@/lib/analytics'
 
 const FALLBACK_HEADLINE = 'About The Lovie Awards'
 const FALLBACK_DEADLINE = 'Enter Your Work Before the Final Entry Deadline on 26 June 2026'
@@ -156,6 +157,7 @@ export function LovieFooter({ report }: { report: Report }) {
           href={ctaUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackCtaClick('footer', ctaUrl, report.property, report.slug.current)}
           style={{
             display: 'inline-flex',
             alignItems: 'center',

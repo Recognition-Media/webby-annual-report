@@ -19,3 +19,13 @@ export function trackSignupConversion() {
   // Google Analytics custom event
   window.gtag?.('event', 'sign_up', { method: 'report_gate' })
 }
+
+export function trackCtaClick(location: string, destinationUrl: string, property?: string, reportSlug?: string) {
+  if (typeof window === 'undefined') return
+  window.analytics?.track('cta_clicked', {
+    cta_location: location,
+    destination_url: destinationUrl,
+    property,
+    report_slug: reportSlug,
+  })
+}

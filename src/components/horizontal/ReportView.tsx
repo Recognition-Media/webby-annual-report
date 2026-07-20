@@ -19,6 +19,7 @@ import { AnimatedBg } from '../AnimatedBg'
 import { IdleArrows } from '../IdleArrows'
 import { TrendIntro } from '../TrendIntro'
 import { MobileNav } from '../MobileNav'
+import { trackCtaClick } from '@/lib/analytics'
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
@@ -336,7 +337,7 @@ export function ReportView({ report }: { report: Report }) {
                         </>
                       )}
                     </div>
-                    <a href={report.thankYouLinkUrl || 'https://www.webbyawards.com/judging-criteria/'} target="_blank" rel="noopener noreferrer" className="no-custom-cursor" style={{ maxWidth: 700, padding: '32px 0', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 40, textAlign: 'left', textDecoration: 'none' }}>
+                    <a href={report.thankYouLinkUrl || 'https://www.webbyawards.com/judging-criteria/'} target="_blank" rel="noopener noreferrer" onClick={() => trackCtaClick('thank_you_learn_more', report.thankYouLinkUrl || 'https://www.webbyawards.com/judging-criteria/', report.property, report.slug.current)} className="no-custom-cursor" style={{ maxWidth: 700, padding: '32px 0', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 40, textAlign: 'left', textDecoration: 'none' }}>
                       <div>
                         <div style={{ fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', color: '#8B70D1', fontWeight: 500, marginBottom: 10 }}>{report.thankYouLinkEyebrow || 'Learn More'}</div>
                         <div style={{ fontSize: 18, fontWeight: 400, color: '#fff', lineHeight: 1.3, marginBottom: 6 }}>{report.thankYouLinkTitle || "How We Judge the Internet's Best Work"}</div>
@@ -346,7 +347,7 @@ export function ReportView({ report }: { report: Report }) {
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B70D1" strokeWidth="1.5"><path d="M7 17L17 7M17 7H7M17 7V17" /></svg>
                       </div>
                     </a>
-                    <a href={report.thankYouCtaUrl || 'https://www.webbyawards.com'} target="_blank" rel="noopener noreferrer" data-content style={{ display: 'inline-flex', alignItems: 'center', gap: 24, border: '1px solid rgba(255,255,255,0.12)', padding: '28px 32px', textDecoration: 'none', color: 'inherit', marginTop: 40 }}>
+                    <a href={report.thankYouCtaUrl || 'https://www.webbyawards.com'} target="_blank" rel="noopener noreferrer" onClick={() => trackCtaClick('thank_you_get_in_touch', report.thankYouCtaUrl || 'https://www.webbyawards.com', report.property, report.slug.current)} data-content style={{ display: 'inline-flex', alignItems: 'center', gap: 24, border: '1px solid rgba(255,255,255,0.12)', padding: '28px 32px', textDecoration: 'none', color: 'inherit', marginTop: 40 }}>
                       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>
                       <div>
                         <h4 style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF', margin: 0 }}>{report.thankYouCtaTitle || 'Get in Touch'}</h4>
