@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { ImageCarousel } from '../ImageCarousel'
 import { urlFor } from '@/sanity/image'
 import { useImageBrightness, type Tone } from '@/lib/useImageBrightness'
+import { trackCtaClick } from '@/lib/analytics'
 
 const LOCAL_HERO_IMAGES = [
   '/anthem/hero-1.jpg',
@@ -257,6 +258,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             href={theme.ctaUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackCtaClick('header', theme.ctaUrl, report.property, report.slug.current)}
             className={`hidden md:block text-[10px] tracking-[2px] uppercase rounded-full py-2.5 px-6 transition-colors ${theme.ctaBgClass} ${theme.ctaTextColorClass}`}
           >
             Enter Now
@@ -322,6 +324,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
                     href={theme.ctaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackCtaClick('header', theme.ctaUrl, report.property, report.slug.current)}
                     className={`md:hidden w-full text-left px-5 py-4 flex items-center justify-between gap-3 transition-colors hover:brightness-110 ${theme.ctaBgClass}`}
                   >
                     <span className={`text-[13px] tracking-[1px] uppercase font-medium ${theme.ctaTextColorClass}`}>

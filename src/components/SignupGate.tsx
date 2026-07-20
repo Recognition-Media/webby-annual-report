@@ -67,6 +67,8 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
     setError(null)
 
     try {
+      const cioIdentity = buildCioIdentity(fields, formData)
+
       await fetch(`${process.env.NEXT_PUBLIC_SIGNUP_API_URL}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -75,7 +77,7 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
           reportTitle: report.title,
           property: report.property || 'webby',
           formData,
-          cioIdentity: buildCioIdentity(fields, formData),
+          cioIdentity,
           consented,
           consentedAt: new Date().toISOString(),
           specifier: report.specifier,
@@ -83,6 +85,15 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
       }).catch(() => {})
 
       trackSignupConversion()
+      if (cioIdentity) {
+        window.analytics?.identify(cioIdentity.email, {
+          firstName: cioIdentity.firstName,
+          lastName: cioIdentity.lastName,
+          organizationName: cioIdentity.company,
+          jobTitle: cioIdentity.jobTitle,
+        })
+        window.analytics?.track('lead_created', { source: 'gated_content' })
+      }
       onComplete()
     } catch {
       setError('Something went wrong. Please try again.')
