@@ -102,6 +102,7 @@ export const reportBySlugQuery = groq`
     gaTrackingId,
     facebookPixelId,
     googleAdsId,
+    segmentWriteKey,
     footerLinks,
     sponsorLogos,
     ceremonyDetails,

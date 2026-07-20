@@ -161,6 +161,7 @@ export default defineType({
     { name: 'gaTrackingId', title: 'GA Tracking ID', type: 'string', group: 'analytics' },
     { name: 'facebookPixelId', title: 'Facebook Pixel ID', type: 'string', group: 'analytics' },
     { name: 'googleAdsId', title: 'Google Ads ID', type: 'string', group: 'analytics' },
+    { name: 'segmentWriteKey', title: 'Segment Write Key', type: 'string', group: 'analytics', description: 'Website (Analytics.js) source write key from app.segment.com. Same key for every report under this property.' },
 
     // Footer
     { name: 'footerLinks', title: 'Footer Links', type: 'array', of: [{ type: 'footerLink' }], group: 'footer', hidden: ({ document }) => document?.template === 'vertical' },

@@ -207,6 +207,7 @@ export interface Report {
   gaTrackingId?: string
   facebookPixelId?: string
   googleAdsId?: string
+  segmentWriteKey?: string
   footerLinks?: FooterLink[]
   sponsorLogos?: SanityImage[]
   ceremonyDetails?: PortableTextBlock[]
