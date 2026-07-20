@@ -2,6 +2,11 @@ declare global {
   interface Window {
     fbq?: (...args: unknown[]) => void
     gtag?: (...args: unknown[]) => void
+    analytics?: {
+      identify: (...args: unknown[]) => void
+      track: (...args: unknown[]) => void
+      page: (...args: unknown[]) => void
+    }
   }
 }
 
