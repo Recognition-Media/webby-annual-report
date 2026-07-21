@@ -48,3 +48,4 @@ next-env.d.ts
 # mp4s should be hosted externally (Sanity assets, S3, etc.) or
 # compressed under 100MB before being tracked in git.
 public/anthem/jaclynn-brennan-influencer-vs-creator.mp4
+public/anthem/garrison-hayes-vetting-process.mp4

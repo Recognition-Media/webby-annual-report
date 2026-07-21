@@ -14,6 +14,15 @@ import keyFinding from './objects/keyFinding'
 import creditPerson from './objects/creditPerson'
 import insideTheHubs from './objects/insideTheHubs'
 import lovieTakeaway from './objects/lovieTakeaway'
+import {
+  siBodyBlock,
+  siSectionHeaderBlock,
+  siAudienceBlock,
+  siPullQuoteBlock,
+  siVideoBlock,
+  siTipsBlock,
+  siContentSlab,
+} from './objects/sharedInfluenceBlocks'
 
 export const schemaTypes = [
   report,
@@ -32,4 +41,12 @@ export const schemaTypes = [
   creditPerson,
   insideTheHubs,
   lovieTakeaway,
+  // Shared Influence content blocks (Option C repeatable-block pattern)
+  siBodyBlock,
+  siSectionHeaderBlock,
+  siAudienceBlock,
+  siPullQuoteBlock,
+  siVideoBlock,
+  siTipsBlock,
+  siContentSlab,
 ]

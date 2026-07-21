@@ -22,6 +22,9 @@ import {
   ComparisonCallout,
   TipsForSuccess,
   VideoModule,
+  PullQuote,
+  AudienceBlock,
+  ContentSlabsRenderer,
 } from './SharedInfluenceModules'
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
@@ -164,6 +167,101 @@ function SharedInfluenceSection01({ report }: { report: Report }) {
             name="Jaclynn Brennan"
             title="Founder, Creative Duality"
             orientation="portrait"
+          />
+        }
+      />
+    </>
+  )
+}
+
+// Section 2 — Finding the Right Partners. When the CMS trendSections[1]
+// has `contentSlabs` populated, the section renders from that. Otherwise
+// the hardcoded Slab 1 + Slab 2 fallback below ships so nothing looks
+// broken while the CMS is being filled in.
+function SharedInfluenceSection02({ report }: { report: Report }) {
+  const trend = report.trendSections?.[1]
+  // Prefer the section cover's accent (where the editor already sets
+  // the section palette) so all Section 2 blocks inherit purple from
+  // one place. Falls back to the trend section's own accent, then red.
+  const accentColor =
+    report.sectionCovers?.[1]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  if (slabs && slabs.length > 0) {
+    return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+  }
+  return (
+    <>
+      {/* Slab 1 — Intro + Creator advice + Bryan quote alongside Garrison video */}
+      <TwoColumnSlab
+        left={
+          <>
+            <SectionHeader title="Finding the right partner is less about audience size than alignment" />
+            <SharedInfluenceBody
+              paragraphs={[
+                <>Creators want to protect the trust they{"'"}ve built with their communities. Impact organizations should be as intentional and rigorous about who represents their mission.</>,
+              ]}
+            />
+            <div style={{ marginTop: 40 }}>
+              <AudienceBlock
+                label="If You Are A Creator"
+                paragraphs={[
+                  <>Learn if an organization is transparent and effective in its community. Creators like <strong style={{ fontWeight: 700 }}>Garrison Hayes</strong> insist on nonprofits with a proven history of effectiveness and access to donor/financial data.</>,
+                  <>Use resources like <strong style={{ fontWeight: 700 }}>Guide Star</strong> to find Gold and Platinum-rated organizations, says <strong style={{ fontWeight: 700 }}>Mercury Stardust</strong>, a DIY home repair educator and creator partner on Point of Pride{"'"}s Stream-a-Thon for Trans Health.</>,
+                ]}
+              >
+                <PullQuote
+                  quote="Follow the money. Where does the money go?"
+                  name="Bryan Reisberg"
+                  role="Creator, Maxine the Corgi"
+                  headshotSrc="/anthem/bryan-reisberg-headshot.jpg"
+                />
+              </AudienceBlock>
+            </div>
+          </>
+        }
+        right={
+          <VideoModule
+            src="/anthem/garrison-hayes-vetting-process.mp4"
+            name="Garrison Hayes"
+            title="Creator, @garrisonhayes"
+            orientation="portrait"
+          />
+        }
+      />
+
+      {/* Slab 2 — Approach body + Impact Leader advice + Ashley quote
+          alongside the Jane Lynch × Direct Relief video */}
+      <TwoColumnSlab
+        left={
+          <>
+            <SectionHeader title="Every organization approaches creator vetting differently." />
+            <SharedInfluenceBody
+              paragraphs={[
+                <><strong style={{ fontWeight: 700 }}>Onyx Impact</strong> runs rigorous screenings on potential creator partners, while <strong style={{ fontWeight: 700 }}>GLAAD</strong> invests in early conversations. <strong style={{ fontWeight: 700 }}>PETA</strong> builds relationships proactively by offering support to creators who post animal content. Choose the approach that reflects your organization{"'"}s goals.</>,
+              ]}
+            />
+            <div style={{ marginTop: 40 }}>
+              <AudienceBlock
+                label="If You Are An Impact Leader"
+                paragraphs={[
+                  <>Begin with values and voice. From there, understand how a creator shows up online for their community, what they have reposted, who their past partners are, and if they are open to long-term partnerships.</>,
+                ]}
+              >
+                <PullQuote
+                  quote="Every time we come across content that has a positive message for animals … we reach out, we offer support, and we start to build a relationship."
+                  name="Ashley Frohnert"
+                  role="Senior Director of Social Media and Influencer Marketing, PETA"
+                  headshotSrc="/anthem/ashley-frohnert-headshot.jpeg"
+                />
+              </AudienceBlock>
+            </div>
+          </>
+        }
+        right={
+          <VideoModule
+            src="/anthem/jane-lynch-direct-relief.mp4"
+            name="Jane Lynch × Direct Relief"
+            title="2026 Anthem Award Winner"
           />
         }
       />
@@ -480,6 +578,7 @@ export function ReportView({ report }: { report: Report }) {
                         while we nail down the layout; will move to CMS
                         once the module shapes stabilise. */}
                     {i === 0 && <SharedInfluenceSection01 report={report} />}
+                    {i === 1 && <SharedInfluenceSection02 report={report} />}
                   </div>
                 ))}
               </>

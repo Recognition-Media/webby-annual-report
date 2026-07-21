@@ -2,6 +2,19 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
+import { PortableText } from '@portabletext/react'
+import type { PortableTextComponents } from '@portabletext/react'
+import type {
+  SIContentBlock,
+  SIContentSlab,
+  SIBodyBlock,
+  SISectionHeaderBlock,
+  SIAudienceBlock,
+  SIPullQuoteBlock,
+  SIVideoBlock,
+  SITipsBlock,
+} from '@/sanity/types'
+import { urlFor } from '@/sanity/image'
 
 // ─────────────────────────────────────────────────────────────────
 // Shared Influence — reusable content modules for the report's six
@@ -17,6 +30,65 @@ const MOSS = '#21261A'
 const TAN = '#d5cfbc'
 const CARD_LIGHT = '#F5EFDB'
 const RED = '#8C001C'
+
+// ─────────────────────────────────────────────────────────────────
+// Heading scale — Roc Grotesk Variable bold. Consistent across the
+// Shared Influence report so section headers, CMS-inserted headings
+// in Portable Text body, and future editorial headings all read from
+// the same modular scale. Level 3 = 36px = the default SectionHeader
+// size (the "Finding the right partner…" beat above each section).
+// ─────────────────────────────────────────────────────────────────
+
+export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
+
+export const HEADING_SCALE: Record<HeadingLevel, {
+  fontSize: number
+  lineHeight: number
+  letterSpacing: string
+}> = {
+  1: { fontSize: 64, lineHeight: 1.05, letterSpacing: '-0.02em' },
+  2: { fontSize: 48, lineHeight: 1.1, letterSpacing: '-0.02em' },
+  3: { fontSize: 36, lineHeight: 1.15, letterSpacing: '-0.01em' },
+  4: { fontSize: 28, lineHeight: 1.2, letterSpacing: '-0.01em' },
+  5: { fontSize: 22, lineHeight: 1.25, letterSpacing: '-0.005em' },
+  6: { fontSize: 18, lineHeight: 1.3, letterSpacing: '-0.005em' },
+}
+
+// Heading — semantic h1..h6 element that pulls its size, line height,
+// and letter spacing from the shared HEADING_SCALE. Font family, weight,
+// and color are locked to the Shared Influence editorial style; pass
+// `style` to override per-instance if needed.
+export function Heading({
+  level = 3,
+  children,
+  style,
+  color = MOSS,
+}: {
+  level?: HeadingLevel
+  children: React.ReactNode
+  style?: React.CSSProperties
+  color?: string
+}) {
+  const scale = HEADING_SCALE[level]
+  const commonStyle: React.CSSProperties = {
+    fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+    fontWeight: 500,
+    color,
+    margin: '0 0 24px',
+    ...scale,
+    ...style,
+  }
+  // React narrows the tag name so we render one of the six literal
+  // elements based on `level`.
+  switch (level) {
+    case 1: return <h1 style={commonStyle}>{children}</h1>
+    case 2: return <h2 style={commonStyle}>{children}</h2>
+    case 3: return <h3 style={commonStyle}>{children}</h3>
+    case 4: return <h4 style={commonStyle}>{children}</h4>
+    case 5: return <h5 style={commonStyle}>{children}</h5>
+    case 6: return <h6 style={commonStyle}>{children}</h6>
+  }
+}
 
 interface SectionShellProps {
   children: React.ReactNode
@@ -45,33 +117,29 @@ export function SectionShell({ children, className = '' }: SectionShellProps) {
 // SectionHeader — big content-level header used inside a 2-column slab
 // (mirrors the SoSI "trend title" beat, without the eyebrow). Sits
 // above the body paragraphs in the left column and pairs with a short
-// accent divider below.
+// accent divider below. Renders via <Heading level={...}> so the size
+// stays in sync with the shared HEADING_SCALE. Default level 3 = 36px.
 export function SectionHeader({
   title,
+  level = 3,
   accentColor = RED,
 }: {
   title: string
+  level?: HeadingLevel
   accentColor?: string
 }) {
   return (
     <>
-      <motion.h3
-        style={{
-          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
-          fontSize: 'clamp(1.5rem, 3vw, 36px)',
-          fontWeight: 700,
-          lineHeight: 1.15,
-          letterSpacing: '-0.01em',
-          color: MOSS,
-          margin: '0 0 24px',
-        }}
+      <motion.div
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        {title}
-      </motion.h3>
+        <Heading level={level} style={{ margin: '0 0 24px' }}>
+          {title}
+        </Heading>
+      </motion.div>
       <div style={{ width: 36, height: 2, background: accentColor, marginBottom: 28 }} />
     </>
   )
@@ -316,6 +384,149 @@ export function TipsForSuccess({
 // with an attribution block below.
 // ─────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────
+// PullQuote — inline editorial pull quote with attribution. Used for
+// expert quotes throughout the Shared Influence sections. Red vertical
+// rule on the left, quote text in Decoy roman, attribution below.
+// ─────────────────────────────────────────────────────────────────
+
+export function PullQuote({
+  quote,
+  name,
+  role,
+  headshotSrc,
+  accentColor = RED,
+}: {
+  quote: string
+  name: string
+  role: string
+  /** Optional headshot image path. When supplied, renders as a large
+   *  circular avatar to the LEFT of the quote text (SoSI-style
+   *  structure, Lovie-sized headshot). */
+  headshotSrc?: string
+  accentColor?: string
+}) {
+  return (
+    <motion.blockquote
+      style={{
+        margin: '32px 0 0',
+        padding: 0,
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 20,
+      }}
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+    >
+      {headshotSrc && (
+        <img
+          src={headshotSrc}
+          alt={name}
+          style={{
+            width: 90,
+            height: 90,
+            borderRadius: '50%',
+            objectFit: 'cover',
+            flexShrink: 0,
+          }}
+        />
+      )}
+      <div
+        style={{
+          borderLeft: `3px solid ${accentColor}`,
+          paddingLeft: 20,
+          flex: 1,
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "'decoy', Georgia, serif",
+            fontSize: 22,
+            lineHeight: 1.35,
+            color: MOSS,
+            margin: '0 0 12px',
+          }}
+        >
+          {quote}
+        </p>
+        <p
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 13,
+            color: MOSS,
+            opacity: 0.65,
+            margin: 0,
+          }}
+        >
+          — <strong style={{ fontWeight: 600, opacity: 1 }}>{name}</strong>, {role}
+        </p>
+      </div>
+    </motion.blockquote>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
+// AudienceBlock — the "If You Are A Creator" / "If You Are An Impact
+// Leader" sub-section pattern. Small caps label + body text; can host
+// a nested PullQuote below.
+// ─────────────────────────────────────────────────────────────────
+
+export function AudienceBlock({
+  label,
+  paragraphs,
+  children,
+  accentColor = RED,
+}: {
+  label: string
+  paragraphs: React.ReactNode[]
+  /** Optional nested content (e.g. a PullQuote). */
+  children?: React.ReactNode
+  accentColor?: string
+}) {
+  return (
+    <div>
+      <motion.p
+        style={{
+          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+          fontSize: 13,
+          letterSpacing: 3,
+          textTransform: 'uppercase',
+          fontWeight: 700,
+          color: accentColor,
+          margin: '0 0 16px',
+        }}
+        initial={{ opacity: 0, y: 8 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4 }}
+      >
+        {label}
+      </motion.p>
+      {paragraphs.map((p, i) => (
+        <motion.p
+          key={i}
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 17,
+            lineHeight: 1.65,
+            color: MOSS,
+            margin: '0 0 20px',
+          }}
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.05 + i * 0.06 }}
+        >
+          {p}
+        </motion.p>
+      ))}
+      {children}
+    </div>
+  )
+}
+
 // VideoModule — native <video> element with play/pause toggle, mirroring
 // the SoSI (State of Social Impact) QuoteVideoSection treatment:
 // 16:9 dark frame, big play-triangle overlay when paused, pill-shaped
@@ -556,5 +767,161 @@ export function VideoModule({
         </>
       )}
     </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
+// CMS block renderers (Option C — repeatable content blocks)
+// Each renderer maps a Sanity block type → the existing React module
+// so the same visual language is preserved whether content is hardcoded
+// or CMS-driven.
+// ─────────────────────────────────────────────────────────────────
+
+// Rich text components as a factory so each render can inject the
+// current section's accentColor into link marks (and anywhere else
+// colour should follow the section palette).
+function makeRichTextComponents(accentColor: string): PortableTextComponents {
+  return {
+    block: {
+      normal: ({ children }) => (
+        <p
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 17,
+            lineHeight: 1.7,
+            color: MOSS,
+            margin: '0 0 20px',
+          }}
+        >
+          {children}
+        </p>
+      ),
+    },
+    marks: {
+      strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+      em: ({ children }) => <em style={{ fontStyle: 'italic' }}>{children}</em>,
+      link: ({ value, children }) => (
+        <a
+          href={value?.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: accentColor, textDecoration: 'underline', textUnderlineOffset: 3 }}
+        >
+          {children}
+        </a>
+      ),
+    },
+  }
+}
+
+function BodyBlockRenderer({ block, accentColor }: { block: SIBodyBlock; accentColor: string }) {
+  if (!block.body || block.body.length === 0) return null
+  return <PortableText value={block.body} components={makeRichTextComponents(accentColor)} />
+}
+
+function SectionHeaderBlockRenderer({ block, accentColor }: { block: SISectionHeaderBlock; accentColor: string }) {
+  return <SectionHeader title={block.title} level={block.level ?? 3} accentColor={accentColor} />
+}
+
+function PullQuoteBlockRenderer({ block, accentColor }: { block: SIPullQuoteBlock; accentColor: string }) {
+  const headshotSrc = block.headshot ? urlFor(block.headshot).width(360).height(360).fit('crop').url() : undefined
+  return (
+    <PullQuote
+      quote={block.quote}
+      name={block.name}
+      role={block.role ?? ''}
+      headshotSrc={headshotSrc}
+      accentColor={accentColor}
+    />
+  )
+}
+
+function AudienceBlockRenderer({ block, accentColor }: { block: SIAudienceBlock; accentColor: string }) {
+  const paragraphs: React.ReactNode[] = block.body && block.body.length > 0
+    ? [<PortableText key="body" value={block.body} components={makeRichTextComponents(accentColor)} />]
+    : []
+  return (
+    <AudienceBlock label={block.label} paragraphs={paragraphs} accentColor={accentColor}>
+      {block.inlineQuote && <PullQuoteBlockRenderer block={block.inlineQuote} accentColor={accentColor} />}
+    </AudienceBlock>
+  )
+}
+
+function VideoBlockRenderer({ block, accentColor }: { block: SIVideoBlock; accentColor: string }) {
+  const src = block.videoFile?.url
+  if (!src) return null
+  return (
+    <VideoModule
+      src={src}
+      name={block.name ?? ''}
+      title={block.title ?? ''}
+      orientation={block.orientation ?? 'landscape'}
+      eyebrow={block.eyebrow}
+      accentColor={accentColor}
+    />
+  )
+}
+
+function TipsBlockRenderer({ block, accentColor }: { block: SITipsBlock; accentColor: string }) {
+  if (!block.items || block.items.length === 0) return null
+  return <TipsForSuccess title={block.title || 'Tips for Success'} tips={block.items} accentColor={accentColor} />
+}
+
+/** Renders a single CMS content block. Returns null for empty/unknown
+ *  block types so slabs stay clean when partially populated.
+ *  `accentColor` flows down from the trendSection so every block picks
+ *  up the section's palette (red default, purple for Section 2, etc.). */
+function ContentBlockRenderer({ block, accentColor }: { block: SIContentBlock; accentColor: string }) {
+  switch (block._type) {
+    case 'siBodyBlock': return <BodyBlockRenderer block={block} accentColor={accentColor} />
+    case 'siSectionHeaderBlock': return <SectionHeaderBlockRenderer block={block} accentColor={accentColor} />
+    case 'siAudienceBlock': return <AudienceBlockRenderer block={block} accentColor={accentColor} />
+    case 'siPullQuoteBlock': return <PullQuoteBlockRenderer block={block} accentColor={accentColor} />
+    case 'siVideoBlock': return <VideoBlockRenderer block={block} accentColor={accentColor} />
+    case 'siTipsBlock': return <TipsBlockRenderer block={block} accentColor={accentColor} />
+    default: return null
+  }
+}
+
+/** Renders an array of CMS content blocks as a single column stack.
+ *  Adjacent blocks are separated visually via each module's own margin. */
+export function ContentBlockList({ blocks, accentColor }: { blocks?: SIContentBlock[]; accentColor: string }) {
+  if (!blocks || blocks.length === 0) return null
+  return (
+    <>
+      {blocks.map((block, i) => (
+        <ContentBlockRenderer key={block._key || i} block={block} accentColor={accentColor} />
+      ))}
+    </>
+  )
+}
+
+/** Renders a single CMS-driven slab: 2-column layout via TwoColumnSlab
+ *  with block arrays composed on each side. */
+export function ContentSlabRenderer({ slab, accentColor }: { slab: SIContentSlab; accentColor: string }) {
+  return (
+    <TwoColumnSlab
+      left={<ContentBlockList blocks={slab.leftBlocks} accentColor={accentColor} />}
+      right={<ContentBlockList blocks={slab.rightBlocks} accentColor={accentColor} />}
+    />
+  )
+}
+
+/** Renders all slabs in order. `accentColor` comes from the parent
+ *  trendSection so blocks pick up the section palette by default. */
+export function ContentSlabsRenderer({
+  slabs,
+  accentColor = RED,
+}: {
+  slabs?: SIContentSlab[]
+  accentColor?: string
+}) {
+  if (!slabs || slabs.length === 0) return null
+  return (
+    <>
+      {slabs.map((slab, i) => (
+        <ContentSlabRenderer key={slab._key || i} slab={slab} accentColor={accentColor} />
+      ))}
+    </>
   )
 }

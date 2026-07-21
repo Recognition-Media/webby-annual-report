@@ -36,6 +36,8 @@ export default function SharedInfluenceMockups() {
       <section id="compare-b"><InfluencerCreatorOptionB /></section>
       <Divider />
       <section id="compare-c"><InfluencerCreatorOptionC /></section>
+      <Divider />
+      <section id="audience-split"><AudienceSplitModule /></section>
     </main>
   )
 }
@@ -80,6 +82,8 @@ function TopBar() {
       <a href="#compare-a" style={link}>Split panel</a>
       <a href="#compare-b" style={link}>Table rows</a>
       <a href="#compare-c" style={link}>Display type</a>
+      <span style={{ fontSize: 12, opacity: 0.4 }}>|</span>
+      <a href="#audience-split" style={link}>Audience Split</a>
     </div>
   )
 }
@@ -1074,6 +1078,111 @@ function InfluencerCreatorOptionC() {
           </div>
         </div>
       </CompareFrame>
+    </div>
+  )
+}
+
+/* =========================================================================
+ * AUDIENCE SPLIT — Option 2 mockup for Section 2. A single card with the
+ * "If You Are A Creator" content on the left and "If You Are An Impact
+ * Leader" content on the right, each with body copy + an inline pull
+ * quote. Rendered inside a simulated full-width slab so what you see
+ * matches how it'd appear on the real report.
+ * ======================================================================= */
+
+function AudienceSplitModule() {
+  return (
+    <div>
+      <OptionLabel
+        n={4}
+        title="Audience Split — dual-column card"
+        description="Both audiences shown side-by-side in one card. Each half has small caps label, body paragraphs, and an inline pull quote. Beige splits (matching section) with a vertical hairline between. Compressed alternative to running two separate slabs."
+      />
+      <div style={{
+        background: CREAM,
+        color: MOSS,
+        padding: '96px 40px',
+        fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+      }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+          <h2 style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 36,
+            fontWeight: 700,
+            lineHeight: 1.15,
+            color: MOSS,
+            margin: '0 0 12px',
+            maxWidth: 900,
+          }}>
+            Finding the right partner is less about audience size than alignment
+          </h2>
+          <div style={{ width: 36, height: 2, background: RED, marginBottom: 40 }} />
+          <p style={{ fontSize: 17, lineHeight: 1.7, color: MOSS, margin: '0 0 56px', maxWidth: 780 }}>
+            Creators want to protect the trust they&apos;ve built with their communities. Impact organizations should be as intentional and rigorous about who represents their mission.
+          </p>
+
+          {/* The split card */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 0,
+            border: `1px solid rgba(33,38,26,0.15)`,
+            borderRadius: 14,
+            overflow: 'hidden',
+          }}>
+            <div style={{ padding: '40px 40px 44px' }}>
+              <p style={{ fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', fontWeight: 700, color: RED, margin: '0 0 20px' }}>
+                If You Are A Creator
+              </p>
+              <p style={{ fontSize: 16, lineHeight: 1.65, color: MOSS, margin: '0 0 18px' }}>
+                Learn if an organization is transparent and effective in its community. Creators insist on nonprofits with available donor and financial data.
+              </p>
+              <p style={{ fontSize: 16, lineHeight: 1.65, color: MOSS, margin: '0 0 24px' }}>
+                Use resources like <strong style={{ fontWeight: 700 }}>Guide Star</strong> to find Gold and Platinum-rated organizations, says <strong style={{ fontWeight: 700 }}>Mercury Stardust</strong>, a DIY home repair educator and creator partner on Point of Pride&apos;s Stream-a-Thon for Trans Health.
+              </p>
+              <blockquote style={{
+                margin: 0,
+                padding: '0 0 0 16px',
+                borderLeft: `3px solid ${RED}`,
+              }}>
+                <p style={{ fontFamily: "'decoy', Georgia, serif", fontSize: 20, lineHeight: 1.35, color: MOSS, margin: '0 0 10px' }}>
+                  Follow the money. Where does the money go?
+                </p>
+                <p style={{ fontSize: 13, color: MOSS, opacity: 0.65, margin: 0 }}>
+                  — <strong style={{ fontWeight: 600 }}>Bryan Reisberg</strong>, Creator, Maxine the Corgi
+                </p>
+              </blockquote>
+            </div>
+
+            <div style={{
+              padding: '40px 40px 44px',
+              borderLeft: `1px solid rgba(33,38,26,0.15)`,
+            }}>
+              <p style={{ fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', fontWeight: 700, color: RED, margin: '0 0 20px' }}>
+                If You Are An Impact Leader
+              </p>
+              <p style={{ fontSize: 16, lineHeight: 1.65, color: MOSS, margin: '0 0 18px' }}>
+                Begin with values and voice. From there, understand how a creator shows up online for their community, what they have reposted, who their past partners are, and if they are open to long-term partnerships.
+              </p>
+              <p style={{ fontSize: 16, lineHeight: 1.65, color: MOSS, margin: '0 0 24px' }}>
+                Every organization interviewed approaches this differently. Onyx Impact runs rigorous screenings; GLAAD invests in early conversations. PETA builds relationships proactively by offering support to creators who post animal content. Choose the approach that reflects your organization&apos;s goals.
+              </p>
+              <blockquote style={{
+                margin: 0,
+                padding: '0 0 0 16px',
+                borderLeft: `3px solid ${RED}`,
+              }}>
+                <p style={{ fontFamily: "'decoy', Georgia, serif", fontSize: 20, lineHeight: 1.35, color: MOSS, margin: '0 0 10px' }}>
+                  Every time we come across content that has a positive message for animals … we reach out, we offer support, and we start to build a relationship.
+                </p>
+                <p style={{ fontSize: 13, color: MOSS, opacity: 0.65, margin: 0 }}>
+                  — <strong style={{ fontWeight: 600 }}>Ashley Frohnert</strong>, Sr. Director of Social Media & Influencer Marketing, PETA
+                </p>
+              </blockquote>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
