@@ -197,6 +197,59 @@ export const siTipsBlock = defineType({
   },
 })
 
+// Case Study Block — an "eyebrow → title → body" callout used to
+// spotlight a specific report / partnership. Sits inside a slab column
+// alongside its supporting embed/video block.
+export const siCaseStudyBlock = defineType({
+  name: 'siCaseStudyBlock',
+  title: 'Case Study Block',
+  type: 'object',
+  fields: [
+    { name: 'eyebrow', title: 'Eyebrow', type: 'string', initialValue: 'Case Study', description: 'Small caps label above the title. Default is "Case Study".' },
+    { name: 'title', title: 'Title', type: 'string', validation: (r) => r.required(), description: 'e.g. "Onyx Impact Launch for Aisha.ai"' },
+    {
+      name: 'body',
+      title: 'Body',
+      type: 'array',
+      of: [{ type: 'block' }],
+      description: 'Rich text — the case study story. Links and bold marks supported.',
+    },
+  ],
+  preview: {
+    select: { title: 'title' },
+    prepare({ title }) {
+      return { title: 'Case Study', subtitle: title || '(untitled)' }
+    },
+  },
+})
+
+// Instagram Embed Block — embeds an Instagram reel/post inline. Editor
+// pastes the share URL; renderer converts to the /embed/ variant.
+export const siInstagramEmbedBlock = defineType({
+  name: 'siInstagramEmbedBlock',
+  title: 'Instagram Embed Block',
+  type: 'object',
+  fields: [
+    {
+      name: 'url',
+      title: 'Instagram Share URL',
+      type: 'url',
+      validation: (r) => r.required(),
+      description: 'Paste the reel or post URL (e.g. https://www.instagram.com/reel/DaBdI7uSVEL/). Renderer appends /embed/ automatically.',
+    },
+    { name: 'caption', title: 'Caption (optional)', type: 'string', description: 'Short attribution shown below the embed.' },
+  ],
+  preview: {
+    select: { url: 'url', caption: 'caption' },
+    prepare({ url, caption }) {
+      return {
+        title: 'Instagram Embed',
+        subtitle: caption || url || '(unset)',
+      }
+    },
+  },
+})
+
 // Content Slab — two-column wrapper containing block arrays
 const BLOCK_TYPES = [
   { type: 'siSectionHeaderBlock' },
@@ -205,6 +258,8 @@ const BLOCK_TYPES = [
   { type: 'siPullQuoteBlock' },
   { type: 'siVideoBlock' },
   { type: 'siTipsBlock' },
+  { type: 'siCaseStudyBlock' },
+  { type: 'siInstagramEmbedBlock' },
 ]
 
 export const siContentSlab = defineType({

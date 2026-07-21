@@ -152,6 +152,21 @@ export interface SITipsBlock {
   items?: string[]
 }
 
+export interface SICaseStudyBlock {
+  _type: 'siCaseStudyBlock'
+  _key?: string
+  eyebrow?: string
+  title: string
+  body?: PortableTextBlock[]
+}
+
+export interface SIInstagramEmbedBlock {
+  _type: 'siInstagramEmbedBlock'
+  _key?: string
+  url: string
+  caption?: string
+}
+
 export type SIContentBlock =
   | SIBodyBlock
   | SISectionHeaderBlock
@@ -159,6 +174,8 @@ export type SIContentBlock =
   | SIPullQuoteBlock
   | SIVideoBlock
   | SITipsBlock
+  | SICaseStudyBlock
+  | SIInstagramEmbedBlock
 
 export interface SIContentSlab {
   _key?: string

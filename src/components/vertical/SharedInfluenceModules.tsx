@@ -13,6 +13,8 @@ import type {
   SIPullQuoteBlock,
   SIVideoBlock,
   SITipsBlock,
+  SICaseStudyBlock,
+  SIInstagramEmbedBlock,
 } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
 
@@ -771,6 +773,129 @@ export function VideoModule({
 }
 
 // ─────────────────────────────────────────────────────────────────
+// CaseStudy — small-caps eyebrow + heading + body copy. Used to
+// spotlight a specific report / campaign inside a section. Sits inside
+// a slab column alongside an embed/video.
+// ─────────────────────────────────────────────────────────────────
+
+export function CaseStudy({
+  eyebrow = 'Case Study',
+  title,
+  children,
+  accentColor = RED,
+}: {
+  eyebrow?: string
+  title: string
+  children?: React.ReactNode
+  accentColor?: string
+}) {
+  return (
+    <div>
+      <motion.p
+        style={{
+          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+          fontSize: 12,
+          letterSpacing: 3,
+          textTransform: 'uppercase',
+          fontWeight: 700,
+          color: accentColor,
+          margin: '0 0 12px',
+        }}
+        initial={{ opacity: 0, y: 8 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4 }}
+      >
+        {eyebrow}
+      </motion.p>
+      <motion.h3
+        style={{
+          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+          fontSize: 24,
+          fontWeight: 500,
+          lineHeight: 1.2,
+          color: MOSS,
+          margin: '0 0 20px',
+        }}
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.05 }}
+      >
+        {title}
+      </motion.h3>
+      {children}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
+// InstagramEmbed — renders an Instagram reel/post via <iframe>. Uses
+// Instagram's /embed/ URL variant, so editors paste a normal share URL
+// and the renderer handles the conversion.
+// ─────────────────────────────────────────────────────────────────
+
+export function InstagramEmbed({ url, caption }: { url: string; caption?: string }) {
+  const embedUrl = toInstagramEmbedUrl(url)
+  if (!embedUrl) return null
+  return (
+    <div>
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          // Reels + most Instagram content is portrait — 9:16 with a
+          // little extra height for the caption bar Instagram overlays.
+          aspectRatio: '9 / 16',
+          maxHeight: 600,
+          background: MOSS,
+          borderRadius: 12,
+          overflow: 'hidden',
+        }}
+      >
+        <iframe
+          src={embedUrl}
+          title="Instagram embed"
+          scrolling="no"
+          allowTransparency
+          allow="encrypted-media"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            border: 0,
+          }}
+        />
+      </div>
+      {caption && (
+        <p
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 13,
+            color: MOSS,
+            opacity: 0.65,
+            margin: '12px 0 0',
+          }}
+        >
+          {caption}
+        </p>
+      )}
+    </div>
+  )
+}
+
+// Instagram share URLs come in a few shapes:
+//   https://www.instagram.com/reel/{id}/
+//   https://www.instagram.com/p/{id}/
+// The embed variant is the same URL with `/embed/` appended.
+function toInstagramEmbedUrl(url: string): string | undefined {
+  if (!url) return undefined
+  const trimmed = url.split('?')[0].replace(/\/$/, '')
+  return `${trimmed}/embed/`
+}
+
+// ─────────────────────────────────────────────────────────────────
 // CMS block renderers (Option C — repeatable content blocks)
 // Each renderer maps a Sanity block type → the existing React module
 // so the same visual language is preserved whether content is hardcoded
@@ -867,6 +992,21 @@ function TipsBlockRenderer({ block, accentColor }: { block: SITipsBlock; accentC
   return <TipsForSuccess title={block.title || 'Tips for Success'} tips={block.items} accentColor={accentColor} />
 }
 
+function CaseStudyBlockRenderer({ block, accentColor }: { block: SICaseStudyBlock; accentColor: string }) {
+  return (
+    <CaseStudy eyebrow={block.eyebrow || 'Case Study'} title={block.title} accentColor={accentColor}>
+      {block.body && block.body.length > 0 && (
+        <PortableText value={block.body} components={makeRichTextComponents(accentColor)} />
+      )}
+    </CaseStudy>
+  )
+}
+
+function InstagramEmbedBlockRenderer({ block }: { block: SIInstagramEmbedBlock }) {
+  if (!block.url) return null
+  return <InstagramEmbed url={block.url} caption={block.caption} />
+}
+
 /** Renders a single CMS content block. Returns null for empty/unknown
  *  block types so slabs stay clean when partially populated.
  *  `accentColor` flows down from the trendSection so every block picks
@@ -879,6 +1019,8 @@ function ContentBlockRenderer({ block, accentColor }: { block: SIContentBlock; a
     case 'siPullQuoteBlock': return <PullQuoteBlockRenderer block={block} accentColor={accentColor} />
     case 'siVideoBlock': return <VideoBlockRenderer block={block} accentColor={accentColor} />
     case 'siTipsBlock': return <TipsBlockRenderer block={block} accentColor={accentColor} />
+    case 'siCaseStudyBlock': return <CaseStudyBlockRenderer block={block} accentColor={accentColor} />
+    case 'siInstagramEmbedBlock': return <InstagramEmbedBlockRenderer block={block} />
     default: return null
   }
 }

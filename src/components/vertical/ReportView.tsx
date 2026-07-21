@@ -269,6 +269,27 @@ function SharedInfluenceSection02({ report }: { report: Report }) {
   )
 }
 
+// Section 3 — fully CMS-driven via contentSlabs. No hardcoded fallback;
+// editors compose every slab in Studio. Accent inherits from the section
+// cover so all child blocks share the same palette.
+function SharedInfluenceSection03({ report }: { report: Report }) {
+  const trend = report.trendSections?.[2]
+  const accentColor =
+    report.sectionCovers?.[2]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  if (!slabs || slabs.length === 0) return null
+  return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+}
+
+function SharedInfluenceSection04({ report }: { report: Report }) {
+  const trend = report.trendSections?.[3]
+  const accentColor =
+    report.sectionCovers?.[3]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  if (!slabs || slabs.length === 0) return null
+  return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+}
+
 export function ReportView({ report }: { report: Report }) {
   const cookieKey = `report-access-${report.slug.current}`
   const [hasAccess, setHasAccess] = useState(false)
@@ -579,6 +600,8 @@ export function ReportView({ report }: { report: Report }) {
                         once the module shapes stabilise. */}
                     {i === 0 && <SharedInfluenceSection01 report={report} />}
                     {i === 1 && <SharedInfluenceSection02 report={report} />}
+                    {i === 2 && <SharedInfluenceSection03 report={report} />}
+                    {i === 3 && <SharedInfluenceSection04 report={report} />}
                   </div>
                 ))}
               </>

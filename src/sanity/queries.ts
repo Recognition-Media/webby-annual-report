@@ -77,6 +77,7 @@ export const reportBySlugQuery = groq`
           videoFile { "url": asset->url },
           orientation, eyebrow,
           items,
+          url, caption,
         },
         rightBlocks[] {
           _type, _key,
@@ -87,6 +88,7 @@ export const reportBySlugQuery = groq`
           videoFile { "url": asset->url },
           orientation, eyebrow,
           items,
+          url, caption,
         },
       },
       showQuotes,
