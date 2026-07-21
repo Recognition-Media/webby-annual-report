@@ -25,6 +25,7 @@ import {
   PullQuote,
   AudienceBlock,
   ContentSlabsRenderer,
+  ContentBlockList,
   FullWidthSlab,
   Heading,
   ScrollingCards,
@@ -161,117 +162,34 @@ function SharedInfluenceSection01({ report }: { report: Report }) {
         }
       />
 
-      {/* Slab 2 — Tips for Success (left) + Video (right) */}
+      {/* Slab 2 — Tips for Success (left) + optional CMS content slabs
+          on the right. Editors add a portrait Video Block (Jaclynn
+          Brennan) or any other supporting module via the Section 1
+          contentSlabs field in Sanity. The Jaclynn video previously
+          hardcoded here was gitignored (>100MB) and 404'd in prod. */}
       <TwoColumnSlab
-        left={
-          <TipsForSuccess title={tipsTitle} tips={tipsItems} />
-        }
+        left={<TipsForSuccess title={tipsTitle} tips={tipsItems} />}
         right={
-          <VideoModule
-            src="/anthem/jaclynn-brennan-influencer-vs-creator.mp4"
-            name="Jaclynn Brennan"
-            title="Founder, Creative Duality"
-            orientation="portrait"
-          />
+          trend?.contentSlabs?.[0]?.rightBlocks && trend.contentSlabs[0].rightBlocks.length > 0
+            ? <ContentBlockList blocks={trend.contentSlabs[0].rightBlocks} accentColor={trend.accentColor || '#8C001C'} />
+            : null
         }
       />
     </>
   )
 }
 
-// Section 2 — Finding the Right Partners. When the CMS trendSections[1]
-// has `contentSlabs` populated, the section renders from that. Otherwise
-// the hardcoded Slab 1 + Slab 2 fallback below ships so nothing looks
-// broken while the CMS is being filled in.
+// Section 2 — Finding the Right Partners. Fully CMS-driven via
+// contentSlabs. The old hardcoded fallback referenced gitignored
+// videos (garrison-hayes-vetting-process.mp4, jane-lynch-direct-relief.mp4)
+// that 404 in production — removed.
 function SharedInfluenceSection02({ report }: { report: Report }) {
   const trend = report.trendSections?.[1]
-  // Prefer the section cover's accent (where the editor already sets
-  // the section palette) so all Section 2 blocks inherit purple from
-  // one place. Falls back to the trend section's own accent, then red.
   const accentColor =
     report.sectionCovers?.[1]?.accentColor || trend?.accentColor || '#8C001C'
   const slabs = trend?.contentSlabs
-  if (slabs && slabs.length > 0) {
-    return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
-  }
-  return (
-    <>
-      {/* Slab 1 — Intro + Creator advice + Bryan quote alongside Garrison video */}
-      <TwoColumnSlab
-        left={
-          <>
-            <SectionHeader title="Finding the right partner is less about audience size than alignment" />
-            <SharedInfluenceBody
-              paragraphs={[
-                <>Creators want to protect the trust they{"'"}ve built with their communities. Impact organizations should be as intentional and rigorous about who represents their mission.</>,
-              ]}
-            />
-            <div style={{ marginTop: 40 }}>
-              <AudienceBlock
-                label="If You Are A Creator"
-                paragraphs={[
-                  <>Learn if an organization is transparent and effective in its community. Creators like <strong style={{ fontWeight: 700 }}>Garrison Hayes</strong> insist on nonprofits with a proven history of effectiveness and access to donor/financial data.</>,
-                  <>Use resources like <strong style={{ fontWeight: 700 }}>Guide Star</strong> to find Gold and Platinum-rated organizations, says <strong style={{ fontWeight: 700 }}>Mercury Stardust</strong>, a DIY home repair educator and creator partner on Point of Pride{"'"}s Stream-a-Thon for Trans Health.</>,
-                ]}
-              >
-                <PullQuote
-                  quote="Follow the money. Where does the money go?"
-                  name="Bryan Reisberg"
-                  role="Creator, Maxine the Corgi"
-                  headshotSrc="/anthem/bryan-reisberg-headshot.jpg"
-                />
-              </AudienceBlock>
-            </div>
-          </>
-        }
-        right={
-          <VideoModule
-            src="/anthem/garrison-hayes-vetting-process.mp4"
-            name="Garrison Hayes"
-            title="Creator, @garrisonhayes"
-            orientation="portrait"
-          />
-        }
-      />
-
-      {/* Slab 2 — Approach body + Impact Leader advice + Ashley quote
-          alongside the Jane Lynch × Direct Relief video */}
-      <TwoColumnSlab
-        left={
-          <>
-            <SectionHeader title="Every organization approaches creator vetting differently." />
-            <SharedInfluenceBody
-              paragraphs={[
-                <><strong style={{ fontWeight: 700 }}>Onyx Impact</strong> runs rigorous screenings on potential creator partners, while <strong style={{ fontWeight: 700 }}>GLAAD</strong> invests in early conversations. <strong style={{ fontWeight: 700 }}>PETA</strong> builds relationships proactively by offering support to creators who post animal content. Choose the approach that reflects your organization{"'"}s goals.</>,
-              ]}
-            />
-            <div style={{ marginTop: 40 }}>
-              <AudienceBlock
-                label="If You Are An Impact Leader"
-                paragraphs={[
-                  <>Begin with values and voice. From there, understand how a creator shows up online for their community, what they have reposted, who their past partners are, and if they are open to long-term partnerships.</>,
-                ]}
-              >
-                <PullQuote
-                  quote="Every time we come across content that has a positive message for animals … we reach out, we offer support, and we start to build a relationship."
-                  name="Ashley Frohnert"
-                  role="Senior Director of Social Media and Influencer Marketing, PETA"
-                  headshotSrc="/anthem/ashley-frohnert-headshot.jpeg"
-                />
-              </AudienceBlock>
-            </div>
-          </>
-        }
-        right={
-          <VideoModule
-            src="/anthem/jane-lynch-direct-relief.mp4"
-            name="Jane Lynch × Direct Relief"
-            title="2026 Anthem Award Winner"
-          />
-        }
-      />
-    </>
-  )
+  if (!slabs || slabs.length === 0) return null
+  return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
 }
 
 // Section 3 — fully CMS-driven via contentSlabs. No hardcoded fallback;
@@ -309,14 +227,20 @@ function SharedInfluenceSection06({ report }: { report: Report }) {
   const accentColor =
     report.sectionCovers?.[5]?.accentColor || trend?.accentColor || '#8C001C'
   const slabs = trend?.contentSlabs
+  // Only render the mock preview while the CMS is still empty of a
+  // real Scrolling Cards Block; once editors add one, the preview
+  // steps aside to avoid duplicated modules.
+  const hasCmsScrollingCards = !!slabs?.some((slab) =>
+    [...(slab.leftBlocks || []), ...(slab.rightBlocks || [])].some(
+      (b) => b._type === 'siScrollingCardsBlock',
+    ),
+  )
   return (
     <>
       {slabs && slabs.length > 0 && (
         <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
       )}
-      {/* Scrolling-cards preview — remove once Slab 2 (full-width
-          siScrollingCardsBlock) is populated in the CMS. */}
-      <ScrollingCardsPreview accentColor={accentColor} />
+      {!hasCmsScrollingCards && <ScrollingCardsPreview accentColor={accentColor} />}
     </>
   )
 }

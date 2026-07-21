@@ -179,7 +179,7 @@ export function AnthemFooter({ report }: { report: Report }) {
   const ctaFontFamily = isSharedInfluence
     ? "'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif"
     : "'roc-grotesk-variable', -apple-system, sans-serif"
-  const ctaFontWeight = isSharedInfluence ? 500 : 500
+  const ctaFontWeight = 500
   const bottomBorderColor = isSharedInfluence ? 'rgba(33, 38, 26, 0.2)' : 'rgba(227, 221, 202, 0.14)'
   const bottomTextColor = isSharedInfluence ? '#21261A' : '#E3DDCA'
 
