@@ -105,9 +105,19 @@ function setCookie(name: string, value: string, days: number) {
 
 // Section 1 — The New Trusted Institutions. Two 2-col slabs mirror the
 // SoSI (State of Social Impact) rhythm: (body + comparison) then
-// (tips + video). Hardcoded for now; will move to CMS once the module
-// shapes stabilise across all six sections.
-function SharedInfluenceSection01() {
+// (tips + video). Tips Module is CMS-driven via the section's Tips
+// Module fields; other modules are hardcoded for now.
+function SharedInfluenceSection01({ report }: { report: Report }) {
+  const trend = report.trendSections?.[0]
+  const tipsTitle = trend?.tipsTitle || 'Tips for Success'
+  const tipsItems = trend?.tipsItems && trend.tipsItems.length > 0
+    ? trend.tipsItems
+    : [
+        'Treat creators as long-term partners, not campaign add-ons.',
+        'Focus on storytelling. A creator collaborates and tells a story. Know which you need.',
+        'Lead with a person, not a logo. A face earns trust faster than an organization can.',
+        'Frame creators internally as a core distribution channel and experts, not a nice-to-have.',
+      ]
   return (
     <>
       {/* Slab 1 — Header + Body copy (left) + Influencer/Creator comparison (right) */}
@@ -146,14 +156,7 @@ function SharedInfluenceSection01() {
       {/* Slab 2 — Tips for Success (left) + Video (right) */}
       <TwoColumnSlab
         left={
-          <TipsForSuccess
-            tips={[
-              'Treat creators as long-term partners, not campaign add-ons.',
-              'Focus on storytelling. A creator collaborates and tells a story. Know which you need.',
-              'Lead with a person, not a logo. A face earns trust faster than an organization can.',
-              'Frame creators internally as a core distribution channel and experts, not a nice-to-have.',
-            ]}
-          />
+          <TipsForSuccess title={tipsTitle} tips={tipsItems} />
         }
         right={
           <VideoModule
@@ -476,7 +479,7 @@ export function ReportView({ report }: { report: Report }) {
                     {/* Section content, keyed by index. Hardcoded for now
                         while we nail down the layout; will move to CMS
                         once the module shapes stabilise. */}
-                    {i === 0 && <SharedInfluenceSection01 />}
+                    {i === 0 && <SharedInfluenceSection01 report={report} />}
                   </div>
                 ))}
               </>

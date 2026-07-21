@@ -61,6 +61,9 @@ export const reportBySlugQuery = groq`
       dataSubheadline,
       dataContext,
       dataStats,
+      showTips,
+      tipsTitle,
+      tipsItems,
       showQuotes,
       expertQuotes[] {
         name,

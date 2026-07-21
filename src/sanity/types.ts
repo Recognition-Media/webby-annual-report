@@ -85,6 +85,9 @@ export interface TrendSection {
   dataStats?: DataStat[]
   showInsideTheHubs?: boolean
   insideTheHubs?: InsideTheHubs
+  showTips?: boolean
+  tipsTitle?: string
+  tipsItems?: string[]
   showQuotes?: boolean
   expertQuotes?: ExpertQuote[]
   showVideo?: boolean

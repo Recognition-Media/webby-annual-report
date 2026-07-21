@@ -8,6 +8,7 @@ export default defineType({
     { name: 'landing', title: 'Intro Page', options: { collapsible: true, collapsed: true } },
     { name: 'data', title: 'Data Module', options: { collapsible: true, collapsed: true } },
     { name: 'hubs', title: 'Inside the Hubs (Lovie)', options: { collapsible: true, collapsed: true } },
+    { name: 'tips', title: 'Tips Module', options: { collapsible: true, collapsed: true } },
     { name: 'quotes', title: 'Expert Quotes', options: { collapsible: true, collapsed: true } },
     { name: 'video', title: 'Video Module', options: { collapsible: true, collapsed: true } },
     { name: 'images', title: 'Images', options: { collapsible: true, collapsed: true } },
@@ -47,6 +48,7 @@ export default defineType({
             type: 'string',
             options: { list: [
               { title: 'Data Module', value: 'data' },
+              { title: 'Tips Module', value: 'tips' },
               { title: 'Expert Quotes', value: 'quotes' },
               { title: 'Video Module', value: 'video' },
             ]},
@@ -56,7 +58,7 @@ export default defineType({
         preview: {
           select: { module: 'module' },
           prepare({ module }) {
-            const labels: Record<string, string> = { data: 'Data Module', quotes: 'Expert Quotes', video: 'Video Module' }
+            const labels: Record<string, string> = { data: 'Data Module', tips: 'Tips Module', quotes: 'Expert Quotes', video: 'Video Module' }
             return { title: labels[module] || module }
           },
         },
@@ -84,6 +86,21 @@ export default defineType({
     // Inside the Hubs (Lovie) — three-column country breakdown
     { name: 'showInsideTheHubs', title: 'Show Inside the Hubs', type: 'boolean', initialValue: false, description: 'Lovie reports only. Adds a Spain / Italy / Portugal breakdown alongside this trend.', fieldset: 'hubs' },
     { name: 'insideTheHubs', title: 'Inside the Hubs', type: 'insideTheHubs', hidden: ({ parent }) => parent?.showInsideTheHubs === false, fieldset: 'hubs' },
+
+    // Tips Module — titled numbered list. Used for "Tips for Success"
+    // beats in the Shared Influence report (and any other titled
+    // short-list callout).
+    { name: 'showTips', title: 'Show Tips Module', type: 'boolean', initialValue: false, description: 'Toggle a titled numbered list (e.g. "Tips for Success").', fieldset: 'tips' },
+    { name: 'tipsTitle', title: 'Tips Title', type: 'string', description: 'e.g. "Tips for Success", "Best Practices", "Key Takeaways"', hidden: ({ parent }) => parent?.showTips === false, fieldset: 'tips' },
+    {
+      name: 'tipsItems',
+      title: 'Tips Items',
+      type: 'array',
+      of: [{ type: 'text', rows: 2 }],
+      description: 'Short bullet-length statements. Rendered as a numbered list.',
+      hidden: ({ parent }) => parent?.showTips === false,
+      fieldset: 'tips',
+    },
 
     // Expert Quotes
     { name: 'showQuotes', title: 'Show Expert Quotes', type: 'boolean', initialValue: true, fieldset: 'quotes' },
