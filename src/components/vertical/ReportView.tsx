@@ -107,11 +107,18 @@ export function ReportView({ report }: { report: Report }) {
   // template is mounted. Lovie reports get `lovie-template`; everything else
   // using the vertical layout (Anthem) keeps `anthem-template`. Webby reports
   // use the horizontal template and stay on the default styling.
+  //
+  // Additionally we tag body with a per-report `report-<slug>` class so any
+  // report-specific overrides (fluid hero sizing, custom section colours,
+  // etc.) can be scoped without leaking into other reports on the same
+  // template.
   useEffect(() => {
     const themeClass = report.property === 'lovie' ? 'lovie-template' : 'anthem-template'
-    document.body.classList.add(themeClass)
-    return () => { document.body.classList.remove(themeClass) }
-  }, [report.property])
+    const slugClass = report.slug?.current ? `report-${report.slug.current}` : null
+    const classes = [themeClass, slugClass].filter(Boolean) as string[]
+    document.body.classList.add(...classes)
+    return () => { document.body.classList.remove(...classes) }
+  }, [report.property, report.slug?.current])
 
   // Show goodbye only when all trends are complete (desktop)
   // On mobile, always show it since trends are just vertical scroll

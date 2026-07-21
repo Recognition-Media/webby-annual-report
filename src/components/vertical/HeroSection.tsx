@@ -61,6 +61,20 @@ const LOVIE_NAV_SECTIONS = [
   { id: 'section-takeaways', label: 'Takeaways' },
 ]
 
+// Shared Influence nav — mirrors the section list in the draft copy PDF.
+// Each id targets the section cover / content that will render as
+// `section-<n>` in the Anthem vertical template. Takeaways uses its
+// own anchor (added when the section is built out).
+const SHARED_INFLUENCE_NAV_SECTIONS = [
+  { id: 'section-01', label: 'The New Trusted Institutions' },
+  { id: 'section-02', label: 'Finding the Right Partners' },
+  { id: 'section-03', label: 'Making It Work' },
+  { id: 'section-04', label: 'Formats That Drive Impact' },
+  { id: 'section-05', label: 'The Challenges with Creator Partnerships' },
+  { id: 'section-06', label: 'Navigating the Value Exchange' },
+  { id: 'takeaways', label: 'Takeaways' },
+]
+
 interface HeroSectionProps {
   report: Report
   carouselImages?: CarouselImage[]
@@ -74,6 +88,13 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
   // hardcoded behavior; LocalHeroCarousel updates this as images cycle.
   const [textTone, setTextTone] = useState<Tone>('light')
   const isLovie = report.property === 'lovie'
+  // Shared Influence: an Anthem-property report but with its own hero
+  // treatment (purple ground, illustrated icons baked into the artwork,
+  // fluid Roc/Decoy title stack). Detected by slug so the existing
+  // State of Social Impact hero is untouched.
+  const isSharedInfluence =
+    report.property === 'anthem' &&
+    report.slug?.current === 'shared-influence-creator-partnerships-nonprofit'
 
   // Branding fork — every Anthem-specific value has a Lovie counterpart so
   // the JSX below stays a single tree. Anthem path resolves to the original
@@ -168,6 +189,76 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         ),
         subtitle: 'Mapping the cities, communities, and ideas shaping Europe’s contributions to the Internet in 2026.',
       }
+    : isSharedInfluence
+    ? {
+        // Anthem-property report with its own hero treatment. Purple
+        // ground, cause icons baked into the artwork (so we skip the
+        // floating draggable icons), Roc Grotesk display title in cream
+        // over the purple, Decoy tagline in moss below. Everything else
+        // (footer, credits, section covers) still uses the default
+        // Anthem theme via report.property === 'anthem'.
+        logoSrc: '/anthem/anthem-sticker.svg',
+        logoAlt: 'Anthem Awards',
+        logoClassName: 'w-[80px] h-[80px] md:w-[120px] md:h-[120px] lg:w-[145px] lg:h-[145px]',
+        ctaUrl: 'https://www.anthemawards.com/',
+        // Beige pill + moss text against the purple hero — swaps the
+        // default red CTA styling used by the State of Social Impact
+        // report. Applies to both the top-right "Enter Now" pill and
+        // the "Explore The Report" button below the title.
+        ctaBgClass: 'bg-[#E3DDCA] hover:bg-[#d5cfbc]',
+        ctaTextColorClass: 'text-[#21261A]',
+        brandLabel: '',
+        brandLabelColor: 'var(--anthem-green)',
+        heroImages: ['/anthem/shared-influence-hero-bg.png'],
+        heroImagesMobile: undefined as string[] | undefined,
+        heroCaptions: [] as string[],
+        heroBgColor: '#D17DD0',
+        // No gradient overlay — purple ground should read as-is.
+        gradientOverlay: 'none',
+        titleColor: '#E3DDCA',
+        subtitleColor: '#21261A',
+        titleClassName: '',
+        titleStyle: {
+          margin: 0,
+        },
+        titleLine1: '',
+        titleLine2: '',
+        // titleNode owns all the fluid sizing so title and subtitle
+        // scale in proportion (title uses 9.5vw slope, subtitle 2.8vw
+        // — same 3.38:1 ratio at every viewport in the fluid range).
+        titleNode: (
+          <span
+            style={{
+              display: 'block',
+              fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+              color: '#E3DDCA',
+              fontSize: 'clamp(3rem, 9.5vw, 125px)',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              lineHeight: 0.95,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Shared Influence
+          </span>
+        ),
+        subtitle: 'A playbook for creator partnerships that drive social impact',
+        subtitleStyle: {
+          fontFamily: "'decoy', Georgia, serif",
+          // 37px at ≥1320px; scales down proportionally with the title
+          // via matching vw slope. min 1.125rem keeps it legible below
+          // the fluid range.
+          fontSize: 'clamp(1.125rem, 2.8vw, 37px)',
+          fontWeight: 700,
+          color: '#21261A',
+          lineHeight: 1.2,
+          whiteSpace: 'nowrap' as const,
+          // Section is bottom-anchored (justify-end), so adding extra
+          // bottom margin here nudges the title+subtitle pair up while
+          // keeping the CTA in place. Dial up/down to taste.
+          marginBottom: 'calc(2rem + 40px)',
+        },
+      }
     : {
         logoSrc: '/anthem/anthem-sticker.svg',
         logoAlt: '6th Annual Anthem Awards',
@@ -259,7 +350,20 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackCtaClick('header', theme.ctaUrl, report.property, report.slug.current)}
-            className={`hidden md:block text-[10px] tracking-[2px] uppercase rounded-full py-2.5 px-6 transition-colors ${theme.ctaBgClass} ${theme.ctaTextColorClass}`}
+            className={`hidden md:block text-[10px] tracking-[2px] uppercase rounded-full py-2.5 px-6 transition-colors ${isSharedInfluence ? '' : theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
+            style={
+              // Inline styles for Shared Influence to sidestep Tailwind's
+              // JIT missing arbitrary classes referenced through variables.
+              isSharedInfluence
+                ? {
+                    background: '#E3DDCA',
+                    color: '#21261A',
+                    fontFamily: "'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif",
+                    fontWeight: 700,
+                    fontVariationSettings: '"wght" 700, "wdth" 125',
+                  }
+                : undefined
+            }
           >
             Enter Now
           </a>
@@ -300,7 +404,12 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
                   className="absolute top-[52px] right-0 w-[280px] rounded-lg overflow-hidden z-50"
                   style={{ background: 'rgba(33, 38, 26, 0.96)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(227, 221, 202, 0.14)' }}
                 >
-                  {(isLovie ? LOVIE_NAV_SECTIONS : NAV_SECTIONS).map((section, i) => (
+                  {(isLovie
+                    ? LOVIE_NAV_SECTIONS
+                    : isSharedInfluence
+                      ? SHARED_INFLUENCE_NAV_SECTIONS
+                      : NAV_SECTIONS
+                  ).map((section, i) => (
                     <button
                       key={section.id}
                       type="button"
@@ -311,7 +420,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
                       }}
                     >
                       <span className="text-[10px] tracking-[2px] uppercase" style={{ color: 'rgba(227, 221, 202, 0.5)' }}>
-                        {`0${i + 1}`}
+                        {String(i + 1).padStart(2, '0')}
                       </span>
                       <span className="text-[13px] tracking-[1px] uppercase" style={{ color: '#E3DDCA' }}>
                         {section.label}
@@ -341,10 +450,10 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
 
       {/* Anthem: seven draggable cause icons scattered around the edges with
           a floating bob. Lovie: no icons in the hero (the portrait carousel
-          carries the visual weight); the LovieCountryRow component is kept
-          in this file because we'll redeploy it on the opening letter / "in
-          the report" section later. */}
-      {!isLovie && CAUSE_ICONS.map((icon, i) => (
+          carries the visual weight). Shared Influence: icons are baked
+          into the purple background artwork, so we skip the interactive
+          set to avoid a doubled-up composition. */}
+      {!isLovie && !isSharedInfluence && CAUSE_ICONS.map((icon, i) => (
         <DraggableIcon key={i} icon={icon} index={i} />
       ))}
 
@@ -379,14 +488,21 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         )}
 
         {/* Subtitle — inherits color from the section's text-light/text-dark
-            tone class so it adapts to whatever's behind it. */}
+            tone class so it adapts to whatever's behind it. When theme
+            supplies its own subtitleStyle (Shared Influence), those
+            values win; otherwise fall back to the shared Anthem/Lovie
+            defaults. */}
         <motion.p
           className="tracking-[0.5px] mb-8"
-          style={{
-            fontSize: 'clamp(1rem, 1.5vw, 1.25rem)',
-            maxWidth: 600,
-            lineHeight: 1.45,
-          }}
+          style={
+            'subtitleStyle' in theme && theme.subtitleStyle
+              ? theme.subtitleStyle
+              : {
+                  fontSize: 'clamp(1rem, 1.5vw, 1.25rem)',
+                  maxWidth: 600,
+                  lineHeight: 1.45,
+                }
+          }
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.55 }}
@@ -397,7 +513,22 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         {/* Explore button */}
         <motion.button
           onClick={() => onSeeReport?.()}
-          className={`inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full transition-colors cursor-pointer pointer-events-auto mt-6 md:mt-0 ${theme.ctaBgClass} ${theme.ctaTextColorClass}`}
+          className={`inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full transition-colors cursor-pointer pointer-events-auto mt-6 md:mt-0 ${isSharedInfluence ? '' : theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
+          style={
+            // Inline styles for Shared Influence — beige pill, moss text,
+            // Roc Grotesk Wide Bold. Inlining sidesteps Tailwind's JIT
+            // missing arbitrary bg-[#...] classes when they're set via a
+            // variable rather than typed literally into JSX.
+            isSharedInfluence
+              ? {
+                  background: '#E3DDCA',
+                  color: '#21261A',
+                  fontFamily: "'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif",
+                  fontWeight: 700,
+                  fontVariationSettings: '"wght" 700, "wdth" 125',
+                }
+              : undefined
+          }
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.65 }}
