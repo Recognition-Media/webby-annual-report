@@ -627,7 +627,12 @@ export function VideoModule({
     >
       <video
         ref={videoRef}
-        src={src}
+        // #t=0.5 seeks 0.5s into the clip so the pre-play frame is
+        // an actual visible frame instead of a black screen. Combined
+        // with preload="metadata" the browser downloads just enough
+        // to render that first frame without pulling the full video.
+        src={`${src}#t=0.5`}
+        preload="metadata"
         playsInline
         onEnded={() => setIsPlaying(false)}
         style={{
