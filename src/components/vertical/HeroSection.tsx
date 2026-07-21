@@ -95,6 +95,20 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
   const isSharedInfluence =
     report.property === 'anthem' &&
     report.slug?.current === 'shared-influence-creator-partnerships-nonprofit'
+  // Hover state for the Shared Influence pills. We track this in React
+  // and apply the base + hover colours via inline style so nothing in
+  // the Tailwind cascade can override it (CSS-only approach lost the
+  // specificity race with something in the utility pipeline).
+  const [hoverEnter, setHoverEnter] = useState(false)
+  const [hoverExplore, setHoverExplore] = useState(false)
+  const siCtaStyle = (hovered: boolean): React.CSSProperties => ({
+    background: hovered ? '#066DBA' : '#E3DDCA',
+    color: hovered ? '#E3DDCA' : '#21261A',
+    fontFamily: "'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif",
+    fontWeight: 700,
+    fontVariationSettings: '"wght" 700, "wdth" 125',
+    transition: 'background-color 0.2s ease, color 0.2s ease',
+  })
 
   // Branding fork — every Anthem-specific value has a Lovie counterpart so
   // the JSX below stays a single tree. Anthem path resolves to the original
@@ -256,7 +270,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           // Section is bottom-anchored (justify-end), so adding extra
           // bottom margin here nudges the title+subtitle pair up while
           // keeping the CTA in place. Dial up/down to taste.
-          marginBottom: 'calc(2rem + 40px)',
+          marginBottom: 'calc(2rem + 75px)',
         },
       }
     : {
@@ -350,7 +364,12 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackCtaClick('header', theme.ctaUrl, report.property, report.slug.current)}
-            className={`hidden md:block text-[10px] tracking-[2px] uppercase rounded-full py-2.5 px-6 transition-colors ${isSharedInfluence ? 'si-cta' : theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
+            onMouseEnter={isSharedInfluence ? () => setHoverEnter(true) : undefined}
+            onMouseLeave={isSharedInfluence ? () => setHoverEnter(false) : undefined}
+            onFocus={isSharedInfluence ? () => setHoverEnter(true) : undefined}
+            onBlur={isSharedInfluence ? () => setHoverEnter(false) : undefined}
+            className={`hidden md:block text-[10px] tracking-[2px] uppercase rounded-full py-2.5 px-6 ${isSharedInfluence ? '' : 'transition-colors ' + theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
+            style={isSharedInfluence ? siCtaStyle(hoverEnter) : undefined}
           >
             Enter Now
           </a>
@@ -500,7 +519,12 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         {/* Explore button */}
         <motion.button
           onClick={() => onSeeReport?.()}
-          className={`inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full transition-colors cursor-pointer pointer-events-auto mt-6 md:mt-0 ${isSharedInfluence ? 'si-cta' : theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
+          onMouseEnter={isSharedInfluence ? () => setHoverExplore(true) : undefined}
+          onMouseLeave={isSharedInfluence ? () => setHoverExplore(false) : undefined}
+          onFocus={isSharedInfluence ? () => setHoverExplore(true) : undefined}
+          onBlur={isSharedInfluence ? () => setHoverExplore(false) : undefined}
+          className={`inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full cursor-pointer pointer-events-auto mt-6 md:mt-0 ${isSharedInfluence ? '' : 'transition-colors ' + theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
+          style={isSharedInfluence ? siCtaStyle(hoverExplore) : undefined}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.65 }}

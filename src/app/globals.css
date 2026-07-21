@@ -346,24 +346,3 @@ body.lovie-template {
   border-color: var(--gate-accent);
 }
 
-/* =========================================================================
-   Shared Influence (Anthem vertical template) — CTA pill overrides
-   Applied only when the report's per-slug body class is set by
-   vertical/ReportView. Beige base, moss text, Roc Grotesk Wide Bold;
-   Anthem Blue background + beige text on hover.
-   Scoped by body class so the live State of Social Impact hero is
-   never touched.
-   ========================================================================= */
-body.report-shared-influence-creator-partnerships-nonprofit .si-cta {
-  background-color: #E3DDCA;
-  color: #21261A;
-  font-family: 'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif;
-  font-weight: 700;
-  font-variation-settings: 'wght' 700, 'wdth' 125;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-body.report-shared-influence-creator-partnerships-nonprofit .si-cta:hover,
-body.report-shared-influence-creator-partnerships-nonprofit .si-cta:focus-visible {
-  background-color: #066DBA;
-  color: #E3DDCA;
-}
