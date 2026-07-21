@@ -41,6 +41,18 @@ const loviePortableTextComponents: PortableTextComponents = {
 export function IntroLetter({ report }: { report: Report }) {
   const author = report.letterAuthors?.[0]
   const isLovie = report.property === 'lovie'
+  // Shared Influence: Anthem-property report with its own opening —
+  // large editorial hook + body letter, no headshot. Detected by slug so
+  // the existing State of Social Impact opening (photo + italic header)
+  // stays untouched.
+  const isSharedInfluence =
+    report.property === 'anthem' &&
+    report.slug?.current === 'shared-influence-creator-partnerships-nonprofit'
+
+  if (isSharedInfluence) {
+    return <SharedInfluenceOpening report={report} />
+  }
+
   const authorName = author?.name || (isLovie ? 'Jesse Feister' : 'Patricia McLoughlin')
   const authorTitle = author?.title || (isLovie ? 'Group Executive Director, The Lovie Awards' : 'General Manager, The Anthem Awards')
 
@@ -281,6 +293,149 @@ export function IntroLetter({ report }: { report: Report }) {
               Together, let{"'"}s set the new standard for good.
             </motion.p>
           )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Shared Influence opening — big editorial hook + letter body copy,
+// no headshot. Scoped by slug so the existing State of Social Impact
+// opening is unaffected. (The report also has a body class
+// `report-shared-influence-creator-partnerships-nonprofit` set by
+// ReportView, which is available if any additional CSS scoping is
+// needed later.)
+// ─────────────────────────────────────────────────────────────────
+
+const SHARED_INFLUENCE_HOOK =
+  'The culture of philanthropy and influence has shifted. In 2026, creators are integral to moving missions forward.'
+// Lede — pulled out of the first body paragraph so it can act as a
+// subheader before the letter unfolds.
+const SHARED_INFLUENCE_LEDE =
+  '2026 is challenging organizations to add creator partnerships to their strategies.'
+const SHARED_INFLUENCE_BODY: React.ReactNode[] = [
+  'There is one problem: many organizations are unsure of where to start, and are less sure of how to turn a one-off collaboration into a long-term partnership that drives action.',
+  'If you are wondering the same, this report is for you. We have done the heavy lifting by gathering real advice from both sides of the partnership. We asked industry leaders — impact-focused creators, nonprofit leaders, and brand strategists at the forefront of this work — to learn what makes these partnerships work, and last.',
+  <>
+    The result is <strong style={{ fontWeight: 700 }}>Shared Influence</strong>: a playbook with practical advice and tips on how creators and nonprofits find and vet collaborators, navigate creative control versus mission message, and make these efforts sustainable.
+  </>,
+]
+
+function SharedInfluenceOpening({ report: _report }: { report: Report }) {
+  // Hook holds the left rail (max ~900 left-aligned). Body copy sits
+  // in a narrower centered column below — matches the stacked-editorial
+  // treatment in the mockup: one big idea up top, quiet supporting copy
+  // beneath.
+  const HOOK_MAX_WIDTH = 1000
+  const BODY_MAX_WIDTH = 720
+
+  return (
+    <section
+      id="welcome-letter"
+      data-snap
+      className="relative overflow-hidden px-5 md:px-[60px] py-20 md:py-28"
+      style={{ background: '#E3DDCA' }}
+    >
+      <div
+        className="relative z-10"
+        style={{
+          // Outer wrapper matches the max-width of the Anthem template
+          // (1280) so the section keeps its familiar left/right margins.
+          // The hook and body inside are constrained by HOOK_MAX_WIDTH /
+          // BODY_MAX_WIDTH.
+          maxWidth: 1280,
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
+        {/* Shared Influence title sticker — masthead placement in the
+            top-right of the max-width container, opposite the eyebrow.
+            Slight editorial tilt. Anchored to the wrapper (not the
+            viewport) so it stays aligned to the same right edge as any
+            content that reaches that far. */}
+        <motion.img
+          src="/anthem/shared-influence-sticker-blue.png"
+          alt="Shared Influence"
+          className="hidden md:block"
+          style={{
+            position: 'absolute',
+            top: 0,
+            // Nudge slightly past the right edge for a "sticker hanging
+            // off the corner" feel. Flip sign to nudge inward instead.
+            right: -20,
+            width: 'clamp(180px, 20vw, 280px)',
+            height: 'auto',
+            transform: 'rotate(-4deg)',
+            zIndex: 2,
+          }}
+          initial={{ opacity: 0, y: -12, rotate: -4 }}
+          whileInView={{ opacity: 1, y: 0, rotate: -4 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        />
+
+        {/* Hook — max 55px; scales down on narrower viewports so it
+            doesn't run into gutter padding. Left-aligned, ends at
+            HOOK_MAX_WIDTH. */}
+        <motion.h2
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 'clamp(2rem, 4.2vw, 55px)',
+            fontWeight: 500,
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+            color: '#21261A',
+            margin: '0 0 96px',
+            maxWidth: HOOK_MAX_WIDTH,
+          }}
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.05 }}
+        >
+          {SHARED_INFLUENCE_HOOK}
+        </motion.h2>
+
+        {/* Body — narrow centered column beneath the wide hook. Lede
+            sentence acts as a subheader in Roc Grotesk 30px medium; the
+            rest of the letter follows in regular 17px body copy. */}
+        <div style={{ maxWidth: BODY_MAX_WIDTH, marginLeft: 'auto', marginRight: 'auto' }}>
+          <motion.p
+            style={{
+              fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+              fontSize: 30,
+              lineHeight: 1.3,
+              fontWeight: 500,
+              color: '#21261A',
+              margin: '0 0 32px',
+            }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+          >
+            {SHARED_INFLUENCE_LEDE}
+          </motion.p>
+
+          {SHARED_INFLUENCE_BODY.map((paragraph, i) => (
+            <motion.p
+              key={i}
+              style={{
+                fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                fontSize: 17,
+                lineHeight: 1.7,
+                color: '#21261A',
+                margin: '0 0 24px',
+              }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.25 + i * 0.08 }}
+            >
+              {paragraph}
+            </motion.p>
+          ))}
         </div>
       </div>
     </section>

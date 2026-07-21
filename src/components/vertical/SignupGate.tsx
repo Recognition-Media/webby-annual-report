@@ -39,6 +39,24 @@ const GATE_THEMES: Record<string, GateTheme> = {
     privacyName: 'Anthem Awards',
     rounded: false,
   },
+  // Slug-keyed override for the Shared Influence report — same base
+  // Anthem card but with a purple frame + purple pill + moss button
+  // text so it mirrors the hero's palette. Everything else (logo, font,
+  // privacy link) stays on the Anthem defaults.
+  'shared-influence-creator-partnerships-nonprofit': {
+    overlay: 'rgba(33, 38, 26, 0.8)',
+    frame: '#D17DD0', // Anthem Purple
+    card: '#E3DDCA',
+    logo: '/anthem/anthem-logo-green.svg',
+    logoAlt: 'Anthem Awards',
+    font: "'roc-grotesk-variable', -apple-system, sans-serif",
+    text: '#21261A',
+    accent: '#D17DD0', // pill background
+    buttonText: '#21261A', // moss text on the purple pill
+    privacyUrl: 'https://www.anthemawards.com/privacy-policy/',
+    privacyName: 'Anthem Awards',
+    rounded: false,
+  },
   lovie: {
     overlay: 'rgba(0, 0, 0, 0.7)',
     frame: '#ff6000', // lovie orange
@@ -91,8 +109,24 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const theme = GATE_THEMES[report.property as string] ?? GATE_THEMES.anthem
+  // Prefer a slug-specific gate theme (e.g. Shared Influence's purple
+  // pill) before falling back to the property-level default (Anthem /
+  // Lovie).
+  const slug = report.slug?.current
+  const theme =
+    (slug && GATE_THEMES[slug]) ||
+    GATE_THEMES[report.property as string] ||
+    GATE_THEMES.anthem
   const fields = report.formFields || []
+  const isSharedInfluence = slug === 'shared-influence-creator-partnerships-nonprofit'
+  // Slug-scoped fallback copy so the gate reads correctly before the
+  // CMS signupTitle/signupSubhead fields are populated for this report.
+  const defaultTitle = isSharedInfluence
+    ? 'Shared Influence Report'
+    : '2026 State of Social Impact Report'
+  const defaultSubhead = isSharedInfluence
+    ? "A playbook for creator partnerships that drive social impact, with real advice from experts. Sign up to explore the report."
+    : "Hear directly from impact leaders on what's shaping the work in 2026. Sign up to explore the report."
 
   function updateField(label: string, value: string) {
     setFormData((prev) => ({ ...prev, [label]: value }))
@@ -174,13 +208,13 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
             className="uppercase font-bold text-xs md:text-sm tracking-wider pb-3 md:pb-4 whitespace-pre-line"
             style={{ color: theme.text }}
           >
-            {report.signupTitle || '2026 State of Social Impact Report'}
+            {report.signupTitle || defaultTitle}
           </h3>
           <p
             className="text-xs md:text-sm mb-5 md:mb-8 leading-relaxed whitespace-pre-line"
             style={{ color: theme.text, opacity: 0.7 }}
           >
-            {report.signupSubhead || "Hear directly from impact leaders on what's shaping the work in 2026. Sign up to explore the report."}
+            {report.signupSubhead || defaultSubhead}
           </p>
 
           <form onSubmit={handleSubmit}>
