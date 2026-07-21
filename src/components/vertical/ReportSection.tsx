@@ -83,6 +83,22 @@ interface ReportSectionCoverProps {
   /** Path to an SVG to render in place of the numeric `sectionNumber` text
    * (e.g. the Lovie heart-token assets in /public/lovie/no-*.svg). */
   sectionNumberSvg?: string
+  /** Optional explicit desktop min-height (in px). When set, overrides the
+   * default `md:min-h-screen` so a section cover can be shorter without
+   * dropping to fully-compact mode. */
+  minHeightPx?: number
+  /** Override the title font family. Defaults to `var(--font-display)`
+   * (Decoy). Shared Influence passes Roc Grotesk Variable. */
+  titleFontFamily?: string
+  /** Override the title font weight. Defaults to `400`. Shared Influence
+   * passes 700 for a bolder editorial title. */
+  titleFontWeight?: number
+  /** Override the subtitle font family. Defaults to `var(--font-display)`. */
+  subtitleFontFamily?: string
+  /** Whether the subtitle renders in italic. Defaults to `true` to match
+   * the existing State of Social Impact treatment; pass `false` for a
+   * roman subtitle. */
+  subtitleItalic?: boolean
 }
 
 export function ReportSectionCover({
@@ -94,13 +110,30 @@ export function ReportSectionCover({
   compact = false,
   property,
   sectionNumberSvg,
+  minHeightPx,
+  titleFontFamily = 'var(--font-display)',
+  titleFontWeight = 400,
+  subtitleFontFamily = 'var(--font-display)',
+  subtitleItalic = true,
 }: ReportSectionCoverProps) {
   const isLovie = property === 'lovie'
+  const hasExplicitMinHeight = typeof minHeightPx === 'number'
   return (
     <section
       id={`section-${sectionNumber}`}
-      className={`relative px-5 md:px-[60px] ${compact ? '' : 'md:min-h-screen md:flex md:flex-col md:items-center md:justify-center'}`}
-      style={{ background: isLovie ? '#f2eeed' : '#E3DDCA', paddingTop: compact ? 80 : 50, paddingBottom: compact ? 60 : 50 }}
+      className={`relative px-5 md:px-[60px] ${
+        compact
+          ? ''
+          : hasExplicitMinHeight
+            ? 'md:flex md:flex-col md:items-center md:justify-center'
+            : 'md:min-h-screen md:flex md:flex-col md:items-center md:justify-center'
+      }`}
+      style={{
+        background: isLovie ? '#f2eeed' : '#E3DDCA',
+        paddingTop: compact ? 80 : 50,
+        paddingBottom: compact ? 60 : 50,
+        ...(hasExplicitMinHeight ? { minHeight: minHeightPx } : {}),
+      }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         {/* Center-aligned: number, title, rule, subtitle */}
@@ -134,7 +167,7 @@ export function ReportSectionCover({
           {/* Title */}
           <motion.h2
             className="text-[32px] md:text-[56px] lg:text-[64px] leading-[1.05] mb-6"
-            style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
+            style={{ fontFamily: titleFontFamily, color: '#21261A', fontWeight: titleFontWeight }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -156,9 +189,9 @@ export function ReportSectionCover({
           <motion.p
             className="text-[18px] md:text-[22px] leading-[1.4] mb-8 max-w-[800px] mx-auto"
             style={{
-              fontFamily: 'var(--font-display)',
+              fontFamily: subtitleFontFamily,
               color: '#21261A',
-              fontStyle: 'italic',
+              fontStyle: subtitleItalic ? 'italic' : 'normal',
               fontWeight: 400,
             }}
             initial={{ opacity: 0, y: 15 }}

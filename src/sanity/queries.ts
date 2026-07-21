@@ -42,6 +42,7 @@ export const reportBySlugQuery = groq`
     trendIntroStats,
     trendIntroCta,
     keyFindings[] { number, title, description, hoverColor, anchor },
+    sectionCovers[] { sectionNumber, title, subtitle, copy, accentColor },
     section01Cover { sectionNumber, title, subtitle, copy, accentColor },
     section02Cover { sectionNumber, title, subtitle, copy, accentColor },
     section03Cover { sectionNumber, title, subtitle, copy, accentColor },

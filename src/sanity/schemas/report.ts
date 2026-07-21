@@ -117,11 +117,28 @@ export default defineType({
     // Key Findings (Anthem vertical template — preview grid above section 01)
     { name: 'keyFindings', title: 'Key Findings', type: 'array', of: [{ type: 'keyFinding' }], group: 'keyFindings', description: 'Top-of-report navigation grid (typically 4 items)' },
 
-    // Section Covers (Anthem vertical template — 01, 02, 03, 04)
-    { name: 'section01Cover', title: 'Section 01 Cover', type: 'sectionCover', group: 'sectionCovers' },
-    { name: 'section02Cover', title: 'Section 02 Cover', type: 'sectionCover', group: 'sectionCovers' },
-    { name: 'section03Cover', title: 'Section 03 Cover', type: 'sectionCover', group: 'sectionCovers' },
-    { name: 'section04Cover', title: 'Section 04 Cover', type: 'sectionCover', group: 'sectionCovers' },
+    // Section Covers — new unlimited-length list. Newer reports (e.g.
+    // Anthem Shared Influence) use this list. Older reports (e.g. the
+    // 2026 State of Social Impact) still read from the legacy per-slot
+    // fields below.
+    {
+      name: 'sectionCovers',
+      title: 'Section Covers',
+      type: 'array',
+      of: [{ type: 'sectionCover' }],
+      group: 'sectionCovers',
+      description: 'Reorderable list of section cover pages. Add one entry per section (typically 4–6 items).',
+    },
+
+    // Legacy per-slot section covers (Anthem vertical template — 01, 02,
+    // 03, 04). Hidden in Studio when the new `sectionCovers` array has
+    // entries so newer reports get a clean UI; kept in the schema so
+    // published data on existing reports (2026 State of Social Impact)
+    // continues to render.
+    { name: 'section01Cover', title: 'Section 01 Cover (legacy)', type: 'sectionCover', group: 'sectionCovers', hidden: ({ parent }) => Array.isArray((parent as { sectionCovers?: unknown[] })?.sectionCovers) && ((parent as { sectionCovers?: unknown[] }).sectionCovers?.length ?? 0) > 0 },
+    { name: 'section02Cover', title: 'Section 02 Cover (legacy)', type: 'sectionCover', group: 'sectionCovers', hidden: ({ parent }) => Array.isArray((parent as { sectionCovers?: unknown[] })?.sectionCovers) && ((parent as { sectionCovers?: unknown[] }).sectionCovers?.length ?? 0) > 0 },
+    { name: 'section03Cover', title: 'Section 03 Cover (legacy)', type: 'sectionCover', group: 'sectionCovers', hidden: ({ parent }) => Array.isArray((parent as { sectionCovers?: unknown[] })?.sectionCovers) && ((parent as { sectionCovers?: unknown[] }).sectionCovers?.length ?? 0) > 0 },
+    { name: 'section04Cover', title: 'Section 04 Cover (legacy)', type: 'sectionCover', group: 'sectionCovers', hidden: ({ parent }) => Array.isArray((parent as { sectionCovers?: unknown[] })?.sectionCovers) && ((parent as { sectionCovers?: unknown[] }).sectionCovers?.length ?? 0) > 0 },
 
     // Trends
     { name: 'trendSections', title: 'Trend Sections', type: 'array', of: [{ type: 'trendSection' }], group: 'trends' },

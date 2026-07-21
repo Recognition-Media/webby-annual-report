@@ -26,6 +26,16 @@ export default function SharedInfluenceMockups() {
       <section id="sticker-a"><OpeningWithStickerA /></section>
       <Divider />
       <section id="sticker-b"><OpeningWithStickerB /></section>
+      <Divider />
+      <section id="inside-a"><InsideReportOptionA /></section>
+      <Divider />
+      <section id="inside-b"><InsideReportOptionB /></section>
+      <Divider />
+      <section id="compare-a"><InfluencerCreatorOptionA /></section>
+      <Divider />
+      <section id="compare-b"><InfluencerCreatorOptionB /></section>
+      <Divider />
+      <section id="compare-c"><InfluencerCreatorOptionC /></section>
     </main>
   )
 }
@@ -61,6 +71,15 @@ function TopBar() {
       <span style={{ fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', opacity: 0.7 }}>Sticker:</span>
       <a href="#sticker-a" style={link}>Top-right</a>
       <a href="#sticker-b" style={link}>Above hook</a>
+      <span style={{ fontSize: 12, opacity: 0.4 }}>|</span>
+      <span style={{ fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', opacity: 0.7 }}>Inside:</span>
+      <a href="#inside-a" style={link}>List rows</a>
+      <a href="#inside-b" style={link}>Tight 3-col grid</a>
+      <span style={{ fontSize: 12, opacity: 0.4 }}>|</span>
+      <span style={{ fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', opacity: 0.7 }}>Inf vs Cr:</span>
+      <a href="#compare-a" style={link}>Split panel</a>
+      <a href="#compare-b" style={link}>Table rows</a>
+      <a href="#compare-c" style={link}>Display type</a>
     </div>
   )
 }
@@ -594,6 +613,467 @@ function OpeningWithStickerB() {
         </div>
         <OpeningInner />
       </StickerOpeningFrame>
+    </div>
+  )
+}
+
+/* =========================================================================
+ * INSIDE THE REPORT — 2 card treatments for the Shared Influence
+ * report's 6-section table of contents. The existing Anthem 2×2 grid
+ * feels clunky at 6 items; both options here shrink the chrome and
+ * lean editorial (stateofaidesign.com direction).
+ * ======================================================================= */
+
+const INSIDE_SECTIONS = [
+  { number: '01', title: 'The New Trusted Institutions', description: 'Public trust has shifted from institutions to individuals — creators are the new distribution.' },
+  { number: '02', title: 'Finding the Right Partners', description: 'The most impactful partnerships start with mutual evaluation. Strong vetting is a shared responsibility.' },
+  { number: '03', title: 'Making It Work', description: 'Give creators a brief, not a script. Trust them to deliver your organization’s message their way.' },
+  { number: '04', title: 'Formats That Drive Impact', description: 'Formats that move people feel native to the creator and give audiences a reason to care.' },
+  { number: '05', title: 'The Challenges with Creator Partnerships', description: 'Not every video will be a home run. Measure engagement, not views.' },
+  { number: '06', title: 'Navigating the Value Exchange', description: 'The impact sector is inventing new models to reflect each relationship.' },
+]
+
+function InsideReportFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      background: CREAM,
+      color: MOSS,
+      padding: '96px 32px 120px',
+      fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+    }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
+          <img
+            src="/anthem/justice-sticker.svg"
+            alt=""
+            style={{ width: 60, height: 60, transform: 'rotate(-8deg)' }}
+            aria-hidden
+          />
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(2rem, 4.5vw, 56px)',
+            fontWeight: 400,
+            lineHeight: 1.1,
+            color: MOSS,
+            margin: 0,
+          }}>
+            Inside The Report
+          </h2>
+        </div>
+        <p style={{
+          fontSize: 15,
+          color: MOSS,
+          opacity: 0.6,
+          margin: '0 0 56px',
+          maxWidth: 640,
+        }}>
+          A playbook for creator partnerships that drive social impact.
+        </p>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// Option A — Editorial list rows.
+// One row per section: two-digit number on the left, title dominant,
+// short description below at low opacity. Thin hairline between rows.
+// Compact and scannable at 6 items; closest to the stateofaidesign row
+// treatment.
+function InsideReportOptionA() {
+  return (
+    <div>
+      <OptionLabel
+        n={1}
+        title="Editorial list rows"
+        description="Full-width rows, one section per line. Small number, big title, subtle description underneath. Thin hairline between rows. Ultra-minimal chrome — the type does the work. All 6 items fit into a compact vertical block."
+      />
+      <InsideReportFrame>
+        <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          {INSIDE_SECTIONS.map((section, i) => (
+            <li
+              key={section.number}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '80px 1fr auto',
+                columnGap: 24,
+                alignItems: 'baseline',
+                padding: '28px 0',
+                borderTop: i === 0 ? '1px solid rgba(33,38,26,0.15)' : 'none',
+                borderBottom: '1px solid rgba(33,38,26,0.15)',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{
+                fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                fontSize: 14,
+                fontWeight: 500,
+                letterSpacing: 2,
+                color: RED,
+              }}>
+                {section.number}
+              </span>
+              <div>
+                <p style={{
+                  fontSize: 22,
+                  fontWeight: 500,
+                  lineHeight: 1.25,
+                  color: MOSS,
+                  margin: '0 0 6px',
+                }}>
+                  {section.title}
+                </p>
+                <p style={{
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  color: MOSS,
+                  opacity: 0.55,
+                  margin: 0,
+                }}>
+                  {section.description}
+                </p>
+              </div>
+              <span style={{ fontSize: 20, color: MOSS, opacity: 0.4 }}>&rarr;</span>
+            </li>
+          ))}
+        </ol>
+      </InsideReportFrame>
+    </div>
+  )
+}
+
+// Option B — Tight 3-column grid.
+// Same card idea as the current Anthem treatment but shrunk down: 3
+// cols × 2 rows fits all 6 items comfortably; each card is small enough
+// to scan quickly. Numbers become secondary; titles lead.
+function InsideReportOptionB() {
+  return (
+    <div>
+      <OptionLabel
+        n={2}
+        title="Tight 3-column grid"
+        description="6 items in a 3×2 grid of compact cards. Number tucks in the top corner, title dominates, short description below. Keeps the visual card language of the existing Anthem treatment but scales it down for scannability."
+      />
+      <InsideReportFrame>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 16,
+        }}>
+          {INSIDE_SECTIONS.map((section) => (
+            <div
+              key={section.number}
+              style={{
+                background: '#d5cfbc',
+                borderRadius: 10,
+                padding: '20px 22px 24px',
+                cursor: 'pointer',
+                transition: 'background-color 0.25s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+              }}
+            >
+              <span style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 26,
+                fontWeight: 700,
+                color: RED,
+                lineHeight: 1,
+              }}>
+                {section.number}
+              </span>
+              <p style={{
+                fontSize: 15,
+                fontWeight: 500,
+                lineHeight: 1.3,
+                color: MOSS,
+                margin: 0,
+              }}>
+                {section.title}
+              </p>
+              <p style={{
+                fontSize: 12,
+                lineHeight: 1.5,
+                color: MOSS,
+                opacity: 0.6,
+                margin: 0,
+              }}>
+                {section.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </InsideReportFrame>
+    </div>
+  )
+}
+
+/* =========================================================================
+ * INFLUENCER vs CREATOR — 3 alternative treatments of the Section 1
+ * data callout. Each renders in a 50%-column-width simulator so the
+ * mockup matches what the module will look like when it sits inside a
+ * TwoColumnSlab on the live report.
+ * ======================================================================= */
+
+const COMPARE_LEFT = {
+  label: 'Influencer',
+  word: 'Sells.',
+  description: 'Someone who sells you something, from a promotion to a paid placement.',
+}
+const COMPARE_RIGHT = {
+  label: 'Creator',
+  word: 'Collaborates.',
+  description: 'Someone you collaborate with, through storytelling or building something together.',
+}
+
+// Wrapper that simulates the module sitting inside a 50% column slot.
+function CompareFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      background: CREAM,
+      color: MOSS,
+      padding: '80px 40px',
+      fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+    }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+        {/* Simulated 2-col slab — left rail is placeholder body copy,
+            right rail hosts the comparison module we're evaluating. */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64 }}>
+          <div style={{ opacity: 0.35 }}>
+            <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 24px', color: MOSS }}>
+              One in five Americans now regularly gets their news from TikTok
+            </p>
+            <div style={{ width: 36, height: 2, background: RED, marginBottom: 20 }} />
+            <p style={{ fontSize: 15, lineHeight: 1.6, color: MOSS, margin: 0 }}>
+              [Body copy from the section lives here — this is a placeholder so the module on the right shows at real half-width proportions.]
+            </p>
+          </div>
+          <div>{children}</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Option A — Split colour panel.
+// One rounded card, split down the middle by a hairline. Left half in
+// Anthem red (Influencer, cream text). Right half in cream (Creator,
+// moss text). Feels like a debate/vs treatment — high contrast, big
+// visual moment. Cards no longer read as separate "kinds" of thing;
+// they read as opposing sides of the same argument.
+function InfluencerCreatorOptionA() {
+  return (
+    <div>
+      <OptionLabel
+        n={1}
+        title="Split colour panel — opposing sides"
+        description="One rounded card split by a hairline; Influencer in Anthem red, Creator in cream. Reads like a debate — opposing sides of the same argument rather than two separate cards."
+      />
+      <CompareFrame>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          borderRadius: 14,
+          overflow: 'hidden',
+        }}>
+          {/* Left — Influencer, red */}
+          <div style={{
+            background: RED,
+            color: CREAM,
+            padding: '28px 26px 32px',
+          }}>
+            <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', fontWeight: 700, margin: '0 0 16px' }}>
+              {COMPARE_LEFT.label}
+            </p>
+            <h3 style={{
+              fontFamily: "'decoy', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: 40,
+              fontWeight: 700,
+              lineHeight: 1,
+              margin: '0 0 20px',
+            }}>
+              {COMPARE_LEFT.word}
+            </h3>
+            <p style={{ fontSize: 14, lineHeight: 1.5, margin: 0, opacity: 0.9 }}>
+              {COMPARE_LEFT.description}
+            </p>
+          </div>
+          {/* Right — Creator, cream */}
+          <div style={{
+            background: CREAM,
+            color: MOSS,
+            padding: '28px 26px 32px',
+            borderLeft: `1px solid rgba(33,38,26,0.1)`,
+          }}>
+            <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', fontWeight: 700, margin: '0 0 16px', color: RED }}>
+              {COMPARE_RIGHT.label}
+            </p>
+            <h3 style={{
+              fontFamily: "'decoy', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: 40,
+              fontWeight: 700,
+              lineHeight: 1,
+              margin: '0 0 20px',
+              color: MOSS,
+            }}>
+              {COMPARE_RIGHT.word}
+            </h3>
+            <p style={{ fontSize: 14, lineHeight: 1.5, margin: 0, color: MOSS }}>
+              {COMPARE_RIGHT.description}
+            </p>
+          </div>
+        </div>
+      </CompareFrame>
+    </div>
+  )
+}
+
+// Option B — Table rows.
+// Traditional comparison table with two columns and multiple attribute
+// rows. INFLUENCER | CREATOR header, then rows for "Role", "Method",
+// "Relationship". Data-forward, scannable, feels like a spec sheet.
+// The most information-dense option; least visual flourish.
+function InfluencerCreatorOptionB() {
+  const rows = [
+    { attribute: 'Role', a: 'Sells', b: 'Collaborates' },
+    { attribute: 'Method', a: 'Paid placement', b: 'Shared storytelling' },
+    { attribute: 'Relationship', a: 'Transactional', b: 'Long-term' },
+  ]
+  return (
+    <div>
+      <OptionLabel
+        n={2}
+        title="Comparison table — data-forward"
+        description="Traditional two-column table with attribute rows (Role, Method, Relationship). Most information-dense — feels like a spec sheet or comparison chart. Scannable but less editorial."
+      />
+      <CompareFrame>
+        <table style={{
+          width: '100%',
+          borderCollapse: 'collapse',
+          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+        }}>
+          <thead>
+            <tr>
+              <th style={{ padding: '16px 0 12px', textAlign: 'left', width: '25%' }} />
+              <th style={{
+                padding: '16px 0 12px',
+                fontSize: 11,
+                letterSpacing: 3,
+                textTransform: 'uppercase',
+                color: RED,
+                fontWeight: 700,
+                textAlign: 'left',
+                width: '37.5%',
+              }}>
+                {COMPARE_LEFT.label}
+              </th>
+              <th style={{
+                padding: '16px 0 12px',
+                fontSize: 11,
+                letterSpacing: 3,
+                textTransform: 'uppercase',
+                color: RED,
+                fontWeight: 700,
+                textAlign: 'left',
+                width: '37.5%',
+              }}>
+                {COMPARE_RIGHT.label}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={i} style={{ borderTop: `1px solid ${MOSS}22` }}>
+                <td style={{ padding: '18px 0', fontSize: 12, textTransform: 'uppercase', letterSpacing: 2, color: MOSS, opacity: 0.6 }}>
+                  {row.attribute}
+                </td>
+                <td style={{ padding: '18px 0', fontSize: 17, color: MOSS, fontWeight: 500 }}>
+                  {row.a}
+                </td>
+                <td style={{ padding: '18px 0', fontSize: 17, color: MOSS, fontWeight: 500 }}>
+                  {row.b}
+                </td>
+              </tr>
+            ))}
+            <tr style={{ borderTop: `1px solid ${MOSS}22` }}>
+              <td style={{ padding: '18px 0', fontSize: 12, textTransform: 'uppercase', letterSpacing: 2, color: MOSS, opacity: 0.6 }}>
+                In Short
+              </td>
+              <td style={{ padding: '18px 0 24px', fontSize: 14, lineHeight: 1.5, color: MOSS, opacity: 0.75 }}>
+                {COMPARE_LEFT.description}
+              </td>
+              <td style={{ padding: '18px 0 24px', fontSize: 14, lineHeight: 1.5, color: MOSS, opacity: 0.75 }}>
+                {COMPARE_RIGHT.description}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </CompareFrame>
+    </div>
+  )
+}
+
+// Option C — Big display type.
+// No cards at all. Two huge Decoy italic words stacked with a hairline
+// between; each word paired with a small caps label above and a short
+// description below. Editorial-heavy, minimal chrome. The type does
+// the entire visual job.
+function InfluencerCreatorOptionC() {
+  return (
+    <div>
+      <OptionLabel
+        n={3}
+        title="Display type stack — no cards"
+        description="No card fills. Two big Decoy italic words stacked with a hairline in between. The typography carries the entire moment — closest to a magazine spread pull-quote."
+      />
+      <CompareFrame>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div>
+            <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', fontWeight: 700, color: RED, margin: '0 0 8px' }}>
+              {COMPARE_LEFT.label}
+            </p>
+            <h3 style={{
+              fontFamily: "'decoy', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: 'clamp(3rem, 6vw, 80px)',
+              fontWeight: 700,
+              lineHeight: 1,
+              color: MOSS,
+              margin: '0 0 12px',
+            }}>
+              {COMPARE_LEFT.word}
+            </h3>
+            <p style={{ fontSize: 14, lineHeight: 1.5, color: MOSS, opacity: 0.7, margin: 0, maxWidth: 420 }}>
+              {COMPARE_LEFT.description}
+            </p>
+          </div>
+
+          <div style={{ height: 1, background: `${MOSS}22`, margin: '8px 0' }} />
+
+          <div>
+            <p style={{ fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', fontWeight: 700, color: RED, margin: '0 0 8px' }}>
+              {COMPARE_RIGHT.label}
+            </p>
+            <h3 style={{
+              fontFamily: "'decoy', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: 'clamp(3rem, 6vw, 80px)',
+              fontWeight: 700,
+              lineHeight: 1,
+              color: MOSS,
+              margin: '0 0 12px',
+            }}>
+              {COMPARE_RIGHT.word}
+            </h3>
+            <p style={{ fontSize: 14, lineHeight: 1.5, color: MOSS, opacity: 0.7, margin: 0, maxWidth: 420 }}>
+              {COMPARE_RIGHT.description}
+            </p>
+          </div>
+        </div>
+      </CompareFrame>
     </div>
   )
 }

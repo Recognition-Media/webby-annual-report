@@ -43,3 +43,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Report video assets — GitHub caps at 100MB per file. Long interview
+# mp4s should be hosted externally (Sanity assets, S3, etc.) or
+# compressed under 100MB before being tracked in git.
+public/anthem/jaclynn-brennan-influencer-vs-creator.mp4
