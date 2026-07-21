@@ -85,6 +85,9 @@ export interface TrendSection {
   dataStats?: DataStat[]
   showInsideTheHubs?: boolean
   insideTheHubs?: InsideTheHubs
+  showTips?: boolean
+  tipsTitle?: string
+  tipsItems?: string[]
   showQuotes?: boolean
   expertQuotes?: ExpertQuote[]
   showVideo?: boolean
@@ -182,6 +185,12 @@ export interface Report {
   trendIntroStats?: DataStat[]
   trendIntroCta?: string
   keyFindings?: KeyFinding[]
+  /**
+   * Newer reports use `sectionCovers` (unlimited-length array). Legacy
+   * per-slot fields below stay for reports published before that field
+   * existed.
+   */
+  sectionCovers?: SectionCover[]
   section01Cover?: SectionCover
   section02Cover?: SectionCover
   section03Cover?: SectionCover

@@ -135,16 +135,21 @@ type ResolvedSection = {
 interface KeyFindingsProps {
   findings?: KeyFinding[]
   property?: 'webby' | 'anthem' | 'telly' | 'lovie'
+  slug?: string
 }
 
-export function KeyFindings({ findings, property }: KeyFindingsProps = {}) {
+export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {}) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const isLovie = property === 'lovie'
+  const isSharedInfluence =
+    property === 'anthem' && slug === 'shared-influence-creator-partnerships-nonprofit'
 
   // Color fork — Anthem uses warm cream + tan; Lovie sits on the same
   // beige body color as the rest of the reading flow so the section
   // doesn't feel like a separate "module". Cards lift slightly via a
-  // lighter cream so they still register as clickable.
+  // lighter cream so they still register as clickable. Shared Influence
+  // is an Anthem report but swaps the header sticker for the Justice
+  // mark that fits its subject matter.
   const theme = isLovie
     ? {
         sectionBg: '#f2eeed',
@@ -152,6 +157,14 @@ export function KeyFindings({ findings, property }: KeyFindingsProps = {}) {
         headingIcon: '/lovie/country-italy.svg',
         headingIconRotation: '-8deg',
         subtitle: 'A look at the creative communities and ideas shaping the Mediterranean in 2026.',
+      }
+    : isSharedInfluence
+    ? {
+        sectionBg: '#E3DDCA',
+        cardDefaultBg: '#d5cfbc',
+        headingIcon: '/anthem/justice-sticker.svg',
+        headingIconRotation: '-8deg',
+        subtitle: 'A playbook for creator partnerships that drive social impact.',
       }
     : {
         sectionBg: '#E3DDCA',
@@ -290,6 +303,120 @@ export function KeyFindings({ findings, property }: KeyFindingsProps = {}) {
               )
             })}
           </ol>
+        </div>
+      </section>
+    )
+  }
+
+  // Shared Influence — 6 sections in a compact 3×2 grid. Same visual
+  // language as the Anthem 2×2 (rounded cream card, red display number,
+  // moss text, colour-fill on hover) but sized smaller so all six items
+  // read comfortably without dominating the section.
+  if (isSharedInfluence) {
+    return (
+      <section
+        id="key-findings"
+        data-snap
+        className="relative overflow-hidden px-5 md:px-[60px] pt-20 md:pt-28 pb-16 md:pb-24"
+        style={{ background: theme.sectionBg }}
+      >
+        <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+          {/* Heading — h2 is inline-block so it hugs the title text; the
+              Justice sticker sits absolutely positioned just past the
+              title's right edge, so it doesn't push the title off the
+              container's left rail. Title's left edge stays aligned
+              with the subtitle below. Roc Grotesk Variable bold to
+              match the section covers below. */}
+          <motion.h2
+            className="mb-4 md:mb-6 text-[40px] md:text-[64px] leading-[1.05] relative inline-block"
+            style={{
+              // Roc Grotesk Wide Medium — matches the section cover
+              // titles below.
+              fontFamily: "'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif",
+              color: '#21261A',
+              fontWeight: 500,
+            }}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            Inside The Report
+            <img
+              src={theme.headingIcon}
+              alt=""
+              aria-hidden
+              className="absolute w-[48px] h-[48px] md:w-[72px] md:h-[72px]"
+              style={{
+                top: '8%',
+                left: 'calc(100% + 16px)',
+                transform: `rotate(${theme.headingIconRotation})`,
+              }}
+            />
+          </motion.h2>
+
+          <motion.p
+            className="text-[14px] md:text-[16px] mb-10 md:mb-14"
+            style={{ color: '#21261A', opacity: 0.6, fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif", maxWidth: 640 }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            {theme.subtitle}
+          </motion.p>
+
+          {/* 3-column tight grid on desktop; 2 cols on tablet; single
+              column on mobile. Same hover-fill behaviour as the Anthem
+              2×2, sized down for scannability at 6 items. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            {sections.map((section, i) => {
+              const isHovered = hoveredIndex === i
+              return (
+                <motion.div
+                  key={section.number}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => scrollToAnchor(section.anchor)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      scrollToAnchor(section.anchor)
+                    }
+                  }}
+                  className="p-5 md:p-6 rounded-lg cursor-pointer flex flex-col gap-2 min-h-[130px] md:min-h-[150px] transition-colors duration-300"
+                  style={{ background: isHovered ? section.hoverBg : theme.cardDefaultBg }}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: 0.15 + i * 0.06 }}
+                >
+                  <div
+                    className="text-[24px] md:text-[28px] leading-none mb-1 transition-colors duration-300"
+                    style={{ fontFamily: 'var(--font-display)', color: isHovered ? '#E3DDCA' : section.hoverBg, fontWeight: 700 }}
+                  >
+                    {section.number}
+                  </div>
+                  <h3
+                    className="text-[14px] md:text-[16px] font-medium leading-tight transition-colors duration-300"
+                    style={{ color: isHovered ? '#E3DDCA' : '#21261A' }}
+                  >
+                    {section.title}
+                  </h3>
+                  {section.description && (
+                    <p
+                      className="text-[11px] md:text-[12px] leading-[1.5] transition-colors duration-300"
+                      style={{ color: isHovered ? '#E3DDCA' : '#21261A', opacity: isHovered ? 0.75 : 0.55 }}
+                    >
+                      {section.description}
+                    </p>
+                  )}
+                </motion.div>
+              )
+            })}
+          </div>
         </div>
       </section>
     )

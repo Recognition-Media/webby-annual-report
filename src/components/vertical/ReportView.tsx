@@ -15,6 +15,14 @@ import { TrendSection } from '../TrendSection'
 import { TrendContainer } from '../TrendContainer'
 import { AnthemFooter } from './AnthemFooter'
 import { LovieFooter } from './LovieFooter'
+import {
+  TwoColumnSlab,
+  SectionHeader,
+  SharedInfluenceBody,
+  ComparisonCallout,
+  TipsForSuccess,
+  VideoModule,
+} from './SharedInfluenceModules'
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
@@ -95,6 +103,74 @@ function setCookie(name: string, value: string, days: number) {
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`
 }
 
+// Section 1 — The New Trusted Institutions. Two 2-col slabs mirror the
+// SoSI (State of Social Impact) rhythm: (body + comparison) then
+// (tips + video). Tips Module is CMS-driven via the section's Tips
+// Module fields; other modules are hardcoded for now.
+function SharedInfluenceSection01({ report }: { report: Report }) {
+  const trend = report.trendSections?.[0]
+  const tipsTitle = trend?.tipsTitle || 'Tips for Success'
+  const tipsItems = trend?.tipsItems && trend.tipsItems.length > 0
+    ? trend.tipsItems
+    : [
+        'Treat creators as long-term partners, not campaign add-ons.',
+        'Focus on storytelling. A creator collaborates and tells a story. Know which you need.',
+        'Lead with a person, not a logo. A face earns trust faster than an organization can.',
+        'Frame creators internally as a core distribution channel and experts, not a nice-to-have.',
+      ]
+  return (
+    <>
+      {/* Slab 1 — Header + Body copy (left) + Influencer/Creator comparison (right) */}
+      <TwoColumnSlab
+        left={
+          <>
+            <SectionHeader title="One in five Americans now regularly gets their news from TikTok" />
+            <SharedInfluenceBody
+              paragraphs={[
+                <>
+                  One in five Americans now regularly gets their news from TikTok—including more than <strong style={{ fontWeight: 700 }}>40% of adults under 30</strong>, according to Pew Research Center. As public trust in institutions and traditional media declines, creators are increasingly filling the gap as trusted sources of information.
+                </>,
+                <>Legacy media and older marketing tactics (direct mail and print ads) no longer reach the scope of audience they used to, particularly among younger generations, says <strong style={{ fontWeight: 700 }}>Abby Schreiber</strong>, Special Projects Lead at Onyx Impact.</>,
+                <>Organizations should treat creators as a core pillar in impact strategies to reach new communities and drive impact.</>,
+                <><strong style={{ fontWeight: 700 }}>These are not influencer campaigns.</strong> The strongest creator partnerships are built on shared values, giving creators the freedom to contribute their skills to your mission.</>,
+              ]}
+            />
+          </>
+        }
+        right={
+          <ComparisonCallout
+            left={{
+              label: 'Influencer',
+              word: 'Sells',
+              description: 'Someone who sells you something, from a promotion to a paid placement.',
+            }}
+            right={{
+              label: 'Creator',
+              word: 'Collaborates',
+              description: 'Someone you collaborate with, through storytelling or building something together.',
+            }}
+          />
+        }
+      />
+
+      {/* Slab 2 — Tips for Success (left) + Video (right) */}
+      <TwoColumnSlab
+        left={
+          <TipsForSuccess title={tipsTitle} tips={tipsItems} />
+        }
+        right={
+          <VideoModule
+            src="/anthem/jaclynn-brennan-influencer-vs-creator.mp4"
+            name="Jaclynn Brennan"
+            title="Founder, Creative Duality"
+            orientation="portrait"
+          />
+        }
+      />
+    </>
+  )
+}
+
 export function ReportView({ report }: { report: Report }) {
   const cookieKey = `report-access-${report.slug.current}`
   const [hasAccess, setHasAccess] = useState(false)
@@ -103,15 +179,30 @@ export function ReportView({ report }: { report: Report }) {
   const [showGoodbye, setShowGoodbye] = useState(false)
   const reportRef = useRef<HTMLDivElement>(null)
 
+  // Shared Influence is an Anthem-property report but with its own
+  // structure (6 sections driven by the new `sectionCovers` array,
+  // custom hero, custom opening letter). Detected by slug so the
+  // existing State of Social Impact hardcoded content isn't touched.
+  const isSharedInfluence =
+    report.property === 'anthem' &&
+    report.slug?.current === 'shared-influence-creator-partnerships-nonprofit'
+
   // Apply vertical-template theme (background, fonts, palette) only while this
   // template is mounted. Lovie reports get `lovie-template`; everything else
   // using the vertical layout (Anthem) keeps `anthem-template`. Webby reports
   // use the horizontal template and stay on the default styling.
+  //
+  // Additionally we tag body with a per-report `report-<slug>` class so any
+  // report-specific overrides (fluid hero sizing, custom section colours,
+  // etc.) can be scoped without leaking into other reports on the same
+  // template.
   useEffect(() => {
     const themeClass = report.property === 'lovie' ? 'lovie-template' : 'anthem-template'
-    document.body.classList.add(themeClass)
-    return () => { document.body.classList.remove(themeClass) }
-  }, [report.property])
+    const slugClass = report.slug?.current ? `report-${report.slug.current}` : null
+    const classes = [themeClass, slugClass].filter(Boolean) as string[]
+    document.body.classList.add(...classes)
+    return () => { document.body.classList.remove(...classes) }
+  }, [report.property, report.slug?.current])
 
   // Show goodbye only when all trends are complete (desktop)
   // On mobile, always show it since trends are just vertical scroll
@@ -328,36 +419,71 @@ export function ReportView({ report }: { report: Report }) {
 
             {/* IADAS — hidden for Anthem redesign */}
             {/* <IadasSection report={report} /> */}
-            <KeyFindings findings={report.keyFindings} property={report.property} />
+            <KeyFindings findings={report.keyFindings} property={report.property} slug={report.slug?.current} />
 
             {/* Section 1 cover. CMS-driven; Lovie reports get the heart-token
-                SVG and Lovie-aware theming through the `property` prop. */}
-            <ReportSectionCover
-              sectionNumber={report.section01Cover?.sectionNumber || '01'}
-              title={
-                report.section01Cover?.title ||
-                (report.property === 'lovie'
-                  ? 'Across the Mediterranean'
-                  : 'The State of Social Impact')
-              }
-              subtitle={
-                report.section01Cover?.subtitle ||
-                (report.property === 'lovie'
-                  ? 'Work prioritises depth over volume, and cultural specificity over global reach.'
-                  : 'Rollbacks have increased across the sector, but leaders have settled into their new reality, becoming more resilient and strategic in the process.')
-              }
-              copy={
-                report.section01Cover?.copy ||
-                (report.property === 'lovie'
-                  ? 'Spain, Portugal, and Italy are producing digital work shaped by place, heritage, and a focus on digital infrastructure for both local and global innovation.'
-                  : 'Last year, we asked the Anthem Awards community how the shifting landscape was impacting their work. This year, we see how the community is adapting.')
-              }
-              accentColor={report.section01Cover?.accentColor || (report.property === 'lovie' ? '#ff6000' : '#8C001C')}
-              property={report.property}
-              sectionNumberSvg={report.property === 'lovie' ? '/lovie/no-1.svg' : undefined}
-            />
+                SVG and Lovie-aware theming through the `property` prop.
+                Shared Influence skips this render and loops through its
+                own `sectionCovers` array below instead. */}
+            {!isSharedInfluence && (
+              <ReportSectionCover
+                sectionNumber={report.section01Cover?.sectionNumber || '01'}
+                title={
+                  report.section01Cover?.title ||
+                  (report.property === 'lovie'
+                    ? 'Across the Mediterranean'
+                    : 'The State of Social Impact')
+                }
+                subtitle={
+                  report.section01Cover?.subtitle ||
+                  (report.property === 'lovie'
+                    ? 'Work prioritises depth over volume, and cultural specificity over global reach.'
+                    : 'Rollbacks have increased across the sector, but leaders have settled into their new reality, becoming more resilient and strategic in the process.')
+                }
+                copy={
+                  report.section01Cover?.copy ||
+                  (report.property === 'lovie'
+                    ? 'Spain, Portugal, and Italy are producing digital work shaped by place, heritage, and a focus on digital infrastructure for both local and global innovation.'
+                    : 'Last year, we asked the Anthem Awards community how the shifting landscape was impacting their work. This year, we see how the community is adapting.')
+                }
+                accentColor={report.section01Cover?.accentColor || (report.property === 'lovie' ? '#ff6000' : '#8C001C')}
+                property={report.property}
+                sectionNumberSvg={report.property === 'lovie' ? '/lovie/no-1.svg' : undefined}
+              />
+            )}
 
-            {report.property === 'lovie' ? (
+            {isSharedInfluence ? (
+              <>
+                {/* Shared Influence — every section cover is driven by
+                    the CMS `sectionCovers` array. Order-preserving, and
+                    the number defaults to the position in the array if
+                    the editor didn't set one explicitly. Section content
+                    modules will slot in between covers as they get
+                    built out. */}
+                {(report.sectionCovers ?? []).map((cover, i) => (
+                  <div key={i}>
+                    <ReportSectionCover
+                      sectionNumber={cover.sectionNumber || String(i + 1).padStart(2, '0')}
+                      title={cover.title || ''}
+                      subtitle={cover.subtitle || ''}
+                      copy={cover.copy || ''}
+                      accentColor={cover.accentColor || '#8C001C'}
+                      property={report.property}
+                      minHeightPx={530}
+                      titleFontFamily="'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif"
+                      titleFontWeight={500}
+                      subtitleFontFamily="'decoy', Georgia, serif"
+                      subtitleItalic={false}
+                    />
+
+                    {/* Section content, keyed by index. Hardcoded for now
+                        while we nail down the layout; will move to CMS
+                        once the module shapes stabilise. */}
+                    {i === 0 && <SharedInfluenceSection01 report={report} />}
+                  </div>
+                ))}
+              </>
+            ) : report.property === 'lovie' ? (
               <>
                 {/* Lovie Trend 01 — title + body are CMS-driven through
                     trendSections[0]. Data module, Inside the Hubs, and
