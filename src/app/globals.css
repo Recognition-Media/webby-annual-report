@@ -346,3 +346,6 @@ body.lovie-template {
   border-color: var(--gate-accent);
 }
 
+
+/* Shared Influence — hide horizontal scrollbar on the ScrollingCards module */
+.hide-scrollbar::-webkit-scrollbar { display: none; }

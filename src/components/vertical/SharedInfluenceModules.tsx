@@ -15,6 +15,7 @@ import type {
   SITipsBlock,
   SICaseStudyBlock,
   SIInstagramEmbedBlock,
+  SIScrollingCardsBlock,
 } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
 
@@ -186,6 +187,22 @@ export function TwoColumnSlab({ left, right }: { left: React.ReactNode; right: R
           <div className="md:w-[50%]">{left}</div>
           <div className="md:w-[50%]">{right}</div>
         </div>
+      </div>
+    </section>
+  )
+}
+
+// FullWidthSlab — same beige ground / padding as TwoColumnSlab but one
+// wide column. Used for modules that need horizontal space (scrolling
+// card carousels, full-width visualizations, etc.).
+export function FullWidthSlab({ children }: { children: React.ReactNode }) {
+  return (
+    <section
+      className="relative px-5 md:px-[60px] py-16 md:py-24"
+      style={{ background: BEIGE }}
+    >
+      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
+        {children}
       </div>
     </section>
   )
@@ -905,7 +922,7 @@ function toInstagramEmbedUrl(url: string): string | undefined {
 // Rich text components as a factory so each render can inject the
 // current section's accentColor into link marks (and anywhere else
 // colour should follow the section palette).
-function makeRichTextComponents(accentColor: string): PortableTextComponents {
+function makeRichTextComponents(accentColor: string, textColor: string = MOSS): PortableTextComponents {
   return {
     block: {
       normal: ({ children }) => (
@@ -914,7 +931,7 @@ function makeRichTextComponents(accentColor: string): PortableTextComponents {
             fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
             fontSize: 17,
             lineHeight: 1.7,
-            color: MOSS,
+            color: textColor,
             margin: '0 0 20px',
           }}
         >
@@ -1007,6 +1024,179 @@ function InstagramEmbedBlockRenderer({ block }: { block: SIInstagramEmbedBlock }
   return <InstagramEmbed url={block.url} caption={block.caption} />
 }
 
+// ─────────────────────────────────────────────────────────────────
+// ScrollingCards — horizontally scrollable row of numbered cards for
+// "Pick the Model That Fits" style data-viz modules. Progress bar and
+// scroll hint below. Cards auto-numbered by position.
+// ─────────────────────────────────────────────────────────────────
+
+interface ScrollingCardsProps {
+  eyebrow?: string
+  cards: { title: string; body?: import('@portabletext/types').PortableTextBlock[]; _key?: string }[]
+  accentColor?: string
+  /** 'light' (default) = beige card with dark text; 'inverted' = accent-colored card with beige text. */
+  variant?: 'light' | 'inverted'
+}
+
+export function ScrollingCards({ eyebrow, cards, accentColor = RED, variant = 'light' }: ScrollingCardsProps) {
+  const inverted = variant === 'inverted'
+  const cardBg = inverted ? accentColor : CARD_LIGHT
+  const cardBorder = inverted ? 'transparent' : 'rgba(33, 38, 26, 0.08)'
+  const textColor = inverted ? BEIGE : MOSS
+  const numberCircleBg = inverted ? BEIGE : accentColor
+  const numberCircleText = inverted ? accentColor : '#fff'
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const [progress, setProgress] = useState(0)
+
+  useEffect(() => {
+    const el = scrollerRef.current
+    if (!el) return
+    const onScroll = () => {
+      const max = el.scrollWidth - el.clientWidth
+      setProgress(max > 0 ? el.scrollLeft / max : 0)
+    }
+    el.addEventListener('scroll', onScroll)
+    onScroll()
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [cards.length])
+
+  return (
+    <div>
+      {eyebrow && (
+        <motion.p
+          style={{
+            fontFamily: "'decoy', Georgia, serif",
+            fontStyle: 'italic',
+            fontSize: 18,
+            textAlign: 'center',
+            color: MOSS,
+            opacity: 0.75,
+            margin: '0 0 32px',
+          }}
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 0.75, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+        >
+          {eyebrow}
+        </motion.p>
+      )}
+      <div
+        ref={scrollerRef}
+        style={{
+          display: 'flex',
+          gap: 20,
+          overflowX: 'auto',
+          scrollSnapType: 'x mandatory',
+          paddingBottom: 8,
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+        className="hide-scrollbar"
+      >
+        {cards.map((card, i) => (
+          <div
+            key={card._key || i}
+            style={{
+              flex: '0 0 260px',
+              background: cardBg,
+              border: `1px solid ${cardBorder}`,
+              borderRadius: 12,
+              padding: 24,
+              scrollSnapAlign: 'start',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+            }}
+          >
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                background: numberCircleBg,
+                color: numberCircleText,
+                fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                fontSize: 14,
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {i + 1}
+            </div>
+            <h4
+              style={{
+                fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                fontSize: 18,
+                fontWeight: 700,
+                color: textColor,
+                margin: 0,
+                lineHeight: 1.25,
+              }}
+            >
+              {card.title}
+            </h4>
+            {card.body && card.body.length > 0 && (
+              <div
+                style={{
+                  fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  color: textColor,
+                }}
+              >
+                <PortableText value={card.body} components={makeRichTextComponents(inverted ? BEIGE : accentColor, textColor)} />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 400,
+            height: 3,
+            background: 'rgba(33, 38, 26, 0.08)',
+            borderRadius: 2,
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              width: `${Math.max(20, progress * 100)}%`,
+              height: '100%',
+              background: accentColor,
+              transition: 'width 0.15s ease-out',
+            }}
+          />
+        </div>
+        <p
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 11,
+            letterSpacing: 2,
+            textTransform: 'uppercase',
+            color: MOSS,
+            opacity: 0.55,
+            margin: 0,
+          }}
+        >
+          ← scroll →
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function ScrollingCardsBlockRenderer({ block, accentColor }: { block: SIScrollingCardsBlock; accentColor: string }) {
+  if (!block.cards || block.cards.length === 0) return null
+  return <ScrollingCards eyebrow={block.eyebrow} cards={block.cards} accentColor={accentColor} />
+}
+
 /** Renders a single CMS content block. Returns null for empty/unknown
  *  block types so slabs stay clean when partially populated.
  *  `accentColor` flows down from the trendSection so every block picks
@@ -1021,6 +1211,7 @@ function ContentBlockRenderer({ block, accentColor }: { block: SIContentBlock; a
     case 'siTipsBlock': return <TipsBlockRenderer block={block} accentColor={accentColor} />
     case 'siCaseStudyBlock': return <CaseStudyBlockRenderer block={block} accentColor={accentColor} />
     case 'siInstagramEmbedBlock': return <InstagramEmbedBlockRenderer block={block} />
+    case 'siScrollingCardsBlock': return <ScrollingCardsBlockRenderer block={block} accentColor={accentColor} />
     default: return null
   }
 }
@@ -1032,15 +1223,26 @@ export function ContentBlockList({ blocks, accentColor }: { blocks?: SIContentBl
   return (
     <>
       {blocks.map((block, i) => (
-        <ContentBlockRenderer key={block._key || i} block={block} accentColor={accentColor} />
+        <div key={block._key || i} style={{ marginTop: i === 0 ? 0 : 32 }}>
+          <ContentBlockRenderer block={block} accentColor={accentColor} />
+        </div>
       ))}
     </>
   )
 }
 
-/** Renders a single CMS-driven slab: 2-column layout via TwoColumnSlab
- *  with block arrays composed on each side. */
+/** Renders a single CMS-driven slab. Defaults to 2-column via
+ *  TwoColumnSlab; when `slab.fullWidth === true` renders a single wide
+ *  column via FullWidthSlab (used for scrolling-card carousels and
+ *  full-width visualizations). */
 export function ContentSlabRenderer({ slab, accentColor }: { slab: SIContentSlab; accentColor: string }) {
+  if (slab.fullWidth) {
+    return (
+      <FullWidthSlab>
+        <ContentBlockList blocks={slab.leftBlocks} accentColor={accentColor} />
+      </FullWidthSlab>
+    )
+  }
   return (
     <TwoColumnSlab
       left={<ContentBlockList blocks={slab.leftBlocks} accentColor={accentColor} />}

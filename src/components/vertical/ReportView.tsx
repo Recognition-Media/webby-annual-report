@@ -25,6 +25,9 @@ import {
   PullQuote,
   AudienceBlock,
   ContentSlabsRenderer,
+  FullWidthSlab,
+  Heading,
+  ScrollingCards,
 } from './SharedInfluenceModules'
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
@@ -288,6 +291,72 @@ function SharedInfluenceSection04({ report }: { report: Report }) {
   const slabs = trend?.contentSlabs
   if (!slabs || slabs.length === 0) return null
   return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+}
+
+function SharedInfluenceSection05({ report }: { report: Report }) {
+  const trend = report.trendSections?.[4]
+  const accentColor =
+    report.sectionCovers?.[4]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  if (!slabs || slabs.length === 0) return null
+  return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+}
+
+function SharedInfluenceSection06({ report }: { report: Report }) {
+  const trend = report.trendSections?.[5]
+  const accentColor =
+    report.sectionCovers?.[5]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  return (
+    <>
+      {slabs && slabs.length > 0 && (
+        <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+      )}
+      {/* Scrolling-cards preview — remove once Slab 2 (full-width
+          siScrollingCardsBlock) is populated in the CMS. */}
+      <ScrollingCardsPreview accentColor={accentColor} />
+    </>
+  )
+}
+
+function ScrollingCardsPreview({ accentColor }: { accentColor: string }) {
+  const mockCards: { title: string; body: PortableTextBlock[] }[] = [
+    { title: 'Volunteer (Gifting & Events)', body: mockPT('**Best when:** the creator has the capacity to give their time, and gifting can meaningfully substitute payment.') },
+    { title: 'In-Kind', body: mockPT('**Best when:** budget isn’t available, but you can offer real expertise, data, or creative strategy.') },
+    { title: 'Project Fee', body: mockPT('**Best when:** there is a specific deliverable with a defined scope.') },
+    { title: 'Retainer', body: mockPT('**Best when:** the partnership is ongoing and needs consistent output over a period of time.') },
+    { title: 'Creator-in-Residence', body: mockPT('**Best when:** you want to build a new media infrastructure that permanently embeds a creator in your organization.') },
+    { title: 'Revenue Share', body: mockPT('**Best when:** the campaign drives measurable donations, sales, or subscriptions.') },
+  ]
+  return (
+    <FullWidthSlab>
+      <Heading level={3} style={{ textAlign: 'center' }}>Pick the Model That Fits</Heading>
+      <ScrollingCards
+        eyebrow="Six ways organizations and creators structure the exchange."
+        cards={mockCards}
+        accentColor={accentColor}
+        variant="inverted"
+      />
+    </FullWidthSlab>
+  )
+}
+
+// Minimal PortableText mock so demo cards render bold ("**Best when:**")
+// through the same rich-text path the CMS uses.
+function mockPT(text: string): PortableTextBlock[] {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean)
+  return [{
+    _type: 'block',
+    _key: 'k',
+    style: 'normal',
+    markDefs: [],
+    children: parts.map((p, i) => {
+      if (p.startsWith('**') && p.endsWith('**')) {
+        return { _type: 'span', _key: `s${i}`, text: p.slice(2, -2), marks: ['strong'] }
+      }
+      return { _type: 'span', _key: `s${i}`, text: p, marks: [] }
+    }),
+  }] as unknown as PortableTextBlock[]
 }
 
 export function ReportView({ report }: { report: Report }) {
@@ -602,6 +671,8 @@ export function ReportView({ report }: { report: Report }) {
                     {i === 1 && <SharedInfluenceSection02 report={report} />}
                     {i === 2 && <SharedInfluenceSection03 report={report} />}
                     {i === 3 && <SharedInfluenceSection04 report={report} />}
+                    {i === 4 && <SharedInfluenceSection05 report={report} />}
+                    {i === 5 && <SharedInfluenceSection06 report={report} />}
                   </div>
                 ))}
               </>

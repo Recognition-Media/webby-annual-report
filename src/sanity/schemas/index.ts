@@ -23,6 +23,7 @@ import {
   siTipsBlock,
   siCaseStudyBlock,
   siInstagramEmbedBlock,
+  siScrollingCardsBlock,
   siContentSlab,
 } from './objects/sharedInfluenceBlocks'
 
@@ -52,5 +53,6 @@ export const schemaTypes = [
   siTipsBlock,
   siCaseStudyBlock,
   siInstagramEmbedBlock,
+  siScrollingCardsBlock,
   siContentSlab,
 ]

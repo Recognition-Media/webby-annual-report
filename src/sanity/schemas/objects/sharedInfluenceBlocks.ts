@@ -250,6 +250,62 @@ export const siInstagramEmbedBlock = defineType({
   },
 })
 
+// Scrolling Cards Block — horizontally scrollable row of numbered cards.
+// Used for "Pick the Model That Fits"-style data-viz modules where
+// editors want to lay out N structured options side-by-side.
+export const siScrollingCardsBlock = defineType({
+  name: 'siScrollingCardsBlock',
+  title: 'Scrolling Cards Block',
+  type: 'object',
+  fields: [
+    {
+      name: 'eyebrow',
+      title: 'Eyebrow (italic subhead)',
+      type: 'string',
+      description: 'Small italic line centered above the cards (e.g. "Eight ways organizations and creators structure the exchange.").',
+    },
+    {
+      name: 'cards',
+      title: 'Cards',
+      type: 'array',
+      description: 'Cards are auto-numbered by position (1, 2, 3, ...).',
+      of: [
+        {
+          type: 'object',
+          name: 'siScrollingCard',
+          title: 'Card',
+          fields: [
+            { name: 'title', title: 'Title', type: 'string', validation: (r) => r.required(), description: 'e.g. "Volunteer (+ Giftings & Events)"' },
+            {
+              name: 'body',
+              title: 'Body',
+              type: 'array',
+              of: [{ type: 'block' }],
+              description: 'Rich text — bold marks for "Best when:" labels. Links supported.',
+            },
+          ],
+          preview: {
+            select: { title: 'title' },
+            prepare({ title }) {
+              return { title: title || '(untitled card)' }
+            },
+          },
+        },
+      ],
+    },
+  ],
+  preview: {
+    select: { eyebrow: 'eyebrow', cards: 'cards' },
+    prepare({ eyebrow, cards }) {
+      const count = Array.isArray(cards) ? cards.length : 0
+      return {
+        title: 'Scrolling Cards',
+        subtitle: `${count} card${count === 1 ? '' : 's'}${eyebrow ? ' · ' + eyebrow.slice(0, 40) : ''}`,
+      }
+    },
+  },
+})
+
 // Content Slab — two-column wrapper containing block arrays
 const BLOCK_TYPES = [
   { type: 'siSectionHeaderBlock' },
@@ -260,6 +316,7 @@ const BLOCK_TYPES = [
   { type: 'siTipsBlock' },
   { type: 'siCaseStudyBlock' },
   { type: 'siInstagramEmbedBlock' },
+  { type: 'siScrollingCardsBlock' },
 ]
 
 export const siContentSlab = defineType({
@@ -267,6 +324,13 @@ export const siContentSlab = defineType({
   title: 'Content Slab',
   type: 'object',
   fields: [
+    {
+      name: 'fullWidth',
+      title: 'Full-Width Slab',
+      type: 'boolean',
+      description: 'When on, the slab spans one wide column (useful for scrolling-card modules and full-width visualizations). Right column blocks are ignored.',
+      initialValue: false,
+    },
     {
       name: 'leftBlocks',
       title: 'Left Column Blocks',
@@ -278,16 +342,17 @@ export const siContentSlab = defineType({
       title: 'Right Column Blocks',
       type: 'array',
       of: BLOCK_TYPES,
+      hidden: ({ parent }) => parent?.fullWidth === true,
     },
   ],
   preview: {
-    select: { left: 'leftBlocks', right: 'rightBlocks' },
-    prepare({ left, right }) {
+    select: { left: 'leftBlocks', right: 'rightBlocks', full: 'fullWidth' },
+    prepare({ left, right, full }) {
       const l = Array.isArray(left) ? left.length : 0
       const r = Array.isArray(right) ? right.length : 0
       return {
-        title: 'Content Slab',
-        subtitle: `${l} left block${l === 1 ? '' : 's'} · ${r} right block${r === 1 ? '' : 's'}`,
+        title: full ? 'Content Slab (full-width)' : 'Content Slab',
+        subtitle: full ? `${l} block${l === 1 ? '' : 's'}` : `${l} left block${l === 1 ? '' : 's'} · ${r} right block${r === 1 ? '' : 's'}`,
       }
     },
   },

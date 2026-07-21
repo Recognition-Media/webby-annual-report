@@ -68,6 +68,7 @@ export const reportBySlugQuery = groq`
       // (including nested video file URLs and inline pull-quote objects).
       contentSlabs[] {
         _key,
+        fullWidth,
         leftBlocks[] {
           _type, _key,
           body,
@@ -78,6 +79,7 @@ export const reportBySlugQuery = groq`
           orientation, eyebrow,
           items,
           url, caption,
+          cards[] { _key, title, body },
         },
         rightBlocks[] {
           _type, _key,
@@ -89,6 +91,7 @@ export const reportBySlugQuery = groq`
           orientation, eyebrow,
           items,
           url, caption,
+          cards[] { _key, title, body },
         },
       },
       showQuotes,

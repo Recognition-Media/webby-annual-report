@@ -167,6 +167,19 @@ export interface SIInstagramEmbedBlock {
   caption?: string
 }
 
+export interface SIScrollingCard {
+  _key?: string
+  title: string
+  body?: PortableTextBlock[]
+}
+
+export interface SIScrollingCardsBlock {
+  _type: 'siScrollingCardsBlock'
+  _key?: string
+  eyebrow?: string
+  cards?: SIScrollingCard[]
+}
+
 export type SIContentBlock =
   | SIBodyBlock
   | SISectionHeaderBlock
@@ -176,9 +189,11 @@ export type SIContentBlock =
   | SITipsBlock
   | SICaseStudyBlock
   | SIInstagramEmbedBlock
+  | SIScrollingCardsBlock
 
 export interface SIContentSlab {
   _key?: string
+  fullWidth?: boolean
   leftBlocks?: SIContentBlock[]
   rightBlocks?: SIContentBlock[]
 }
