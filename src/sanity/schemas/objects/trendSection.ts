@@ -115,6 +115,19 @@ export default defineType({
 
     // Images
     { name: 'sectionImages', title: 'Images', type: 'array', of: [{ type: 'image', options: { hotspot: true }, fields: [{ name: 'alt', title: 'Alt Text', type: 'string' }] }], fieldset: 'images' },
+
+    // Content Slabs (Shared Influence — Option C repeatable-block pattern).
+    // When populated, the Shared Influence renderer prefers this field
+    // over the legacy body/quotes/video fields above. Editors compose
+    // each slab as a 2-column layout with any combination of blocks
+    // (body, header, audience, quote, video, tips).
+    {
+      name: 'contentSlabs',
+      title: 'Content Slabs (Shared Influence)',
+      type: 'array',
+      of: [{ type: 'siContentSlab' }],
+      description: 'Two-column slabs composed from reusable content blocks. Used by the Shared Influence report; other templates ignore this field.',
+    },
   ],
   preview: {
     select: { title: 'trendTitle', enabled: 'enabled' },

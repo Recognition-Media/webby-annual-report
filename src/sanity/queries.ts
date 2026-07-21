@@ -64,6 +64,36 @@ export const reportBySlugQuery = groq`
       showTips,
       tipsTitle,
       tipsItems,
+      // Shared Influence content slabs — resolve each block type's fields
+      // (including nested video file URLs and inline pull-quote objects).
+      contentSlabs[] {
+        _key,
+        fullWidth,
+        leftBlocks[] {
+          _type, _key,
+          body,
+          title, level,
+          label, inlineQuote,
+          quote, name, role, headshot,
+          videoFile { "url": asset->url },
+          orientation, eyebrow,
+          items,
+          url, caption,
+          cards[] { _key, title, body },
+        },
+        rightBlocks[] {
+          _type, _key,
+          body,
+          title, level,
+          label, inlineQuote,
+          quote, name, role, headshot,
+          videoFile { "url": asset->url },
+          orientation, eyebrow,
+          items,
+          url, caption,
+          cards[] { _key, title, body },
+        },
+      },
       showQuotes,
       expertQuotes[] {
         name,

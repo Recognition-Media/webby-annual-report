@@ -79,6 +79,8 @@ export function Credits({ report }: { report?: Report } = {}) {
 function AnthemCredits({ report }: { report: Report | undefined }) {
   const createdBy = fromCms(report?.creditsCreatedBy, CREATED_BY)
   const contributors = fromCms(report?.creditsContributors, CONTRIBUTORS)
+  // Shared Influence bumps name weight to 700; SoSI keeps the lighter 500.
+  const boldNames = report?.slug?.current === 'shared-influence-creator-partnerships-nonprofit'
 
   return (
     <section
@@ -99,9 +101,9 @@ function AnthemCredits({ report }: { report: Report | undefined }) {
         </motion.h2>
 
         <div className="mx-auto" style={{ maxWidth: 880 }}>
-          <AnthemPeopleGroup title="Created By" people={createdBy} columns={2} delay={0.1} />
+          <AnthemPeopleGroup title="Created By" people={createdBy} columns={2} delay={0.1} boldNames={boldNames} />
           <div className="mt-14 md:mt-16">
-            <AnthemPeopleGroup title="Contributors" people={contributors} columns={3} delay={0.2} />
+            <AnthemPeopleGroup title="Contributors" people={contributors} columns={3} delay={0.2} boldNames={boldNames} />
           </div>
         </div>
       </div>
@@ -109,7 +111,7 @@ function AnthemCredits({ report }: { report: Report | undefined }) {
   )
 }
 
-function AnthemPeopleGroup({ title, people, columns, delay }: { title: string; people: Person[]; columns: 2 | 3; delay: number }) {
+function AnthemPeopleGroup({ title, people, columns, delay, boldNames = false }: { title: string; people: Person[]; columns: 2 | 3; delay: number; boldNames?: boolean }) {
   const accent = '#D17DD0'
   const gridClass =
     columns === 3
@@ -137,7 +139,7 @@ function AnthemPeopleGroup({ title, people, columns, delay }: { title: string; p
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.35, delay: delay + 0.05 + i * 0.025 }}
           >
-            <p className="text-[14px] md:text-[15px] font-medium leading-tight" style={{ color: '#E3DDCA', fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>
+            <p className={`text-[14px] md:text-[15px] leading-tight ${boldNames ? 'font-bold' : 'font-medium'}`} style={{ color: '#E3DDCA', fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>
               {person.url ? (
                 <a href={person.url} target="_blank" rel="noopener noreferrer" className="transition-colors hover:opacity-100" style={{ color: '#E3DDCA', textDecoration: 'none', borderBottom: `1px solid rgba(209, 125, 208, 0.4)` }}>
                   {person.name}

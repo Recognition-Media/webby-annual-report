@@ -22,10 +22,19 @@ import {
   ComparisonCallout,
   TipsForSuccess,
   VideoModule,
+  PullQuote,
+  AudienceBlock,
+  ContentSlabsRenderer,
+  ContentBlockList,
+  FullWidthSlab,
+  Heading,
+  ScrollingCards,
 } from './SharedInfluenceModules'
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
+import { SharedInfluenceTopNav, SHARED_INFLUENCE_NAV_SECTIONS } from './SharedInfluenceTopNav'
+import { trackCtaClick } from '@/lib/analytics'
 import { LovieTrendContent } from './LovieTrendContent'
 import { QuoteVideoSection } from './QuoteVideoSection'
 import { BubbleChart } from './BubbleChart'
@@ -153,22 +162,172 @@ function SharedInfluenceSection01({ report }: { report: Report }) {
         }
       />
 
-      {/* Slab 2 — Tips for Success (left) + Video (right) */}
+      {/* Slab 2 — Tips for Success (left) + optional CMS content slabs
+          on the right. Editors add a portrait Video Block (Jaclynn
+          Brennan) or any other supporting module via the Section 1
+          contentSlabs field in Sanity. The Jaclynn video previously
+          hardcoded here was gitignored (>100MB) and 404'd in prod. */}
       <TwoColumnSlab
-        left={
-          <TipsForSuccess title={tipsTitle} tips={tipsItems} />
-        }
+        left={<TipsForSuccess title={tipsTitle} tips={tipsItems} />}
         right={
-          <VideoModule
-            src="/anthem/jaclynn-brennan-influencer-vs-creator.mp4"
-            name="Jaclynn Brennan"
-            title="Founder, Creative Duality"
-            orientation="portrait"
-          />
+          trend?.contentSlabs?.[0]?.rightBlocks && trend.contentSlabs[0].rightBlocks.length > 0
+            ? <ContentBlockList blocks={trend.contentSlabs[0].rightBlocks} accentColor={trend.accentColor || '#8C001C'} />
+            : null
         }
       />
     </>
   )
+}
+
+// Section 2 — Finding the Right Partners. Fully CMS-driven via
+// contentSlabs. The old hardcoded fallback referenced gitignored
+// videos (garrison-hayes-vetting-process.mp4, jane-lynch-direct-relief.mp4)
+// that 404 in production — removed.
+function SharedInfluenceSection02({ report }: { report: Report }) {
+  const trend = report.trendSections?.[1]
+  const accentColor =
+    report.sectionCovers?.[1]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  if (!slabs || slabs.length === 0) return null
+  return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+}
+
+// Section 3 — fully CMS-driven via contentSlabs. No hardcoded fallback;
+// editors compose every slab in Studio. Accent inherits from the section
+// cover so all child blocks share the same palette.
+function SharedInfluenceSection03({ report }: { report: Report }) {
+  const trend = report.trendSections?.[2]
+  const accentColor =
+    report.sectionCovers?.[2]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  if (!slabs || slabs.length === 0) return null
+  return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+}
+
+function SharedInfluenceSection04({ report }: { report: Report }) {
+  const trend = report.trendSections?.[3]
+  const accentColor =
+    report.sectionCovers?.[3]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  if (!slabs || slabs.length === 0) return null
+  return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+}
+
+function SharedInfluenceSection05({ report }: { report: Report }) {
+  const trend = report.trendSections?.[4]
+  const accentColor =
+    report.sectionCovers?.[4]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  if (!slabs || slabs.length === 0) return null
+  return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+}
+
+function SharedInfluenceSection06({ report }: { report: Report }) {
+  const trend = report.trendSections?.[5]
+  const accentColor =
+    report.sectionCovers?.[5]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  // Only render the mock preview while the CMS is still empty of a
+  // real Scrolling Cards Block; once editors add one, the preview
+  // steps aside to avoid duplicated modules.
+  const hasCmsScrollingCards = !!slabs?.some((slab) =>
+    [...(slab.leftBlocks || []), ...(slab.rightBlocks || [])].some(
+      (b) => b._type === 'siScrollingCardsBlock',
+    ),
+  )
+  return (
+    <>
+      {slabs && slabs.length > 0 && (
+        <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+      )}
+      {!hasCmsScrollingCards && <ScrollingCardsPreview accentColor={accentColor} />}
+    </>
+  )
+}
+
+// 6 takeaway cards for the Shared Influence report. Keep body copy
+// tight — the hover-cards get cramped past ~4 sentences. Migrate to a
+// CMS field on the report if editors need to tune these live.
+const SHARED_INFLUENCE_TAKEAWAYS: { number: string; title: string; body: string }[] = [
+  {
+    number: '01',
+    title: 'Trust has moved to creators. Build around it.',
+    body: 'Audiences increasingly turn to individuals for information and connection. Organizations creating long-term creator relationships are building trust that extends beyond a single campaign.',
+  },
+  {
+    number: '02',
+    title: 'Alignment creates stronger partnerships. Vet from both sides.',
+    body: 'The right creator partners bring more than an audience. Shared values, strong storytelling skills, and community engagement determine whether a partnership can grow over time.',
+  },
+  {
+    number: '03',
+    title: 'Give creators a strong data-filled brief. Trust them to do the rest.',
+    body: 'Prep creators with any vital information: your mission, standard language, and cause-related data. Leave room for creators to serve as a new personality for your organization, and tell your story through their lens.',
+  },
+  {
+    number: '04',
+    title: 'Match your storytelling to the platform in ways that feel native.',
+    body: 'Every platform serves a different purpose. The strongest content meets audiences where they are and reflects the creator’s own style and perspective.',
+  },
+  {
+    number: '05',
+    title: 'Measure creator impact through movement.',
+    body: 'Views and likes tell a limited story. Show leadership that your creator collaborations work through sentiment analysis, audience engagement, or conversions.',
+  },
+  {
+    number: '06',
+    title: 'Build compensation models that reflect the relationship.',
+    body: 'There is no one-size-fits-all approach; creator partnerships can range from volunteer collaborations to paid opportunities. For long-term impact, create in-house models that you can fundraise against.',
+  },
+]
+
+function SharedInfluenceSection07({ report }: { report: Report }) {
+  const trend = report.trendSections?.[6]
+  const accentColor =
+    report.sectionCovers?.[6]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  if (!slabs || slabs.length === 0) return null
+  return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+}
+
+function ScrollingCardsPreview({ accentColor }: { accentColor: string }) {
+  const mockCards: { title: string; body: PortableTextBlock[] }[] = [
+    { title: 'Volunteer (Gifting & Events)', body: mockPT('**Best when:** the creator has the capacity to give their time, and gifting can meaningfully substitute payment.') },
+    { title: 'In-Kind', body: mockPT('**Best when:** budget isn’t available, but you can offer real expertise, data, or creative strategy.') },
+    { title: 'Project Fee', body: mockPT('**Best when:** there is a specific deliverable with a defined scope.') },
+    { title: 'Retainer', body: mockPT('**Best when:** the partnership is ongoing and needs consistent output over a period of time.') },
+    { title: 'Creator-in-Residence', body: mockPT('**Best when:** you want to build a new media infrastructure that permanently embeds a creator in your organization.') },
+    { title: 'Revenue Share', body: mockPT('**Best when:** the campaign drives measurable donations, sales, or subscriptions.') },
+  ]
+  return (
+    <FullWidthSlab>
+      <Heading level={3} style={{ textAlign: 'center' }}>Pick the Model That Fits</Heading>
+      <ScrollingCards
+        eyebrow="Six ways organizations and creators structure the exchange."
+        cards={mockCards}
+        accentColor={accentColor}
+        variant="inverted"
+      />
+    </FullWidthSlab>
+  )
+}
+
+// Minimal PortableText mock so demo cards render bold ("**Best when:**")
+// through the same rich-text path the CMS uses.
+function mockPT(text: string): PortableTextBlock[] {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean)
+  return [{
+    _type: 'block',
+    _key: 'k',
+    style: 'normal',
+    markDefs: [],
+    children: parts.map((p, i) => {
+      if (p.startsWith('**') && p.endsWith('**')) {
+        return { _type: 'span', _key: `s${i}`, text: p.slice(2, -2), marks: ['strong'] }
+      }
+      return { _type: 'span', _key: `s${i}`, text: p, marks: [] }
+    }),
+  }] as unknown as PortableTextBlock[]
 }
 
 export function ReportView({ report }: { report: Report }) {
@@ -376,6 +535,18 @@ export function ReportView({ report }: { report: Report }) {
     <main>
       <AnalyticsScripts report={report} />
 
+      {/* Shared Influence — dedicated sticky top nav mounted at the
+          ReportView level so `fixed` positioning survives no matter what
+          section (hero, letter, sections, footer) is on screen. */}
+      {isSharedInfluence && (
+        <SharedInfluenceTopNav
+          ctaUrl={report.footerCtaUrl || 'https://www.anthemawards.com/'}
+          sections={SHARED_INFLUENCE_NAV_SECTIONS}
+          onNavClick={(anchor) => handleSeeReport(anchor)}
+          onCtaClick={() => trackCtaClick('header', report.footerCtaUrl || 'https://www.anthemawards.com/', report.property, report.slug.current)}
+        />
+      )}
+
       {/* Hero — hidden once you've entered the report */}
       {!entered && (
         <HeroSection report={report} carouselImages={report.carouselImages} onSeeReport={handleSeeReport} />
@@ -401,8 +572,11 @@ export function ReportView({ report }: { report: Report }) {
       {/* Idle navigation arrows — disabled for Anthem redesign */}
       {/* <IdleArrows active={entered} /> */}
 
-      {/* Bottom progress / section nav (Anthem template) */}
-      <AnthemBottomNav active={entered} property={report.property} />
+      {/* Bottom progress / section nav (Anthem template) — hidden for
+          Shared Influence, which uses a sticky top nav instead. */}
+      {!isSharedInfluence && (
+        <AnthemBottomNav active={entered} property={report.property} />
+      )}
 
       {/* Mobile navigation */}
       <MobileNav
@@ -466,7 +640,10 @@ export function ReportView({ report }: { report: Report }) {
                     the editor didn't set one explicitly. Section content
                     modules will slot in between covers as they get
                     built out. */}
-                {(report.sectionCovers ?? []).map((cover, i) => (
+                {/* Render only the first seven sectionCovers as the trend
+                    sections; the eighth (if present) is treated as the
+                    Takeaways transition cover below. */}
+                {(report.sectionCovers ?? []).slice(0, 7).map((cover, i) => (
                   <div key={i}>
                     <ReportSectionCover
                       sectionNumber={cover.sectionNumber || String(i + 1).padStart(2, '0')}
@@ -486,8 +663,40 @@ export function ReportView({ report }: { report: Report }) {
                         while we nail down the layout; will move to CMS
                         once the module shapes stabilise. */}
                     {i === 0 && <SharedInfluenceSection01 report={report} />}
+                    {i === 1 && <SharedInfluenceSection02 report={report} />}
+                    {i === 2 && <SharedInfluenceSection03 report={report} />}
+                    {i === 3 && <SharedInfluenceSection04 report={report} />}
+                    {i === 4 && <SharedInfluenceSection05 report={report} />}
+                    {i === 5 && <SharedInfluenceSection06 report={report} />}
+                    {i === 6 && <SharedInfluenceSection07 report={report} />}
                   </div>
                 ))}
+
+                {/* Takeaways transition cover — pulls from
+                    sectionCovers[7] when present so editors can tune the
+                    title/subtitle/copy in the CMS; falls back to a
+                    sensible hardcoded default otherwise. */}
+                <ReportSectionCover
+                  sectionNumber={report.sectionCovers?.[7]?.sectionNumber || '08'}
+                  title={report.sectionCovers?.[7]?.title || 'Takeaways'}
+                  subtitle={report.sectionCovers?.[7]?.subtitle || 'The Future of Philanthropy Includes Creators'}
+                  copy={report.sectionCovers?.[7]?.copy || 'Six practices for impact organizations and creators building trust, sharing stories, and driving measurable movement — together.'}
+                  accentColor={report.sectionCovers?.[7]?.accentColor || '#00B469'}
+                  property={report.property}
+                  minHeightPx={530}
+                  titleFontFamily="'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif"
+                  titleFontWeight={500}
+                  subtitleFontFamily="'decoy', Georgia, serif"
+                  subtitleItalic={false}
+                  compact
+                />
+
+                <Takeaways
+                  eyebrow=""
+                  heading=""
+                  accentColor="#00B469"
+                  takeaways={SHARED_INFLUENCE_TAKEAWAYS}
+                />
               </>
             ) : report.property === 'lovie' ? (
               <>

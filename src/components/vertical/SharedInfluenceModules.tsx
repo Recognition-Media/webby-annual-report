@@ -2,6 +2,22 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
+import { PortableText } from '@portabletext/react'
+import type { PortableTextComponents } from '@portabletext/react'
+import type {
+  SIContentBlock,
+  SIContentSlab,
+  SIBodyBlock,
+  SISectionHeaderBlock,
+  SIAudienceBlock,
+  SIPullQuoteBlock,
+  SIVideoBlock,
+  SITipsBlock,
+  SICaseStudyBlock,
+  SIInstagramEmbedBlock,
+  SIScrollingCardsBlock,
+} from '@/sanity/types'
+import { urlFor } from '@/sanity/image'
 
 // ─────────────────────────────────────────────────────────────────
 // Shared Influence — reusable content modules for the report's six
@@ -17,6 +33,65 @@ const MOSS = '#21261A'
 const TAN = '#d5cfbc'
 const CARD_LIGHT = '#F5EFDB'
 const RED = '#8C001C'
+
+// ─────────────────────────────────────────────────────────────────
+// Heading scale — Roc Grotesk Variable bold. Consistent across the
+// Shared Influence report so section headers, CMS-inserted headings
+// in Portable Text body, and future editorial headings all read from
+// the same modular scale. Level 3 = 36px = the default SectionHeader
+// size (the "Finding the right partner…" beat above each section).
+// ─────────────────────────────────────────────────────────────────
+
+export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
+
+export const HEADING_SCALE: Record<HeadingLevel, {
+  fontSize: number
+  lineHeight: number
+  letterSpacing: string
+}> = {
+  1: { fontSize: 64, lineHeight: 1.05, letterSpacing: '-0.02em' },
+  2: { fontSize: 48, lineHeight: 1.1, letterSpacing: '-0.02em' },
+  3: { fontSize: 36, lineHeight: 1.15, letterSpacing: '-0.01em' },
+  4: { fontSize: 28, lineHeight: 1.2, letterSpacing: '-0.01em' },
+  5: { fontSize: 22, lineHeight: 1.25, letterSpacing: '-0.005em' },
+  6: { fontSize: 18, lineHeight: 1.3, letterSpacing: '-0.005em' },
+}
+
+// Heading — semantic h1..h6 element that pulls its size, line height,
+// and letter spacing from the shared HEADING_SCALE. Font family, weight,
+// and color are locked to the Shared Influence editorial style; pass
+// `style` to override per-instance if needed.
+export function Heading({
+  level = 3,
+  children,
+  style,
+  color = MOSS,
+}: {
+  level?: HeadingLevel
+  children: React.ReactNode
+  style?: React.CSSProperties
+  color?: string
+}) {
+  const scale = HEADING_SCALE[level]
+  const commonStyle: React.CSSProperties = {
+    fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+    fontWeight: 500,
+    color,
+    margin: '0 0 24px',
+    ...scale,
+    ...style,
+  }
+  // React narrows the tag name so we render one of the six literal
+  // elements based on `level`.
+  switch (level) {
+    case 1: return <h1 style={commonStyle}>{children}</h1>
+    case 2: return <h2 style={commonStyle}>{children}</h2>
+    case 3: return <h3 style={commonStyle}>{children}</h3>
+    case 4: return <h4 style={commonStyle}>{children}</h4>
+    case 5: return <h5 style={commonStyle}>{children}</h5>
+    case 6: return <h6 style={commonStyle}>{children}</h6>
+  }
+}
 
 interface SectionShellProps {
   children: React.ReactNode
@@ -45,33 +120,29 @@ export function SectionShell({ children, className = '' }: SectionShellProps) {
 // SectionHeader — big content-level header used inside a 2-column slab
 // (mirrors the SoSI "trend title" beat, without the eyebrow). Sits
 // above the body paragraphs in the left column and pairs with a short
-// accent divider below.
+// accent divider below. Renders via <Heading level={...}> so the size
+// stays in sync with the shared HEADING_SCALE. Default level 3 = 36px.
 export function SectionHeader({
   title,
+  level = 3,
   accentColor = RED,
 }: {
   title: string
+  level?: HeadingLevel
   accentColor?: string
 }) {
   return (
     <>
-      <motion.h3
-        style={{
-          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
-          fontSize: 'clamp(1.5rem, 3vw, 36px)',
-          fontWeight: 700,
-          lineHeight: 1.15,
-          letterSpacing: '-0.01em',
-          color: MOSS,
-          margin: '0 0 24px',
-        }}
+      <motion.div
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        {title}
-      </motion.h3>
+        <Heading level={level} style={{ margin: '0 0 24px' }}>
+          {title}
+        </Heading>
+      </motion.div>
       <div style={{ width: 36, height: 2, background: accentColor, marginBottom: 28 }} />
     </>
   )
@@ -116,6 +187,22 @@ export function TwoColumnSlab({ left, right }: { left: React.ReactNode; right: R
           <div className="md:w-[50%]">{left}</div>
           <div className="md:w-[50%]">{right}</div>
         </div>
+      </div>
+    </section>
+  )
+}
+
+// FullWidthSlab — same beige ground / padding as TwoColumnSlab but one
+// wide column. Used for modules that need horizontal space (scrolling
+// card carousels, full-width visualizations, etc.).
+export function FullWidthSlab({ children }: { children: React.ReactNode }) {
+  return (
+    <section
+      className="relative px-5 md:px-[60px] py-16 md:py-24"
+      style={{ background: BEIGE }}
+    >
+      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
+        {children}
       </div>
     </section>
   )
@@ -316,6 +403,149 @@ export function TipsForSuccess({
 // with an attribution block below.
 // ─────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────
+// PullQuote — inline editorial pull quote with attribution. Used for
+// expert quotes throughout the Shared Influence sections. Red vertical
+// rule on the left, quote text in Decoy roman, attribution below.
+// ─────────────────────────────────────────────────────────────────
+
+export function PullQuote({
+  quote,
+  name,
+  role,
+  headshotSrc,
+  accentColor = RED,
+}: {
+  quote: string
+  name: string
+  role: string
+  /** Optional headshot image path. When supplied, renders as a large
+   *  circular avatar to the LEFT of the quote text (SoSI-style
+   *  structure, Lovie-sized headshot). */
+  headshotSrc?: string
+  accentColor?: string
+}) {
+  return (
+    <motion.blockquote
+      style={{
+        margin: '32px 0 0',
+        padding: 0,
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 20,
+      }}
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+    >
+      {headshotSrc && (
+        <img
+          src={headshotSrc}
+          alt={name}
+          style={{
+            width: 90,
+            height: 90,
+            borderRadius: '50%',
+            objectFit: 'cover',
+            flexShrink: 0,
+          }}
+        />
+      )}
+      <div
+        style={{
+          borderLeft: `3px solid ${accentColor}`,
+          paddingLeft: 20,
+          flex: 1,
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "'decoy', Georgia, serif",
+            fontSize: 22,
+            lineHeight: 1.35,
+            color: MOSS,
+            margin: '0 0 12px',
+          }}
+        >
+          {quote}
+        </p>
+        <p
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 13,
+            color: MOSS,
+            opacity: 0.65,
+            margin: 0,
+          }}
+        >
+          — <strong style={{ fontWeight: 600, opacity: 1 }}>{name}</strong>, {role}
+        </p>
+      </div>
+    </motion.blockquote>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
+// AudienceBlock — the "If You Are A Creator" / "If You Are An Impact
+// Leader" sub-section pattern. Small caps label + body text; can host
+// a nested PullQuote below.
+// ─────────────────────────────────────────────────────────────────
+
+export function AudienceBlock({
+  label,
+  paragraphs,
+  children,
+  accentColor = RED,
+}: {
+  label: string
+  paragraphs: React.ReactNode[]
+  /** Optional nested content (e.g. a PullQuote). */
+  children?: React.ReactNode
+  accentColor?: string
+}) {
+  return (
+    <div>
+      <motion.p
+        style={{
+          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+          fontSize: 13,
+          letterSpacing: 3,
+          textTransform: 'uppercase',
+          fontWeight: 700,
+          color: accentColor,
+          margin: '0 0 16px',
+        }}
+        initial={{ opacity: 0, y: 8 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4 }}
+      >
+        {label}
+      </motion.p>
+      {paragraphs.map((p, i) => (
+        <motion.p
+          key={i}
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 17,
+            lineHeight: 1.65,
+            color: MOSS,
+            margin: '0 0 20px',
+          }}
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.05 + i * 0.06 }}
+        >
+          {p}
+        </motion.p>
+      ))}
+      {children}
+    </div>
+  )
+}
+
 // VideoModule — native <video> element with play/pause toggle, mirroring
 // the SoSI (State of Social Impact) QuoteVideoSection treatment:
 // 16:9 dark frame, big play-triangle overlay when paused, pill-shaped
@@ -397,7 +627,12 @@ export function VideoModule({
     >
       <video
         ref={videoRef}
-        src={src}
+        // #t=0.5 seeks 0.5s into the clip so the pre-play frame is
+        // an actual visible frame instead of a black screen. Combined
+        // with preload="metadata" the browser downloads just enough
+        // to render that first frame without pulling the full video.
+        src={`${src}#t=0.5`}
+        preload="metadata"
         playsInline
         onEnded={() => setIsPlaying(false)}
         style={{
@@ -556,5 +791,486 @@ export function VideoModule({
         </>
       )}
     </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
+// CaseStudy — small-caps eyebrow + heading + body copy. Used to
+// spotlight a specific report / campaign inside a section. Sits inside
+// a slab column alongside an embed/video.
+// ─────────────────────────────────────────────────────────────────
+
+export function CaseStudy({
+  eyebrow = 'Case Study',
+  title,
+  children,
+  accentColor = RED,
+}: {
+  eyebrow?: string
+  title: string
+  children?: React.ReactNode
+  accentColor?: string
+}) {
+  return (
+    <div>
+      <motion.p
+        style={{
+          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+          fontSize: 12,
+          letterSpacing: 3,
+          textTransform: 'uppercase',
+          fontWeight: 700,
+          color: accentColor,
+          margin: '0 0 12px',
+        }}
+        initial={{ opacity: 0, y: 8 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4 }}
+      >
+        {eyebrow}
+      </motion.p>
+      <motion.h3
+        style={{
+          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+          fontSize: 24,
+          fontWeight: 500,
+          lineHeight: 1.2,
+          color: MOSS,
+          margin: '0 0 20px',
+        }}
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.05 }}
+      >
+        {title}
+      </motion.h3>
+      {children}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
+// InstagramEmbed — renders an Instagram reel/post via <iframe>. Uses
+// Instagram's /embed/ URL variant, so editors paste a normal share URL
+// and the renderer handles the conversion.
+// ─────────────────────────────────────────────────────────────────
+
+export function InstagramEmbed({ url, caption }: { url: string; caption?: string }) {
+  const embedUrl = toInstagramEmbedUrl(url)
+  if (!embedUrl) return null
+  return (
+    <div>
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          // Reels + most Instagram content is portrait — 9:16 with a
+          // little extra height for the caption bar Instagram overlays.
+          aspectRatio: '9 / 16',
+          maxHeight: 600,
+          background: MOSS,
+          borderRadius: 12,
+          overflow: 'hidden',
+        }}
+      >
+        <iframe
+          src={embedUrl}
+          title="Instagram embed"
+          scrolling="no"
+          allowTransparency
+          allow="encrypted-media"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            border: 0,
+          }}
+        />
+      </div>
+      {caption && (
+        <p
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 13,
+            color: MOSS,
+            opacity: 0.65,
+            margin: '12px 0 0',
+          }}
+        >
+          {caption}
+        </p>
+      )}
+    </div>
+  )
+}
+
+// Instagram share URLs come in a few shapes:
+//   https://www.instagram.com/reel/{id}/
+//   https://www.instagram.com/p/{id}/
+// The embed variant is the same URL with `/embed/` appended.
+function toInstagramEmbedUrl(url: string): string | undefined {
+  if (!url) return undefined
+  const trimmed = url.split('?')[0].replace(/\/$/, '')
+  return `${trimmed}/embed/`
+}
+
+// ─────────────────────────────────────────────────────────────────
+// CMS block renderers (Option C — repeatable content blocks)
+// Each renderer maps a Sanity block type → the existing React module
+// so the same visual language is preserved whether content is hardcoded
+// or CMS-driven.
+// ─────────────────────────────────────────────────────────────────
+
+// Rich text components as a factory so each render can inject the
+// current section's accentColor into link marks (and anywhere else
+// colour should follow the section palette).
+function makeRichTextComponents(accentColor: string, textColor: string = MOSS): PortableTextComponents {
+  return {
+    block: {
+      normal: ({ children }) => (
+        <p
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 17,
+            lineHeight: 1.7,
+            color: textColor,
+            margin: '0 0 20px',
+          }}
+        >
+          {children}
+        </p>
+      ),
+    },
+    marks: {
+      strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+      em: ({ children }) => <em style={{ fontStyle: 'italic' }}>{children}</em>,
+      link: ({ value, children }) => (
+        <a
+          href={value?.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: accentColor, textDecoration: 'underline', textUnderlineOffset: 3 }}
+        >
+          {children}
+        </a>
+      ),
+    },
+  }
+}
+
+function BodyBlockRenderer({ block, accentColor }: { block: SIBodyBlock; accentColor: string }) {
+  if (!block.body || block.body.length === 0) return null
+  return <PortableText value={block.body} components={makeRichTextComponents(accentColor)} />
+}
+
+function SectionHeaderBlockRenderer({ block, accentColor }: { block: SISectionHeaderBlock; accentColor: string }) {
+  return <SectionHeader title={block.title} level={block.level ?? 3} accentColor={accentColor} />
+}
+
+function PullQuoteBlockRenderer({ block, accentColor }: { block: SIPullQuoteBlock; accentColor: string }) {
+  const headshotSrc = block.headshot ? urlFor(block.headshot).width(360).height(360).fit('crop').url() : undefined
+  return (
+    <PullQuote
+      quote={block.quote}
+      name={block.name}
+      role={block.role ?? ''}
+      headshotSrc={headshotSrc}
+      accentColor={accentColor}
+    />
+  )
+}
+
+function AudienceBlockRenderer({ block, accentColor }: { block: SIAudienceBlock; accentColor: string }) {
+  const paragraphs: React.ReactNode[] = block.body && block.body.length > 0
+    ? [<PortableText key="body" value={block.body} components={makeRichTextComponents(accentColor)} />]
+    : []
+  return (
+    <AudienceBlock label={block.label} paragraphs={paragraphs} accentColor={accentColor}>
+      {block.inlineQuote && <PullQuoteBlockRenderer block={block.inlineQuote} accentColor={accentColor} />}
+    </AudienceBlock>
+  )
+}
+
+function VideoBlockRenderer({ block, accentColor }: { block: SIVideoBlock; accentColor: string }) {
+  const src = block.videoFile?.url
+  if (!src) return null
+  return (
+    <VideoModule
+      src={src}
+      name={block.name ?? ''}
+      title={block.title ?? ''}
+      orientation={block.orientation ?? 'landscape'}
+      eyebrow={block.eyebrow}
+      accentColor={accentColor}
+    />
+  )
+}
+
+function TipsBlockRenderer({ block, accentColor }: { block: SITipsBlock; accentColor: string }) {
+  if (!block.items || block.items.length === 0) return null
+  return <TipsForSuccess title={block.title || 'Tips for Success'} tips={block.items} accentColor={accentColor} />
+}
+
+function CaseStudyBlockRenderer({ block, accentColor }: { block: SICaseStudyBlock; accentColor: string }) {
+  return (
+    <CaseStudy eyebrow={block.eyebrow || 'Case Study'} title={block.title} accentColor={accentColor}>
+      {block.body && block.body.length > 0 && (
+        <PortableText value={block.body} components={makeRichTextComponents(accentColor)} />
+      )}
+    </CaseStudy>
+  )
+}
+
+function InstagramEmbedBlockRenderer({ block }: { block: SIInstagramEmbedBlock }) {
+  if (!block.url) return null
+  return <InstagramEmbed url={block.url} caption={block.caption} />
+}
+
+// ─────────────────────────────────────────────────────────────────
+// ScrollingCards — horizontally scrollable row of numbered cards for
+// "Pick the Model That Fits" style data-viz modules. Progress bar and
+// scroll hint below. Cards auto-numbered by position.
+// ─────────────────────────────────────────────────────────────────
+
+interface ScrollingCardsProps {
+  eyebrow?: string
+  cards: { title: string; body?: import('@portabletext/types').PortableTextBlock[]; _key?: string }[]
+  accentColor?: string
+  /** 'light' (default) = beige card with dark text; 'inverted' = accent-colored card with beige text. */
+  variant?: 'light' | 'inverted'
+}
+
+export function ScrollingCards({ eyebrow, cards, accentColor = RED, variant = 'light' }: ScrollingCardsProps) {
+  const inverted = variant === 'inverted'
+  const cardBg = inverted ? accentColor : CARD_LIGHT
+  const cardBorder = inverted ? 'transparent' : 'rgba(33, 38, 26, 0.08)'
+  const textColor = inverted ? BEIGE : MOSS
+  const numberCircleBg = inverted ? BEIGE : accentColor
+  const numberCircleText = inverted ? accentColor : '#fff'
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const [progress, setProgress] = useState(0)
+
+  useEffect(() => {
+    const el = scrollerRef.current
+    if (!el) return
+    const onScroll = () => {
+      const max = el.scrollWidth - el.clientWidth
+      setProgress(max > 0 ? el.scrollLeft / max : 0)
+    }
+    el.addEventListener('scroll', onScroll)
+    onScroll()
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [cards.length])
+
+  return (
+    <div>
+      {eyebrow && (
+        <motion.p
+          style={{
+            fontFamily: "'decoy', Georgia, serif",
+            fontStyle: 'italic',
+            fontSize: 18,
+            textAlign: 'center',
+            color: MOSS,
+            opacity: 0.75,
+            margin: '0 0 32px',
+          }}
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 0.75, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+        >
+          {eyebrow}
+        </motion.p>
+      )}
+      <div
+        ref={scrollerRef}
+        style={{
+          display: 'flex',
+          gap: 20,
+          overflowX: 'auto',
+          scrollSnapType: 'x mandatory',
+          paddingBottom: 8,
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+        className="hide-scrollbar"
+      >
+        {cards.map((card, i) => (
+          <div
+            key={card._key || i}
+            style={{
+              flex: '0 0 260px',
+              background: cardBg,
+              border: `1px solid ${cardBorder}`,
+              borderRadius: 12,
+              padding: 24,
+              scrollSnapAlign: 'start',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+            }}
+          >
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                background: numberCircleBg,
+                color: numberCircleText,
+                fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                fontSize: 14,
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {i + 1}
+            </div>
+            <h4
+              style={{
+                fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                fontSize: 18,
+                fontWeight: 700,
+                color: textColor,
+                margin: 0,
+                lineHeight: 1.25,
+              }}
+            >
+              {card.title}
+            </h4>
+            {card.body && card.body.length > 0 && (
+              <div
+                style={{
+                  fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  color: textColor,
+                }}
+              >
+                <PortableText value={card.body} components={makeRichTextComponents(inverted ? BEIGE : accentColor, textColor)} />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 400,
+            height: 3,
+            background: 'rgba(33, 38, 26, 0.08)',
+            borderRadius: 2,
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              width: `${Math.max(20, progress * 100)}%`,
+              height: '100%',
+              background: accentColor,
+              transition: 'width 0.15s ease-out',
+            }}
+          />
+        </div>
+        <p
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            fontSize: 11,
+            letterSpacing: 2,
+            textTransform: 'uppercase',
+            color: MOSS,
+            opacity: 0.55,
+            margin: 0,
+          }}
+        >
+          ← scroll →
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function ScrollingCardsBlockRenderer({ block, accentColor }: { block: SIScrollingCardsBlock; accentColor: string }) {
+  if (!block.cards || block.cards.length === 0) return null
+  return <ScrollingCards eyebrow={block.eyebrow} cards={block.cards} accentColor={accentColor} />
+}
+
+/** Renders a single CMS content block. Returns null for empty/unknown
+ *  block types so slabs stay clean when partially populated.
+ *  `accentColor` flows down from the trendSection so every block picks
+ *  up the section's palette (red default, purple for Section 2, etc.). */
+function ContentBlockRenderer({ block, accentColor }: { block: SIContentBlock; accentColor: string }) {
+  switch (block._type) {
+    case 'siBodyBlock': return <BodyBlockRenderer block={block} accentColor={accentColor} />
+    case 'siSectionHeaderBlock': return <SectionHeaderBlockRenderer block={block} accentColor={accentColor} />
+    case 'siAudienceBlock': return <AudienceBlockRenderer block={block} accentColor={accentColor} />
+    case 'siPullQuoteBlock': return <PullQuoteBlockRenderer block={block} accentColor={accentColor} />
+    case 'siVideoBlock': return <VideoBlockRenderer block={block} accentColor={accentColor} />
+    case 'siTipsBlock': return <TipsBlockRenderer block={block} accentColor={accentColor} />
+    case 'siCaseStudyBlock': return <CaseStudyBlockRenderer block={block} accentColor={accentColor} />
+    case 'siInstagramEmbedBlock': return <InstagramEmbedBlockRenderer block={block} />
+    case 'siScrollingCardsBlock': return <ScrollingCardsBlockRenderer block={block} accentColor={accentColor} />
+    default: return null
+  }
+}
+
+/** Renders an array of CMS content blocks as a single column stack.
+ *  Adjacent blocks are separated visually via each module's own margin. */
+export function ContentBlockList({ blocks, accentColor }: { blocks?: SIContentBlock[]; accentColor: string }) {
+  if (!blocks || blocks.length === 0) return null
+  return (
+    <>
+      {blocks.map((block, i) => (
+        <div key={block._key || i} style={{ marginTop: i === 0 ? 0 : 32 }}>
+          <ContentBlockRenderer block={block} accentColor={accentColor} />
+        </div>
+      ))}
+    </>
+  )
+}
+
+/** Renders a single CMS-driven slab. Defaults to 2-column via
+ *  TwoColumnSlab; when `slab.fullWidth === true` renders a single wide
+ *  column via FullWidthSlab (used for scrolling-card carousels and
+ *  full-width visualizations). */
+export function ContentSlabRenderer({ slab, accentColor }: { slab: SIContentSlab; accentColor: string }) {
+  if (slab.fullWidth) {
+    return (
+      <FullWidthSlab>
+        <ContentBlockList blocks={slab.leftBlocks} accentColor={accentColor} />
+      </FullWidthSlab>
+    )
+  }
+  return (
+    <TwoColumnSlab
+      left={<ContentBlockList blocks={slab.leftBlocks} accentColor={accentColor} />}
+      right={<ContentBlockList blocks={slab.rightBlocks} accentColor={accentColor} />}
+    />
+  )
+}
+
+/** Renders all slabs in order. `accentColor` comes from the parent
+ *  trendSection so blocks pick up the section palette by default. */
+export function ContentSlabsRenderer({
+  slabs,
+  accentColor = RED,
+}: {
+  slabs?: SIContentSlab[]
+  accentColor?: string
+}) {
+  if (!slabs || slabs.length === 0) return null
+  return (
+    <>
+      {slabs.map((slab, i) => (
+        <ContentSlabRenderer key={slab._key || i} slab={slab} accentColor={accentColor} />
+      ))}
+    </>
   )
 }
