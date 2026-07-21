@@ -51,15 +51,18 @@ export function Takeaways({
   heading = 'Where We Go From Here',
 }: TakeawaysProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const showHeaderBlock = Boolean(eyebrow || heading)
 
   return (
     <section
       id="takeaways"
-      className="relative px-5 md:px-[60px] py-16 md:py-24"
+      className={`relative px-5 md:px-[60px] ${showHeaderBlock ? 'py-16 md:py-24' : 'pt-4 pb-16 md:pt-6 md:pb-24'}`}
       style={{ background: '#E3DDCA' }}
     >
       <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        {/* Eyebrow + heading — mirrors TabbedPriorities/BubbleChart pattern in Section 3 */}
+        {/* Eyebrow + heading — hidden entirely when both are empty so the
+            preceding section cover flows straight into the cards. */}
+        {eyebrow && (
         <motion.p
           className="uppercase font-medium mb-3 text-center"
           style={{ fontSize: 11, letterSpacing: 4, color: accentColor }}
@@ -70,6 +73,8 @@ export function Takeaways({
         >
           {eyebrow}
         </motion.p>
+        )}
+        {heading && (
         <motion.h2
           className="text-center mb-12 text-[32px] md:text-[40px] leading-[1.15]"
           style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
@@ -80,6 +85,7 @@ export function Takeaways({
         >
           {heading}
         </motion.h2>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
           {takeaways.map((item, i) => {

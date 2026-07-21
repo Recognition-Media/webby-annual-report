@@ -32,6 +32,8 @@ import {
 import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
+import { SharedInfluenceTopNav, SHARED_INFLUENCE_NAV_SECTIONS } from './SharedInfluenceTopNav'
+import { trackCtaClick } from '@/lib/analytics'
 import { LovieTrendContent } from './LovieTrendContent'
 import { QuoteVideoSection } from './QuoteVideoSection'
 import { BubbleChart } from './BubbleChart'
@@ -603,6 +605,18 @@ export function ReportView({ report }: { report: Report }) {
     <main>
       <AnalyticsScripts report={report} />
 
+      {/* Shared Influence — dedicated sticky top nav mounted at the
+          ReportView level so `fixed` positioning survives no matter what
+          section (hero, letter, sections, footer) is on screen. */}
+      {isSharedInfluence && (
+        <SharedInfluenceTopNav
+          ctaUrl={report.footerCtaUrl || 'https://www.anthemawards.com/'}
+          sections={SHARED_INFLUENCE_NAV_SECTIONS}
+          onNavClick={(anchor) => handleSeeReport(anchor)}
+          onCtaClick={() => trackCtaClick('header', report.footerCtaUrl || 'https://www.anthemawards.com/', report.property, report.slug.current)}
+        />
+      )}
+
       {/* Hero — hidden once you've entered the report */}
       {!entered && (
         <HeroSection report={report} carouselImages={report.carouselImages} onSeeReport={handleSeeReport} />
@@ -628,8 +642,11 @@ export function ReportView({ report }: { report: Report }) {
       {/* Idle navigation arrows — disabled for Anthem redesign */}
       {/* <IdleArrows active={entered} /> */}
 
-      {/* Bottom progress / section nav (Anthem template) */}
-      <AnthemBottomNav active={entered} property={report.property} />
+      {/* Bottom progress / section nav (Anthem template) — hidden for
+          Shared Influence, which uses a sticky top nav instead. */}
+      {!isSharedInfluence && (
+        <AnthemBottomNav active={entered} property={report.property} />
+      )}
 
       {/* Mobile navigation */}
       <MobileNav
@@ -693,7 +710,10 @@ export function ReportView({ report }: { report: Report }) {
                     the editor didn't set one explicitly. Section content
                     modules will slot in between covers as they get
                     built out. */}
-                {(report.sectionCovers ?? []).map((cover, i) => (
+                {/* Render only the first seven sectionCovers as the trend
+                    sections; the eighth (if present) is treated as the
+                    Takeaways transition cover below. */}
+                {(report.sectionCovers ?? []).slice(0, 7).map((cover, i) => (
                   <div key={i}>
                     <ReportSectionCover
                       sectionNumber={cover.sectionNumber || String(i + 1).padStart(2, '0')}
@@ -722,17 +742,16 @@ export function ReportView({ report }: { report: Report }) {
                   </div>
                 ))}
 
-                {/* Takeaways transition cover — mirrors SoSI's pattern of
-                    a compact section-cover intro followed by the 6-card
-                    Takeaways component. Accent picks the last section's
-                    colour by default so the visual thread carries through. */}
+                {/* Takeaways transition cover — pulls from
+                    sectionCovers[7] when present so editors can tune the
+                    title/subtitle/copy in the CMS; falls back to a
+                    sensible hardcoded default otherwise. */}
                 <ReportSectionCover
-                  sectionNumber="takeaways-cover"
-                  hideSectionNumber
-                  title="Takeaways"
-                  subtitle="The Future of Philanthropy Includes Creators"
-                  copy="Six practices for impact organizations and creators building trust, sharing stories, and driving measurable movement — together."
-                  accentColor="#00B469"
+                  sectionNumber={report.sectionCovers?.[7]?.sectionNumber || '08'}
+                  title={report.sectionCovers?.[7]?.title || 'Takeaways'}
+                  subtitle={report.sectionCovers?.[7]?.subtitle || 'The Future of Philanthropy Includes Creators'}
+                  copy={report.sectionCovers?.[7]?.copy || 'Six practices for impact organizations and creators building trust, sharing stories, and driving measurable movement — together.'}
+                  accentColor={report.sectionCovers?.[7]?.accentColor || '#00B469'}
                   property={report.property}
                   minHeightPx={530}
                   titleFontFamily="'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif"
@@ -743,8 +762,8 @@ export function ReportView({ report }: { report: Report }) {
                 />
 
                 <Takeaways
-                  eyebrow="6 Key Takeaways"
-                  heading="The Future of Philanthropy Includes Creators"
+                  eyebrow=""
+                  heading=""
                   accentColor="#00B469"
                   takeaways={SHARED_INFLUENCE_TAKEAWAYS}
                 />

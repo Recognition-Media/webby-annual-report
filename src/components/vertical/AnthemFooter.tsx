@@ -246,7 +246,7 @@ export function AnthemFooter({ report }: { report: Report }) {
 
           {/* Italic subhead */}
           <motion.p
-            className="text-[15px] md:text-[18px] leading-[1.5] mb-10 text-center"
+            className={`${isSharedInfluence ? 'text-[18px] md:text-[22px]' : 'text-[15px] md:text-[18px]'} leading-[1.5] mb-10 text-center`}
             style={{
               fontFamily: 'var(--font-display)',
               color: bodyColor,

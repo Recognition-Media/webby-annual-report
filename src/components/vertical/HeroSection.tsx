@@ -337,10 +337,11 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         )}
       </div>
 
-      {/* Minimal top bar. On mobile the logo sits centered (justify-center)
-          and the menu is absolutely positioned in the top-right corner.
-          On desktop the layout reverts to a standard justify-between with
-          logo on the left, menu on the right. */}
+      {/* Minimal top bar. Hidden for Shared Influence — that report uses
+          a dedicated sticky <SharedInfluenceTopNav> mounted in ReportView
+          so the nav follows the scroll cleanly without any stacking or
+          overflow concerns. */}
+      {!isSharedInfluence && (
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center md:justify-between px-5 md:px-[60px] py-6">
         {/* Brand logo */}
         <motion.img
@@ -380,9 +381,6 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
               onClick={() => setMenuOpen((v) => !v)}
               className="w-11 h-11 rounded-full flex items-center justify-center transition-colors cursor-pointer"
               style={{
-                // Lovie gets a solid orange border to read against the lime
-                // hero background; Anthem keeps its faint cream border that
-                // reads on the dark moss hero.
                 border: isLovie ? '2px solid #ff6000' : '1px solid rgba(227,221,202,0.3)',
               }}
             >
@@ -453,6 +451,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           </div>
         </motion.div>
       </div>
+      )}
 
       {/* Anthem: seven draggable cause icons scattered around the edges with
           a floating bob. Lovie: no icons in the hero (the portrait carousel
