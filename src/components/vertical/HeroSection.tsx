@@ -350,20 +350,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackCtaClick('header', theme.ctaUrl, report.property, report.slug.current)}
-            className={`hidden md:block text-[10px] tracking-[2px] uppercase rounded-full py-2.5 px-6 transition-colors ${isSharedInfluence ? '' : theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
-            style={
-              // Inline styles for Shared Influence to sidestep Tailwind's
-              // JIT missing arbitrary classes referenced through variables.
-              isSharedInfluence
-                ? {
-                    background: '#E3DDCA',
-                    color: '#21261A',
-                    fontFamily: "'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif",
-                    fontWeight: 700,
-                    fontVariationSettings: '"wght" 700, "wdth" 125',
-                  }
-                : undefined
-            }
+            className={`hidden md:block text-[10px] tracking-[2px] uppercase rounded-full py-2.5 px-6 transition-colors ${isSharedInfluence ? 'si-cta' : theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
           >
             Enter Now
           </a>
@@ -513,22 +500,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         {/* Explore button */}
         <motion.button
           onClick={() => onSeeReport?.()}
-          className={`inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full transition-colors cursor-pointer pointer-events-auto mt-6 md:mt-0 ${isSharedInfluence ? '' : theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
-          style={
-            // Inline styles for Shared Influence — beige pill, moss text,
-            // Roc Grotesk Wide Bold. Inlining sidesteps Tailwind's JIT
-            // missing arbitrary bg-[#...] classes when they're set via a
-            // variable rather than typed literally into JSX.
-            isSharedInfluence
-              ? {
-                  background: '#E3DDCA',
-                  color: '#21261A',
-                  fontFamily: "'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif",
-                  fontWeight: 700,
-                  fontVariationSettings: '"wght" 700, "wdth" 125',
-                }
-              : undefined
-          }
+          className={`inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-12 rounded-full transition-colors cursor-pointer pointer-events-auto mt-6 md:mt-0 ${isSharedInfluence ? 'si-cta' : theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.65 }}
