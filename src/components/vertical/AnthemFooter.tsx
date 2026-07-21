@@ -50,33 +50,35 @@ const FALLBACK_BODY: PortableTextBlock[] = [
   },
 ]
 
-const portableTextComponents = {
-  block: {
-    normal: ({ children }: { children?: React.ReactNode }) => (
-      <p
-        className="text-[15px] md:text-[18px] leading-[1.7] mb-5 text-center"
-        style={{
-          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
-          color: '#E3DDCA',
-          opacity: 0.78,
-        }}
-      >
-        {children}
-      </p>
-    ),
-  },
-  marks: {
-    link: ({ value, children }: { value?: { href?: string }; children?: React.ReactNode }) => (
-      <a
-        href={value?.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ color: '#E3DDCA', textDecoration: 'underline' }}
-      >
-        {children}
-      </a>
-    ),
-  },
+function makePortableTextComponents(textColor: string) {
+  return {
+    block: {
+      normal: ({ children }: { children?: React.ReactNode }) => (
+        <p
+          className="text-[15px] md:text-[18px] leading-[1.7] mb-5 text-center"
+          style={{
+            fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+            color: textColor,
+            opacity: 0.85,
+          }}
+        >
+          {children}
+        </p>
+      ),
+    },
+    marks: {
+      link: ({ value, children }: { value?: { href?: string }; children?: React.ReactNode }) => (
+        <a
+          href={value?.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: textColor, textDecoration: 'underline' }}
+        >
+          {children}
+        </a>
+      ),
+    },
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -163,9 +165,31 @@ function DraggableSticker({ sticker, index }: { sticker: FooterSticker; index: n
 /* ------------------------------------------------------------------ */
 
 export function AnthemFooter({ report }: { report: Report }) {
+  // Shared Influence gets the lilac/moss footer treatment; other Anthem
+  // reports (State of Social Impact) keep the blue/beige default.
+  const isSharedInfluence =
+    report.slug?.current === 'shared-influence-creator-partnerships-nonprofit'
+  const bgColor = isSharedInfluence ? '#D17DD0' : '#066DBA'
+  const bodyColor = isSharedInfluence ? '#21261A' : '#E3DDCA'
+  const eyebrowColor = isSharedInfluence ? '#21261A' : '#E3DDCA'
+  const headlineColor = '#E3DDCA'
+  const dividerColor = isSharedInfluence ? '#21261A' : '#8C001C'
+  const ctaBg = isSharedInfluence ? '#E3DDCA' : '#8C001C'
+  const ctaText = isSharedInfluence ? '#21261A' : '#E3DDCA'
+  const ctaFontFamily = isSharedInfluence
+    ? "'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif"
+    : "'roc-grotesk-variable', -apple-system, sans-serif"
+  const ctaFontWeight = isSharedInfluence ? 500 : 500
+  const bottomBorderColor = isSharedInfluence ? 'rgba(33, 38, 26, 0.2)' : 'rgba(227, 221, 202, 0.14)'
+  const bottomTextColor = isSharedInfluence ? '#21261A' : '#E3DDCA'
+
   const eyebrow = report.footerEyebrow || 'About the Anthem Awards'
   const headline = report.footerHeadline || 'Set the New Standard for Good'
-  const subhead = report.footerSubhead || 'Enter Your Work Before the Early Entry Deadline on May 22, 2026'
+  const subhead =
+    report.footerSubhead ||
+    (isSharedInfluence
+      ? 'Enter Your Work Before the Final Entry Deadline on July 31, 2026'
+      : 'Enter Your Work Before the Early Entry Deadline on May 22, 2026')
   const ctaUrl = report.footerCtaUrl || 'https://www.anthemawards.com/'
   const body = report.footerBody && report.footerBody.length > 0 ? report.footerBody : FALLBACK_BODY
 
@@ -173,7 +197,7 @@ export function AnthemFooter({ report }: { report: Report }) {
     <footer
       id="about-anthem"
       className="relative overflow-hidden px-5 md:px-[60px] py-16 md:py-28"
-      style={{ background: '#066DBA', color: '#E3DDCA' }}
+      style={{ background: bgColor, color: bodyColor }}
     >
       {/* Floating draggable celebration stickers */}
       {FOOTER_STICKERS.map((sticker, i) => (
@@ -187,7 +211,7 @@ export function AnthemFooter({ report }: { report: Report }) {
         {/* Centered banner: eyebrow + headline */}
         <motion.p
           className="uppercase font-medium text-center mb-6 pointer-events-auto"
-          style={{ fontSize: 11, letterSpacing: 4, color: '#E3DDCA' }}
+          style={{ fontSize: 11, letterSpacing: 4, color: eyebrowColor }}
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -200,7 +224,7 @@ export function AnthemFooter({ report }: { report: Report }) {
           className="mb-12 text-center text-[32px] md:text-[56px] lg:text-[64px] leading-[1.05] pointer-events-auto md:whitespace-nowrap"
           style={{
             fontFamily: 'var(--font-display)',
-            color: '#E3DDCA',
+            color: headlineColor,
             fontWeight: 400,
             letterSpacing: '-1px',
           }}
@@ -218,14 +242,14 @@ export function AnthemFooter({ report }: { report: Report }) {
           style={{ maxWidth: 640 }}
         >
           {/* Divider */}
-          <div style={{ width: 40, height: 2, background: '#8C001C', marginBottom: 24 }} />
+          <div style={{ width: 40, height: 2, background: dividerColor, marginBottom: 24 }} />
 
           {/* Italic subhead */}
           <motion.p
             className="text-[15px] md:text-[18px] leading-[1.5] mb-10 text-center"
             style={{
               fontFamily: 'var(--font-display)',
-              color: '#E3DDCA',
+              color: bodyColor,
               fontStyle: 'italic',
               fontWeight: 400,
             }}
@@ -245,7 +269,7 @@ export function AnthemFooter({ report }: { report: Report }) {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <PortableText value={body} components={portableTextComponents} />
+            <PortableText value={body} components={makePortableTextComponents(bodyColor)} />
           </motion.div>
 
           {/* CTA button — centered */}
@@ -254,11 +278,12 @@ export function AnthemFooter({ report }: { report: Report }) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackCtaClick('footer', ctaUrl, report.property, report.slug.current)}
-            className="inline-flex items-center justify-between gap-4 uppercase font-medium py-4 px-8 text-xs md:text-sm tracking-wider rounded-full transition-transform hover:scale-[1.02] mt-6"
+            className="inline-flex items-center justify-between gap-4 uppercase py-4 px-8 text-xs md:text-sm tracking-wider rounded-full transition-transform hover:scale-[1.02] mt-6"
             style={{
-              background: '#8C001C',
-              color: '#E3DDCA',
-              fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+              background: ctaBg,
+              color: ctaText,
+              fontFamily: ctaFontFamily,
+              fontWeight: ctaFontWeight,
               minWidth: 240,
             }}
             initial={{ opacity: 0, y: 10 }}
@@ -276,7 +301,7 @@ export function AnthemFooter({ report }: { report: Report }) {
       <div
         className="relative z-20 mt-16 md:mt-20 pt-6 flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6"
         style={{
-          borderTop: '1px solid rgba(227, 221, 202, 0.14)',
+          borderTop: `1px solid ${bottomBorderColor}`,
           maxWidth: 1280,
           margin: '64px auto 0',
         }}
@@ -290,8 +315,8 @@ export function AnthemFooter({ report }: { report: Report }) {
         <p
           className="text-[11px] md:text-[12px]"
           style={{
-            color: '#E3DDCA',
-            opacity: 0.4,
+            color: bottomTextColor,
+            opacity: 0.5,
             fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
           }}
         >

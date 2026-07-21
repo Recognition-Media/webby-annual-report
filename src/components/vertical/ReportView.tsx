@@ -319,6 +319,51 @@ function SharedInfluenceSection06({ report }: { report: Report }) {
   )
 }
 
+// 6 takeaway cards for the Shared Influence report. Keep body copy
+// tight — the hover-cards get cramped past ~4 sentences. Migrate to a
+// CMS field on the report if editors need to tune these live.
+const SHARED_INFLUENCE_TAKEAWAYS: { number: string; title: string; body: string }[] = [
+  {
+    number: '01',
+    title: 'Trust has moved to creators. Build around it.',
+    body: 'Audiences increasingly turn to individuals for information and connection. Organizations creating long-term creator relationships are building trust that extends beyond a single campaign.',
+  },
+  {
+    number: '02',
+    title: 'Alignment creates stronger partnerships. Vet from both sides.',
+    body: 'The right creator partners bring more than an audience. Shared values, strong storytelling skills, and community engagement determine whether a partnership can grow over time.',
+  },
+  {
+    number: '03',
+    title: 'Give creators a strong data-filled brief. Trust them to do the rest.',
+    body: 'Prep creators with any vital information: your mission, standard language, and cause-related data. Leave room for creators to serve as a new personality for your organization, and tell your story through their lens.',
+  },
+  {
+    number: '04',
+    title: 'Match your storytelling to the platform in ways that feel native.',
+    body: 'Every platform serves a different purpose. The strongest content meets audiences where they are and reflects the creator’s own style and perspective.',
+  },
+  {
+    number: '05',
+    title: 'Measure creator impact through movement.',
+    body: 'Views and likes tell a limited story. Show leadership that your creator collaborations work through sentiment analysis, audience engagement, or conversions.',
+  },
+  {
+    number: '06',
+    title: 'Build compensation models that reflect the relationship.',
+    body: 'There is no one-size-fits-all approach; creator partnerships can range from volunteer collaborations to paid opportunities. For long-term impact, create in-house models that you can fundraise against.',
+  },
+]
+
+function SharedInfluenceSection07({ report }: { report: Report }) {
+  const trend = report.trendSections?.[6]
+  const accentColor =
+    report.sectionCovers?.[6]?.accentColor || trend?.accentColor || '#8C001C'
+  const slabs = trend?.contentSlabs
+  if (!slabs || slabs.length === 0) return null
+  return <ContentSlabsRenderer slabs={slabs} accentColor={accentColor} />
+}
+
 function ScrollingCardsPreview({ accentColor }: { accentColor: string }) {
   const mockCards: { title: string; body: PortableTextBlock[] }[] = [
     { title: 'Volunteer (Gifting & Events)', body: mockPT('**Best when:** the creator has the capacity to give their time, and gifting can meaningfully substitute payment.') },
@@ -673,8 +718,36 @@ export function ReportView({ report }: { report: Report }) {
                     {i === 3 && <SharedInfluenceSection04 report={report} />}
                     {i === 4 && <SharedInfluenceSection05 report={report} />}
                     {i === 5 && <SharedInfluenceSection06 report={report} />}
+                    {i === 6 && <SharedInfluenceSection07 report={report} />}
                   </div>
                 ))}
+
+                {/* Takeaways transition cover — mirrors SoSI's pattern of
+                    a compact section-cover intro followed by the 6-card
+                    Takeaways component. Accent picks the last section's
+                    colour by default so the visual thread carries through. */}
+                <ReportSectionCover
+                  sectionNumber="takeaways-cover"
+                  hideSectionNumber
+                  title="Takeaways"
+                  subtitle="The Future of Philanthropy Includes Creators"
+                  copy="Six practices for impact organizations and creators building trust, sharing stories, and driving measurable movement — together."
+                  accentColor="#00B469"
+                  property={report.property}
+                  minHeightPx={530}
+                  titleFontFamily="'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif"
+                  titleFontWeight={500}
+                  subtitleFontFamily="'decoy', Georgia, serif"
+                  subtitleItalic={false}
+                  compact
+                />
+
+                <Takeaways
+                  eyebrow="6 Key Takeaways"
+                  heading="The Future of Philanthropy Includes Creators"
+                  accentColor="#00B469"
+                  takeaways={SHARED_INFLUENCE_TAKEAWAYS}
+                />
               </>
             ) : report.property === 'lovie' ? (
               <>

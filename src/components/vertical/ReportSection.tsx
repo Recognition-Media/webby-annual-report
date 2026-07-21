@@ -99,6 +99,10 @@ interface ReportSectionCoverProps {
    * the existing State of Social Impact treatment; pass `false` for a
    * roman subtitle. */
   subtitleItalic?: boolean
+  /** When true, the sectionNumber is used only for the DOM id and is
+   * not rendered visually. Useful for transition covers (takeaways,
+   * etc.) where the number token is unwanted. */
+  hideSectionNumber?: boolean
 }
 
 export function ReportSectionCover({
@@ -115,6 +119,7 @@ export function ReportSectionCover({
   titleFontWeight = 400,
   subtitleFontFamily = 'var(--font-display)',
   subtitleItalic = true,
+  hideSectionNumber = false,
 }: ReportSectionCoverProps) {
   const isLovie = property === 'lovie'
   const hasExplicitMinHeight = typeof minHeightPx === 'number'
@@ -139,7 +144,7 @@ export function ReportSectionCover({
         {/* Center-aligned: number, title, rule, subtitle */}
         <div className="text-center">
           {/* Section number (or SVG token for Lovie) */}
-          {sectionNumberSvg ? (
+          {hideSectionNumber ? null : sectionNumberSvg ? (
             <motion.img
               src={sectionNumberSvg}
               alt={`Section ${sectionNumber}`}

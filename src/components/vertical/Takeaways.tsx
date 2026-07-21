@@ -40,11 +40,15 @@ const FALLBACK_TAKEAWAYS: Takeaway[] = [
 interface TakeawaysProps {
   takeaways?: Takeaway[]
   accentColor?: string
+  eyebrow?: string
+  heading?: string
 }
 
 export function Takeaways({
   takeaways = FALLBACK_TAKEAWAYS,
   accentColor = '#066DBA',
+  eyebrow = '5 Key Takeaways',
+  heading = 'Where We Go From Here',
 }: TakeawaysProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
@@ -64,7 +68,7 @@ export function Takeaways({
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          5 Key Takeaways
+          {eyebrow}
         </motion.p>
         <motion.h2
           className="text-center mb-12 text-[32px] md:text-[40px] leading-[1.15]"
@@ -74,7 +78,7 @@ export function Takeaways({
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          Where We Go From Here
+          {heading}
         </motion.h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">

@@ -137,7 +137,7 @@ function AnthemPeopleGroup({ title, people, columns, delay }: { title: string; p
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.35, delay: delay + 0.05 + i * 0.025 }}
           >
-            <p className="text-[14px] md:text-[15px] font-medium leading-tight" style={{ color: '#E3DDCA', fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>
+            <p className="text-[14px] md:text-[15px] font-bold leading-tight" style={{ color: '#E3DDCA', fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>
               {person.url ? (
                 <a href={person.url} target="_blank" rel="noopener noreferrer" className="transition-colors hover:opacity-100" style={{ color: '#E3DDCA', textDecoration: 'none', borderBottom: `1px solid rgba(209, 125, 208, 0.4)` }}>
                   {person.name}
