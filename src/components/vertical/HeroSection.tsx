@@ -224,7 +224,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         brandLabel: '',
         brandLabelColor: 'var(--anthem-green)',
         heroImages: ['/anthem/shared-influence-hero-bg.png'],
-        heroImagesMobile: undefined as string[] | undefined,
+        heroImagesMobile: ['/anthem/shared-influence-hero-bg-mobile.png'] as string[] | undefined,
         heroCaptions: [] as string[],
         heroBgColor: '#D17DD0',
         // No gradient overlay — purple ground should read as-is.
@@ -242,11 +242,13 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         // — same 3.38:1 ratio at every viewport in the fluid range).
         titleNode: (
           <span
+            // Mobile size fixed at 70px per design; desktop keeps the
+            // fluid clamp so it scales from ~48px → 125px across the
+            // md+ viewport range.
+            className="block text-[70px] md:text-[clamp(3rem,9.5vw,125px)]"
             style={{
-              display: 'block',
               fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
               color: '#E3DDCA',
-              fontSize: 'clamp(3rem, 9.5vw, 125px)',
               fontWeight: 500,
               textTransform: 'uppercase',
               lineHeight: 0.95,
@@ -266,7 +268,9 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           fontWeight: 700,
           color: '#21261A',
           lineHeight: 1.2,
-          whiteSpace: 'nowrap' as const,
+          // Allow the subtitle to wrap on narrow viewports so it doesn't
+          // overflow horizontally. Desktop keeps one-line rhythm via
+          // `md:whitespace-nowrap` on the subtitle element itself.
           // Section is bottom-anchored (justify-end), so adding extra
           // bottom margin here nudges the title+subtitle pair up while
           // keeping the CTA in place. Dial up/down to taste.
@@ -319,13 +323,19 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           // While testing the lime trend-background hero, ignore CMS
           // carouselImages for Lovie so the local PNG fallback wins.
           // Revert to `carouselImages` for both when test is over.
-          cmsImages={isLovie ? undefined : carouselImages}
+          cmsImages={isLovie || isSharedInfluence ? undefined : carouselImages}
           localImages={theme.heroImages}
           localImagesMobile={theme.heroImagesMobile}
           solidFallbackColor={theme.heroBgColor}
           captions={theme.heroCaptions}
           captionEyebrow={isLovie ? 'Featured' : undefined}
           onToneChange={setTextTone}
+          // Shared Influence's mobile bg is a full-bleed illustration
+          // with stickers pre-composed at the top — no top gap and
+          // anchor the image to the top of the frame so nothing gets
+          // cropped off. Other reports keep the existing defaults.
+          mobileTopOffsetPx={isSharedInfluence ? 0 : 100}
+          objectPosition={isSharedInfluence ? 'top center' : 'center 20%'}
         />
         {/* Gradient overlay — heavier at bottom-left for text legibility
             against dark portrait photos. */}
@@ -498,7 +508,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             values win; otherwise fall back to the shared Anthem/Lovie
             defaults. */}
         <motion.p
-          className="tracking-[0.5px] mb-8"
+          className={`tracking-[0.5px] mb-8 ${isSharedInfluence ? 'md:whitespace-nowrap' : ''}`}
           style={
             'subtitleStyle' in theme && theme.subtitleStyle
               ? theme.subtitleStyle
@@ -653,6 +663,8 @@ function LocalHeroCarousel({
   captions,
   captionEyebrow,
   onToneChange,
+  mobileTopOffsetPx = 100,
+  objectPosition = 'center 20%',
 }: {
   cmsImages?: CarouselImage[]
   localImages?: string[]
@@ -665,6 +677,13 @@ function LocalHeroCarousel({
    * recommended text tone. Parent uses it to swap text-light / text-dark
    * on the hero section. */
   onToneChange?: (tone: Tone) => void
+  /** Top padding on mobile so the background starts below the header
+   * bar (Lovie logo). Defaults to 100px; pass 0 for full-bleed. */
+  mobileTopOffsetPx?: number
+  /** CSS object-position applied to the hero image. Defaults to
+   * `center 20%` (biases toward the top-third for landscape crops).
+   * Pass `top` to anchor the top of the image to the top of the frame. */
+  objectPosition?: string
 }) {
   const [current, setCurrent] = useState(0)
 
@@ -715,16 +734,20 @@ function LocalHeroCarousel({
 
   return (
     <div className="absolute inset-0">
-      {/* Inner wrapper holds the actual image. On mobile it starts 100px
-          down so the section's lime background shows through at the top,
-          giving the Lovie logo clean negative space to sit in. Desktop
-          stays full-bleed. */}
-      <div className="absolute inset-x-0 bottom-0 top-[100px] md:top-0">
+      {/* Inner wrapper holds the actual image. Mobile can add a top
+          offset so the section's ground colour shows through at the
+          top (used by Lovie for logo negative space). Desktop is
+          always full-bleed. */}
+      <div
+        className="absolute inset-x-0 bottom-0 md:top-0"
+        style={{ top: mobileTopOffsetPx }}
+      >
         <Image
           src={images[current]}
           alt=""
           fill
-          className="object-cover object-[center_20%]"
+          className="object-cover"
+          style={{ objectPosition }}
           priority
           unoptimized
         />
