@@ -337,6 +337,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           mobileTopOffsetPx={isSharedInfluence ? 0 : 100}
           objectPosition={isSharedInfluence ? 'top center' : 'center 20%'}
           desktopVideoSrc={isSharedInfluence ? '/anthem/shared-influence-hero-desktop.mp4' : undefined}
+          mobileVideoSrc={isSharedInfluence ? '/anthem/shared-influence-hero-mobile.mp4' : undefined}
         />
         {/* Gradient overlay — heavier at bottom-left for text legibility
             against dark portrait photos. */}
@@ -667,6 +668,7 @@ function LocalHeroCarousel({
   mobileTopOffsetPx = 100,
   objectPosition = 'center 20%',
   desktopVideoSrc,
+  mobileVideoSrc,
 }: {
   cmsImages?: CarouselImage[]
   localImages?: string[]
@@ -687,9 +689,11 @@ function LocalHeroCarousel({
    * Pass `top` to anchor the top of the image to the top of the frame. */
   objectPosition?: string
   /** Optional mp4 to render as the desktop background in place of the
-   * static image. Mobile always uses `localImagesMobile` (or falls
-   * back to `localImages`). Autoplay, muted, looped, plays-inline. */
+   * static image. Autoplay, muted, looped, plays-inline. */
   desktopVideoSrc?: string
+  /** Optional mp4 to render as the mobile background in place of the
+   * static image. Autoplay, muted, looped, plays-inline. */
+  mobileVideoSrc?: string
 }) {
   const [current, setCurrent] = useState(0)
 
@@ -762,15 +766,42 @@ function LocalHeroCarousel({
             style={{ objectPosition }}
           />
         )}
-        <Image
-          src={images[current]}
-          alt=""
-          fill
-          className={desktopVideoSrc ? 'md:hidden object-cover' : 'object-cover'}
-          style={{ objectPosition }}
-          priority
-          unoptimized
-        />
+        {mobileVideoSrc && (
+          <video
+            src={mobileVideoSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="md:hidden absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition }}
+          />
+        )}
+        {/* Image fallback — hide on md+ when desktop video is set,
+            hide on mobile when mobile video is set. If both are set,
+            the image is hidden everywhere. */}
+        {(() => {
+          const bothVideos = desktopVideoSrc && mobileVideoSrc
+          const imgClass = bothVideos
+            ? 'hidden'
+            : desktopVideoSrc
+              ? 'md:hidden object-cover'
+              : mobileVideoSrc
+                ? 'hidden md:block object-cover'
+                : 'object-cover'
+          return (
+            <Image
+              src={images[current]}
+              alt=""
+              fill
+              className={imgClass}
+              style={{ objectPosition }}
+              priority
+              unoptimized
+            />
+          )
+        })()}
       </div>
 
       {/* Photo credit overlay — fades in/out as the carousel cycles. Color
