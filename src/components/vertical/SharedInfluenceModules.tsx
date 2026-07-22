@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
 import type {
@@ -639,7 +639,6 @@ export function VideoModule({
   const containerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  const isInView = useInView(containerRef, { amount: 0.3 })
   // Track viewport so portrait videos render just one <video> element
   // per layout — sharing a single ref between two mounted elements
   // caused clicks on mobile to control the hidden desktop video and
@@ -652,14 +651,6 @@ export function VideoModule({
     mq.addEventListener('change', update)
     return () => mq.removeEventListener('change', update)
   }, [])
-
-  // Pause when the module scrolls out of view.
-  useEffect(() => {
-    if (!isInView && isPlaying && videoRef.current) {
-      videoRef.current.pause()
-      setIsPlaying(false)
-    }
-  }, [isInView, isPlaying])
 
   function togglePlay() {
     if (!videoRef.current) return
@@ -682,6 +673,9 @@ export function VideoModule({
   const videoFrame = (
     <motion.div
       onClick={togglePlay}
+      role="button"
+      tabIndex={0}
+      aria-label={isPlaying ? 'Pause video' : 'Play video'}
       style={{
         position: 'relative',
         background: MOSS,
@@ -689,6 +683,8 @@ export function VideoModule({
         overflow: 'hidden',
         cursor: 'pointer',
         flexShrink: 0,
+        WebkitTapHighlightColor: 'transparent',
+        touchAction: 'manipulation',
         ...(isPortrait
           ? {
               aspectRatio: '9 / 16',
@@ -715,6 +711,8 @@ export function VideoModule({
         preload="metadata"
         playsInline
         onEnded={() => setIsPlaying(false)}
+        onPause={() => setIsPlaying(false)}
+        onPlay={() => setIsPlaying(true)}
         style={{
           position: 'absolute',
           inset: 0,
@@ -926,6 +924,9 @@ function ResponsivePortraitVideoFrame({
   return (
     <motion.div
       onClick={togglePlay}
+      role="button"
+      tabIndex={0}
+      aria-label={isPlaying ? 'Pause video' : 'Play video'}
       style={{
         position: 'relative',
         background: MOSS,
@@ -934,6 +935,8 @@ function ResponsivePortraitVideoFrame({
         cursor: 'pointer',
         width: '100%',
         height: '100%',
+        WebkitTapHighlightColor: 'transparent',
+        touchAction: 'manipulation',
       }}
       initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -946,6 +949,8 @@ function ResponsivePortraitVideoFrame({
         preload="metadata"
         playsInline
         onEnded={() => setIsPlaying(false)}
+        onPause={() => setIsPlaying(false)}
+        onPlay={() => setIsPlaying(true)}
         style={{
           position: 'absolute',
           inset: 0,
