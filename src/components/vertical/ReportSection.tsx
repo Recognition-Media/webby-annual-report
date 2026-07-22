@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
 function ScrollGauge({ sentimentGauge, accentColor }: { sentimentGauge: { score: number; contextLeft?: string; contextRight?: string }; accentColor: string }) {
@@ -123,6 +123,17 @@ export function ReportSectionCover({
 }: ReportSectionCoverProps) {
   const isLovie = property === 'lovie'
   const hasExplicitMinHeight = typeof minHeightPx === 'number'
+  // Skip the explicit min-height on mobile — it forces a large gap
+  // between the cover and the first content block when the cover's
+  // actual content is shorter than the pixel value.
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
   return (
     <section
       id={`section-${sectionNumber}`}
@@ -137,7 +148,7 @@ export function ReportSectionCover({
         background: isLovie ? '#f2eeed' : '#E3DDCA',
         paddingTop: compact ? 80 : 50,
         paddingBottom: compact ? 60 : 50,
-        ...(hasExplicitMinHeight ? { minHeight: minHeightPx } : {}),
+        ...(hasExplicitMinHeight && !isMobile ? { minHeight: minHeightPx } : {}),
       }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>

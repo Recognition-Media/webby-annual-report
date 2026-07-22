@@ -131,6 +131,20 @@ export function SectionHeader({
   level?: HeadingLevel
   accentColor?: string
 }) {
+  const scale = HEADING_SCALE[level]
+  // Track viewport so we can drop to 18px on mobile without fighting
+  // Tailwind's JIT (which can't compile dynamic arbitrary values).
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+  const fontSize = isMobile ? 18 : scale.fontSize
+  const headingMarginBottom = isMobile ? 12 : 24
+  const dividerMarginBottom = isMobile ? 12 : 28
   return (
     <>
       <motion.div
@@ -139,11 +153,11 @@ export function SectionHeader({
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <Heading level={level} style={{ margin: '0 0 24px' }}>
+        <Heading level={level} style={{ fontSize, margin: `0 0 ${headingMarginBottom}px` }}>
           {title}
         </Heading>
       </motion.div>
-      <div style={{ width: 36, height: 2, background: accentColor, marginBottom: 28 }} />
+      <div style={{ width: 36, height: 2, background: accentColor, marginBottom: dividerMarginBottom }} />
     </>
   )
 }
@@ -179,7 +193,7 @@ export function SharedInfluenceBody({ paragraphs }: { paragraphs: React.ReactNod
 export function TwoColumnSlab({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
   return (
     <section
-      className="relative px-5 md:px-[60px] py-16 md:py-24"
+      className="relative px-5 md:px-[60px] pt-8 pb-16 md:py-24"
       style={{ background: BEIGE }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
@@ -198,7 +212,7 @@ export function TwoColumnSlab({ left, right }: { left: React.ReactNode; right: R
 export function FullWidthSlab({ children }: { children: React.ReactNode }) {
   return (
     <section
-      className="relative px-5 md:px-[60px] py-16 md:py-24"
+      className="relative px-5 md:px-[60px] pt-8 pb-16 md:py-24"
       style={{ background: BEIGE }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
@@ -218,6 +232,51 @@ interface ComparisonSide {
   label: string
   word: string
   description: string
+}
+
+// ComparisonCalloutMobile — peek-carousel version for phones. Both
+// cards render side-by-side at ~80vw each; the container starts
+// scrolled to the middle so half of each card is visible at rest.
+// Swiping snaps the focused card into view.
+function ComparisonCalloutMobile({ left, right }: { left: ComparisonSide; right: ComparisonSide }) {
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = scrollerRef.current
+    if (!el) return
+    // Center the scroll so both cards peek in equally.
+    el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2
+  }, [])
+
+  return (
+    <div className="md:hidden">
+      <div
+        ref={scrollerRef}
+        className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
+        style={{ scrollbarWidth: 'none', gap: '4vw' }}
+      >
+        <div className="flex-shrink-0 w-[80vw] snap-center">
+          <ComparisonCard side={left} variant="red" />
+        </div>
+        <div className="flex-shrink-0 w-[80vw] snap-center">
+          <ComparisonCard side={right} variant="cream" />
+        </div>
+      </div>
+      <p
+        style={{
+          fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+          fontSize: 11,
+          letterSpacing: 2,
+          textTransform: 'uppercase',
+          color: MOSS,
+          opacity: 0.55,
+          textAlign: 'center',
+          marginTop: 12,
+        }}
+      >
+        ← swipe →
+      </p>
+    </div>
+  )
 }
 
 export function ComparisonCallout({
@@ -250,12 +309,14 @@ export function ComparisonCallout({
           {description}
         </motion.p>
       )}
-      {/* Stacked layout: cards fill the column width, "vs." pivots
-          between them. Gives each card room to breathe when the module
-          sits inside a 50% slab column. */}
+      <ComparisonCalloutMobile left={left} right={right} />
+      {/* Desktop stacked layout follows below. */}
+
+      {/* Desktop: stacked layout inside a slab column. Cards fill the
+          column width, "vs." pivots between them. */}
       <motion.div
+        className="hidden md:flex"
         style={{
-          display: 'flex',
           flexDirection: 'column',
           alignItems: 'stretch',
           gap: 12,
@@ -579,6 +640,18 @@ export function VideoModule({
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const isInView = useInView(containerRef, { amount: 0.3 })
+  // Track viewport so portrait videos render just one <video> element
+  // per layout — sharing a single ref between two mounted elements
+  // caused clicks on mobile to control the hidden desktop video and
+  // vice versa.
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
 
   // Pause when the module scrolls out of view.
   useEffect(() => {
@@ -594,8 +667,15 @@ export function VideoModule({
       videoRef.current.pause()
       setIsPlaying(false)
     } else {
-      videoRef.current.play()
-      setIsPlaying(true)
+      // play() returns a Promise; mobile browsers silently reject if
+      // we don't attach a .catch, and iOS specifically needs the call
+      // synchronously from the user gesture (which we have).
+      const p = videoRef.current.play()
+      if (p !== undefined) {
+        p.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
+      } else {
+        setIsPlaying(true)
+      }
     }
   }
 
@@ -752,28 +832,61 @@ export function VideoModule({
       )}
 
       {isPortrait ? (
-        // Portrait layout: video on the left, caption + button stacked
-        // together (name + title + Watch pill as one group), anchored
-        // to the bottom of the video's height so the group sits parallel
-        // to the CC track on the video.
-        <div style={{ display: 'flex', alignItems: 'stretch', gap: 24 }}>
-          {videoFrame}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              gap: 16,
-              flex: 1,
-              paddingBottom: 24,
-            }}
-          >
-            {nameBlock}
-            {watchButton}
+        isMobile ? (
+          // Mobile portrait: video centered, name/title on the left
+          // and Watch button on the right beneath it. Renders only on
+          // mobile so the single <video> element (ref-tracked) matches
+          // the layout the user is looking at.
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-[70vw] max-w-[280px]" style={{ aspectRatio: '9 / 16' }}>
+              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                <ResponsivePortraitVideoFrame
+                  src={src}
+                  isPlaying={isPlaying}
+                  togglePlay={togglePlay}
+                  videoRef={videoRef}
+                  setIsPlaying={setIsPlaying}
+                />
+              </div>
+            </div>
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 16,
+                paddingTop: 4,
+              }}
+            >
+              {nameBlock}
+              {watchButton}
+            </div>
           </div>
-        </div>
+        ) : (
+          // Desktop portrait: video on the left, caption + button
+          // stacked to the right, bottom-aligned to the video.
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 24 }}>
+            {videoFrame}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                gap: 16,
+                flex: 1,
+                paddingBottom: 24,
+              }}
+            >
+              {nameBlock}
+              {watchButton}
+            </div>
+          </div>
+        )
       ) : (
-        // Landscape layout: video full-width, caption row underneath.
+        // Landscape layout: video full-width, caption row underneath —
+        // name/title left, Watch button right on both mobile and
+        // desktop (mirrors SoSI's editorial rhythm).
         <>
           {videoFrame}
           <div
@@ -791,6 +904,85 @@ export function VideoModule({
         </>
       )}
     </div>
+  )
+}
+
+// Portrait video frame at responsive size for mobile — matches the
+// interaction of the main videoFrame (click to play/pause, play-overlay)
+// but sizes itself to its container instead of a fixed 480px height.
+function ResponsivePortraitVideoFrame({
+  src,
+  isPlaying,
+  togglePlay,
+  videoRef,
+  setIsPlaying,
+}: {
+  src: string
+  isPlaying: boolean
+  togglePlay: () => void
+  videoRef: React.RefObject<HTMLVideoElement | null>
+  setIsPlaying: (v: boolean) => void
+}) {
+  return (
+    <motion.div
+      onClick={togglePlay}
+      style={{
+        position: 'relative',
+        background: MOSS,
+        borderRadius: 12,
+        overflow: 'hidden',
+        cursor: 'pointer',
+        width: '100%',
+        height: '100%',
+      }}
+      initial={{ opacity: 0, y: 15 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+    >
+      <video
+        ref={videoRef}
+        src={`${src}#t=0.5`}
+        preload="metadata"
+        playsInline
+        onEnded={() => setIsPlaying(false)}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'opacity 0.3s ease',
+          opacity: isPlaying ? 0 : 1,
+        }}
+      >
+        <div
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            border: '2px solid #E3DDCA',
+            background: 'rgba(33,38,26,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <svg width="16" height="18" viewBox="0 0 12 14" fill="none">
+            <path d="M0 0L12 7L0 14V0Z" fill="#E3DDCA" />
+          </svg>
+        </div>
+      </div>
+    </motion.div>
   )
 }
 
@@ -1253,7 +1445,10 @@ export function ContentBlockList({ blocks, accentColor }: { blocks?: SIContentBl
   return (
     <>
       {blocks.map((block, i) => (
-        <div key={block._key || i} style={{ marginTop: i === 0 ? 0 : 32 }}>
+        <div
+          key={block._key || i}
+          className={i === 0 ? '' : 'mt-4 md:mt-8'}
+        >
           <ContentBlockRenderer block={block} accentColor={accentColor} />
         </div>
       ))}

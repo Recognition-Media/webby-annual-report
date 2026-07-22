@@ -317,7 +317,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
       <section
         id="key-findings"
         data-snap
-        className="relative overflow-hidden px-5 md:px-[60px] pt-20 md:pt-28 pb-16 md:pb-24"
+        className="relative overflow-hidden px-5 md:px-[60px] pt-8 md:pt-28 pb-16 md:pb-24"
         style={{ background: theme.sectionBg }}
       >
         <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
@@ -366,10 +366,47 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
             {theme.subtitle}
           </motion.p>
 
-          {/* 3-column tight grid on desktop; 2 cols on tablet; single
-              column on mobile. Same hover-fill behaviour as the Anthem
-              2×2, sized down for scannability at 6 items. */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {/* Mobile — compact list: number + title in a single row per
+              section, thin divider between. Tappable. Kills the bulky
+              card treatment on small screens. */}
+          <ul className="md:hidden divide-y" style={{ borderColor: 'rgba(33, 38, 26, 0.12)' }}>
+            {sections.map((section, i) => (
+              <motion.li
+                key={section.number}
+                onClick={() => scrollToAnchor(section.anchor)}
+                className="flex items-baseline gap-4 py-4 cursor-pointer"
+                style={{ borderColor: 'rgba(33, 38, 26, 0.12)' }}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: 0.05 + i * 0.03 }}
+              >
+                <span
+                  className="text-[22px] leading-none flex-shrink-0 w-9"
+                  style={{ fontFamily: 'var(--font-display)', color: section.hoverBg, fontWeight: 700 }}
+                >
+                  {section.number}
+                </span>
+                <span
+                  className="text-[16px] font-medium leading-snug flex-1"
+                  style={{ color: '#21261A' }}
+                >
+                  {section.title}
+                </span>
+                <span
+                  className="text-[14px] flex-shrink-0"
+                  style={{ color: '#21261A', opacity: 0.4 }}
+                >
+                  →
+                </span>
+              </motion.li>
+            ))}
+          </ul>
+
+          {/* Desktop — 3-column tight grid; 2 cols on tablet. Same
+              hover-fill behaviour as the Anthem 2×2, sized down for
+              scannability at 6 items. */}
+          <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {sections.map((section, i) => {
               const isHovered = hoveredIndex === i
               return (

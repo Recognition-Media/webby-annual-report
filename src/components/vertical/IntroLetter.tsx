@@ -334,7 +334,7 @@ function SharedInfluenceOpening({ report: _report }: { report: Report }) {
     <section
       id="welcome-letter"
       data-snap
-      className="relative overflow-hidden px-5 md:px-[60px] py-20 md:py-28"
+      className="relative overflow-hidden px-5 md:px-[60px] pt-20 pb-8 md:py-28"
       style={{ background: '#E3DDCA' }}
     >
       <div
@@ -398,13 +398,14 @@ function SharedInfluenceOpening({ report: _report }: { report: Report }) {
         </motion.h2>
 
         {/* Body — narrow centered column beneath the wide hook. Lede
-            sentence acts as a subheader in Roc Grotesk 30px medium; the
-            rest of the letter follows in regular 17px body copy. */}
+            sentence acts as a subheader — 18px on mobile so it feels
+            like a supporting sub-line, 30px on desktop for the fuller
+            editorial weight. Roc Grotesk medium either way. */}
         <div style={{ maxWidth: BODY_MAX_WIDTH, marginLeft: 'auto', marginRight: 'auto' }}>
           <motion.p
+            className="text-[18px] md:text-[30px]"
             style={{
               fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
-              fontSize: 30,
               lineHeight: 1.3,
               fontWeight: 500,
               color: '#21261A',

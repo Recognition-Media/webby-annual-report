@@ -349,3 +349,12 @@ body.lovie-template {
 
 /* Shared Influence — hide horizontal scrollbar on the ScrollingCards module */
 .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Shared Influence — override the anthem-template moss body background
+   with beige so the tiny inter-section gaps that appear on mobile
+   scrolling don't show a dark line. Sections themselves already carry
+   their own beige/moss/lilac backgrounds, so this only affects the
+   negative space between them. */
+body.report-shared-influence-creator-partnerships-nonprofit {
+  background: #E3DDCA;
+}
