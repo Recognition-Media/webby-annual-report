@@ -713,6 +713,16 @@ export function VideoModule({
         onEnded={() => setIsPlaying(false)}
         onPause={() => setIsPlaying(false)}
         onPlay={() => setIsPlaying(true)}
+        // Suppress any embedded caption/subtitle tracks the video file
+        // may carry (Descript exports sometimes ship an auto-caption
+        // track that mobile Safari renders on top of the baked-in
+        // styled subtitles). Iterate every track and mark disabled.
+        onLoadedMetadata={(e) => {
+          const v = e.currentTarget
+          for (let i = 0; i < v.textTracks.length; i++) {
+            v.textTracks[i].mode = 'disabled'
+          }
+        }}
         style={{
           position: 'absolute',
           inset: 0,
@@ -951,6 +961,16 @@ function ResponsivePortraitVideoFrame({
         onEnded={() => setIsPlaying(false)}
         onPause={() => setIsPlaying(false)}
         onPlay={() => setIsPlaying(true)}
+        // Suppress any embedded caption/subtitle tracks the video file
+        // may carry (Descript exports sometimes ship an auto-caption
+        // track that mobile Safari renders on top of the baked-in
+        // styled subtitles). Iterate every track and mark disabled.
+        onLoadedMetadata={(e) => {
+          const v = e.currentTarget
+          for (let i = 0; i < v.textTracks.length; i++) {
+            v.textTracks[i].mode = 'disabled'
+          }
+        }}
         style={{
           position: 'absolute',
           inset: 0,
