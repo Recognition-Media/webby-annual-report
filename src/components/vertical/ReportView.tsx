@@ -574,15 +574,18 @@ export function ReportView({ report }: { report: Report }) {
         <AnthemBottomNav active={entered} property={report.property} />
       )}
 
-      {/* Mobile navigation */}
-      <MobileNav
-        active={entered}
-        property={report.property}
-        trendTitles={(report.trendSections || [])
-          .filter((s) => s.enabled !== false)
-          .map((s) => s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim())
-        }
-      />
+      {/* Mobile navigation — hidden for Shared Influence, which uses
+          the same sticky top nav on mobile as it does on desktop. */}
+      {!isSharedInfluence && (
+        <MobileNav
+          active={entered}
+          property={report.property}
+          trendTitles={(report.trendSections || [])
+            .filter((s) => s.enabled !== false)
+            .map((s) => s.trendTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim())
+          }
+        />
+      )}
 
       {/* Report content — snap scrolling + nav dots activate after entry */}
       {hasAccess && (
