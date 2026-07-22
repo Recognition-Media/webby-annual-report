@@ -1041,15 +1041,20 @@ interface ScrollingCardsProps {
   accentColor?: string
   /** 'light' (default) = beige card with dark text; 'inverted' = accent-colored card with beige text. */
   variant?: 'light' | 'inverted'
+  /** Optional per-card colors — card N uses cardColors[N % length].
+   * Overrides accentColor for card bg (inverted variant) and number
+   * circles. Useful for cycling through the Anthem palette so cards
+   * read as a series rather than a wall of one color. */
+  cardColors?: string[]
 }
 
-export function ScrollingCards({ eyebrow, cards, accentColor = RED, variant = 'light' }: ScrollingCardsProps) {
+// Anthem palette cycle used when a ScrollingCards block sets
+// `colorCycle`. Skips beige (the ground colour) and cycles red → blue
+// → purple → green → moss.
+export const ANTHEM_CARD_CYCLE = ['#8C001C', '#066DBA', '#D17DD0', '#00B469', '#21261A']
+
+export function ScrollingCards({ eyebrow, cards, accentColor = RED, variant = 'light', cardColors }: ScrollingCardsProps) {
   const inverted = variant === 'inverted'
-  const cardBg = inverted ? accentColor : CARD_LIGHT
-  const cardBorder = inverted ? 'transparent' : 'rgba(33, 38, 26, 0.08)'
-  const textColor = inverted ? BEIGE : MOSS
-  const numberCircleBg = inverted ? BEIGE : accentColor
-  const numberCircleText = inverted ? accentColor : '#fff'
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [progress, setProgress] = useState(0)
 
@@ -1099,7 +1104,18 @@ export function ScrollingCards({ eyebrow, cards, accentColor = RED, variant = 'l
         }}
         className="hide-scrollbar"
       >
-        {cards.map((card, i) => (
+        {cards.map((card, i) => {
+          // Per-card color: cycle through `cardColors` if provided,
+          // otherwise fall back to the section accent.
+          const cardAccent = cardColors && cardColors.length > 0
+            ? cardColors[i % cardColors.length]
+            : accentColor
+          const cardBg = inverted ? cardAccent : CARD_LIGHT
+          const cardBorder = inverted ? 'transparent' : 'rgba(33, 38, 26, 0.08)'
+          const textColor = inverted ? BEIGE : MOSS
+          const numberCircleBg = inverted ? BEIGE : cardAccent
+          const numberCircleText = inverted ? cardAccent : '#fff'
+          return (
           <div
             key={card._key || i}
             style={{
@@ -1153,11 +1169,12 @@ export function ScrollingCards({ eyebrow, cards, accentColor = RED, variant = 'l
                   color: textColor,
                 }}
               >
-                <PortableText value={card.body} components={makeRichTextComponents(inverted ? BEIGE : accentColor, textColor)} />
+                <PortableText value={card.body} components={makeRichTextComponents(inverted ? BEIGE : cardAccent, textColor)} />
               </div>
             )}
           </div>
-        ))}
+          )
+        })}
       </div>
       <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
         <div
@@ -1199,7 +1216,15 @@ export function ScrollingCards({ eyebrow, cards, accentColor = RED, variant = 'l
 
 function ScrollingCardsBlockRenderer({ block, accentColor }: { block: SIScrollingCardsBlock; accentColor: string }) {
   if (!block.cards || block.cards.length === 0) return null
-  return <ScrollingCards eyebrow={block.eyebrow} cards={block.cards} accentColor={accentColor} />
+  return (
+    <ScrollingCards
+      eyebrow={block.eyebrow}
+      cards={block.cards}
+      accentColor={accentColor}
+      variant="inverted"
+      cardColors={ANTHEM_CARD_CYCLE}
+    />
+  )
 }
 
 /** Renders a single CMS content block. Returns null for empty/unknown

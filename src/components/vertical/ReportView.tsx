@@ -34,6 +34,7 @@ import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
 import { SharedInfluenceTopNav, SHARED_INFLUENCE_NAV_SECTIONS } from './SharedInfluenceTopNav'
+import { ANTHEM_CARD_CYCLE } from './SharedInfluenceModules'
 import { trackCtaClick } from '@/lib/analytics'
 import { LovieTrendContent } from './LovieTrendContent'
 import { QuoteVideoSection } from './QuoteVideoSection'
@@ -112,24 +113,19 @@ function setCookie(name: string, value: string, days: number) {
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`
 }
 
-// Section 1 — The New Trusted Institutions. Two 2-col slabs mirror the
-// SoSI (State of Social Impact) rhythm: (body + comparison) then
-// (tips + video). Tips Module is CMS-driven via the section's Tips
-// Module fields; other modules are hardcoded for now.
+// Section 1 — The New Trusted Institutions. Slab 1 (Header + Body +
+// Influencer/Creator comparison) is hardcoded because those three
+// modules are custom to this section. Any additional slabs — the
+// Tips + Video pairing, extra pull quotes, etc. — come from the CMS
+// contentSlabs array so editors can shape the tail of Section 1 the
+// same way they shape Sections 2–7.
 function SharedInfluenceSection01({ report }: { report: Report }) {
   const trend = report.trendSections?.[0]
-  const tipsTitle = trend?.tipsTitle || 'Tips for Success'
-  const tipsItems = trend?.tipsItems && trend.tipsItems.length > 0
-    ? trend.tipsItems
-    : [
-        'Treat creators as long-term partners, not campaign add-ons.',
-        'Focus on storytelling. A creator collaborates and tells a story. Know which you need.',
-        'Lead with a person, not a logo. A face earns trust faster than an organization can.',
-        'Frame creators internally as a core distribution channel and experts, not a nice-to-have.',
-      ]
+  const accentColor =
+    report.sectionCovers?.[0]?.accentColor || trend?.accentColor || '#8C001C'
   return (
     <>
-      {/* Slab 1 — Header + Body copy (left) + Influencer/Creator comparison (right) */}
+      {/* Slab 1 — hardcoded Header + Body + Comparison Callout */}
       <TwoColumnSlab
         left={
           <>
@@ -137,7 +133,7 @@ function SharedInfluenceSection01({ report }: { report: Report }) {
             <SharedInfluenceBody
               paragraphs={[
                 <>
-                  One in five Americans now regularly gets their news from TikTok—including more than <strong style={{ fontWeight: 700 }}>40% of adults under 30</strong>, according to Pew Research Center. As public trust in institutions and traditional media declines, creators are increasingly filling the gap as trusted sources of information.
+                  One in five Americans now regularly gets their news from TikTok—including more than <strong style={{ fontWeight: 700 }}>40% of adults under 30</strong>, according to <a href="https://www.pewresearch.org/short-reads/2025/09/25/1-in-5-americans-now-regularly-get-news-on-tiktok-up-sharply-from-2020/" target="_blank" rel="noopener noreferrer" style={{ color: accentColor, textDecoration: 'underline', textUnderlineOffset: 3 }}>Pew Research Center</a>. As public trust in institutions and traditional media declines, creators are increasingly filling the gap as trusted sources of information.
                 </>,
                 <>Legacy media and older marketing tactics (direct mail and print ads) no longer reach the scope of audience they used to, particularly among younger generations, says <strong style={{ fontWeight: 700 }}>Abby Schreiber</strong>, Special Projects Lead at Onyx Impact.</>,
                 <>Organizations should treat creators as a core pillar in impact strategies to reach new communities and drive impact.</>,
@@ -162,19 +158,18 @@ function SharedInfluenceSection01({ report }: { report: Report }) {
         }
       />
 
-      {/* Slab 2 — Tips for Success (left) + optional CMS content slabs
-          on the right. Editors add a portrait Video Block (Jaclynn
-          Brennan) or any other supporting module via the Section 1
-          contentSlabs field in Sanity. The Jaclynn video previously
-          hardcoded here was gitignored (>100MB) and 404'd in prod. */}
-      <TwoColumnSlab
-        left={<TipsForSuccess title={tipsTitle} tips={tipsItems} />}
-        right={
-          trend?.contentSlabs?.[0]?.rightBlocks && trend.contentSlabs[0].rightBlocks.length > 0
-            ? <ContentBlockList blocks={trend.contentSlabs[0].rightBlocks} accentColor={trend.accentColor || '#8C001C'} />
-            : null
-        }
-      />
+      {/* Everything after the hardcoded intro is CMS-driven. Empty
+          slabs are filtered so an editor accidentally leaving one
+          blank doesn't render as a hollow whitespace section. */}
+      {(() => {
+        const populated = (trend?.contentSlabs || []).filter((s) => {
+          const l = s.leftBlocks?.length || 0
+          const r = s.rightBlocks?.length || 0
+          return l + r > 0
+        })
+        if (populated.length === 0) return null
+        return <ContentSlabsRenderer slabs={populated} accentColor={accentColor} />
+      })()}
     </>
   )
 }
@@ -307,6 +302,7 @@ function ScrollingCardsPreview({ accentColor }: { accentColor: string }) {
         cards={mockCards}
         accentColor={accentColor}
         variant="inverted"
+        cardColors={ANTHEM_CARD_CYCLE}
       />
     </FullWidthSlab>
   )
