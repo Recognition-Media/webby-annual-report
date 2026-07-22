@@ -336,6 +336,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           // cropped off. Other reports keep the existing defaults.
           mobileTopOffsetPx={isSharedInfluence ? 0 : 100}
           objectPosition={isSharedInfluence ? 'top center' : 'center 20%'}
+          desktopVideoSrc={isSharedInfluence ? '/anthem/shared-influence-hero-desktop.mp4' : undefined}
         />
         {/* Gradient overlay — heavier at bottom-left for text legibility
             against dark portrait photos. */}
@@ -665,6 +666,7 @@ function LocalHeroCarousel({
   onToneChange,
   mobileTopOffsetPx = 100,
   objectPosition = 'center 20%',
+  desktopVideoSrc,
 }: {
   cmsImages?: CarouselImage[]
   localImages?: string[]
@@ -684,6 +686,10 @@ function LocalHeroCarousel({
    * `center 20%` (biases toward the top-third for landscape crops).
    * Pass `top` to anchor the top of the image to the top of the frame. */
   objectPosition?: string
+  /** Optional mp4 to render as the desktop background in place of the
+   * static image. Mobile always uses `localImagesMobile` (or falls
+   * back to `localImages`). Autoplay, muted, looped, plays-inline. */
+  desktopVideoSrc?: string
 }) {
   const [current, setCurrent] = useState(0)
 
@@ -737,16 +743,30 @@ function LocalHeroCarousel({
       {/* Inner wrapper holds the actual image. Mobile can add a top
           offset so the section's ground colour shows through at the
           top (used by Lovie for logo negative space). Desktop is
-          always full-bleed. */}
+          always full-bleed. When a desktopVideoSrc is provided, an
+          autoplay/muted/looped mp4 renders in place of the image on
+          md+ viewports; mobile still uses the image. */}
       <div
         className="absolute inset-x-0 bottom-0 md:top-0"
         style={{ top: mobileTopOffsetPx }}
       >
+        {desktopVideoSrc && (
+          <video
+            src={desktopVideoSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="hidden md:block absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition }}
+          />
+        )}
         <Image
           src={images[current]}
           alt=""
           fill
-          className="object-cover"
+          className={desktopVideoSrc ? 'md:hidden object-cover' : 'object-cover'}
           style={{ objectPosition }}
           priority
           unoptimized
