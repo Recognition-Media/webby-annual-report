@@ -458,11 +458,17 @@ export function ReportView({ report }: { report: Report }) {
 
   // Once access is granted, scroll to report and hide hero — but only for
   // returning visitors who already have the cookie. When the signup gate is
-  // disabled in the CMS, hasAccess is also true from mount, but we want
-  // those users to see the hero and click "Explore" themselves.
+  // disabled in the CMS, or when access was granted via the ?access=direct
+  // bypass link, hasAccess is also true from mount, but we want those
+  // visitors to see the hero and click "Explore" themselves instead of
+  // being auto-scrolled straight into the report.
   useEffect(() => {
     if (!hasAccess) return
     if (report.signupGateEnabled === false) return
+    // Shareable "skip the gate" link: land on the hero like any first-time
+    // visitor and let them click through themselves — don't auto-scroll past
+    // the cover the way a returning (cookie-present) visitor does.
+    if (new URLSearchParams(window.location.search).get('access') === 'direct') return
     // Small delay to let report content render
     setTimeout(() => {
       scrollToTargetOrReport()
