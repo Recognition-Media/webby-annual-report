@@ -28,7 +28,7 @@ const ROWS = [
   },
   {
     label: 'Stable',
-    detail: 'Things are solid but not accelerating',
+    detail: 'Things are solid',
     value: 11.11,
     color: '#001A33',
   },
@@ -45,7 +45,7 @@ export function NordicsDataModule() {
     <section
       style={{
         background: '#f2eeed',
-        padding: '0 20px 80px',
+        padding: '72px 20px 80px',
       }}
     >
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
@@ -135,15 +135,6 @@ export function NordicsDataModule() {
             ))}
           </div>
 
-          <p style={{
-            marginTop: 24,
-            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
-            fontSize: 12,
-            color: NORDICS_MUTED,
-            fontStyle: 'italic',
-          }}>
-            &ldquo;Not sure&rdquo; received 0% and is omitted from the scale.
-          </p>
         </div>
       </div>
     </section>
