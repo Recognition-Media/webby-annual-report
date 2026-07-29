@@ -52,9 +52,11 @@ export interface DataStat {
 }
 
 export interface TrendVideo {
-  sourceType: 'upload' | 'youtube'
+  sourceType: 'upload' | 'youtube' | 'image'
   videoFile?: { url: string }
   youtubeUrl?: string
+  image?: { url: string; alt?: string }
+  linkUrl?: string
   aspectRatio: '9:16' | '16:9' | '1:1'
   name: string
   title?: string
@@ -93,6 +95,7 @@ export interface TrendSection {
   showVideo?: boolean
   videoFeatureLabel?: string
   trendVideo?: TrendVideo
+  secondaryStandout?: TrendVideo
   videoType?: 'local' | 'youtube'
   videoUrl?: string
   sectionImages?: (SanityImage & { alt?: string })[]

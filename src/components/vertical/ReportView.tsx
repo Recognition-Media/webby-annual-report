@@ -39,6 +39,7 @@ import { NordicsDataModule } from './NordicsDataModule'
 import { ANTHEM_CARD_CYCLE } from './SharedInfluenceModules'
 import { trackCtaClick } from '@/lib/analytics'
 import { LovieTrendContent } from './LovieTrendContent'
+import { NordicsOnesToWatch } from './NordicsOnesToWatch'
 import { QuoteVideoSection } from './QuoteVideoSection'
 import { BubbleChart } from './BubbleChart'
 import { PairedBarChart } from './PairedBarChart'
@@ -102,6 +103,40 @@ function portableTextToBody(blocks: PortableTextBlock[] | undefined, fallback: R
   return blocks.map((block, i) => (
     <PortableText key={i} value={[block]} components={inlineBlockComponents} />
   ))
+}
+
+// Turn a CMS `trendVideo` object into the LovieFeatureMedia shape used
+// by LovieTrendContent. Returns `undefined` when the CMS entry doesn't
+// carry a usable source (so the caller can fall back to hardcoded copy).
+type TrendVideoInput = {
+  sourceType?: 'upload' | 'youtube' | 'image'
+  videoFile?: { url?: string }
+  youtubeUrl?: string
+  image?: { url?: string; alt?: string }
+  linkUrl?: string
+  name?: string
+  title?: string
+  description?: string
+} | null | undefined
+
+function resolveStandout(input: TrendVideoInput, label?: string) {
+  if (!input) return undefined
+  const base = {
+    label,
+    name: input.name,
+    title: input.title,
+    description: input.description,
+  }
+  if (input.sourceType === 'image' && input.image?.url) {
+    return { ...base, url: input.linkUrl || '#', imageUrl: input.image.url }
+  }
+  if (input.sourceType === 'youtube' && input.youtubeUrl) {
+    return { ...base, url: input.youtubeUrl }
+  }
+  if (input.videoFile?.url) {
+    return { ...base, url: input.videoFile.url }
+  }
+  return undefined
 }
 
 function getCookie(name: string): string | undefined {
@@ -695,7 +730,6 @@ export function ReportView({ report }: { report: Report }) {
                       titleFontFamily="'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif"
                       titleFontWeight={500}
                       subtitleFontFamily="'decoy', Georgia, serif"
-                      subtitleItalic={false}
                     />
 
                     {/* Section content, keyed by index. Hardcoded for now
@@ -726,7 +760,6 @@ export function ReportView({ report }: { report: Report }) {
                   titleFontFamily="'roc-grotesk-wide', 'roc-grotesk-variable', -apple-system, sans-serif"
                   titleFontWeight={500}
                   subtitleFontFamily="'decoy', Georgia, serif"
-                  subtitleItalic={false}
                   compact
                 />
 
@@ -908,9 +941,9 @@ export function ReportView({ report }: { report: Report }) {
                 })()}
 
                 {/* Nordics Trend 02 — Capitals Don't Tell the Region's
-                    Full Story. First 2-column module only for now
-                    (body + data module); Inside the Hubs, standouts,
-                    and quotes will slot in as the CMS gets populated. */}
+                    Full Story. Row 1: body + callout data.
+                    Row 2: Inside the Hubs (4 countries) + Standouts image
+                    that links out to the IKEA Catalogue project page. */}
                 {isNordics && (
                   <LovieTrendContent
                     trendNumber="02"
@@ -932,7 +965,219 @@ export function ReportView({ report }: { report: Report }) {
                       ],
                       tileBackground: '#F2EEED',
                     }}
+                    insideTheHubs={{
+                      eyebrow: 'Inside the Hubs',
+                      swedenCopy: (
+                        <p>Sweden&rsquo;s biggest global brands extend well beyond Stockholm. <strong>IKEA</strong> was founded in &Auml;lmhult, <strong>Oatly</strong> is based in Malm&ouml;, and <strong>Volvo</strong> and <strong>Forsman &amp; Bodenfors</strong> have helped make Gothenburg a global centre for design and creativity. In the country&rsquo;s far north, <strong>Stegra</strong> is building one of Europe&rsquo;s most ambitious green steel plants in Boden.</p>
+                      ),
+                      denmarkCopy: (
+                        <p>Denmark&rsquo;s most recognisable brands are rooted outside of Copenhagen. <strong>LEGO</strong> calls Billund home, Lovie-recognised <strong>Bang &amp; Olufsen</strong> was founded in Struer, <strong>&Oslash;rsted</strong> has its roots in Fredericia, and digital bank <strong>Lunar</strong> is based in Aarhus.</p>
+                      ),
+                      finlandCopy: (
+                        <p>Finland&rsquo;s innovation story stretches beyond Helsinki. <strong>Oura</strong>, one of the world&rsquo;s leading wearable technology companies, is headquartered in Oulu.</p>
+                      ),
+                      norwayCopy: (
+                        <p>Norway&rsquo;s biggest success stories are increasingly spread across the country. <strong>AutoStore</strong>, the nation&rsquo;s first unicorn, was founded in Nedre Vats, while Trondheim&rsquo;s research ecosystem is helping grow a new generation of AI and climate technology companies, including <strong>Vespa AI</strong> and <strong>Ocean GeoLoop</strong>.</p>
+                      ),
+                    }}
+                    featureMedia={resolveStandout(report.trendSections?.[1]?.trendVideo, 'Standouts from the Nordics') || {
+                      url: 'https://dazed.studio/our-work/ikea-catalogue/',
+                      imageUrl: '/lovie/ikea-catalogue-standout.jpg',
+                      label: 'Standouts from the Nordics',
+                      name: 'Inside IKEA Catalogue!!!',
+                      title: 'A one-off publishing project bringing the Danish retailer’s iconic archives to life during Milan Design Week.',
+                    }}
                   />
+                )}
+
+                {/* Nordics Trend 03 — Sustainability & Circularity At the
+                    Centre. First part: body + inline pull quote (Martin
+                    Cedergren) + Norlys standout image. Data module and
+                    Inside the Hubs slot in as they arrive. */}
+                {isNordics && (
+                  <LovieTrendContent
+                    trendNumber="03"
+                    title="Sustainability & Circularity At the Centre"
+                    accentColor="#016BA7"
+                    body={[
+                      <>Across the Nordics, sustainability is less a brand message than a business principle. Rather than treating environmental responsibility as a marketing campaign, many of the region&rsquo;s best-known companies have built it into their products, operations, and long-term strategy. That confidence often carries through to their communications, too.</>,
+                      <>Brands are comfortable being self-aware, irreverent, and transparent&mdash;using honesty in place of polished corporate messaging. Together, those qualities have become one of the region&rsquo;s most distinctive creative signatures.</>,
+                      <div key="quote" style={{ display: 'flex', gap: 20, alignItems: 'flex-start', marginTop: 12, paddingLeft: 20, borderLeft: `3px solid #016BA7` }}>
+                        <div style={{
+                          width: 80,
+                          height: 80,
+                          borderRadius: '50%',
+                          overflow: 'hidden',
+                          flexShrink: 0,
+                          border: '2px solid #016BA7',
+                        }}>
+                          <img
+                            src="/lovie/martin-cedergren-headshot.jpg"
+                            alt="Martin Cedergren"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              objectPosition: '48% 30%',
+                              transform: 'translateX(3px) scale(1.8)',
+                              transformOrigin: '48% 30%',
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <p style={{
+                            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                            fontSize: 17,
+                            lineHeight: 1.5,
+                            color: '#000000',
+                            margin: '0 0 12px',
+                          }}>
+                            “The tension between rigid ESG compliance and creative risk-taking. With strict EU directives (like CSRD/ESRS), sustainability is no longer a marketing choice; it is a legal data matrix… The real, unappreciated challenge is figuring out how to aggressively defend raw, emotional storytelling while operating flawlessly within these legal handcuffs.”
+                          </p>
+                          <p style={{
+                            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                            fontSize: 14,
+                            lineHeight: 1.4,
+                            color: '#000000',
+                            margin: 0,
+                          }}>
+                            <strong style={{ fontWeight: 700 }}>Martin Cedergren</strong>, Creative Director &amp; Brand Advisor
+                          </p>
+                        </div>
+                      </div>,
+                    ]}
+                    featureMedia={resolveStandout(report.trendSections?.[2]?.trendVideo, 'Standouts from the Nordics') || {
+                      url: 'https://framna.com/cases/norlys',
+                      imageUrl: '/lovie/norlys-standout.webp',
+                      label: 'Standouts from the Nordics',
+                      name: 'Norlys Efficient Energy Usage',
+                      title: 'Norlys owns Denmark’s largest electricity grid, half of Eurowind Energy, and the Greenlab green industrial park. The Lovie-winning app lets customers track real-time electricity pricing and shift consumption to greener, cheaper windows.',
+                    }}
+                    insideTheHubs={{
+                      eyebrow: 'Inside the Hubs',
+                      swedenCopy: (
+                        <p><strong>Oatly</strong> built its brand by rejecting the conventions of corporate marketing. Its irreverent voice and campaigns like &ldquo;Wow No Cow!&rdquo; helped redefine how purpose-driven brands could communicate.</p>
+                      ),
+                      denmarkCopy: (
+                        <p><strong>Carlsberg</strong>&rsquo;s &ldquo;Probably Not the Best Beer in the World&rdquo; campaign playfully reworked its century-old slogan, while <strong>&Oslash;rsted</strong> transformed from fossil fuel giant DONG Energy into one of the world&rsquo;s leading renewable energy companies.</p>
+                      ),
+                      norwayCopy: (
+                        <p>Norway&rsquo;s <strong>Equinor</strong> has reshaped its identity around the energy transition, with projects like <strong>Hywind</strong>&mdash;the world&rsquo;s first floating offshore wind farm&mdash;symbolising the country&rsquo;s shift from oil to renewables.</p>
+                      ),
+                    }}
+                    secondaryStandout={resolveStandout(report.trendSections?.[2]?.secondaryStandout, 'Standouts from the Nordics') || {
+                      url: 'https://framna.com/cases/ok',
+                      imageUrl: '/lovie/ok-app-standout.webp',
+                      label: 'Standouts from the Nordics',
+                      name: 'OK App',
+                      title: 'OK started in 1978 as Denmark’s largest fuel cooperative, but its app now frames EV charging, heat pumps, solar advice, and green electricity as core functions, not a campaign layered on top of a fuel business.',
+                    }}
+                  />
+                )}
+
+                {/* Nordics Trend 04 — Cross-Border Collaboration At Its
+                    Core. Body + inline pull quotes in row 1 left; enlarged
+                    donut in row 1 right. Row 2 stays open for future
+                    Inside the Hubs / standouts. */}
+                {isNordics && (() => {
+                  const NORDIC_ACCENT_T4 = '#016BA7'
+                  function InlineQuote({ text, name, role, headshotUrl }: { text: string; name: string; role: string; headshotUrl?: string }) {
+                    return (
+                      <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', marginTop: 12, paddingLeft: 20, borderLeft: `3px solid ${NORDIC_ACCENT_T4}` }}>
+                        {headshotUrl && (
+                          <img
+                            src={headshotUrl}
+                            alt={name}
+                            width={80}
+                            height={80}
+                            style={{
+                              width: 80,
+                              height: 80,
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              flexShrink: 0,
+                              border: `2px solid ${NORDIC_ACCENT_T4}`,
+                            }}
+                          />
+                        )}
+                        <div>
+                          <p style={{
+                            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                            fontSize: 17,
+                            lineHeight: 1.5,
+                            color: '#000000',
+                            margin: '0 0 12px',
+                          }}>
+                            {text}
+                          </p>
+                          <p style={{
+                            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                            fontSize: 14,
+                            lineHeight: 1.4,
+                            color: '#000000',
+                            margin: 0,
+                          }}>
+                            <strong style={{ fontWeight: 700 }}>{name}</strong>, {role}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  }
+                  return (
+                  <LovieTrendContent
+                    trendNumber="04"
+                    title="Cross-Border Collaboration At Its Core"
+                    accentColor={NORDIC_ACCENT_T4}
+                    body={[
+                      <>Scandinavia and Finland&rsquo;s creative industries punch above their weight by thinking beyond national markets. Rather than competing as four separate creative scenes, agencies have built networks that share talent, clients, and expertise across the region.</>,
+                      <>The <strong>North Alliance</strong> is the clearest example: an independent agency collective that gives smaller markets the scale to compete internationally while maintaining strong local identities. It&rsquo;s a model that reflects the region itself: <strong style={{ fontWeight: 700 }}>collaborative and designed to embrace collaboration as a competitive advantage</strong>.</>,
+                      <InlineQuote
+                        key="q-claus"
+                        text="“People underestimate that creatives from a smaller country are more diverse in their craft. They are not as specialized as in bigger countries. They can also do more for less money since budgets are not high here.”"
+                        name="Claus Collstrup"
+                        role="Creative Director & Partner, NoA / &Co"
+                        headshotUrl="/lovie/claus-collstrup-headshot.jpeg"
+                      />,
+                      <InlineQuote
+                        key="q-david"
+                        text="“It’s incredibly important to lean on Scandinavian culture and standards, but improve on selling ideas and approaches globally.”"
+                        name="David Juul Ledstrup"
+                        role="Executive Strategy Director, Kubbco"
+                        headshotUrl="/lovie/david-juul-ledstrup-headshot.webp"
+                      />,
+                    ]}
+                    dataModule={{
+                      eyebrow: 'Culturally Specific or International',
+                      question: 'Is the region’s most exciting work better served by staying culturally specific or scaling internationally?',
+                      chartType: 'donut',
+                      donutSize: 380,
+                      bars: [
+                        { label: 'Both / a mix', value: 50, displayValue: '50%', color: '#003D66' },
+                        { label: 'Culturally specific only', value: 25, displayValue: '25%', color: '#016BA7' },
+                        { label: 'Internationally only', value: 12, displayValue: '12%', color: '#4C9BC7' },
+                        { label: 'No answer', value: 13, displayValue: '13%', color: '#A8D5F0' },
+                      ],
+                    }}
+                  />
+                  )
+                })()}
+
+                {/* Nordics Section 02 — "The Ones to Watch". Section
+                    cover uses the same compact treatment as the Trend
+                    covers, then the 3×3 grid of picks follows. */}
+                {isNordics && (
+                  <>
+                    <ReportSectionCover
+                      sectionNumber="02"
+                      title="The Ones to Watch"
+                      subtitle="We asked our community to share who is flying under the radar. Which creatives or companies are creating standout work, but haven’t received enough recognition?"
+                      accentColor="#016BA7"
+                      property={report.property}
+                      sectionNumberSvg="/lovie/lovie-heart-black.svg"
+                      compact
+                    />
+                    <NordicsOnesToWatch />
+                  </>
                 )}
 
 

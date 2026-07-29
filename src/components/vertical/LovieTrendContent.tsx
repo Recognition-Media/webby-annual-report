@@ -35,6 +35,9 @@ export interface LovieDataModule {
    * the Lovie lime `#eeffbb`. Set on a per-trend basis (e.g. Nordics
    * uses a pale cream `#FFF3D1`). */
   tileBackground?: string
+  /** Donut chart size override (px). Defaults to 300. Only applies when
+   * `chartType === 'donut'`. */
+  donutSize?: number
 }
 
 export type HubCountry =
@@ -68,12 +71,17 @@ export interface LovieInsideTheHubsContent {
 }
 
 export interface LovieFeatureMedia {
-  /** Video file URL (.mp4) for inline <video>, or iframe-embeddable URL for
-   * external sites/YouTube. Detected by file extension. */
+  /** Video file URL (.mp4) for inline <video>, iframe-embeddable URL for
+   * external sites/YouTube, OR the click-through link when this is a
+   * static image standout (see `imageUrl`). Detected by file extension. */
   url: string
-  /** Eyebrow label above the player, e.g. "Standouts from the Mediterranean" */
+  /** When set, this module renders a static image (linked to `url`)
+   * instead of a video player. Used for photo standouts that link
+   * out to a project page. */
+  imageUrl?: string
+  /** Eyebrow label above the media, e.g. "Standouts from the Mediterranean" */
   label?: string
-  /** Headline shown under the player on the left (e.g. studio or speaker name) */
+  /** Headline shown under the media (e.g. studio or speaker name) */
   name?: string
   /** Smaller line under `name` (e.g. project subtitle or speaker role) */
   title?: string
@@ -105,6 +113,10 @@ interface LovieTrendContentProps {
   dataModule?: LovieDataModule
   insideTheHubs?: LovieInsideTheHubsContent
   featureMedia?: LovieFeatureMedia
+  /** Second standout media. When present, always renders in row 2 right,
+   * so it can sit next to `insideTheHubs` while `featureMedia` occupies
+   * row 1 right (or row 2 right if row 1 is filled by data/quotes). */
+  secondaryStandout?: LovieFeatureMedia
   /** Falls back to first quote in row 1 right if no dataModule, second quote
    * in row 2 right if no featureMedia. */
   quotes?: LovieQuote[]
@@ -118,31 +130,41 @@ export function LovieTrendContent({
   dataModule,
   insideTheHubs,
   featureMedia,
+  secondaryStandout,
   quotes = [],
 }: LovieTrendContentProps) {
   // Right-column composition. Quotes act as a flexible fill so trends with
   // different module combinations all read cleanly:
   //   - dataModule present → row1 = data
-  //   - dataModule absent → row1 stacks ALL quotes alongside the body
-  //   - featureMedia present → row2 = media
+  //   - dataModule absent, quotes present → row1 stacks ALL quotes
+  //   - dataModule + quotes both absent, featureMedia present → row1 = media
+  //     (row2 collapses so the media reads alongside the body copy)
+  //   - featureMedia present (and row1 filled with data/quotes) → row2 = media
   //   - featureMedia absent → row2 stacks remaining quotes
   //   - anything still leftover → row3 (full-width pulled quotes)
   let quoteCursor = 0
   let row1Right:
     | { kind: 'data'; module: LovieDataModule }
     | { kind: 'quotes'; quotes: LovieQuote[] }
+    | { kind: 'media'; media: LovieFeatureMedia }
     | undefined
+  let mediaConsumedByRow1 = false
   if (dataModule) {
     row1Right = { kind: 'data', module: dataModule }
   } else if (quotes.length > 0) {
     row1Right = { kind: 'quotes', quotes }
     quoteCursor = quotes.length
+  } else if (featureMedia) {
+    row1Right = { kind: 'media', media: featureMedia }
+    mediaConsumedByRow1 = true
   }
   let row2Right:
     | { kind: 'media'; media: LovieFeatureMedia }
     | { kind: 'quotes'; quotes: LovieQuote[] }
     | undefined
-  if (featureMedia) {
+  if (secondaryStandout) {
+    row2Right = { kind: 'media', media: secondaryStandout }
+  } else if (featureMedia && !mediaConsumedByRow1) {
     row2Right = { kind: 'media', media: featureMedia }
   } else if (quotes.length > quoteCursor) {
     row2Right = { kind: 'quotes', quotes: quotes.slice(quoteCursor) }
@@ -211,6 +233,8 @@ export function LovieTrendContent({
             >
               {row1Right.kind === 'data' ? (
                 <DataModuleBlock module={row1Right.module} accentColor={accentColor} />
+              ) : row1Right.kind === 'media' ? (
+                <FeatureMediaBlock media={row1Right.media} accentColor={accentColor} />
               ) : (
                 <div className="flex flex-col gap-10">
                   {row1Right.quotes.map((quote, i) => (
@@ -314,7 +338,7 @@ function DataModuleBlock({ module, accentColor }: { module: LovieDataModule; acc
       ) : chartType === 'verticalBar' ? (
         <VerticalBarChart bars={module.bars} accentColor={accentColor} />
       ) : chartType === 'donut' ? (
-        <DonutChart bars={module.bars} />
+        <DonutChart bars={module.bars} size={module.donutSize} />
       ) : (
         <div className="flex flex-col gap-6 w-full">
           {module.bars.map((bar, i) => (
@@ -447,7 +471,7 @@ function VerticalBarColumn({
 // Donut chart — interactive single-choice viz. Each wedge is a bar in the
 // data, sized by its share. Hover any wedge or legend row → wedge expands
 // outward, others fade, center reveals the label and percentage.
-function DonutChart({ bars }: { bars: LovieDataBar[] }) {
+function DonutChart({ bars, size }: { bars: LovieDataBar[]; size?: number }) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
   const total = bars.reduce((sum, b) => sum + b.value, 0) || 1
   let cursor = -90 // start at top
@@ -457,14 +481,16 @@ function DonutChart({ bars }: { bars: LovieDataBar[] }) {
     cursor += angleSpan
     return slice
   })
-  const SIZE = 300
+  const SIZE = size ?? 300
   const center = SIZE / 2
-  const radius = 115
-  const innerRadius = 72
+  // Scale radii proportionally so a larger donut keeps the same ring
+  // thickness ratio (~72/115) as the default.
+  const radius = (SIZE / 300) * 115
+  const innerRadius = (SIZE / 300) * 72
   const focused = activeIdx !== null ? arcs[activeIdx] : null
   return (
-    <div className="flex items-center justify-center md:justify-start gap-8 flex-wrap" style={{ rowGap: 24 }}>
-      <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ flexShrink: 0 }}>
+    <div className="flex flex-col items-center" style={{ gap: 20 }}>
+      <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ flexShrink: 0, maxWidth: '100%', height: 'auto' }}>
         {arcs.map((arc, i) => {
           if (arc.value === 0) return null
           const isActive = activeIdx === i
@@ -532,8 +558,10 @@ function DonutChart({ bars }: { bars: LovieDataBar[] }) {
         </text>
       </svg>
 
-      {/* Legend */}
-      <div className="flex flex-col" style={{ gap: 10, flex: 1, minWidth: 220 }}>
+      {/* Legend — constrained to donut width and centered so rows sit
+          tightly beneath the chart rather than stretching to the full
+          column width. */}
+      <div className="flex flex-col" style={{ gap: 6, width: '100%', maxWidth: SIZE }}>
         {bars.map((bar, i) => (
           <div
             key={i}
@@ -803,7 +831,37 @@ function FeatureMediaBlock({ media, accentColor }: { media: LovieFeatureMedia; a
         </p>
       )}
 
-      {isVideoFile ? (
+      {media.imageUrl ? (
+        <>
+          {/* Static image standout — image links out to `media.url`
+              (e.g. a project page). Used when there's no video for the
+              featured work. */}
+          <a
+            href={media.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block rounded-lg overflow-hidden"
+            style={{ background: '#000' }}
+          >
+            <img
+              src={media.imageUrl}
+              alt={media.name || media.label || 'Standout'}
+              className="w-full h-auto block"
+            />
+          </a>
+
+          {(media.name || media.title) && (
+            <div className="py-3">
+              {media.name && (
+                <p className="text-[14px] font-semibold" style={{ color: '#000' }}>{media.name}</p>
+              )}
+              {media.title && (
+                <p className="text-[13px]" style={{ color: '#000', opacity: 0.6 }}>{media.title}</p>
+              )}
+            </div>
+          )}
+        </>
+      ) : isVideoFile ? (
         <>
           <div
             className="rounded-lg overflow-hidden relative cursor-pointer"

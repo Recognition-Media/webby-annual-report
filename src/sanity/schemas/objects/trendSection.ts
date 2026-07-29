@@ -109,7 +109,8 @@ export default defineType({
     // Video Module
     { name: 'showVideo', title: 'Show Video Module', type: 'boolean', initialValue: false, fieldset: 'video' },
     { name: 'videoFeatureLabel', title: 'Feature Label', type: 'string', description: 'Optional eyebrow above the video (e.g. "Standouts from the Mediterranean")', hidden: ({ parent }) => parent?.showVideo === false, fieldset: 'video' },
-    { name: 'trendVideo', title: 'Video', type: 'trendVideo', hidden: ({ parent }) => parent?.showVideo === false, fieldset: 'video' },
+    { name: 'trendVideo', title: 'Standout Media (primary)', type: 'trendVideo', hidden: ({ parent }) => parent?.showVideo === false, fieldset: 'video' },
+    { name: 'secondaryStandout', title: 'Standout Media (secondary)', type: 'trendVideo', description: 'Optional second standout. Used when a trend has two standout modules (e.g. Nordics Trend 03 with Norlys + OK App).', hidden: ({ parent }) => parent?.showVideo === false, fieldset: 'video' },
     { name: 'videoType', title: 'Video Type (legacy)', type: 'string', hidden: () => true },
     { name: 'videoUrl', title: 'Video URL (legacy)', type: 'string', hidden: () => true },
 
