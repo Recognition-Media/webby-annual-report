@@ -35,6 +35,7 @@ export const reportBySlugQuery = groq`
     auditorCardUrl,
     letterBody,
     letterAuthors,
+    nordicsHook,
     carouselImages,
     trendIntroEyebrow,
     trendIntroHeadline,

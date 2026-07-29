@@ -280,6 +280,7 @@ export interface Report {
   auditorCardDescription?: string
   auditorCardUrl?: string
   letterBody?: PortableTextBlock[]
+  nordicsHook?: string
   letterAuthors?: LetterAuthor[]
   carouselImages?: CarouselImage[]
   trendIntroEyebrow?: string

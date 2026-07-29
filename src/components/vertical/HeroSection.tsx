@@ -202,13 +202,12 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
               style={{
                 display: 'block',
                 fontSize: 'clamp(2rem, 4vw, 3rem)',
-                fontStyle: 'italic',
                 lineHeight: 1.2,
                 marginTop: 18,
                 fontWeight: 500,
               }}
             >
-              The Mediterranean
+              {isNordics ? 'The Nordics' : 'The Mediterranean'}
             </span>
           </>
         ),
