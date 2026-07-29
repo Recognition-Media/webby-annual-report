@@ -56,7 +56,7 @@ export function IntroLetter({ report }: { report: Report }) {
   }
 
   if (isNordics) {
-    return <NordicsOpening />
+    return <NordicsOpening report={report} />
   }
 
   const authorName = author?.name || (isLovie ? 'Jesse Feister' : 'Patricia McLoughlin')
@@ -457,6 +457,47 @@ function SharedInfluenceOpening({ report: _report }: { report: Report }) {
 // long-form fields for this report.
 // ─────────────────────────────────────────────────────────────────
 
+// Portable text components for the Nordics letter body. Mirrors the
+// hardcoded fallback styling (17px Scto Grotesk on cream, muted signoff
+// via a `strong` mark or the last paragraph). Editors can freely use
+// bold + links from the studio; the sign-off can be a normal paragraph
+// starting with "— " and the reader will treat it visually the same.
+const nordicsBodyComponents: PortableTextComponents = {
+  block: {
+    normal: ({ children }) => (
+      <motion.p
+        style={{
+          fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+          fontSize: 17,
+          lineHeight: 1.7,
+          color: '#000000',
+          margin: '0 0 24px',
+        }}
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        {children}
+      </motion.p>
+    ),
+  },
+  marks: {
+    strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+    em: ({ children }) => <em style={{ fontStyle: 'italic' }}>{children}</em>,
+    link: ({ value, children }) => (
+      <a
+        href={value?.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: '#016BA7', textDecoration: 'underline', textUnderlineOffset: 3 }}
+      >
+        {children}
+      </a>
+    ),
+  },
+}
+
 const NORDICS_HOOK = 'Small Markets. Global Infrastructure.'
 const NORDICS_BODY: React.ReactNode[] = [
   'Sweden, Denmark, Finland, and Norway have a combined population smaller than France’s. Yet this region has built companies that changed entire categories: Spotify reshaped music, Klarna transformed fintech, Supercell and King redefined mobile gaming, and Wolt changed how cities think about delivery.',
@@ -468,9 +509,15 @@ const NORDICS_BODY: React.ReactNode[] = [
   <span key="signoff" style={{ color: 'rgba(0,0,0,0.65)' }}>— The Lovie Awards team</span>,
 ]
 
-function NordicsOpening() {
+function NordicsOpening({ report }: { report: Report }) {
   const HOOK_MAX_WIDTH = 1000
   const BODY_MAX_WIDTH = 720
+
+  // Prefer CMS values; fall back to the hardcoded copy so the section
+  // never blanks out while the editor tweaks copy.
+  const hook = report.nordicsHook?.trim() || NORDICS_HOOK
+  const cmsBody = report.letterBody
+  const useCmsBody = Array.isArray(cmsBody) && cmsBody.length > 0
 
   return (
     <section
@@ -503,28 +550,32 @@ function NordicsOpening() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.05 }}
         >
-          {NORDICS_HOOK}
+          {hook}
         </motion.h2>
 
         <div style={{ maxWidth: BODY_MAX_WIDTH, marginLeft: 'auto', marginRight: 'auto' }}>
-          {NORDICS_BODY.map((paragraph, i) => (
-            <motion.p
-              key={i}
-              style={{
-                fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
-                fontSize: 17,
-                lineHeight: 1.7,
-                color: '#000000',
-                margin: '0 0 24px',
-              }}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 + i * 0.08 }}
-            >
-              {paragraph}
-            </motion.p>
-          ))}
+          {useCmsBody ? (
+            <PortableText value={cmsBody} components={nordicsBodyComponents} />
+          ) : (
+            NORDICS_BODY.map((paragraph, i) => (
+              <motion.p
+                key={i}
+                style={{
+                  fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                  fontSize: 17,
+                  lineHeight: 1.7,
+                  color: '#000000',
+                  margin: '0 0 24px',
+                }}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 + i * 0.08 }}
+              >
+                {paragraph}
+              </motion.p>
+            ))
+          )}
         </div>
       </div>
     </section>

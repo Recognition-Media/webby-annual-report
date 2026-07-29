@@ -83,6 +83,10 @@ export default defineType({
     // Welcome Letter
     { name: 'letterBody', title: 'Welcome Letter', type: 'array', of: [{ type: 'block' }], group: 'letter' },
     { name: 'letterAuthors', title: 'Letter Authors', type: 'array', of: [{ type: 'letterAuthor' }], group: 'letter' },
+    // Nordics-only: the big editorial hook shown above the Welcome
+    // Letter body (e.g. "Small Markets. Global Infrastructure."). Other
+    // reports ignore this field.
+    { name: 'nordicsHook', title: 'Opening Hook (Nordics)', type: 'string', group: 'letter', description: 'Big editorial line shown above the Welcome Letter body on the Nordics report only.' },
 
     // Carousel
     { name: 'carouselImages', title: 'Image Carousel', type: 'array', of: [{ type: 'carouselImage' }], group: 'carousel' },
