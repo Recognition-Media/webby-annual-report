@@ -88,6 +88,10 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
   // hardcoded behavior; LocalHeroCarousel updates this as images cycle.
   const [textTone, setTextTone] = useState<Tone>('light')
   const isLovie = report.property === 'lovie'
+  // Nordics is a Lovie report but with its own hero artwork (country
+  // flag hearts on a pale cream ground) and trend content. Detected
+  // by slug so the Mediterranean report is untouched.
+  const isNordics = isLovie && report.slug?.current === 'lovie-creative-hubs-nordics'
   // Shared Influence: an Anthem-property report but with its own hero
   // treatment (purple ground, illustrated icons baked into the artwork,
   // fluid Roc/Decoy title stack). Detected by slug so the existing
@@ -115,26 +119,33 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
   // hardcoded values; Lovie path swaps in palette, logo, and copy.
   const theme = isLovie
     ? {
-        logoSrc: '/lovie/lovie-logo-lockup.svg',
+        // Nordics uses the all-black lockup (works with the purple accent);
+        // Mediterranean keeps its orange-forward lockup.
+        logoSrc: isNordics ? '/lovie/lovie-logo-lockup-black.svg' : '/lovie/lovie-logo-lockup.svg',
         logoAlt: 'The Lovie Awards x Creative Hubs',
         // Lovie lockup is ~3x wider than tall — keep height the same so the
         // wider mark doesn't crowd the menu button.
         logoClassName: 'h-[44px] md:h-[62px] lg:h-[75px] w-auto',
         ctaUrl: 'https://www.lovieawards.com/',
-        ctaBgClass: 'bg-[#ff6000] hover:bg-[#cc4d00]',
+        ctaBgClass: isNordics
+          ? 'bg-[#016BA7] hover:bg-[#014a75]'
+          : 'bg-[#ff6000] hover:bg-[#cc4d00]',
         ctaTextColorClass: 'text-white',
         brandLabel: '',
-        brandLabelColor: '#ff6000',
-        // TEST: use the trend-report background PNG as a static hero image
-        // (single-frame "carousel"). Designer wants to evaluate the lime
-        // composition before deciding whether to keep portraits.
-        // v4 — designer's latest: three stickers staggered at top with a
-        // dotted curve, leaving the bottom 60–70% open for title + CTA.
-        heroImages: ['/lovie/trend-report-background-v4.png'],
+        brandLabelColor: isNordics ? '#016BA7' : '#ff6000',
+        // Mediterranean uses the lime PNG; Nordics uses its own pale-
+        // cream flag-hearts PNG (single image, no mobile variant yet).
+        heroImages: isNordics
+          ? ['/lovie/nordics-hero-bg.png']
+          : ['/lovie/trend-report-background-v4.png'],
         // Portrait-orientation variant used when the viewport is mobile-
         // sized; the desktop image's three-hearts-with-curve composition
-        // doesn't crop well below ~768px wide.
-        heroImagesMobile: ['/lovie/trend-report-background-mobile.png'],
+        // doesn't crop well below ~768px wide. Nordics reuses its
+        // landscape image for both breakpoints until a portrait
+        // variant is provided.
+        heroImagesMobile: isNordics
+          ? ['/lovie/nordics-hero-bg.png']
+          : ['/lovie/trend-report-background-mobile.png'],
         heroCaptions: [] as string[],
         heroBgColor: '#eeffbb',
         gradientOverlay: 'none',
@@ -334,8 +345,15 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           // with stickers pre-composed at the top — no top gap and
           // anchor the image to the top of the frame so nothing gets
           // cropped off. Other reports keep the existing defaults.
-          mobileTopOffsetPx={isSharedInfluence ? 0 : 100}
-          objectPosition={isSharedInfluence ? 'top center' : 'center 20%'}
+          // Shared Influence and Nordics both have stickers pre-composed
+          // at the very top of the artwork; Mediterranean's lime PNG
+          // has a 100px logo negative space at the top by design.
+          mobileTopOffsetPx={isSharedInfluence || isNordics ? 0 : 100}
+          // Nordics hero has stickers at the very top of the artwork,
+          // so anchor the image to the top edge and let it crop from
+          // the bottom instead of the default center-crop that cut the
+          // Sweden flag off.
+          objectPosition={isSharedInfluence || isNordics ? 'top center' : 'center 20%'}
           desktopVideoSrc={isSharedInfluence ? '/anthem/shared-influence-hero-desktop.mp4' : undefined}
           mobileVideoSrc={isSharedInfluence ? '/anthem/shared-influence-hero-mobile.mp4' : undefined}
         />
@@ -349,11 +367,11 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         )}
       </div>
 
-      {/* Minimal top bar. Hidden for Shared Influence — that report uses
-          a dedicated sticky <SharedInfluenceTopNav> mounted in ReportView
-          so the nav follows the scroll cleanly without any stacking or
-          overflow concerns. */}
-      {!isSharedInfluence && (
+      {/* Minimal top bar. Hidden for Shared Influence and Nordics —
+          both use dedicated sticky top nav components mounted in
+          ReportView so the nav follows the scroll cleanly without
+          stacking / overflow concerns. */}
+      {!isSharedInfluence && !isNordics && (
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-center md:justify-between px-5 md:px-[60px] py-6">
         {/* Brand logo */}
         <motion.img
@@ -393,19 +411,21 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
               onClick={() => setMenuOpen((v) => !v)}
               className="w-11 h-11 rounded-full flex items-center justify-center transition-colors cursor-pointer"
               style={{
-                border: isLovie ? '2px solid #ff6000' : '1px solid rgba(227,221,202,0.3)',
+                border: isLovie
+                  ? `2px solid ${isNordics ? '#016BA7' : '#ff6000'}`
+                  : '1px solid rgba(227,221,202,0.3)',
               }}
             >
               {menuOpen ? (
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <line x1="1" y1="1" x2="13" y2="13" stroke={isLovie ? '#ff6000' : '#E3DDCA'} strokeWidth="1.5" />
-                  <line x1="13" y1="1" x2="1" y2="13" stroke={isLovie ? '#ff6000' : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="1" y1="1" x2="13" y2="13" stroke={isLovie ? (isNordics ? '#016BA7' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="13" y1="1" x2="1" y2="13" stroke={isLovie ? (isNordics ? '#016BA7' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
                 </svg>
               ) : (
                 <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-                  <line x1="0" y1="1" x2="16" y2="1" stroke={isLovie ? '#ff6000' : '#E3DDCA'} strokeWidth="1.5" />
-                  <line x1="0" y1="5" x2="16" y2="5" stroke={isLovie ? '#ff6000' : '#E3DDCA'} strokeWidth="1.5" />
-                  <line x1="0" y1="9" x2="16" y2="9" stroke={isLovie ? '#ff6000' : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="0" y1="1" x2="16" y2="1" stroke={isLovie ? (isNordics ? '#016BA7' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="0" y1="5" x2="16" y2="5" stroke={isLovie ? (isNordics ? '#016BA7' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="0" y1="9" x2="16" y2="9" stroke={isLovie ? (isNordics ? '#016BA7' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
                 </svg>
               )}
             </button>

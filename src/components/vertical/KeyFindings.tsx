@@ -97,6 +97,60 @@ const LOVIE_FALLBACK_SECTIONS = [
   },
 ]
 
+// Nordics has 4 trends + Ones to Watch + Takeaways (6 items). Anchor
+// order matches the 6-item ToC the editor sees in the CMS so any item
+// with an empty anchor field falls back to the right destination.
+const NORDICS_FALLBACK_SECTIONS = [
+  {
+    number: '1',
+    title: 'Small Populations, Outsized Infrastructure',
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'trend-01',
+  },
+  {
+    number: '2',
+    title: "Capitals Don't Tell the Region's Full Story",
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'trend-02',
+  },
+  {
+    number: '3',
+    title: 'Sustainability & Circularity At the Centre',
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'trend-03',
+  },
+  {
+    number: '4',
+    title: 'Cross-Border Collaboration At Its Core',
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'trend-04',
+  },
+  {
+    number: '5',
+    title: 'The Ones to Watch',
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'ones-to-watch',
+  },
+  {
+    number: '6',
+    title: 'Takeaways',
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'section-takeaways',
+  },
+]
+
 function scrollToAnchor(anchor: string) {
   const raw = (anchor || '').trim()
   if (!raw) return
@@ -141,8 +195,13 @@ interface KeyFindingsProps {
 export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {}) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const isLovie = property === 'lovie'
+  const isNordics = isLovie && slug === 'lovie-creative-hubs-nordics'
   const isSharedInfluence =
     property === 'anthem' && slug === 'shared-influence-creator-partnerships-nonprofit'
+  // Nordics swaps Lovie's orange for purple; other Lovie reports keep
+  // orange. Applies to the section eyebrow, number, hover title, and
+  // arrow within the mobile-list treatment.
+  const lovieAccent = isNordics ? '#016BA7' : '#ff6000'
 
   // Color fork — Anthem uses warm cream + tan; Lovie sits on the same
   // beige body color as the rest of the reading flow so the section
@@ -174,7 +233,11 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
         subtitle: 'A look at how the social impact sector is responding in 2026.',
       }
 
-  const fallback = isLovie ? LOVIE_FALLBACK_SECTIONS : FALLBACK_SECTIONS
+  const fallback = isNordics
+    ? NORDICS_FALLBACK_SECTIONS
+    : isLovie
+      ? LOVIE_FALLBACK_SECTIONS
+      : FALLBACK_SECTIONS
   // CMS-driven when keyFindings is populated; otherwise the property's
   // hardcoded fallback list ships. Default text color is brand-aware:
   // dark moss for Anthem, true black for Lovie.
@@ -199,47 +262,92 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
       <section
         id="key-findings"
         data-snap
-        className="relative overflow-hidden pt-4 md:pt-24 pb-16 md:pb-24"
+        className={`relative overflow-hidden pt-4 md:pt-24 ${isNordics ? 'pb-4 md:pb-8' : 'pb-16 md:pb-24'}`}
         style={{ background: theme.sectionBg }}
       >
-        {/* Cover-art banner: 3 country stickers with a short dotted curve
-            connecting Italy (center) to Portugal/Spain (left/right). SVG
-            recreation rather than the static PNG so the curve/stickers
-            scale and respond independently. Mobile uses a shorter banner
-            so the artwork sits tight against the opening letter above. */}
-        <div className="relative w-full h-[220px] md:h-[360px]">
-          <svg
-            viewBox="0 0 1000 360" preserveAspectRatio="none"
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            aria-hidden="true"
-          >
-            <path
-              d="M 100 230 Q 360 100 500 210 Q 640 320 900 230"
-              fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeDasharray="2 14"
+        {/* Cover-art banner. Nordics shows four floating country flag
+            stickers (Norway, Sweden, Denmark, Finland) on a wavy dotted
+            curve; the Mediterranean report shows its three-heart SVG
+            recreation of the trend-report background. Both sit tight
+            against the opening letter above. */}
+        {isNordics ? (
+          <div className="relative w-full h-[220px] md:h-[360px]">
+            <svg
+              viewBox="0 0 1000 360" preserveAspectRatio="none"
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              aria-hidden="true"
+            >
+              <path
+                d="M 30 250 Q 190 90 350 190 Q 510 290 670 150 Q 790 70 890 240 Q 950 320 1000 260"
+                fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeDasharray="2 14"
+              />
+            </svg>
+            {/* Sticker sizes: 20% smaller than the Mediterranean stickers
+                (Med used clamp(100–220px); Nordics uses clamp(80–176px)).
+                Slight rotations + gentle vertical bob = the "floating"
+                feel Jordana asked for. Net position is 5% left of the
+                original layout so Finland clears the ENTER NOW pill
+                without cropping Norway. */}
+            <motion.img src="/lovie/norway-sticker.svg" alt="" aria-hidden
+              className="absolute pointer-events-none"
+              style={{ top: '54%', left: '-2%', width: 'clamp(80px, 14.4vw, 176px)', height: 'auto', transform: 'rotate(-6deg)' }}
+              animate={{ y: [-6, 6] }}
+              transition={{ duration: 4.2, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
             />
-          </svg>
-          <CountryPortugal
-            aria-hidden="true"
-            className="absolute pointer-events-none"
-            style={{ top: '38%', left: '2%', width: 'clamp(100px, 18vw, 220px)', height: 'auto', transform: 'rotate(-6deg)' }}
-          />
-          <CountryItaly
-            aria-hidden="true"
-            className="absolute pointer-events-none"
-            style={{ top: '12%', left: '50%', width: 'clamp(110px, 20vw, 240px)', height: 'auto', transform: 'translateX(-50%)' }}
-          />
-          <CountrySpain
-            aria-hidden="true"
-            className="absolute pointer-events-none"
-            style={{ top: '38%', right: '2%', width: 'clamp(100px, 18vw, 220px)', height: 'auto', transform: 'rotate(6deg)' }}
-          />
-        </div>
+            <motion.img src="/lovie/sweden-sticker.svg" alt="" aria-hidden
+              className="absolute pointer-events-none"
+              style={{ top: '10%', left: '25%', width: 'clamp(90px, 16vw, 192px)', height: 'auto', transform: 'rotate(3deg)' }}
+              animate={{ y: [-8, 8] }}
+              transition={{ duration: 4.8, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut', delay: 0.2 }}
+            />
+            <motion.img src="/lovie/denmark-sticker.svg" alt="" aria-hidden
+              className="absolute pointer-events-none"
+              style={{ top: '38%', left: '49%', width: 'clamp(80px, 14.4vw, 176px)', height: 'auto', transform: 'rotate(-4deg)' }}
+              animate={{ y: [-7, 7] }}
+              transition={{ duration: 4.4, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut', delay: 0.4 }}
+            />
+            <motion.img src="/lovie/finland-sticker.svg" alt="" aria-hidden
+              className="absolute pointer-events-none"
+              style={{ top: '4%', right: '9%', width: 'clamp(85px, 15.2vw, 184px)', height: 'auto', transform: 'rotate(8deg)' }}
+              animate={{ y: [-6, 6] }}
+              transition={{ duration: 5, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut', delay: 0.6 }}
+            />
+          </div>
+        ) : (
+          <div className="relative w-full h-[220px] md:h-[360px]">
+            <svg
+              viewBox="0 0 1000 360" preserveAspectRatio="none"
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              aria-hidden="true"
+            >
+              <path
+                d="M 100 230 Q 360 100 500 210 Q 640 320 900 230"
+                fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeDasharray="2 14"
+              />
+            </svg>
+            <CountryPortugal
+              aria-hidden="true"
+              className="absolute pointer-events-none"
+              style={{ top: '38%', left: '2%', width: 'clamp(100px, 18vw, 220px)', height: 'auto', transform: 'rotate(-6deg)' }}
+            />
+            <CountryItaly
+              aria-hidden="true"
+              className="absolute pointer-events-none"
+              style={{ top: '12%', left: '50%', width: 'clamp(110px, 20vw, 240px)', height: 'auto', transform: 'translateX(-50%)' }}
+            />
+            <CountrySpain
+              aria-hidden="true"
+              className="absolute pointer-events-none"
+              style={{ top: '38%', right: '2%', width: 'clamp(100px, 18vw, 220px)', height: 'auto', transform: 'rotate(6deg)' }}
+            />
+          </div>
+        )}
 
         {/* Editorial trend list */}
         <div className="px-5 md:px-[60px] mt-12 md:mt-16" style={{ maxWidth: 1100, margin: '60px auto 0' }}>
           <motion.p
             className="text-[11px] uppercase mb-3"
-            style={{ letterSpacing: 4, color: '#ff6000', fontWeight: 500 }}
+            style={{ letterSpacing: 4, color: lovieAccent, fontWeight: 500 }}
             initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -255,7 +363,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            Five Trends Shaping the Mediterranean
+            {isNordics ? 'Trends Shaping the Nordics' : 'Five Trends Shaping the Mediterranean'}
           </motion.h2>
 
           <ol className="list-none p-0 m-0">
@@ -283,19 +391,19 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
                 >
                   <span
                     className="text-[18px] md:text-[22px] font-bold flex-shrink-0"
-                    style={{ color: '#ff6000', minWidth: 36 }}
+                    style={{ color: lovieAccent, minWidth: 36 }}
                   >
                     {section.number}
                   </span>
                   <span
                     className="text-[16px] md:text-[22px] leading-[1.25] flex-1 transition-colors duration-200"
-                    style={{ fontWeight: 500, color: isHovered ? '#ff6000' : '#000000' }}
+                    style={{ fontWeight: 500, color: isHovered ? lovieAccent : '#000000' }}
                   >
                     {section.title}
                   </span>
                   <span
                     className="text-[18px] md:text-[22px] flex-shrink-0 transition-transform duration-200"
-                    style={{ color: '#ff6000', transform: isHovered ? 'translateX(6px)' : 'none' }}
+                    style={{ color: lovieAccent, transform: isHovered ? 'translateX(6px)' : 'none' }}
                   >
                     →
                   </span>

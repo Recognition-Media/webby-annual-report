@@ -41,6 +41,8 @@ const loviePortableTextComponents: PortableTextComponents = {
 export function IntroLetter({ report }: { report: Report }) {
   const author = report.letterAuthors?.[0]
   const isLovie = report.property === 'lovie'
+  const isNordics = isLovie && report.slug?.current === 'lovie-creative-hubs-nordics'
+  const lovieAccent = isNordics ? '#016BA7' : '#ff6000'
   // Shared Influence: Anthem-property report with its own opening —
   // large editorial hook + body letter, no headshot. Detected by slug so
   // the existing State of Social Impact opening (photo + italic header)
@@ -51,6 +53,10 @@ export function IntroLetter({ report }: { report: Report }) {
 
   if (isSharedInfluence) {
     return <SharedInfluenceOpening report={report} />
+  }
+
+  if (isNordics) {
+    return <NordicsOpening />
   }
 
   const authorName = author?.name || (isLovie ? 'Jesse Feister' : 'Patricia McLoughlin')
@@ -65,10 +71,10 @@ export function IntroLetter({ report }: { report: Report }) {
         // base so long-form copy stays editorial and the lime "moments"
         // (hero, Inside The Report cover-art banner) hit harder.
         sectionBg: '#f2eeed',
-        eyebrowColor: '#ff6000',
+        eyebrowColor: lovieAccent,
         textColor: '#000000',
         textColorMuted: 'rgba(0,0,0,0.55)',
-        accentColor: '#ff6000',
+        accentColor: lovieAccent,
         authorPhoto: '/lovie/jesse-feister-headshot.jpg',
         // Jesse's photo is landscape (3615×2250); Patricia's was portrait.
         // Skip the 5% offset + 5% zoom that were tuned for Patricia — they
@@ -433,6 +439,88 @@ function SharedInfluenceOpening({ report: _report }: { report: Report }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.25 + i * 0.08 }}
+            >
+              {paragraph}
+            </motion.p>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
+// NordicsOpening — Nordics-specific opening. Mirrors the Shared
+// Influence hook + letter pattern (no headshot, editorial flow) but
+// uses Lovie typography (Scto Grotesk) and the cream reading surface
+// (#f2eeed). Body content is hardcoded until the CMS carries the
+// long-form fields for this report.
+// ─────────────────────────────────────────────────────────────────
+
+const NORDICS_HOOK = 'Small Markets. Global Infrastructure.'
+const NORDICS_BODY: React.ReactNode[] = [
+  'Sweden, Denmark, Finland, and Norway have a combined population smaller than France’s. Yet this region has built companies that changed entire categories: Spotify reshaped music, Klarna transformed fintech, Supercell and King redefined mobile gaming, and Wolt changed how cities think about delivery.',
+  'The Lovie Awards x Creative Hubs Series explores how Europe’s regions build for the internet. Each report looks beyond the headlines to uncover the communities behind influential digital work, the forces shaping creative identity, and the ideas the rest of the world should be watching.',
+  <>
+    This edition turns to <strong style={{ fontWeight: 700 }}>the Nordics</strong>, a region with an established global reputation. Its brands, platforms, and creative exports are recognised worldwide. But beneath that reputation is a deeper story: a network of unicorns and deep-tech companies extending far beyond capital cities, and a shared approach to building that treats sustainability as a principle rather than a promise.
+  </>,
+  'At a pivotal moment for creativity and technology, the Nordics offer a distinct model for the internet era: small markets that build for global audiences from day one — not as an ambition, but as the starting point.',
+  <span key="signoff" style={{ color: 'rgba(0,0,0,0.65)' }}>— The Lovie Awards team</span>,
+]
+
+function NordicsOpening() {
+  const HOOK_MAX_WIDTH = 1000
+  const BODY_MAX_WIDTH = 720
+
+  return (
+    <section
+      id="welcome-letter"
+      data-snap
+      className="relative overflow-hidden px-5 md:px-[60px] pt-20 pb-8 md:py-28"
+      style={{ background: '#f2eeed' }}
+    >
+      <div
+        className="relative z-10"
+        style={{
+          maxWidth: 1280,
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
+        <motion.h2
+          style={{
+            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+            fontSize: 'clamp(2rem, 4.2vw, 55px)',
+            fontWeight: 700,
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+            color: '#000000',
+            margin: '0 0 64px',
+            maxWidth: HOOK_MAX_WIDTH,
+          }}
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.05 }}
+        >
+          {NORDICS_HOOK}
+        </motion.h2>
+
+        <div style={{ maxWidth: BODY_MAX_WIDTH, marginLeft: 'auto', marginRight: 'auto' }}>
+          {NORDICS_BODY.map((paragraph, i) => (
+            <motion.p
+              key={i}
+              style={{
+                fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                fontSize: 17,
+                lineHeight: 1.7,
+                color: '#000000',
+                margin: '0 0 24px',
+              }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 + i * 0.08 }}
             >
               {paragraph}
             </motion.p>

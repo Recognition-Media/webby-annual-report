@@ -95,9 +95,9 @@ interface ReportSectionCoverProps {
   titleFontWeight?: number
   /** Override the subtitle font family. Defaults to `var(--font-display)`. */
   subtitleFontFamily?: string
-  /** Whether the subtitle renders in italic. Defaults to `true` to match
-   * the existing State of Social Impact treatment; pass `false` for a
-   * roman subtitle. */
+  /** Whether the subtitle renders in italic. Defaults to `false` (roman)
+   * per Jordana's universal editorial preference across all reports. Pass
+   * `true` only if a specific cover explicitly needs italic. */
   subtitleItalic?: boolean
   /** When true, the sectionNumber is used only for the DOM id and is
    * not rendered visually. Useful for transition covers (takeaways,
@@ -118,7 +118,7 @@ export function ReportSectionCover({
   titleFontFamily = 'var(--font-display)',
   titleFontWeight = 400,
   subtitleFontFamily = 'var(--font-display)',
-  subtitleItalic = true,
+  subtitleItalic = false,
   hideSectionNumber = false,
 }: ReportSectionCoverProps) {
   const isLovie = property === 'lovie'
@@ -161,7 +161,15 @@ export function ReportSectionCover({
               alt={`Section ${sectionNumber}`}
               className="mx-auto mb-4 select-none"
               draggable={false}
-              style={{ height: 'clamp(64px, 9vw, 120px)', width: 'auto' }}
+              style={{
+                // Nordics uses the plain-heart lockup — read a touch
+                // smaller than the numbered Lovie tokens so it sits as
+                // an accent rather than a title-competing mark.
+                height: sectionNumberSvg.includes('lovie-heart-black')
+                  ? 'clamp(44px, 6vw, 80px)'
+                  : 'clamp(64px, 9vw, 120px)',
+                width: 'auto',
+              }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
