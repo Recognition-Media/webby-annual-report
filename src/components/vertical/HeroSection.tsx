@@ -139,12 +139,11 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           ? ['/lovie/nordics-hero-bg.png']
           : ['/lovie/trend-report-background-v4.png'],
         // Portrait-orientation variant used when the viewport is mobile-
-        // sized; the desktop image's three-hearts-with-curve composition
-        // doesn't crop well below ~768px wide. Nordics reuses its
-        // landscape image for both breakpoints until a portrait
-        // variant is provided.
+        // sized. Nordics uses a dedicated mobile PNG where the four
+        // country hearts + dashed curve are re-laid out along the top
+        // for narrow screens; Mediterranean has its own mobile image.
         heroImagesMobile: isNordics
-          ? ['/lovie/nordics-hero-bg.png']
+          ? ['/lovie/nordics-hero-bg-mobile.png']
           : ['/lovie/trend-report-background-mobile.png'],
         heroCaptions: [] as string[],
         heroBgColor: '#eeffbb',
@@ -203,7 +202,10 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
                 display: 'block',
                 fontSize: 'clamp(2rem, 4vw, 3rem)',
                 lineHeight: 1.2,
-                marginTop: 18,
+                // Bigger top gap on Nordics — the mobile hero has flag
+                // hearts across the top, so the region label + subtitle
+                // + CTA cluster want to sit lower for balance.
+                marginTop: isNordics ? 48 : 18,
                 fontWeight: 500,
               }}
             >
