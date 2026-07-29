@@ -76,7 +76,7 @@ interface ReportSectionCoverProps {
   sectionNumber: string
   title: string
   subtitle: string
-  copy: string
+  copy?: string
   accentColor?: string
   compact?: boolean
   property?: 'webby' | 'anthem' | 'telly' | 'lovie'
@@ -227,25 +227,29 @@ export function ReportSectionCover({
           </motion.p>
         </div>
 
-        {/* Left-aligned: body copy, centered on page axis */}
-        <div className="max-w-[588px] mx-auto">
-          <motion.p
-            className="text-[16px] md:text-[18px] leading-[30px] text-center"
-            style={{
-              fontFamily: isLovie
-                ? "'Scto Grotesk A', -apple-system, sans-serif"
-                : "'roc-grotesk-variable', -apple-system, sans-serif",
-              color: '#21261A',
-              opacity: 0.65,
-            }}
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-          >
-            {copy}
-          </motion.p>
-        </div>
+        {/* Left-aligned: body copy, centered on page axis. Skipped when
+            the cover doesn't ship a paragraph (e.g. Nordics Ones to
+            Watch, where the subtitle alone tells the whole story). */}
+        {copy && (
+          <div className="max-w-[588px] mx-auto">
+            <motion.p
+              className="text-[16px] md:text-[18px] leading-[30px] text-center"
+              style={{
+                fontFamily: isLovie
+                  ? "'Scto Grotesk A', -apple-system, sans-serif"
+                  : "'roc-grotesk-variable', -apple-system, sans-serif",
+                color: '#21261A',
+                opacity: 0.65,
+              }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+            >
+              {copy}
+            </motion.p>
+          </div>
+        )}
       </div>
     </section>
   )
