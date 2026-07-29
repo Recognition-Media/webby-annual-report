@@ -97,6 +97,60 @@ const LOVIE_FALLBACK_SECTIONS = [
   },
 ]
 
+// Nordics has 4 trends + Ones to Watch + Takeaways (6 items). Anchor
+// order matches the 6-item ToC the editor sees in the CMS so any item
+// with an empty anchor field falls back to the right destination.
+const NORDICS_FALLBACK_SECTIONS = [
+  {
+    number: '1',
+    title: 'Small Populations, Outsized Infrastructure',
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'trend-01',
+  },
+  {
+    number: '2',
+    title: "Capitals Don't Tell the Region's Full Story",
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'trend-02',
+  },
+  {
+    number: '3',
+    title: 'Sustainability & Circularity At the Centre',
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'trend-03',
+  },
+  {
+    number: '4',
+    title: 'Cross-Border Collaboration At Its Core',
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'trend-04',
+  },
+  {
+    number: '5',
+    title: 'The Ones to Watch',
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'ones-to-watch',
+  },
+  {
+    number: '6',
+    title: 'Takeaways',
+    description: '',
+    color: '#000000',
+    hoverBg: '#016BA7',
+    anchor: 'section-takeaways',
+  },
+]
+
 function scrollToAnchor(anchor: string) {
   const raw = (anchor || '').trim()
   if (!raw) return
@@ -179,7 +233,11 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
         subtitle: 'A look at how the social impact sector is responding in 2026.',
       }
 
-  const fallback = isLovie ? LOVIE_FALLBACK_SECTIONS : FALLBACK_SECTIONS
+  const fallback = isNordics
+    ? NORDICS_FALLBACK_SECTIONS
+    : isLovie
+      ? LOVIE_FALLBACK_SECTIONS
+      : FALLBACK_SECTIONS
   // CMS-driven when keyFindings is populated; otherwise the property's
   // hardcoded fallback list ships. Default text color is brand-aware:
   // dark moss for Anthem, true black for Lovie.

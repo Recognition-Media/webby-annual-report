@@ -43,9 +43,9 @@ const CONTRIBUTORS: Person[] = [
 const LOVIE_CREATED_BY: Person[] = [
   { name: 'Selin Clayton', title: 'Research Lead & Strategist' },
   { name: 'Jordana Jarrett', title: 'Head of Brand Strategy' },
+  { name: 'Nick Shizeng Ni', title: 'Lead Designer' },
   { name: 'Jesse Feister', title: 'Executive Director' },
   { name: 'Nick Farnhill', title: 'Founder of FOOD' },
-  { name: 'Nick Shizeng Ni', title: 'Lead Designer' },
   { name: 'Nidha Kattil Veetil', title: 'Marketing Director' },
 ]
 
@@ -57,6 +57,17 @@ const LOVIE_CONTRIBUTORS: Person[] = [
   { name: 'Miguel Priera', title: 'Senior Visual & Interaction Designer, Hanzo' },
   { name: 'Pepe Garcia', title: 'Executive Creative Director, Now Independent (exMcCann, exFCB, exGrey, exJellyfish)' },
   { name: 'Stefanie Palomino', title: 'Vice President Product, Marketing and Innovation, Middelhoffconsulting S.L.' },
+]
+
+// Nordics contributors — the six creative leaders interviewed for the
+// Nordics report. Falls back here when the CMS entry is empty.
+const NORDICS_CONTRIBUTORS: Person[] = [
+  { name: 'Martin Cedergren', title: 'Creative Director & Brand Advisor', url: 'https://se.linkedin.com/in/martincedergren' },
+  { name: 'Nick Christiansen', title: 'Creative Director, OKTO', url: 'https://se.linkedin.com/in/nickchristiansen' },
+  { name: 'David Juul Ledstrup', title: 'Executive Strategy Director, Kubbco', url: 'https://www.linkedin.com/in/davidledstrup/' },
+  { name: 'Monica Östling Holmlund', title: 'UX/Design Director, Fröjd Interactive', url: 'https://se.linkedin.com/in/monicaostlingholmlund' },
+  { name: 'Babak Shermond', title: 'Creative Director, The Apartment Creative Studio', url: 'https://www.linkedin.com/in/shermond/' },
+  { name: 'Claus Collstrup', title: 'Creative Director & Partner, NoA / &Co.', url: 'https://dk.linkedin.com/in/claus-collstrup-39871334' },
 ]
 
 function fromCms(list: CreditPerson[] | undefined, fallback: Person[]): Person[] {
@@ -163,8 +174,16 @@ function AnthemPeopleGroup({ title, people, columns, delay, boldNames = false }:
 // names stacked on the right. Dotted divider (strokeDasharray="2 14"
 // matches the hero/key-findings curves) sits above each section label.
 function LovieCredits({ report }: { report: Report | undefined }) {
+  const isNordics = report?.slug?.current === 'lovie-creative-hubs-nordics'
   const createdBy = fromCms(report?.creditsCreatedBy, LOVIE_CREATED_BY)
-  const contributors = fromCms(report?.creditsContributors, LOVIE_CONTRIBUTORS)
+  const contributors = fromCms(
+    report?.creditsContributors,
+    isNordics ? NORDICS_CONTRIBUTORS : LOVIE_CONTRIBUTORS,
+  )
+  // Nordics uses the warm cream ground + black heart token that ties
+  // into the Section covers; Med keeps the lime ground + numbered heart.
+  const background = isNordics ? '#FFF3D1' : '#eeffbb'
+  const heartSrc = isNordics ? '/lovie/lovie-heart-black.svg' : '/lovie/no-1-heart.svg'
 
   return (
     <section
@@ -172,7 +191,7 @@ function LovieCredits({ report }: { report: Report | undefined }) {
       data-snap
       className="relative"
       style={{
-        background: '#eeffbb',
+        background,
         padding: '96px 24px 120px',
         fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
         color: '#000000',
@@ -191,7 +210,7 @@ function LovieCredits({ report }: { report: Report | undefined }) {
             Credits
           </motion.h2>
           <motion.img
-            src="/lovie/no-1-heart.svg"
+            src={heartSrc}
             alt=""
             aria-hidden
             style={{ width: 80, height: 'auto', marginTop: 8 }}

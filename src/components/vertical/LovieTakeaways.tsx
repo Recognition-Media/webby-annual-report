@@ -27,9 +27,36 @@ const FALLBACK_TAKEAWAYS = [
 ]
 
 // Numbered heart token — the official Lovie brand asset for each
-// takeaway. PNGs live in /public/lovie/takeaway-{1..5}.png and already
-// have the numeral baked in with the correct brand typography.
-function NumberedHeart({ n }: { n: number }) {
+// takeaway. Med uses PNGs (/public/lovie/takeaway-{1..5}.png) with the
+// numeral baked in; Nordics uses the black heart SVG with the numeral
+// overlaid in white so the count matches whatever the report ships.
+function NumberedHeart({ n, variant }: { n: number; variant: 'med' | 'nordics' }) {
+  if (variant === 'nordics') {
+    return (
+      <div style={{ position: 'relative', width: 80, height: 80, flexShrink: 0 }}>
+        <img
+          src="/lovie/lovie-heart-black.svg"
+          alt=""
+          aria-hidden
+          style={{ width: '100%', height: '100%', display: 'block' }}
+        />
+        <span style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#fff',
+          fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+          fontWeight: 700,
+          fontSize: 34,
+          lineHeight: 1,
+        }}>
+          {n}
+        </span>
+      </div>
+    )
+  }
   return (
     <img
       src={`/lovie/takeaway-${n}.png`}
@@ -39,7 +66,7 @@ function NumberedHeart({ n }: { n: number }) {
   )
 }
 
-export function LovieTakeaways({ takeaways }: { takeaways?: LovieTakeaway[] } = {}) {
+export function LovieTakeaways({ takeaways, variant = 'med' }: { takeaways?: LovieTakeaway[]; variant?: 'med' | 'nordics' } = {}) {
   // CMS-driven when populated, otherwise the fallback list ships.
   const items = takeaways && takeaways.length > 0 ? takeaways : FALLBACK_TAKEAWAYS
 
@@ -84,7 +111,7 @@ export function LovieTakeaways({ takeaways }: { takeaways?: LovieTakeaway[] } = 
                 gridColumn: isOdd5th ? '1 / -1' : 'auto',
               }}
             >
-              <NumberedHeart n={i + 1} />
+              <NumberedHeart n={i + 1} variant={variant} />
               <h3
                 style={{
                   fontSize: 20,

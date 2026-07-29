@@ -43,11 +43,23 @@ const portableTextComponents: PortableTextComponents = {
 }
 
 export function LovieFooter({ report }: { report: Report }) {
+  const isNordics = report.slug?.current === 'lovie-creative-hubs-nordics'
   const headline = report.footerHeadline || FALLBACK_HEADLINE
-  const deadline = report.footerSubhead || FALLBACK_DEADLINE
+  const deadline =
+    report.footerSubhead ||
+    (isNordics
+      ? 'Enter Your Work Before the Extended Entry Deadline on 7 August 2026'
+      : FALLBACK_DEADLINE)
   const ctaUrl = report.footerCtaUrl || FALLBACK_CTA_URL
   const ctaText = FALLBACK_CTA_TEXT
   const body = report.footerBody && report.footerBody.length > 0 ? report.footerBody : null
+  // Nordics uses the cream Lovie gray for the CTA button (per Jordana's
+  // instruction) and swaps "Mediterranean" for "Nordics" in the closing
+  // line so the transition into the CTA reads correctly.
+  const buttonBg = isNordics ? '#F2EEED' : LIME
+  const closingLine = isNordics
+    ? "If you're redefining digital creativity from the Nordics, in ways only your country can, we want to see your work in the Lovie Awards."
+    : FALLBACK_CLOSING_LINE
 
   return (
     <footer
@@ -150,7 +162,7 @@ export function LovieFooter({ report }: { report: Report }) {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.35 }}
         >
-          {FALLBACK_CLOSING_LINE}
+          {closingLine}
         </motion.p>
 
         <motion.a
@@ -163,7 +175,7 @@ export function LovieFooter({ report }: { report: Report }) {
             alignItems: 'center',
             gap: 12,
             marginTop: 32,
-            background: LIME,
+            background: buttonBg,
             color: '#000000',
             padding: '14px 28px',
             borderRadius: 999,

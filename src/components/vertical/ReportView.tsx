@@ -1180,6 +1180,46 @@ export function ReportView({ report }: { report: Report }) {
                   </>
                 )}
 
+                {/* Nordics Section 03 — Takeaways. Cover + 4-card grid
+                    (via LovieTakeaways with variant='nordics' so the
+                    numbered heart renders in black over the Swedish
+                    blue accent). */}
+                {isNordics && (
+                  <>
+                    <ReportSectionCover
+                      sectionNumber="03"
+                      title="Takeaways"
+                      subtitle="Four conclusions on the Nordic creative economy."
+                      copy="How Sweden, Denmark, Finland, and Norway are shaping the next chapter of European digital and creative work — from distributed hubs to cross-border collaboration."
+                      accentColor="#016BA7"
+                      property={report.property}
+                      sectionNumberSvg="/lovie/lovie-heart-black.svg"
+                      compact
+                    />
+                    <LovieTakeaways
+                      variant="nordics"
+                      takeaways={[
+                        {
+                          title: 'Creative infrastructure outlasts breakout success',
+                          body: "Spotify, Klarna, and Wolt may grab the headlines, but they're products of something bigger. Judges pointed to digital infrastructure and platforms — not consumer apps — as the region's greatest engine of innovation.",
+                        },
+                        {
+                          title: 'The creative map extends beyond the capitals',
+                          body: "Many of the Nordics' most influential companies are based outside Stockholm, Copenhagen, Oslo, and Helsinki. Yet the capitals still dominate perceptions of where the region's best creative work happens.",
+                        },
+                        {
+                          title: 'Purpose is built into the business',
+                          body: "The Nordics treat sustainability as a business principle, not a marketing strategy. From Ørsted to Oatly, the region's strongest brands build trust through their decisions and transparency.",
+                        },
+                        {
+                          title: 'Cross-border collaboration at scale',
+                          body: "Creatives and companies across the Nordics have built a connected creative ecosystem. Networks like The North Alliance (NoA) give independent agencies the reach to compete well beyond their borders.",
+                        },
+                      ]}
+                    />
+                  </>
+                )}
+
 
                 {/* Lovie Mediterranean Trend 01 — title + body are
                     CMS-driven through trendSections[0]. Data module,
