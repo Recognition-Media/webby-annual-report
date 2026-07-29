@@ -3,7 +3,31 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
+import type { PortableTextComponents } from '@portabletext/react'
 import type { PortableTextBlock } from '@portabletext/types'
+
+// PortableText renderer for Inside the Hubs country copy. Editors can
+// add bold marks + external links in Studio and they render with the
+// trend's accent colour (Swedish blue on Nordics, orange on Med).
+// Links open in a new tab.
+function hubsBodyComponents(accentColor: string): PortableTextComponents {
+  return {
+    marks: {
+      strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+      em: ({ children }) => <em style={{ fontStyle: 'italic' }}>{children}</em>,
+      link: ({ value, children }) => (
+        <a
+          href={value?.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: accentColor, textDecoration: 'underline', textUnderlineOffset: 3 }}
+        >
+          {children}
+        </a>
+      ),
+    },
+  }
+}
 import { CountryItaly, CountryPortugal, CountrySpain } from '../lovie/CountryStickers'
 
 export interface LovieDataBar {
@@ -754,7 +778,7 @@ function InsideTheHubsBlock({ content, accentColor }: { content: LovieInsideTheH
                   }}
                 >
                   {Array.isArray(row.copy)
-                    ? <PortableText value={row.copy as PortableTextBlock[]} />
+                    ? <PortableText value={row.copy as PortableTextBlock[]} components={hubsBodyComponents(accentColor)} />
                     : row.copy}
                 </div>
               </div>

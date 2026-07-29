@@ -63,9 +63,15 @@ export interface TrendVideo {
   description?: string
 }
 
+export interface InsideTheHubsCountry {
+  country: 'spain' | 'italy' | 'portugal' | 'sweden' | 'denmark' | 'finland' | 'norway'
+  copy?: PortableTextBlock[]
+}
+
 export interface InsideTheHubs {
   eyebrow?: string
   heading?: string
+  countries?: InsideTheHubsCountry[]
   spainCopy?: PortableTextBlock[]
   italyCopy?: PortableTextBlock[]
   portugalCopy?: PortableTextBlock[]

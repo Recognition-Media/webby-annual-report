@@ -911,6 +911,11 @@ export function ReportView({ report }: { report: Report }) {
                     }}
                     insideTheHubs={{
                       eyebrow: 'Inside the Hubs',
+                      // CMS-driven when populated (via `countries[]`);
+                      // legacy per-country props below act as the
+                      // fallback until editors populate the trend's
+                      // Inside the Hubs → Countries array in Studio.
+                      countries: report.trendSections?.[0]?.insideTheHubs?.countries,
                       swedenCopy: (
                         <p>Stockholm remains the region&rsquo;s technology powerhouse. <strong>Spotify</strong> transformed the global music industry, while <strong>Klarna</strong>&rsquo;s 2025 New York Stock Exchange debut marked the city&rsquo;s biggest public listing since Spotify. A new generation of AI companies, including <strong>Lovable</strong>, <strong>Neko Health</strong>, and <strong>Einride</strong>, is keeping Sweden at the forefront of Europe&rsquo;s next tech wave.</p>
                       ),
@@ -967,6 +972,7 @@ export function ReportView({ report }: { report: Report }) {
                     }}
                     insideTheHubs={{
                       eyebrow: 'Inside the Hubs',
+                      countries: report.trendSections?.[1]?.insideTheHubs?.countries,
                       swedenCopy: (
                         <p>Sweden&rsquo;s biggest global brands extend well beyond Stockholm. <strong>IKEA</strong> was founded in &Auml;lmhult, <strong>Oatly</strong> is based in Malm&ouml;, and <strong>Volvo</strong> and <strong>Forsman &amp; Bodenfors</strong> have helped make Gothenburg a global centre for design and creativity. In the country&rsquo;s far north, <strong>Stegra</strong> is building one of Europe&rsquo;s most ambitious green steel plants in Boden.</p>
                       ),
@@ -1055,6 +1061,7 @@ export function ReportView({ report }: { report: Report }) {
                     }}
                     insideTheHubs={{
                       eyebrow: 'Inside the Hubs',
+                      countries: report.trendSections?.[2]?.insideTheHubs?.countries,
                       swedenCopy: (
                         <p><strong>Oatly</strong> built its brand by rejecting the conventions of corporate marketing. Its irreverent voice and campaigns like &ldquo;Wow No Cow!&rdquo; helped redefine how purpose-driven brands could communicate.</p>
                       ),
