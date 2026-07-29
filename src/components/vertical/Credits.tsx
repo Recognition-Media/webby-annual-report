@@ -201,7 +201,7 @@ function LovieCredits({ report }: { report: Report | undefined }) {
         {/* Top wordmark — left aligned, big. Heart sticker tucked to the right. */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 80, gap: 24 }}>
           <motion.h2
-            style={{ fontSize: 'clamp(48px, 8vw, 96px)', fontWeight: 700, color: '#000000', lineHeight: 1, letterSpacing: '-0.02em', margin: 0 }}
+            style={{ fontSize: isNordics ? 56 : 'clamp(48px, 8vw, 96px)', fontWeight: 700, color: '#000000', lineHeight: 1, letterSpacing: '-0.02em', margin: 0 }}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

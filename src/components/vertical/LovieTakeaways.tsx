@@ -75,10 +75,10 @@ export function LovieTakeaways({ takeaways, variant = 'med' }: { takeaways?: Lov
       id="section-takeaways"
       data-snap
       style={{
-        // Lovie-style light grey ground — cleaner break from the beige
-        // body and the lime credits below. Cards sit directly on this
-        // surface with no fill of their own.
-        background: '#E8E8E8',
+        // Med uses light grey to break from the beige body; Nordics
+        // continues the warm cream palette (F2EEED) so the section
+        // reads as part of the same run as Ones to Watch + Credits.
+        background: variant === 'nordics' ? '#F2EEED' : '#E8E8E8',
         padding: '40px 24px 120px',
         fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
       }}
