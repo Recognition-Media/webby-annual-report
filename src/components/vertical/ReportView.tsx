@@ -40,6 +40,7 @@ import { ANTHEM_CARD_CYCLE } from './SharedInfluenceModules'
 import { trackCtaClick } from '@/lib/analytics'
 import { LovieTrendContent } from './LovieTrendContent'
 import { NordicsOnesToWatch } from './NordicsOnesToWatch'
+import { NordicsFlagStripes } from './NordicsFlagStripes'
 import { QuoteVideoSection } from './QuoteVideoSection'
 import { BubbleChart } from './BubbleChart'
 import { PairedBarChart } from './PairedBarChart'
@@ -1259,11 +1260,14 @@ export function ReportView({ report }: { report: Report }) {
                   )
                 })()}
 
-                {/* Nordics Section 02 — "The Ones to Watch". Section
-                    cover uses the same compact treatment as the Trend
-                    covers, then the 3×3 grid of picks follows. */}
+                {/* Nordics Section 02 — "The Ones to Watch". Flag
+                    ribbon at the very top mirrors the opening letter
+                    intro; section cover follows in the same compact
+                    treatment as the Trend covers; then the 3×3 grid
+                    of picks. */}
                 {isNordics && (
-                  <>
+                  <div style={{ background: '#f2eeed', overflow: 'hidden' }}>
+                    <NordicsFlagStripes position="top" edgeClassName="" />
                     <ReportSectionCover
                       sectionNumber="02"
                       title="The Ones to Watch"
@@ -1274,7 +1278,7 @@ export function ReportView({ report }: { report: Report }) {
                       compact
                     />
                     <NordicsOnesToWatch />
-                  </>
+                  </div>
                 )}
 
                 {/* Nordics Section 03 — Takeaways. Cover + 4-card grid
