@@ -59,6 +59,11 @@ export interface LovieDataModule {
    * the Lovie lime `#eeffbb`. Set on a per-trend basis (e.g. Nordics
    * uses a pale cream `#FFF3D1`). */
   tileBackground?: string
+  /** Skip the tile chrome (background + padding + border-radius) so
+   * the data module sits directly on the section ground. Used by
+   * Nordics Trend 01 so its horizontal bar chart matches the visual
+   * style + width of the Section 1 opener stacked bar. */
+  hideTile?: boolean
   /** Donut chart size override (px). Defaults to 300. Only applies when
    * `chartType === 'donut'`. */
   donutSize?: number
@@ -199,7 +204,7 @@ export function LovieTrendContent({
   return (
     <section
       id={`trend-${trendNumber}`}
-      className="relative px-5 md:px-[60px] py-20 md:py-28"
+      className="relative px-5 md:px-[60px] py-10 md:py-28"
       style={{ background: '#f2eeed' }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
@@ -329,9 +334,10 @@ function DataModuleBlock({ module, accentColor }: { module: LovieDataModule; acc
   // Donut charts sit on the beige section directly (no lime tile) — the
   // colored wedges are already strong enough that an additional color
   // block underneath fights for attention.
-  const useLimeTile = chartType !== 'donut'
+  const useLimeTile = chartType !== 'donut' && !module.hideTile
   return (
     <motion.div
+      className={useLimeTile ? 'p-5 md:p-7' : undefined}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -339,7 +345,6 @@ function DataModuleBlock({ module, accentColor }: { module: LovieDataModule; acc
       style={useLimeTile ? {
         background: module.tileBackground || '#eeffbb',
         borderRadius: 14,
-        padding: '28px 28px',
       } : undefined}
     >
       {module.eyebrow && (
@@ -347,7 +352,7 @@ function DataModuleBlock({ module, accentColor }: { module: LovieDataModule; acc
           {module.eyebrow}
         </p>
       )}
-      <h4 className="leading-[1.35] mb-8 w-full" style={{ fontSize: 18, color: '#000', fontWeight: 700 }}>
+      <h4 className="leading-[1.35] mb-5 md:mb-8 w-full" style={{ fontSize: 18, color: '#000', fontWeight: 700 }}>
         {module.question}
       </h4>
 
@@ -1072,7 +1077,7 @@ function CalloutStat({ bars, accentColor }: { bars: LovieDataBar[]; accentColor:
       </motion.div>
 
       {secondary && (
-        <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid rgba(0, 0, 0, 0.2)' }}>
+        <div className="mt-5 pt-4 md:mt-7 md:pt-6" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.2)' }}>
           <p
             style={{
               fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",

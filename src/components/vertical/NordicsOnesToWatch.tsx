@@ -25,9 +25,9 @@ export function NordicsOnesToWatch() {
   return (
     <section
       id="ones-to-watch"
+      className="pt-4 pb-16 md:pt-[60px] md:pb-[100px] px-5"
       style={{
         background: '#f2eeed',
-        padding: '60px 20px 100px',
         fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
       }}
     >

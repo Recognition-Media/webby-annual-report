@@ -43,27 +43,29 @@ const NORDICS_MUTED = 'rgba(0, 0, 0, 0.55)'
 export function NordicsDataModule() {
   return (
     <section
-      style={{
-        background: '#f2eeed',
-        padding: '72px 20px 80px',
-      }}
+      className="px-5 pt-6 pb-8 md:pt-[72px] md:pb-20"
+      style={{ background: '#f2eeed' }}
     >
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <h3 style={{
-          fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
-          fontSize: 20,
-          fontWeight: 700,
-          color: NORDICS_INK,
-          margin: '0 0 24px',
-          lineHeight: 1.3,
-          textAlign: 'center',
-          whiteSpace: 'nowrap',
-        }}>
+        <h3
+          className="md:whitespace-nowrap"
+          style={{
+            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+            fontSize: 18,
+            fontWeight: 700,
+            color: NORDICS_INK,
+            margin: '0 0 24px',
+            lineHeight: 1.3,
+            textAlign: 'center',
+          }}
+        >
           {QUESTION}
         </h3>
 
-        <div>
-          {/* Stacked bar — 4 segments sized to their share */}
+        {/* Desktop: horizontal stacked bar with aligned legend below.
+            Hidden on mobile — the segments get too cramped and labels
+            wrap awkwardly beneath 500px wide. */}
+        <div className="hidden md:block">
           <div style={{
             display: 'flex',
             height: 80,
@@ -96,9 +98,6 @@ export function NordicsDataModule() {
             ))}
           </div>
 
-          {/* Legend — explicit width % that matches the bar segments
-              above exactly so the coloured underlines sit under their
-              corresponding segments. */}
           <div style={{ display: 'flex', marginTop: 24, width: '100%' }}>
             {ROWS.map((row) => (
               <div
@@ -134,7 +133,64 @@ export function NordicsDataModule() {
               </div>
             ))}
           </div>
+        </div>
 
+        {/* Mobile: each response gets a full-width row — label on top,
+            horizontal bar sized to its share, description underneath.
+            Reads top-to-bottom like a ranking. */}
+        <div className="flex flex-col gap-5 md:hidden">
+          {ROWS.map((row, i) => (
+            <div key={row.label}>
+              <div className="flex items-baseline justify-between gap-3 mb-2">
+                <p style={{
+                  fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                  fontSize: 16,
+                  color: NORDICS_INK,
+                  margin: 0,
+                  fontWeight: 700,
+                  lineHeight: 1.2,
+                }}>
+                  {row.label}
+                </p>
+                <p style={{
+                  fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                  fontSize: 15,
+                  color: NORDICS_INK,
+                  margin: 0,
+                  fontWeight: 700,
+                }}>
+                  {row.value.toFixed(1)}%
+                </p>
+              </div>
+              <div style={{
+                height: 10,
+                borderRadius: 999,
+                background: 'rgba(0, 0, 0, 0.08)',
+                overflow: 'hidden',
+              }}>
+                <motion.div
+                  initial={{ width: '0%' }}
+                  whileInView={{ width: `${(row.value / 99.99) * 100}%` }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.9, delay: i * 0.1, ease: [0.22, 0.61, 0.36, 1] }}
+                  style={{
+                    height: '100%',
+                    background: row.color,
+                    borderRadius: 999,
+                  }}
+                />
+              </div>
+              <p style={{
+                fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                fontSize: 13,
+                color: NORDICS_MUTED,
+                margin: '8px 0 0',
+                lineHeight: 1.4,
+              }}>
+                {row.detail}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

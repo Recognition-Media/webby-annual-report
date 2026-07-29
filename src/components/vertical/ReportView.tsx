@@ -912,14 +912,19 @@ export function ReportView({ report }: { report: Report }) {
                     dataModule={{
                       eyebrow: 'What Is Powering Innovation',
                       question: 'When you think about what’s actually driving tech innovation in your market right now, which comes closest to what you’re seeing?',
+                      // Colors mirror the Section 1 opener stacked bar
+                      // so the two Trend 01 data modules read as one
+                      // palette family (Swedish blue → light → dark navy).
                       bars: [
-                        { label: 'Digital infrastructure and platforms', value: 44, displayValue: '44%' },
-                        { label: 'Consumer-facing products and platforms', value: 22, displayValue: '22%' },
-                        { label: 'A mix — genuinely hard to separate', value: 22, displayValue: '22%' },
-                        { label: 'Cultural and creative output', value: 11, displayValue: '11%' },
+                        { label: 'Digital infrastructure and platforms', value: 44, displayValue: '44%', color: '#016BA7' },
+                        { label: 'Consumer-facing products and platforms', value: 22, displayValue: '22%', color: '#A8D5F0' },
+                        { label: 'A mix — genuinely hard to separate', value: 22, displayValue: '22%', color: '#003D66' },
+                        { label: 'Cultural and creative output', value: 11, displayValue: '11%', color: '#001A33' },
                       ],
-                      footnote: 'Regulation and governance, Deep tech and R&D, and None of the above each received 0% and are omitted.',
-                      tileBackground: '#FFF3D1',
+                      // No tile chrome — sits directly on the section
+                      // ground so the bars span the full column width,
+                      // matching the Section 1 opener treatment.
+                      hideTile: true,
                     }}
                     insideTheHubs={{
                       eyebrow: 'Inside the Hubs',
