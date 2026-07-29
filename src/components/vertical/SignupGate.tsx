@@ -71,6 +71,22 @@ const GATE_THEMES: Record<string, GateTheme> = {
     privacyName: 'Lovie Awards',
     rounded: true,
   },
+  // Slug-keyed override for the Nordics report — same Lovie card but
+  // with the brand purple in place of orange for frame + accent pill.
+  'lovie-creative-hubs-nordics': {
+    overlay: 'rgba(0, 0, 0, 0.7)',
+    frame: '#6139FF',
+    card: '#f2eeed',
+    logo: '/lovie/lovie-logo-black.svg',
+    logoAlt: 'The Lovie Awards',
+    font: "'Scto Grotesk A', -apple-system, sans-serif",
+    text: '#000000',
+    accent: '#6139FF',
+    buttonText: '#f2eeed',
+    privacyUrl: 'https://www.lovieawards.com/privacy-policy/',
+    privacyName: 'Lovie Awards',
+    rounded: true,
+  },
 }
 
 function FieldInput({ field, value, onChange }: { field: FormField; value: string; onChange: (v: string) => void }) {

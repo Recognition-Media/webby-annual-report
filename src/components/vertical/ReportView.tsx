@@ -34,6 +34,7 @@ import { KeyFindings } from './KeyFindings'
 import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
 import { SharedInfluenceTopNav, SHARED_INFLUENCE_NAV_SECTIONS } from './SharedInfluenceTopNav'
+import { NordicsTopNav, NORDICS_NAV_SECTIONS } from './NordicsTopNav'
 import { ANTHEM_CARD_CYCLE } from './SharedInfluenceModules'
 import { trackCtaClick } from '@/lib/analytics'
 import { LovieTrendContent } from './LovieTrendContent'
@@ -342,6 +343,13 @@ export function ReportView({ report }: { report: Report }) {
     report.property === 'anthem' &&
     report.slug?.current === 'shared-influence-creator-partnerships-nonprofit'
 
+  // Nordics is a Lovie-property report but ports the Shared Influence
+  // UX (sticky top nav, no opening letter, no bottom nav). Detected
+  // by slug so the Mediterranean report is untouched.
+  const isNordics =
+    report.property === 'lovie' &&
+    report.slug?.current === 'lovie-creative-hubs-nordics'
+
   // Apply vertical-template theme (background, fonts, palette) only while this
   // template is mounted. Lovie reports get `lovie-template`; everything else
   // using the vertical layout (Anthem) keeps `anthem-template`. Webby reports
@@ -543,6 +551,17 @@ export function ReportView({ report }: { report: Report }) {
         />
       )}
 
+      {/* Nordics — same sticky-top-nav treatment as Shared Influence,
+          styled for the Lovie palette. */}
+      {isNordics && (
+        <NordicsTopNav
+          ctaUrl={report.footerCtaUrl || 'https://www.lovieawards.com/'}
+          sections={NORDICS_NAV_SECTIONS}
+          onNavClick={(anchor) => handleSeeReport(anchor)}
+          onCtaClick={() => trackCtaClick('header', report.footerCtaUrl || 'https://www.lovieawards.com/', report.property, report.slug.current)}
+        />
+      )}
+
       {/* Hero — hidden once you've entered the report */}
       {!entered && (
         <HeroSection report={report} carouselImages={report.carouselImages} onSeeReport={handleSeeReport} />
@@ -569,14 +588,15 @@ export function ReportView({ report }: { report: Report }) {
       {/* <IdleArrows active={entered} /> */}
 
       {/* Bottom progress / section nav (Anthem template) — hidden for
-          Shared Influence, which uses a sticky top nav instead. */}
-      {!isSharedInfluence && (
+          Shared Influence and Nordics, which use a sticky top nav
+          instead. */}
+      {!isSharedInfluence && !isNordics && (
         <AnthemBottomNav active={entered} property={report.property} />
       )}
 
-      {/* Mobile navigation — hidden for Shared Influence, which uses
-          the same sticky top nav on mobile as it does on desktop. */}
-      {!isSharedInfluence && (
+      {/* Mobile navigation — hidden for Shared Influence and Nordics,
+          which use the same sticky top nav on mobile as on desktop. */}
+      {!isSharedInfluence && !isNordics && (
         <MobileNav
           active={entered}
           property={report.property}
@@ -625,9 +645,20 @@ export function ReportView({ report }: { report: Report }) {
                     ? 'Spain, Portugal, and Italy are producing digital work shaped by place, heritage, and a focus on digital infrastructure for both local and global innovation.'
                     : 'Last year, we asked the Anthem Awards community how the shifting landscape was impacting their work. This year, we see how the community is adapting.')
                 }
-                accentColor={report.section01Cover?.accentColor || (report.property === 'lovie' ? '#ff6000' : '#8C001C')}
+                accentColor={
+                  isNordics
+                    ? '#6139FF'
+                    : report.section01Cover?.accentColor ||
+                      (report.property === 'lovie' ? '#ff6000' : '#8C001C')
+                }
                 property={report.property}
-                sectionNumberSvg={report.property === 'lovie' ? '/lovie/no-1.svg' : undefined}
+                sectionNumberSvg={
+                  isNordics
+                    ? '/lovie/lovie-heart-black.svg'
+                    : report.property === 'lovie'
+                      ? '/lovie/no-1.svg'
+                      : undefined
+                }
               />
             )}
 
