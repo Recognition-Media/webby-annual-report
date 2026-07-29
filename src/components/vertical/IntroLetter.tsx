@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
+import { NordicsFlagStripes } from './NordicsFlagStripes'
 
 // Custom renderers so Lovie's CMS-driven letter body matches the
 // styling of the hardcoded fallback: paragraphs fade in on scroll,
@@ -523,9 +524,14 @@ function NordicsOpening({ report }: { report: Report }) {
     <section
       id="welcome-letter"
       data-snap
-      className="relative overflow-hidden px-5 md:px-[60px] pt-20 pb-8 md:py-28"
+      className="relative overflow-hidden px-5 md:px-[60px] pt-8 pb-8 md:pt-12 md:pb-10"
       style={{ background: '#f2eeed' }}
     >
+      {/* Top ribbon — animates in as soon as the section enters view so
+          the user lands with motion. Bottom ribbon renders at the very
+          end of the letter. */}
+      <NordicsFlagStripes position="top" />
+
       <div
         className="relative z-10"
         style={{
@@ -578,6 +584,13 @@ function NordicsOpening({ report }: { report: Report }) {
           )}
         </div>
       </div>
+
+      {/* Decorative Nordic-flag ribbon at the bottom of the letter.
+          Five stripes in the Nordic flag palette, each anchored at its
+          own x-range and animating in as the section scrolls into
+          view. */}
+      <NordicsFlagStripes position="bottom" />
     </section>
   )
 }
+

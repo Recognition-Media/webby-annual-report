@@ -105,7 +105,7 @@ export function LovieFooter({ report }: { report: Report }) {
         // portion lands behind "About The Lovie Awards." instead of
         // sitting fully above the headline.
         backgroundPosition: 'center -144px',
-        padding: '120px 24px 220px',
+        padding: isNordics ? '240px 24px 220px' : '120px 24px 220px',
         fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
         color: isNordics ? '#000000' : '#ffffff',
         position: 'relative',
@@ -243,10 +243,10 @@ function NordicsStickerBand() {
   // Lovie Awards" title + deadline copy stay uncovered. Two on each
   // side, staggered vertically for a bit of rhythm.
   const stickers = [
-    { src: '/lovie/norway-sticker.svg',  left: '3%',  top: 70,  size: 200, rotate: -4 },
-    { src: '/lovie/sweden-sticker.svg',  left: '18%', top: 0,   size: 200, rotate: 3 },
-    { src: '/lovie/denmark-sticker.svg', left: '76%', top: 55,  size: 200, rotate: -2 },
-    { src: '/lovie/finland-sticker.svg', left: '90%', top: 60,  size: 200, rotate: 5 },
+    { src: '/lovie/norway-sticker.svg',  left: '3%',  top: 40, size: 170, rotate: -4 },
+    { src: '/lovie/sweden-sticker.svg',  left: '18%', top: 0,  size: 170, rotate: 3 },
+    { src: '/lovie/denmark-sticker.svg', left: '76%', top: 20, size: 170, rotate: -2 },
+    { src: '/lovie/finland-sticker.svg', left: '90%', top: 30, size: 170, rotate: 5 },
   ]
   return (
     <div
@@ -256,22 +256,20 @@ function NordicsStickerBand() {
         top: 0,
         left: 0,
         right: 0,
-        height: 300,
+        height: 210,
         pointerEvents: 'none',
       }}
     >
-      {/* Dashed curve winding through the 4 stickers. Uses the same
-          strokeDasharray rhythm as the KeyFindings curve for visual
-          consistency. Curve peaks near the Sweden sticker on the left,
-          dips through the mid-air gap over the title, and rises again
-          to touch the Finland sticker on the right. */}
+      {/* Dashed curve winding through the 4 stickers. Confined to the
+          top ~200px of the section so it never runs through the
+          "About The Lovie Awards" title below. */}
       <svg
-        viewBox="0 0 1000 220"
+        viewBox="0 0 1000 160"
         preserveAspectRatio="none"
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
       >
         <path
-          d="M 0 200 C 200 20, 340 20, 500 110 S 780 210, 1000 90"
+          d="M 0 140 C 200 20, 340 20, 500 90 S 780 150, 1000 60"
           fill="none"
           stroke="#000000"
           strokeWidth="2.5"
