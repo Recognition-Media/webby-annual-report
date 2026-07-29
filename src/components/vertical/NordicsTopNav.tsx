@@ -37,7 +37,7 @@ export function NordicsTopNav({ ctaUrl, sections, onNavClick, onCtaClick }: Nord
   // report. `scrolled` still tracks position so we can flip the label
   // colour on darker sections if we add any later; for now the pill
   // stays purple + white text on both cream and darker surfaces.
-  const pillBg = '#6139FF'
+  const pillBg = '#016BA7'
   const pillText = '#FFFFFF'
   const strokeColor = '#FFFFFF'
   void scrolled // reserved for future contrast-switching
@@ -117,7 +117,7 @@ export function NordicsTopNav({ ctaUrl, sections, onNavClick, onCtaClick }: Nord
                     key={section.id}
                     type="button"
                     onClick={() => { setMenuOpen(false); onNavClick(section.id) }}
-                    className="w-full text-left px-5 py-4 transition-colors hover:bg-[#6139FF]/30 flex items-baseline gap-3"
+                    className="w-full text-left px-5 py-4 transition-colors hover:bg-[#016BA7]/30 flex items-baseline gap-3"
                     style={{
                       borderBottom: i < sections.length - 1 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
                     }}

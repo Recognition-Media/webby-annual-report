@@ -75,13 +75,13 @@ const GATE_THEMES: Record<string, GateTheme> = {
   // with the brand purple in place of orange for frame + accent pill.
   'lovie-creative-hubs-nordics': {
     overlay: 'rgba(0, 0, 0, 0.7)',
-    frame: '#6139FF',
+    frame: '#016BA7',
     card: '#f2eeed',
     logo: '/lovie/lovie-logo-black.svg',
     logoAlt: 'The Lovie Awards',
     font: "'Scto Grotesk A', -apple-system, sans-serif",
     text: '#000000',
-    accent: '#6139FF',
+    accent: '#016BA7',
     buttonText: '#f2eeed',
     privacyUrl: 'https://www.lovieawards.com/privacy-policy/',
     privacyName: 'Lovie Awards',

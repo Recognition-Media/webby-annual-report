@@ -147,7 +147,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
   // Nordics swaps Lovie's orange for purple; other Lovie reports keep
   // orange. Applies to the section eyebrow, number, hover title, and
   // arrow within the mobile-list treatment.
-  const lovieAccent = isNordics ? '#6139FF' : '#ff6000'
+  const lovieAccent = isNordics ? '#016BA7' : '#ff6000'
 
   // Color fork — Anthem uses warm cream + tan; Lovie sits on the same
   // beige body color as the rest of the reading flow so the section

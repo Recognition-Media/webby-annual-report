@@ -42,7 +42,7 @@ export function IntroLetter({ report }: { report: Report }) {
   const author = report.letterAuthors?.[0]
   const isLovie = report.property === 'lovie'
   const isNordics = isLovie && report.slug?.current === 'lovie-creative-hubs-nordics'
-  const lovieAccent = isNordics ? '#6139FF' : '#ff6000'
+  const lovieAccent = isNordics ? '#016BA7' : '#ff6000'
   // Shared Influence: Anthem-property report with its own opening —
   // large editorial hook + body letter, no headshot. Detected by slug so
   // the existing State of Social Impact opening (photo + italic header)

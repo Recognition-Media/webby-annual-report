@@ -128,11 +128,11 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         logoClassName: 'h-[44px] md:h-[62px] lg:h-[75px] w-auto',
         ctaUrl: 'https://www.lovieawards.com/',
         ctaBgClass: isNordics
-          ? 'bg-[#6139FF] hover:bg-[#4d2fcc]'
+          ? 'bg-[#016BA7] hover:bg-[#014a75]'
           : 'bg-[#ff6000] hover:bg-[#cc4d00]',
         ctaTextColorClass: 'text-white',
         brandLabel: '',
-        brandLabelColor: isNordics ? '#6139FF' : '#ff6000',
+        brandLabelColor: isNordics ? '#016BA7' : '#ff6000',
         // Mediterranean uses the lime PNG; Nordics uses its own pale-
         // cream flag-hearts PNG (single image, no mobile variant yet).
         heroImages: isNordics
@@ -412,20 +412,20 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
               className="w-11 h-11 rounded-full flex items-center justify-center transition-colors cursor-pointer"
               style={{
                 border: isLovie
-                  ? `2px solid ${isNordics ? '#6139FF' : '#ff6000'}`
+                  ? `2px solid ${isNordics ? '#016BA7' : '#ff6000'}`
                   : '1px solid rgba(227,221,202,0.3)',
               }}
             >
               {menuOpen ? (
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <line x1="1" y1="1" x2="13" y2="13" stroke={isLovie ? (isNordics ? '#6139FF' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
-                  <line x1="13" y1="1" x2="1" y2="13" stroke={isLovie ? (isNordics ? '#6139FF' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="1" y1="1" x2="13" y2="13" stroke={isLovie ? (isNordics ? '#016BA7' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="13" y1="1" x2="1" y2="13" stroke={isLovie ? (isNordics ? '#016BA7' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
                 </svg>
               ) : (
                 <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-                  <line x1="0" y1="1" x2="16" y2="1" stroke={isLovie ? (isNordics ? '#6139FF' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
-                  <line x1="0" y1="5" x2="16" y2="5" stroke={isLovie ? (isNordics ? '#6139FF' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
-                  <line x1="0" y1="9" x2="16" y2="9" stroke={isLovie ? (isNordics ? '#6139FF' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="0" y1="1" x2="16" y2="1" stroke={isLovie ? (isNordics ? '#016BA7' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="0" y1="5" x2="16" y2="5" stroke={isLovie ? (isNordics ? '#016BA7' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
+                  <line x1="0" y1="9" x2="16" y2="9" stroke={isLovie ? (isNordics ? '#016BA7' : '#ff6000') : '#E3DDCA'} strokeWidth="1.5" />
                 </svg>
               )}
             </button>

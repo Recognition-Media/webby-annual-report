@@ -35,6 +35,7 @@ import { ReportSectionCover, TrendContent } from './ReportSection'
 import { AnthemBottomNav } from './AnthemBottomNav'
 import { SharedInfluenceTopNav, SHARED_INFLUENCE_NAV_SECTIONS } from './SharedInfluenceTopNav'
 import { NordicsTopNav, NORDICS_NAV_SECTIONS } from './NordicsTopNav'
+import { NordicsDataModule } from './NordicsDataModule'
 import { ANTHEM_CARD_CYCLE } from './SharedInfluenceModules'
 import { trackCtaClick } from '@/lib/analytics'
 import { LovieTrendContent } from './LovieTrendContent'
@@ -647,7 +648,7 @@ export function ReportView({ report }: { report: Report }) {
                 }
                 accentColor={
                   isNordics
-                    ? '#6139FF'
+                    ? '#016BA7'
                     : report.section01Cover?.accentColor ||
                       (report.property === 'lovie' ? '#ff6000' : '#8C001C')
                 }
@@ -659,8 +660,16 @@ export function ReportView({ report }: { report: Report }) {
                       ? '/lovie/no-1.svg'
                       : undefined
                 }
+                // Nordics uses a compact cover so the data module
+                // below can sit close to the section header; other
+                // reports keep the full viewport-height magazine cover.
+                compact={isNordics}
               />
             )}
+
+            {/* Nordics — Section 1 opener data module: sentiment
+                scale (4-segment stacked bar with aligned legend). */}
+            {isNordics && <NordicsDataModule />}
 
             {isSharedInfluence ? (
               <>
