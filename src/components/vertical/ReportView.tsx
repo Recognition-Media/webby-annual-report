@@ -739,10 +739,207 @@ export function ReportView({ report }: { report: Report }) {
               </>
             ) : report.property === 'lovie' ? (
               <>
-                {/* Lovie Trend 01 — title + body are CMS-driven through
-                    trendSections[0]. Data module, Inside the Hubs, and
-                    feature video are still hardcoded (no schema fields
-                    for those Lovie-specific structures yet). */}
+                {/* Nordics Trend 01 — hardcoded for now (until CMS
+                    fields carry the Nordics body + data). Uses the
+                    same LovieTrendContent 2-column layout as
+                    Mediterranean; accent flips to Swedish blue. */}
+                {isNordics && (() => {
+                  const NORDIC_ACCENT = '#016BA7'
+                  const cmsQuotes = report.trendSections?.[0]?.expertQuotes ?? []
+                  // Normalise CMS quotes into a common shape so both the
+                  // inline (body) slot and the leftover (below-video)
+                  // slot share the same rendering data.
+                  const normalisedQuotes = cmsQuotes.map((q) => ({
+                    text: portableTextToPlain(q.quoteText),
+                    attribution: q.name,
+                    role: q.title || '',
+                    linkedInUrl: q.linkedInUrl,
+                    headshotUrl: q.headshot ? urlFor(q.headshot).width(240).height(240).fit('crop').url() : q.headshotUrl,
+                  }))
+                  const [inlineQuote, ...restQuotes] = normalisedQuotes
+
+                  // CMS `trendVideo` overrides the hardcoded fallback
+                  // once populated. Falls back to the YouTube URL from
+                  // the draft until the editor picks a source.
+                  const cmsVideo = report.trendSections?.[0]?.trendVideo
+                  const cmsVideoUrl =
+                    cmsVideo?.sourceType === 'youtube'
+                      ? cmsVideo.youtubeUrl
+                      : cmsVideo?.videoFile?.url
+                  const featureMedia = {
+                    url: cmsVideoUrl || 'https://www.youtube.com/watch?v=D4rar2bmCAM',
+                    label: 'Standouts from the Nordics',
+                    name: cmsVideo?.name || 'Inside Opera Neon, the first “fully-agentic” browser',
+                    title: cmsVideo?.title || '2025 Lovie Silver Winner, AI Apps — Experimental & Innovation',
+                    description: cmsVideo?.description,
+                  }
+
+                  return (
+                  <LovieTrendContent
+                    trendNumber="01"
+                    title="Small Populations, Outsized Infrastructure"
+                    accentColor={NORDIC_ACCENT}
+                    body={[
+                      <>The Nordic population is significantly smaller than that of France (69 million to 28 million, respectively), yet the region produces an outsized share of Europe&rsquo;s most influential tech companies. <strong style={{ fontWeight: 700 }}>Spotify, Klarna, and Wolt, to name a few</strong>.</>,
+                      <>Across Sweden, Denmark, Finland, and Norway, innovation is increasingly being driven by B2B software, emerging technologies, industrial technology, and consumer apps. What makes the Nordics strong is the infrastructure it has built to create and sustain digital innovation.</>,
+                      // Inline pull quote — first CMS expertQuote if
+                      // populated, else the hardcoded David quote from
+                      // the draft.
+                      inlineQuote ? (
+                        <div key="quote" style={{ display: 'flex', gap: 20, alignItems: 'flex-start', marginTop: 12, paddingLeft: 20, borderLeft: `3px solid ${NORDIC_ACCENT}` }}>
+                          {inlineQuote.headshotUrl && (
+                            <img
+                              src={inlineQuote.headshotUrl}
+                              alt={inlineQuote.attribution}
+                              width={80}
+                              height={80}
+                              style={{
+                                width: 80,
+                                height: 80,
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                                flexShrink: 0,
+                                border: `2px solid ${NORDIC_ACCENT}`,
+                              }}
+                            />
+                          )}
+                          <div>
+                            <p style={{
+                              fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                              fontSize: 17,
+                              lineHeight: 1.5,
+                              color: '#000000',
+                              margin: '0 0 12px',
+                            }}>
+                              {inlineQuote.text}
+                            </p>
+                            <p style={{
+                              fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                              fontSize: 14,
+                              lineHeight: 1.4,
+                              color: '#000000',
+                              margin: 0,
+                            }}>
+                              <strong style={{ fontWeight: 700 }}>{inlineQuote.attribution}</strong>
+                              {inlineQuote.role ? `, ${inlineQuote.role}` : ''}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div key="quote" style={{ display: 'flex', gap: 20, alignItems: 'flex-start', marginTop: 12, paddingLeft: 20, borderLeft: `3px solid ${NORDIC_ACCENT}` }}>
+                          <img
+                            src="/lovie/david-juul-ledstrup-headshot.webp"
+                            alt="David Juul Ledstrup"
+                            width={80}
+                            height={80}
+                            style={{
+                              width: 80,
+                              height: 80,
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              flexShrink: 0,
+                              border: `2px solid ${NORDIC_ACCENT}`,
+                            }}
+                          />
+                          <div>
+                            <p style={{
+                              fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                              fontSize: 17,
+                              lineHeight: 1.5,
+                              color: '#000000',
+                              margin: '0 0 12px',
+                            }}>
+                              “The amount of talent that Scandinavia attracts. The industry here is a global melting pot of culture, ideas, and diversity from all corners of the world.”
+                            </p>
+                            <p style={{
+                              fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                              fontSize: 14,
+                              lineHeight: 1.4,
+                              color: '#000000',
+                              margin: 0,
+                            }}>
+                              <strong style={{ fontWeight: 700 }}>David Juul Ledstrup</strong>, Executive Strategy Director, Kubbco
+                            </p>
+                          </div>
+                        </div>
+                      ),
+                    ]}
+                    dataModule={{
+                      eyebrow: 'What Is Powering Innovation',
+                      question: 'When you think about what’s actually driving tech innovation in your market right now, which comes closest to what you’re seeing?',
+                      bars: [
+                        { label: 'Digital infrastructure and platforms', value: 44, displayValue: '44%' },
+                        { label: 'Consumer-facing products and platforms', value: 22, displayValue: '22%' },
+                        { label: 'A mix — genuinely hard to separate', value: 22, displayValue: '22%' },
+                        { label: 'Cultural and creative output', value: 11, displayValue: '11%' },
+                      ],
+                      footnote: 'Regulation and governance, Deep tech and R&D, and None of the above each received 0% and are omitted.',
+                      tileBackground: '#FFF3D1',
+                    }}
+                    insideTheHubs={{
+                      eyebrow: 'Inside the Hubs',
+                      swedenCopy: (
+                        <p>Stockholm remains the region&rsquo;s technology powerhouse. <strong>Spotify</strong> transformed the global music industry, while <strong>Klarna</strong>&rsquo;s 2025 New York Stock Exchange debut marked the city&rsquo;s biggest public listing since Spotify. A new generation of AI companies, including <strong>Lovable</strong>, <strong>Neko Health</strong>, and <strong>Einride</strong>, is keeping Sweden at the forefront of Europe&rsquo;s next tech wave.</p>
+                      ),
+                      denmarkCopy: (
+                        <p>Copenhagen has become one of Europe&rsquo;s densest AI startup hubs. More than a dozen AI-native SaaS companies have launched since 2023, nurturing a strong fintech and software ecosystem. Standouts include <strong>Trustpilot</strong> and <strong>Pleo</strong>, alongside Lovie Award-winning <strong>Corti ApS</strong> and <strong>Novo Nordisk</strong>&rsquo;s influence on life sciences.</p>
+                      ),
+                      finlandCopy: (
+                        <p>Finland&rsquo;s reputation for gaming has evolved into something much broader. <strong>Supercell</strong> and delivery service <strong>Wolt</strong> remain defining success stories, while <strong>Aalto University</strong> is helping turn Espoo into a centre for quantum computing through companies including <strong>IQM</strong> and <strong>SemiQon</strong>.</p>
+                      ),
+                      norwayCopy: (
+                        <p>Norway has built a diverse cohort of global technology companies. <strong>Kahoot!</strong> brought Norwegian edtech to millions, while <strong>Cognite</strong> and <strong>Ardoq</strong> have established Oslo as a leader in AI-led software. Oslo-founded and Lovie-recognised <strong>Opera</strong> is pushing further with <strong>Opera Neon</strong>, its fully agentic browser.</p>
+                      ),
+                    }}
+                    featureMedia={featureMedia}
+                    // Remaining CMS quotes (after the inline one) drop
+                    // into the right column beneath the video via
+                    // LovieTrendContent's leftoverQuotes fallback path.
+                    quotes={restQuotes.length > 0 ? restQuotes.map((q) => ({
+                      text: q.text,
+                      attribution: q.attribution,
+                      role: q.role,
+                      linkedInUrl: q.linkedInUrl,
+                      headshotUrl: q.headshotUrl,
+                      borderColor: NORDIC_ACCENT,
+                    })) : undefined}
+                  />
+                  )
+                })()}
+
+                {/* Nordics Trend 02 — Capitals Don't Tell the Region's
+                    Full Story. First 2-column module only for now
+                    (body + data module); Inside the Hubs, standouts,
+                    and quotes will slot in as the CMS gets populated. */}
+                {isNordics && (
+                  <LovieTrendContent
+                    trendNumber="02"
+                    title="Capitals Don’t Tell the Region’s Full Story"
+                    accentColor="#016BA7"
+                    body={[
+                      <>The Nordic creative economy is far more distributed than its reputation suggests. Across Sweden, Denmark, Finland, and Norway, many of the region&rsquo;s most influential companies are headquartered well beyond the capital cities.</>,
+                      <>Yet when judges were asked where the country&rsquo;s most exciting creative work is happening, nearly nine in ten still pointed to Stockholm, Copenhagen, Oslo, and Helsinki. <strong style={{ fontWeight: 700 }}>While companies have spread across the region, the creative spotlight falls on capital cities.</strong></>,
+                    ]}
+                    dataModule={{
+                      eyebrow: 'Creative Spotlight on the Capitals',
+                      question: 'When you think about the most exciting creative work coming out of your country right now, where is it being produced?',
+                      chartType: 'callout',
+                      bars: [
+                        { label: 'Predominantly from the major cities (Copenhagen, Stockholm, Oslo, Helsinki)', value: 89, displayValue: '89%' },
+                        { label: 'The work travels, but the origin is hard to track', value: 11, displayValue: '11%' },
+                        { label: 'Increasingly from secondary cities (Gothenburg, Aarhus, Oulu)', value: 0, displayValue: '0%' },
+                        { label: 'It’s genuinely distributed. No single geography dominates', value: 0, displayValue: '0%' },
+                      ],
+                      tileBackground: '#F2EEED',
+                    }}
+                  />
+                )}
+
+
+                {/* Lovie Mediterranean Trend 01 — title + body are
+                    CMS-driven through trendSections[0]. Data module,
+                    Inside the Hubs, and feature video are hardcoded. */}
+                {!isNordics && (
                 <LovieTrendContent
                   trendNumber="01"
                   title={report.trendSections?.[0]?.trendTitle?.trim() || 'A Creative Scene Building Beyond Capital Cities'}
@@ -781,6 +978,13 @@ export function ReportView({ report }: { report: Report }) {
                     title: '2025 Lovie Gold Winner, Craft — Best Installation or Experience',
                   }}
                 />
+                )}
+
+                {/* Lovie Mediterranean Trends 02–05, Takeaways transition,
+                    and Trend 05 media are all Med-only for now — hide
+                    from the Nordics report until Nordics content is
+                    ready. */}
+                {!isNordics && <>
 
                 {/* Lovie Trend 02 — Smaller Players Are Setting the Standard.
                     Body + quotes pulled from CMS so editor link/strong marks
@@ -1080,6 +1284,7 @@ export function ReportView({ report }: { report: Report }) {
                 />
 
                 <LovieTakeaways takeaways={report.lovieTakeaways} />
+                </>}
               </>
             ) : (
             <>

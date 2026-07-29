@@ -25,18 +25,46 @@ export interface LovieDataModule {
    *   `lollipop`    — thin stem with a dot at the value (ranked / scores)
    *   `verticalBar` — column chart (Anthem-style; many parallel categories)
    *   `donut`       — interactive donut with hover-to-highlight wedges
-   *                   (single-choice / share-of-total data) */
-  chartType?: 'bar' | 'lollipop' | 'verticalBar' | 'donut'
+   *   `callout`     — big-number editorial treatment (single dominant
+   *                   answer with supporting secondary + zero-response
+   *                   footnote) */
+  chartType?: 'bar' | 'lollipop' | 'verticalBar' | 'donut' | 'callout'
   /** Optional footnote rendered under the chart (e.g. "Avg. score out of 10"). */
   footnote?: string
+  /** Optional override for the tile background colour. Defaults to
+   * the Lovie lime `#eeffbb`. Set on a per-trend basis (e.g. Nordics
+   * uses a pale cream `#FFF3D1`). */
+  tileBackground?: string
+}
+
+export type HubCountry =
+  | 'spain'
+  | 'italy'
+  | 'portugal'
+  | 'sweden'
+  | 'denmark'
+  | 'finland'
+  | 'norway'
+
+export interface HubCountryEntry {
+  country: HubCountry
+  copy?: PortableTextBlock[] | React.ReactNode
 }
 
 export interface LovieInsideTheHubsContent {
   eyebrow?: string
   heading?: string
+  // Preferred field — array of country entries. Country stickers are
+  // picked automatically from the `country` value.
+  countries?: HubCountryEntry[]
+  // Legacy per-country fields (Med only). Used if `countries` is empty.
   spainCopy?: PortableTextBlock[] | React.ReactNode
   italyCopy?: PortableTextBlock[] | React.ReactNode
   portugalCopy?: PortableTextBlock[] | React.ReactNode
+  swedenCopy?: PortableTextBlock[] | React.ReactNode
+  denmarkCopy?: PortableTextBlock[] | React.ReactNode
+  finlandCopy?: PortableTextBlock[] | React.ReactNode
+  norwayCopy?: PortableTextBlock[] | React.ReactNode
 }
 
 export interface LovieFeatureMedia {
@@ -173,7 +201,14 @@ export function LovieTrendContent({
           </div>
 
           {row1Right && (
-            <div className="md:w-[50%] md:pt-[38px]">
+            <div
+              className={
+                'md:w-[50%] ' +
+                (row1Right.kind === 'data' && row1Right.module.chartType === 'callout'
+                  ? ''
+                  : 'md:pt-[38px]')
+              }
+            >
               {row1Right.kind === 'data' ? (
                 <DataModuleBlock module={row1Right.module} accentColor={accentColor} />
               ) : (
@@ -254,7 +289,7 @@ function DataModuleBlock({ module, accentColor }: { module: LovieDataModule; acc
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
       style={useLimeTile ? {
-        background: '#eeffbb',
+        background: module.tileBackground || '#eeffbb',
         borderRadius: 14,
         padding: '28px 28px',
       } : undefined}
@@ -268,7 +303,9 @@ function DataModuleBlock({ module, accentColor }: { module: LovieDataModule; acc
         {module.question}
       </h4>
 
-      {chartType === 'lollipop' ? (
+      {chartType === 'callout' ? (
+        <CalloutStat bars={module.bars} accentColor={accentColor} />
+      ) : chartType === 'lollipop' ? (
         <div className="flex flex-col gap-5 w-full">
           {module.bars.map((bar, i) => (
             <LollipopRow key={i} bar={bar} accentColor={accentColor} delay={0.1 + i * 0.08} />
@@ -576,12 +613,55 @@ function LollipopRow({ bar, accentColor, delay }: { bar: LovieDataBar; accentCol
   )
 }
 
+// Small wrappers so the Nordic country stickers (which live as SVG
+// files under /public/lovie/) share the same call signature as the
+// Mediterranean country SVG components — render as an <img>.
+const NordicSweden = (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+  <img src="/lovie/sweden-sticker.svg" alt="" {...props} />
+)
+const NordicDenmark = (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+  <img src="/lovie/denmark-sticker.svg" alt="" {...props} />
+)
+const NordicFinland = (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+  <img src="/lovie/finland-sticker.svg" alt="" {...props} />
+)
+const NordicNorway = (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+  <img src="/lovie/norway-sticker.svg" alt="" {...props} />
+)
+
+// Map from a CMS country slug to its label + icon component. Adding
+// a new country: extend both this map AND the schema's country
+// dropdown options in `insideTheHubs.ts` so editors can select it.
+const COUNTRY_META: Record<HubCountry, { label: string; Icon: React.ComponentType<React.ImgHTMLAttributes<HTMLImageElement> & React.SVGProps<SVGSVGElement>> }> = {
+  spain: { label: 'Spain', Icon: CountrySpain as never },
+  italy: { label: 'Italy', Icon: CountryItaly as never },
+  portugal: { label: 'Portugal', Icon: CountryPortugal as never },
+  sweden: { label: 'Sweden', Icon: NordicSweden as never },
+  denmark: { label: 'Denmark', Icon: NordicDenmark as never },
+  finland: { label: 'Finland', Icon: NordicFinland as never },
+  norway: { label: 'Norway', Icon: NordicNorway as never },
+}
+
 function InsideTheHubsBlock({ content, accentColor }: { content: LovieInsideTheHubsContent; accentColor: string }) {
-  const rows = [
-    { label: 'Spain', copy: content.spainCopy, Icon: CountrySpain },
-    { label: 'Italy', copy: content.italyCopy, Icon: CountryItaly },
-    { label: 'Portugal', copy: content.portugalCopy, Icon: CountryPortugal },
+  // Preferred path: iterate the CMS `countries` array so editors can
+  // add / reorder countries + auto-pick stickers. Fall back to the
+  // legacy per-country fields when the array isn't populated.
+  const arrayRows: { label: string; copy: LovieInsideTheHubsContent['spainCopy']; Icon: React.ComponentType<React.ImgHTMLAttributes<HTMLImageElement> & React.SVGProps<SVGSVGElement>> }[] =
+    (content.countries || [])
+      .filter((c) => !!c.copy && COUNTRY_META[c.country])
+      .map((c) => ({ label: COUNTRY_META[c.country].label, copy: c.copy, Icon: COUNTRY_META[c.country].Icon }))
+
+  const legacyRows = [
+    { label: 'Spain', copy: content.spainCopy, Icon: COUNTRY_META.spain.Icon },
+    { label: 'Italy', copy: content.italyCopy, Icon: COUNTRY_META.italy.Icon },
+    { label: 'Portugal', copy: content.portugalCopy, Icon: COUNTRY_META.portugal.Icon },
+    { label: 'Sweden', copy: content.swedenCopy, Icon: COUNTRY_META.sweden.Icon },
+    { label: 'Denmark', copy: content.denmarkCopy, Icon: COUNTRY_META.denmark.Icon },
+    { label: 'Finland', copy: content.finlandCopy, Icon: COUNTRY_META.finland.Icon },
+    { label: 'Norway', copy: content.norwayCopy, Icon: COUNTRY_META.norway.Icon },
   ].filter((r) => !!r.copy)
+
+  const rows = arrayRows.length > 0 ? arrayRows : legacyRows
 
   return (
     <motion.div
@@ -658,12 +738,32 @@ function InsideTheHubsBlock({ content, accentColor }: { content: LovieInsideTheH
   )
 }
 
+function toYouTubeEmbedUrl(url: string): string {
+  // Convert youtube.com/watch?v=ID or youtu.be/ID → youtube.com/embed/ID
+  // so the iframe embed works. Leaves any other URL untouched.
+  try {
+    const u = new URL(url)
+    if (u.hostname.endsWith('youtube.com') && u.pathname === '/watch') {
+      const id = u.searchParams.get('v')
+      if (id) return `https://www.youtube.com/embed/${id}`
+    }
+    if (u.hostname === 'youtu.be' || u.hostname === 'www.youtu.be') {
+      const id = u.pathname.replace(/^\//, '')
+      if (id) return `https://www.youtube.com/embed/${id}`
+    }
+  } catch {
+    // fall through
+  }
+  return url
+}
+
 function FeatureMediaBlock({ media, accentColor }: { media: LovieFeatureMedia; accentColor: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const isInView = useInView(containerRef, { amount: 0.3 })
   const isVideoFile = /\.(mp4|webm|ogg)(\?|$)/i.test(media.url)
+  const embedUrl = isVideoFile ? media.url : toYouTubeEmbedUrl(media.url)
   const buttonLabel = media.buttonLabel ?? 'Watch Video'
   // Lovie play-button color — lime brand green with black text. Dark border
   // keeps the button readable against the cream section background.
@@ -756,17 +856,32 @@ function FeatureMediaBlock({ media, accentColor }: { media: LovieFeatureMedia; a
           </div>
         </>
       ) : (
-        // External URL — embed as iframe (no play/pause; the host site
-        // controls playback).
-        <div className="aspect-video w-full overflow-hidden rounded-lg" style={{ background: '#000' }}>
-          <iframe
-            src={media.url}
-            title={media.label || 'Feature'}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-            allowFullScreen
-          />
-        </div>
+        <>
+          {/* External URL — embed as iframe (no play/pause; the host
+              site controls playback). */}
+          <div className="aspect-video w-full overflow-hidden rounded-lg" style={{ background: '#000' }}>
+            <iframe
+              src={embedUrl}
+              title={media.label || 'Feature'}
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+              allowFullScreen
+            />
+          </div>
+
+          {/* Metadata row (name + title) — same as the mp4 case, minus
+              the Watch/Pause button since the iframe owns playback. */}
+          {(media.name || media.title) && (
+            <div className="py-3">
+              {media.name && (
+                <p className="text-[14px] font-semibold" style={{ color: '#000' }}>{media.name}</p>
+              )}
+              {media.title && (
+                <p className="text-[13px]" style={{ color: '#000', opacity: 0.6 }}>{media.title}</p>
+              )}
+            </div>
+          )}
+        </>
       )}
 
       {media.description && (
@@ -831,5 +946,70 @@ function QuoteBlock({ quote, accentColor }: { quote: LovieQuote; accentColor: st
         </figcaption>
       </div>
     </motion.figure>
+  )
+}
+
+// CalloutStat — big-number editorial treatment for data with one
+// dominant answer. Bars[0] is treated as the primary; bars[1] as a
+// secondary supporting stat; any remaining zero-value entries roll
+// up into a footnote so the module doesn't drown out the story.
+function CalloutStat({ bars, accentColor }: { bars: LovieDataBar[]; accentColor: string }) {
+  const [primary, secondary] = bars
+  return (
+    <div>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        <div
+          style={{
+            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+            fontSize: 'clamp(72px, 10vw, 128px)',
+            fontWeight: 700,
+            color: accentColor,
+            lineHeight: 0.9,
+            letterSpacing: '-0.03em',
+          }}
+        >
+          {primary.displayValue ?? `${primary.value}%`}
+        </div>
+        <p
+          style={{
+            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+            fontSize: 18,
+            fontWeight: 500,
+            color: '#000',
+            lineHeight: 1.35,
+            margin: '12px 0 0',
+          }}
+        >
+          {primary.label}
+        </p>
+      </motion.div>
+
+      {secondary && (
+        <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid rgba(0, 0, 0, 0.2)' }}>
+          <p
+            style={{
+              fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+              fontSize: 14,
+              color: '#000',
+              lineHeight: 1.5,
+              margin: 0,
+            }}
+          >
+            Only{' '}
+            <strong style={{ fontWeight: 700, color: accentColor }}>
+              {secondary.displayValue ?? `${secondary.value}%`}
+            </strong>{' '}
+            {secondary.label.toLowerCase().startsWith('say ')
+              ? secondary.label
+              : `say: ${secondary.label}`}
+          </p>
+        </div>
+      )}
+    </div>
   )
 }

@@ -64,6 +64,18 @@ export const reportBySlugQuery = groq`
       showTips,
       tipsTitle,
       tipsItems,
+      showInsideTheHubs,
+      insideTheHubs {
+        eyebrow,
+        heading,
+        countries[] { country, copy },
+        // Legacy per-country fields — still fetched so any previously
+        // published Med content keeps rendering until it migrates to
+        // the new countries array above.
+        spainCopy,
+        italyCopy,
+        portugalCopy,
+      },
       // Shared Influence content slabs — resolve each block type's fields
       // (including nested video file URLs and inline pull-quote objects).
       contentSlabs[] {

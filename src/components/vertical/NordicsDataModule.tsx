@@ -62,7 +62,7 @@ export function NordicsDataModule() {
           {QUESTION}
         </h3>
 
-        <div style={{ borderTop: `2px solid ${NORDICS_INK}`, paddingTop: 24 }}>
+        <div>
           {/* Stacked bar — 4 segments sized to their share */}
           <div style={{
             display: 'flex',
