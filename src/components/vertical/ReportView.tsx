@@ -853,7 +853,18 @@ export function ReportView({ report }: { report: Report }) {
                               color: '#000000',
                               margin: 0,
                             }}>
-                              <strong style={{ fontWeight: 700 }}>{inlineQuote.attribution}</strong>
+                              {inlineQuote.linkedInUrl ? (
+                                <a
+                                  href={inlineQuote.linkedInUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ color: '#000000', textDecoration: 'underline', textUnderlineOffset: 3, textDecorationColor: NORDIC_ACCENT, fontWeight: 700 }}
+                                >
+                                  {inlineQuote.attribution}
+                                </a>
+                              ) : (
+                                <strong style={{ fontWeight: 700 }}>{inlineQuote.attribution}</strong>
+                              )}
                               {inlineQuote.role ? `, ${inlineQuote.role}` : ''}
                             </p>
                           </div>
@@ -997,10 +1008,93 @@ export function ReportView({ report }: { report: Report }) {
                 )}
 
                 {/* Nordics Trend 03 — Sustainability & Circularity At the
-                    Centre. First part: body + inline pull quote (Martin
-                    Cedergren) + Norlys standout image. Data module and
-                    Inside the Hubs slot in as they arrive. */}
-                {isNordics && (
+                    Centre. Inline pull quote (Martin Cedergren) is
+                    CMS-driven via Trend 03 → Expert Quotes; falls back
+                    to the hardcoded Martin quote (with the zoom-cropped
+                    hardcoded headshot) when the CMS array is empty. */}
+                {isNordics && (() => {
+                  const cmsQuote03 = report.trendSections?.[2]?.expertQuotes?.[0]
+                  const cmsInlineQuote = cmsQuote03
+                    ? {
+                        text: portableTextToPlain(cmsQuote03.quoteText),
+                        name: cmsQuote03.name,
+                        role: cmsQuote03.title || '',
+                        linkedInUrl: cmsQuote03.linkedInUrl,
+                        headshotUrl: cmsQuote03.headshot
+                          ? urlFor(cmsQuote03.headshot).width(240).height(240).fit('crop').url()
+                          : undefined,
+                      }
+                    : null
+                  const quoteNode = cmsInlineQuote ? (
+                    <div key="quote" style={{ display: 'flex', gap: 20, alignItems: 'flex-start', marginTop: 12, paddingLeft: 20, borderLeft: `3px solid #016BA7` }}>
+                      {cmsInlineQuote.headshotUrl && (
+                        <img
+                          src={cmsInlineQuote.headshotUrl}
+                          alt={cmsInlineQuote.name}
+                          width={80}
+                          height={80}
+                          style={{
+                            width: 80,
+                            height: 80,
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            flexShrink: 0,
+                            border: '2px solid #016BA7',
+                          }}
+                        />
+                      )}
+                      <div>
+                        <p style={{ fontFamily: "'Scto Grotesk A', -apple-system, sans-serif", fontSize: 17, lineHeight: 1.5, color: '#000000', margin: '0 0 12px' }}>
+                          {cmsInlineQuote.text}
+                        </p>
+                        <p style={{ fontFamily: "'Scto Grotesk A', -apple-system, sans-serif", fontSize: 14, lineHeight: 1.4, color: '#000000', margin: 0 }}>
+                          {cmsInlineQuote.linkedInUrl ? (
+                            <a
+                              href={cmsInlineQuote.linkedInUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ color: '#000000', textDecoration: 'underline', textUnderlineOffset: 3, textDecorationColor: '#016BA7', fontWeight: 700 }}
+                            >
+                              {cmsInlineQuote.name}
+                            </a>
+                          ) : (
+                            <strong style={{ fontWeight: 700 }}>{cmsInlineQuote.name}</strong>
+                          )}
+                          {cmsInlineQuote.role ? `, ${cmsInlineQuote.role}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    // Hardcoded Martin — zoom transform tuned for the
+                    // wide source photo. Used only when the CMS array is
+                    // empty; once populated, editors pick the crop via
+                    // Sanity's image hotspot.
+                    <div key="quote" style={{ display: 'flex', gap: 20, alignItems: 'flex-start', marginTop: 12, paddingLeft: 20, borderLeft: `3px solid #016BA7` }}>
+                      <div style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '2px solid #016BA7' }}>
+                        <img
+                          src="/lovie/martin-cedergren-headshot.jpg"
+                          alt="Martin Cedergren"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            objectPosition: '48% 30%',
+                            transform: 'translateX(3px) scale(1.8)',
+                            transformOrigin: '48% 30%',
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <p style={{ fontFamily: "'Scto Grotesk A', -apple-system, sans-serif", fontSize: 17, lineHeight: 1.5, color: '#000000', margin: '0 0 12px' }}>
+                          “The tension between rigid ESG compliance and creative risk-taking. With strict EU directives (like CSRD/ESRS), sustainability is no longer a marketing choice; it is a legal data matrix… The real, unappreciated challenge is figuring out how to aggressively defend raw, emotional storytelling while operating flawlessly within these legal handcuffs.”
+                        </p>
+                        <p style={{ fontFamily: "'Scto Grotesk A', -apple-system, sans-serif", fontSize: 14, lineHeight: 1.4, color: '#000000', margin: 0 }}>
+                          <strong style={{ fontWeight: 700 }}>Martin Cedergren</strong>, Creative Director &amp; Brand Advisor
+                        </p>
+                      </div>
+                    </div>
+                  )
+                  return (
                   <LovieTrendContent
                     trendNumber="03"
                     title="Sustainability & Circularity At the Centre"
@@ -1008,49 +1102,7 @@ export function ReportView({ report }: { report: Report }) {
                     body={[
                       <>Across the Nordics, sustainability is less a brand message than a business principle. Rather than treating environmental responsibility as a marketing campaign, many of the region&rsquo;s best-known companies have built it into their products, operations, and long-term strategy. That confidence often carries through to their communications, too.</>,
                       <>Brands are comfortable being self-aware, irreverent, and transparent&mdash;using honesty in place of polished corporate messaging. Together, those qualities have become one of the region&rsquo;s most distinctive creative signatures.</>,
-                      <div key="quote" style={{ display: 'flex', gap: 20, alignItems: 'flex-start', marginTop: 12, paddingLeft: 20, borderLeft: `3px solid #016BA7` }}>
-                        <div style={{
-                          width: 80,
-                          height: 80,
-                          borderRadius: '50%',
-                          overflow: 'hidden',
-                          flexShrink: 0,
-                          border: '2px solid #016BA7',
-                        }}>
-                          <img
-                            src="/lovie/martin-cedergren-headshot.jpg"
-                            alt="Martin Cedergren"
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              objectPosition: '48% 30%',
-                              transform: 'translateX(3px) scale(1.8)',
-                              transformOrigin: '48% 30%',
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <p style={{
-                            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
-                            fontSize: 17,
-                            lineHeight: 1.5,
-                            color: '#000000',
-                            margin: '0 0 12px',
-                          }}>
-                            “The tension between rigid ESG compliance and creative risk-taking. With strict EU directives (like CSRD/ESRS), sustainability is no longer a marketing choice; it is a legal data matrix… The real, unappreciated challenge is figuring out how to aggressively defend raw, emotional storytelling while operating flawlessly within these legal handcuffs.”
-                          </p>
-                          <p style={{
-                            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
-                            fontSize: 14,
-                            lineHeight: 1.4,
-                            color: '#000000',
-                            margin: 0,
-                          }}>
-                            <strong style={{ fontWeight: 700 }}>Martin Cedergren</strong>, Creative Director &amp; Brand Advisor
-                          </p>
-                        </div>
-                      </div>,
+                      quoteNode,
                     ]}
                     featureMedia={resolveStandout(report.trendSections?.[2]?.trendVideo, 'Standouts from the Nordics') || {
                       url: 'https://framna.com/cases/norlys',
@@ -1080,7 +1132,8 @@ export function ReportView({ report }: { report: Report }) {
                       title: 'OK started in 1978 as Denmark’s largest fuel cooperative, but its app now frames EV charging, heat pumps, solar advice, and green electricity as core functions, not a campaign layered on top of a fuel business.',
                     }}
                   />
-                )}
+                  )
+                })()}
 
                 {/* Nordics Trend 04 — Cross-Border Collaboration At Its
                     Core. Body + inline pull quotes in row 1 left; enlarged
@@ -1088,7 +1141,36 @@ export function ReportView({ report }: { report: Report }) {
                     Inside the Hubs / standouts. */}
                 {isNordics && (() => {
                   const NORDIC_ACCENT_T4 = '#016BA7'
-                  function InlineQuote({ text, name, role, headshotUrl }: { text: string; name: string; role: string; headshotUrl?: string }) {
+                  // CMS-driven pull quotes with hardcoded pair as fallback.
+                  // Editors populate Trend 04 → Expert Quotes; the first
+                  // two render inline below the body copy in Claus/David
+                  // order.
+                  const cmsQuotes04 = report.trendSections?.[3]?.expertQuotes ?? []
+                  const nordicsQuotes04 = cmsQuotes04.length > 0
+                    ? cmsQuotes04.map((q) => ({
+                        text: portableTextToPlain(q.quoteText),
+                        name: q.name,
+                        role: q.title || '',
+                        linkedInUrl: q.linkedInUrl,
+                        headshotUrl: q.headshot ? urlFor(q.headshot).width(240).height(240).fit('crop').url() : undefined,
+                      }))
+                    : [
+                        {
+                          text: '“People underestimate that creatives from a smaller country are more diverse in their craft. They are not as specialized as in bigger countries. They can also do more for less money since budgets are not high here.”',
+                          name: 'Claus Collstrup',
+                          role: 'Creative Director & Partner, NoA / &Co',
+                          linkedInUrl: 'https://dk.linkedin.com/in/claus-collstrup-39871334',
+                          headshotUrl: '/lovie/claus-collstrup-headshot.jpeg',
+                        },
+                        {
+                          text: '“It’s incredibly important to lean on Scandinavian culture and standards, but improve on selling ideas and approaches globally.”',
+                          name: 'David Juul Ledstrup',
+                          role: 'Executive Strategy Director, Kubbco',
+                          linkedInUrl: 'https://www.linkedin.com/in/davidledstrup/',
+                          headshotUrl: '/lovie/david-juul-ledstrup-headshot.webp',
+                        },
+                      ]
+                  function InlineQuote({ text, name, role, headshotUrl, linkedInUrl }: { text: string; name: string; role: string; headshotUrl?: string; linkedInUrl?: string }) {
                     return (
                       <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', marginTop: 12, paddingLeft: 20, borderLeft: `3px solid ${NORDIC_ACCENT_T4}` }}>
                         {headshotUrl && (
@@ -1124,7 +1206,19 @@ export function ReportView({ report }: { report: Report }) {
                             color: '#000000',
                             margin: 0,
                           }}>
-                            <strong style={{ fontWeight: 700 }}>{name}</strong>, {role}
+                            {linkedInUrl ? (
+                              <a
+                                href={linkedInUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: '#000000', textDecoration: 'underline', textUnderlineOffset: 3, textDecorationColor: NORDIC_ACCENT_T4, fontWeight: 700 }}
+                              >
+                                {name}
+                              </a>
+                            ) : (
+                              <strong style={{ fontWeight: 700 }}>{name}</strong>
+                            )}
+                            {role ? `, ${role}` : ''}
                           </p>
                         </div>
                       </div>
@@ -1138,20 +1232,16 @@ export function ReportView({ report }: { report: Report }) {
                     body={[
                       <>Scandinavia and Finland&rsquo;s creative industries punch above their weight by thinking beyond national markets. Rather than competing as four separate creative scenes, agencies have built networks that share talent, clients, and expertise across the region.</>,
                       <>The <strong>North Alliance</strong> is the clearest example: an independent agency collective that gives smaller markets the scale to compete internationally while maintaining strong local identities. It&rsquo;s a model that reflects the region itself: <strong style={{ fontWeight: 700 }}>collaborative and designed to embrace collaboration as a competitive advantage</strong>.</>,
-                      <InlineQuote
-                        key="q-claus"
-                        text="“People underestimate that creatives from a smaller country are more diverse in their craft. They are not as specialized as in bigger countries. They can also do more for less money since budgets are not high here.”"
-                        name="Claus Collstrup"
-                        role="Creative Director & Partner, NoA / &Co"
-                        headshotUrl="/lovie/claus-collstrup-headshot.jpeg"
-                      />,
-                      <InlineQuote
-                        key="q-david"
-                        text="“It’s incredibly important to lean on Scandinavian culture and standards, but improve on selling ideas and approaches globally.”"
-                        name="David Juul Ledstrup"
-                        role="Executive Strategy Director, Kubbco"
-                        headshotUrl="/lovie/david-juul-ledstrup-headshot.webp"
-                      />,
+                      ...nordicsQuotes04.slice(0, 2).map((q, i) => (
+                        <InlineQuote
+                          key={`q-t4-${i}`}
+                          text={q.text}
+                          name={q.name}
+                          role={q.role}
+                          headshotUrl={q.headshotUrl}
+                          linkedInUrl={q.linkedInUrl}
+                        />
+                      )),
                     ]}
                     dataModule={{
                       eyebrow: 'Culturally Specific or International',

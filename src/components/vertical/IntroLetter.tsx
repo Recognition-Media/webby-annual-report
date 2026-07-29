@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
@@ -523,9 +524,14 @@ function NordicsOpening({ report }: { report: Report }) {
     <section
       id="welcome-letter"
       data-snap
-      className="relative overflow-hidden px-5 md:px-[60px] pt-20 pb-8 md:py-28"
+      className="relative overflow-hidden px-5 md:px-[60px] pt-8 pb-8 md:pt-12 md:pb-10"
       style={{ background: '#f2eeed' }}
     >
+      {/* Top ribbon — animates in as soon as the section enters view so
+          the user lands with motion. Bottom ribbon renders at the very
+          end of the letter. */}
+      <NordicsFlagStripes position="top" />
+
       <div
         className="relative z-10"
         style={{
@@ -578,6 +584,87 @@ function NordicsOpening({ report }: { report: Report }) {
           )}
         </div>
       </div>
+
+      {/* Decorative Nordic-flag ribbon at the bottom of the letter.
+          Five stripes in the Nordic flag palette, each anchored at its
+          own x-range and animating in as the section scrolls into
+          view. */}
+      <NordicsFlagStripes position="bottom" />
     </section>
+  )
+}
+
+// Nordic flag ribbon — five stripes staggered horizontally to form
+// an abstract, flag-inspired band. Each stripe grows from its origin
+// edge on scroll-in via a native CSS transition (more reliable than
+// framer-motion here — the right-anchored stripes were dropping frames
+// in some viewports). An IntersectionObserver on the wrapper flips a
+// class that swaps the initial scaleX(0) for scaleX(1).
+function NordicsFlagStripes({ position }: { position: 'top' | 'bottom' }) {
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
+  const [inView, setInView] = useState(false)
+
+  useEffect(() => {
+    const node = wrapperRef.current
+    if (!node) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.1 },
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  const stripes = [
+    { color: '#C71539', startPct: 0,  endPct: 55,  origin: 'left'  as const },
+    { color: '#FFFFFF', startPct: 12, endPct: 65,  origin: 'left'  as const },
+    { color: '#00205B', startPct: 22, endPct: 72,  origin: 'left'  as const },
+    { color: '#FCD335', startPct: 42, endPct: 95,  origin: 'right' as const },
+    { color: '#006AA7', startPct: 45, endPct: 100, origin: 'right' as const },
+  ]
+  const STRIPE_HEIGHT = 14
+  const STRIPE_GAP = 0
+  const totalHeight = stripes.length * STRIPE_HEIGHT + (stripes.length - 1) * STRIPE_GAP
+  return (
+    <div
+      ref={wrapperRef}
+      aria-hidden
+      className="-mx-5 md:-mx-[60px]"
+      style={{
+        position: 'relative',
+        height: totalHeight,
+        marginTop: position === 'bottom' ? 32 : 0,
+        marginBottom: position === 'top' ? 48 : 0,
+      }}
+    >
+      {stripes.map((s, i) => {
+        const rightOffset = 100 - s.endPct
+        const anchorStyle =
+          s.origin === 'left'
+            ? { left: `${s.startPct}%` }
+            : { right: rightOffset === 0 ? 0 : `${rightOffset}%` }
+        return (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              top: i * (STRIPE_HEIGHT + STRIPE_GAP),
+              ...anchorStyle,
+              width: `${s.endPct - s.startPct}%`,
+              height: STRIPE_HEIGHT,
+              background: s.color,
+              transformOrigin: s.origin === 'left' ? '0% 50%' : '100% 50%',
+              transform: inView ? 'scaleX(1)' : 'scaleX(0)',
+              transition: `transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) ${0.15 * i}s`,
+            }}
+          />
+        )
+      })}
+    </div>
   )
 }
