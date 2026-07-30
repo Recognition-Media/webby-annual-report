@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
@@ -232,23 +232,36 @@ export function LovieTrendContent({
               {title}
             </motion.h3>
             <div style={{ width: 36, height: 2, background: accentColor, marginBottom: 24 }} />
-            {body.map((para, i) => (
-              <motion.p
-                key={i}
-                className="text-[16px] leading-[1.6] mb-6"
-                style={{
-                  color: '#000',
-                  fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
-                  fontWeight: 400,
-                }}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 + i * 0.1 }}
-              >
-                {para}
-              </motion.p>
-            ))}
+            {body.map((para, i) => {
+              // Body items are usually short text/JSX (wraps cleanly in
+              // <p>), but a few Nordics trends pass inline pull-quote
+              // <div> elements as body items. Wrapping a <div> in a <p>
+              // is invalid HTML and triggers a Next.js hydration
+              // warning, so switch the wrapper to a <div> when the
+              // child is itself a block-level React element.
+              const isBlockChild =
+                React.isValidElement(para) &&
+                typeof para.type === 'string' &&
+                ['div', 'section', 'article', 'blockquote'].includes(para.type)
+              const Wrapper: typeof motion.p = isBlockChild ? motion.div : motion.p
+              return (
+                <Wrapper
+                  key={i}
+                  className="text-[16px] leading-[1.6] mb-6"
+                  style={{
+                    color: '#000',
+                    fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+                    fontWeight: 400,
+                  }}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.1 + i * 0.1 }}
+                >
+                  {para}
+                </Wrapper>
+              )
+            })}
           </div>
 
           {row1Right && (
