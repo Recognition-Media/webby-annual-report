@@ -146,8 +146,8 @@ export function ReportSectionCover({
       }`}
       style={{
         background: isLovie ? '#f2eeed' : '#E3DDCA',
-        paddingTop: compact ? 80 : 50,
-        paddingBottom: compact ? 60 : 50,
+        paddingTop: compact ? (isMobile ? 56 : 80) : 50,
+        paddingBottom: compact ? (isMobile ? 24 : 60) : 50,
         ...(hasExplicitMinHeight && !isMobile ? { minHeight: minHeightPx } : {}),
       }}
     >

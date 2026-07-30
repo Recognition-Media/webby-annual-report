@@ -1,9 +1,11 @@
 'use client'
 
-// "Nordic Creatives to Watch" — 3×3 grid of under-the-radar picks.
-// Editorial spreadsheet treatment: soft neutral rules, warm cream tint
-// (matching the Trend 01 data tile), Swedish blue used only as an
-// accent on the number, arrow, and hover state.
+// "Nordic Creatives to Watch" — under-the-radar picks laid out in a
+// responsive card grid. 2 columns on mobile (so studio names have
+// room to breathe), 3 columns on desktop. Cards use the same
+// editorial-spreadsheet treatment as before: soft neutral rules,
+// warm cream tile background, Swedish blue accent on the number,
+// arrow, and hover state.
 
 const NORDIC_BLUE = '#016BA7'
 
@@ -21,6 +23,24 @@ const PICKS: Pick[] = [
   { name: 'Annika Backstrom', role: 'Art Director', url: 'https://www.annikabackstrom.se/' },
 ]
 
+// Scoped CSS handles the responsive border rules — 2-col rules on
+// mobile, 3-col rules on desktop. Cleaner than juggling className
+// conditionals per card.
+const BORDER_STYLES = `
+  .otw-card {
+    border-right: 1px solid rgba(0,0,0,0.12);
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+  }
+  @media (max-width: 767px) {
+    .otw-card:nth-child(2n) { border-right: none; }
+    .otw-card:last-child { border-right: none; border-bottom: none; }
+  }
+  @media (min-width: 768px) {
+    .otw-card:nth-child(3n) { border-right: none; }
+    .otw-card:nth-child(n+7) { border-bottom: none; }
+  }
+`
+
 export function NordicsOnesToWatch() {
   return (
     <section
@@ -31,24 +51,25 @@ export function NordicsOnesToWatch() {
         fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
       }}
     >
+      <style>{BORDER_STYLES}</style>
       <div style={{ maxWidth: 1180, margin: '0 auto' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          border: '1px solid rgba(0,0,0,0.12)',
-          background: 'rgba(255, 243, 209, 0.4)',
-        }}>
+        <div
+          className="grid grid-cols-2 md:grid-cols-3"
+          style={{
+            border: '1px solid rgba(0,0,0,0.12)',
+            background: 'rgba(255, 243, 209, 0.4)',
+          }}
+        >
           {PICKS.map((p, i) => (
             <a
               key={i}
+              className="otw-card"
               href={p.url}
               target="_blank"
               rel="noopener noreferrer"
               style={{
                 display: 'block',
-                padding: '28px 24px 24px',
-                borderRight: (i % 3 !== 2) ? '1px solid rgba(0,0,0,0.12)' : 'none',
-                borderBottom: (i < 6) ? '1px solid rgba(0,0,0,0.12)' : 'none',
+                padding: '28px 20px 22px',
                 color: '#000',
                 textDecoration: 'none',
                 minHeight: 130,
@@ -72,8 +93,8 @@ export function NordicsOnesToWatch() {
             >
               <span style={{
                 position: 'absolute',
-                top: 14,
-                left: 18,
+                top: 12,
+                left: 14,
                 fontSize: 12,
                 fontWeight: 700,
                 letterSpacing: 2,
@@ -85,8 +106,8 @@ export function NordicsOnesToWatch() {
                 data-arrow
                 style={{
                   position: 'absolute',
-                  top: 12,
-                  right: 18,
+                  top: 10,
+                  right: 14,
                   fontSize: 16,
                   color: NORDIC_BLUE,
                   transition: 'transform 0.2s ease',
@@ -97,10 +118,10 @@ export function NordicsOnesToWatch() {
               </span>
               <div
                 data-name
+                className="text-[17px] md:text-[20px]"
                 style={{
                   marginTop: 28,
                   fontWeight: 700,
-                  fontSize: 20,
                   lineHeight: 1.2,
                   textUnderlineOffset: 4,
                   textDecorationColor: NORDIC_BLUE,
@@ -109,12 +130,14 @@ export function NordicsOnesToWatch() {
               >
                 {p.name}
               </div>
-              <div style={{
-                marginTop: 6,
-                fontSize: 13,
-                lineHeight: 1.4,
-                color: 'rgba(0,0,0,0.6)',
-              }}>
+              <div
+                className="text-[12px] md:text-[13px]"
+                style={{
+                  marginTop: 6,
+                  lineHeight: 1.4,
+                  color: 'rgba(0,0,0,0.6)',
+                }}
+              >
                 {p.role}
               </div>
             </a>

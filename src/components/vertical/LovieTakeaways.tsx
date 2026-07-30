@@ -33,25 +33,30 @@ const FALLBACK_TAKEAWAYS = [
 function NumberedHeart({ n, variant }: { n: number; variant: 'med' | 'nordics' }) {
   if (variant === 'nordics') {
     return (
-      <div style={{ position: 'relative', width: 80, height: 80, flexShrink: 0 }}>
+      <div
+        className="w-[52px] h-[52px] md:w-[80px] md:h-[80px]"
+        style={{ position: 'relative', flexShrink: 0 }}
+      >
         <img
           src="/lovie/lovie-heart-black.svg"
           alt=""
           aria-hidden
           style={{ width: '100%', height: '100%', display: 'block' }}
         />
-        <span style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#fff',
-          fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
-          fontWeight: 700,
-          fontSize: 34,
-          lineHeight: 1,
-        }}>
+        <span
+          className="text-[22px] md:text-[34px]"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
+            fontWeight: 700,
+            lineHeight: 1,
+          }}
+        >
           {n}
         </span>
       </div>
@@ -61,7 +66,8 @@ function NumberedHeart({ n, variant }: { n: number; variant: 'med' | 'nordics' }
     <img
       src={`/lovie/takeaway-${n}.png`}
       alt={`Takeaway ${n}`}
-      style={{ width: 80, height: 'auto', flexShrink: 0 }}
+      className="w-[56px] md:w-[80px]"
+      style={{ height: 'auto', flexShrink: 0 }}
     />
   )
 }

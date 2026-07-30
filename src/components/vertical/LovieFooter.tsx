@@ -93,6 +93,7 @@ export function LovieFooter({ report }: { report: Report }) {
     <footer
       id="about-lovie"
       data-snap
+      className={isNordics ? 'pt-[140px] pb-[100px] px-6 md:pt-[240px] md:pb-[220px] md:px-6' : ''}
       style={{
         // Solid purple ground. Med bakes Spain/Italy/Portugal flag hearts
         // + a dashed curve into the PNG; Nordics uses just the plain
@@ -105,7 +106,7 @@ export function LovieFooter({ report }: { report: Report }) {
         // portion lands behind "About The Lovie Awards." instead of
         // sitting fully above the headline.
         backgroundPosition: 'center -144px',
-        padding: isNordics ? '240px 24px 220px' : '120px 24px 220px',
+        padding: isNordics ? undefined : '120px 24px 220px',
         fontFamily: "'Scto Grotesk A', -apple-system, sans-serif",
         color: isNordics ? '#000000' : '#ffffff',
         position: 'relative',
@@ -242,11 +243,13 @@ function NordicsStickerBand() {
   // Stickers hug the far left / far right so the centered "About The
   // Lovie Awards" title + deadline copy stay uncovered. Two on each
   // side, staggered vertically for a bit of rhythm.
+  // Each sticker gets a subtle float — small y-axis bob with slightly
+  // different durations and delays so the group never syncs up.
   const stickers = [
-    { src: '/lovie/norway-sticker.svg',  left: '3%',  top: 40, size: 170, rotate: -4 },
-    { src: '/lovie/sweden-sticker.svg',  left: '18%', top: 0,  size: 170, rotate: 3 },
-    { src: '/lovie/denmark-sticker.svg', left: '76%', top: 20, size: 170, rotate: -2 },
-    { src: '/lovie/finland-sticker.svg', left: '90%', top: 30, size: 170, rotate: 5 },
+    { src: '/lovie/norway-sticker.svg',  left: '3%',  top: 40, size: 170, rotate: -4, floatY: 8,  floatDur: 4.2, floatDelay: 0    },
+    { src: '/lovie/sweden-sticker.svg',  left: '18%', top: 0,  size: 170, rotate: 3,  floatY: 10, floatDur: 5.0, floatDelay: 0.6 },
+    { src: '/lovie/denmark-sticker.svg', left: '64%', top: 45, size: 170, rotate: -2, floatY: 9,  floatDur: 4.6, floatDelay: 1.1 },
+    { src: '/lovie/finland-sticker.svg', left: '90%', top: 30, size: 170, rotate: 5,  floatY: 7,  floatDur: 4.4, floatDelay: 0.3 },
   ]
   return (
     <div
@@ -279,7 +282,7 @@ function NordicsStickerBand() {
         />
       </svg>
       {stickers.map((s, i) => (
-        <img
+        <motion.img
           key={i}
           src={s.src}
           alt=""
@@ -287,9 +290,16 @@ function NordicsStickerBand() {
             position: 'absolute',
             left: s.left,
             top: s.top,
-            width: `clamp(90px, 12vw, ${s.size}px)`,
+            width: `clamp(80px, 12vw, ${s.size}px)`,
             height: 'auto',
             transform: `translateX(-50%) rotate(${s.rotate}deg)`,
+          }}
+          animate={{ y: [0, -s.floatY, 0] }}
+          transition={{
+            duration: s.floatDur,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: s.floatDelay,
           }}
         />
       ))}
