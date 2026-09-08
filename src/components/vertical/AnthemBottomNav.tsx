@@ -31,9 +31,29 @@ const LOVIE_SECTIONS = [
 
 type Property = 'webby' | 'anthem' | 'telly' | 'lovie'
 
-export function AnthemBottomNav({ active, property }: { active: boolean; property?: Property }) {
+export function AnthemBottomNav({
+  active,
+  property,
+  trendTitles = [],
+}: {
+  active: boolean
+  property?: Property
+  trendTitles?: string[]
+}) {
   const isLovie = property === 'lovie'
-  const SECTIONS = isLovie ? LOVIE_SECTIONS : ANTHEM_SECTIONS
+  const isTelly = property === 'telly'
+  // Telly sections come from the CMS trend list so the bar tracks
+  // whatever the editors publish; ids match the trend-NN wrappers.
+  const TELLY_SECTIONS = [
+    { id: 'key-findings', label: 'Inside The Report', color: '#ef1e40' },
+    ...trendTitles.map((label, i) => ({
+      id: `trend-${String(i + 1).padStart(2, '0')}`,
+      label,
+      color: i % 2 === 0 ? '#ef1e40' : '#c23799',
+    })),
+    { id: 'about-telly', label: 'About The Telly Awards', color: '#ef1e40' },
+  ]
+  const SECTIONS = isLovie ? LOVIE_SECTIONS : isTelly ? TELLY_SECTIONS : ANTHEM_SECTIONS
 
   // Lovie palette — black bar, cream label, orange accents, Scto
   // Grotesk A. Anthem keeps dark moss + cream + Roc Grotesk.
@@ -48,6 +68,18 @@ export function AnthemBottomNav({ active, property }: { active: boolean; propert
         homeBorderHover: 'rgba(238, 255, 187, 0.9)',
         homeColor: 'rgba(242, 238, 237, 0.85)',
         homeColorHover: '#f2eeed',
+      }
+    : isTelly
+    ? {
+        barBg: 'rgba(0, 0, 0, 0.92)',
+        progressTrack: 'rgba(255, 255, 255, 0.15)',
+        labelColor: '#ffffff',
+        labelFont: "'Basetica', -apple-system, sans-serif",
+        counterColor: 'rgba(255, 255, 255, 0.5)',
+        homeBorder: 'rgba(239, 30, 64, 0.6)',
+        homeBorderHover: '#ef1e40',
+        homeColor: 'rgba(255, 255, 255, 0.85)',
+        homeColorHover: '#ffffff',
       }
     : {
         barBg: 'rgba(33, 38, 26, 0.92)',

@@ -36,6 +36,14 @@ const LOVIE_SECTIONS: NavSection[] = [
 
 export function MobileNav({ active, trendTitles, property }: MobileNavProps) {
   const isLovie = property === 'lovie'
+  const isTelly = property === 'telly'
+  const tellyIds = [
+    'welcome-letter',
+    'key-findings',
+    ...trendTitles.map((_, i) => `trend-${String(i + 1).padStart(2, '0')}`),
+    'credits',
+    'about-telly',
+  ]
   const [open, setOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [activeSection, setActiveSection] = useState('')
@@ -61,8 +69,11 @@ export function MobileNav({ active, trendTitles, property }: MobileNavProps) {
 
       const allSections: { id: string; top: number }[] = []
 
-      if (isLovie) {
-        ;['welcome-letter', 'key-findings', 'trend-01', 'trend-02', 'trend-03', 'trend-04', 'trend-05', 'section-takeaways', 'credits', 'about-lovie'].forEach((id) => {
+      if (isLovie || isTelly) {
+        const ids = isTelly
+          ? tellyIds
+          : ['welcome-letter', 'key-findings', 'trend-01', 'trend-02', 'trend-03', 'trend-04', 'trend-05', 'section-takeaways', 'credits', 'about-lovie']
+        ids.forEach((id) => {
           const el = document.getElementById(id)
           if (el) allSections.push({ id, top: el.offsetTop })
         })
@@ -104,12 +115,24 @@ export function MobileNav({ active, trendTitles, property }: MobileNavProps) {
       clearTimeout(t1)
       clearTimeout(t2)
     }
-  }, [active, isMobile, isLovie, trendTitles])
+  }, [active, isMobile, isLovie, isTelly, trendTitles])
 
   if (!active || !isMobile) return null
 
   const sections: NavSection[] = isLovie
     ? LOVIE_SECTIONS
+    : isTelly
+    ? [
+        { id: 'welcome-letter', label: 'Introduction', color: '#ef1e40' },
+        { id: 'key-findings', label: 'Inside The Report', color: '#ef1e40' },
+        ...trendTitles.map((title, i) => ({
+          id: `trend-${String(i + 1).padStart(2, '0')}`,
+          label: title,
+          color: i % 2 === 0 ? '#ef1e40' : '#c23799',
+        })),
+        { id: 'credits', label: 'Credits', color: '#ef1e40' },
+        { id: 'about-telly', label: 'About The Telly Awards', color: '#ef1e40' },
+      ]
     : [
         { id: 'welcome-letter', label: 'Welcome Letter', color: '#8B70D1' },
         { id: 'entry-stats', label: 'By the Numbers', color: '#80D064' },

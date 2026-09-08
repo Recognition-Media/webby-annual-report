@@ -99,6 +99,15 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
   const isSharedInfluence =
     report.property === 'anthem' &&
     report.slug?.current === 'shared-influence-creator-partnerships-nonprofit'
+  const isTelly = report.property === 'telly'
+  // Telly nav is built from the CMS trend list (ids match the trend-NN
+  // wrappers the Telly ReportView branch renders) plus the About footer.
+  const tellyNavSections = [
+    ...(report.trendSections ?? [])
+      .filter((t) => t.enabled !== false)
+      .map((t, i) => ({ id: `trend-${String(i + 1).padStart(2, '0')}`, label: t.trendTitle })),
+    { id: 'about-telly', label: 'About The Telly Awards' },
+  ]
   // Hover state for the Shared Influence pills. We track this in React
   // and apply the base + hover colours via inline style so nothing in
   // the Tailwind cascade can override it (CSS-only approach lost the
@@ -289,6 +298,38 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           marginBottom: 'calc(2rem + 75px)',
         },
       }
+    : isTelly
+    ? {
+        // Telly — brand gradient ground (purple → red), white Screens
+        // lockup, red CTA pill, Basetica bold title. Headline/subtitle
+        // come from the CMS hero fields with generic fallbacks.
+        logoSrc: '/telly/telly-logo-white.svg',
+        logoAlt: 'The Telly Awards',
+        logoClassName: 'w-[64px] h-auto md:w-[84px] lg:w-[96px]',
+        ctaUrl: 'https://www.tellyawards.com/',
+        ctaBgClass: 'bg-[#ef1e40] hover:bg-[#c8152f]',
+        ctaTextColorClass: 'text-white',
+        brandLabel: 'By The Telly Awards',
+        brandLabelColor: '#ffffff',
+        heroImages: ['/telly/hero-gradient.svg'],
+        heroImagesMobile: undefined as string[] | undefined,
+        heroCaptions: [] as string[],
+        heroBgColor: '#000000',
+        gradientOverlay: 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.55) 100%)',
+        titleColor: '#ffffff',
+        subtitleColor: '#ffffff',
+        titleClassName: 'text-[44px] md:text-[84px] lg:text-[108px] leading-[0.98] font-bold mb-3',
+        titleStyle: {
+          fontFamily: "'Basetica', -apple-system, sans-serif",
+          color: '#ffffff',
+          letterSpacing: '-0.02em',
+          fontWeight: 700,
+        },
+        titleLine1: report.heroHeadline?.split('\\n')[0] || '2026 State of',
+        titleLine2: report.heroHeadline?.split('\\n')[1] || 'Video Report',
+        titleNode: undefined as React.ReactNode,
+        subtitle: report.heroSubtitle || 'A pulse check with the makers shaping video and television across every screen',
+      }
     : {
         logoSrc: '/anthem/anthem-sticker.svg',
         logoAlt: '6th Annual Anthem Awards',
@@ -439,13 +480,15 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.18, ease: 'easeOut' }}
                   className="absolute top-[52px] right-0 w-[280px] rounded-lg overflow-hidden z-50"
-                  style={{ background: 'rgba(33, 38, 26, 0.96)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(227, 221, 202, 0.14)' }}
+                  style={{ background: isTelly ? 'rgba(0, 0, 0, 0.96)' : 'rgba(33, 38, 26, 0.96)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(227, 221, 202, 0.14)' }}
                 >
                   {(isLovie
                     ? LOVIE_NAV_SECTIONS
                     : isSharedInfluence
                       ? SHARED_INFLUENCE_NAV_SECTIONS
-                      : NAV_SECTIONS
+                      : isTelly
+                        ? tellyNavSections
+                        : NAV_SECTIONS
                   ).map((section, i) => (
                     <button
                       key={section.id}
@@ -491,7 +534,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           carries the visual weight). Shared Influence: icons are baked
           into the purple background artwork, so we skip the interactive
           set to avoid a doubled-up composition. */}
-      {!isLovie && !isSharedInfluence && CAUSE_ICONS.map((icon, i) => (
+      {!isLovie && !isSharedInfluence && !isTelly && CAUSE_ICONS.map((icon, i) => (
         <DraggableIcon key={i} icon={icon} index={i} />
       ))}
 

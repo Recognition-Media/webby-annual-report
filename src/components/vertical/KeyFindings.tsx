@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import type { KeyFinding } from '@/sanity/types'
 import { CountryItaly, CountryPortugal, CountrySpain } from '../lovie/CountryStickers'
+import { SignalWaves } from './SignalWaves'
 
 const FALLBACK_SECTIONS = [
   {
@@ -192,9 +193,19 @@ interface KeyFindingsProps {
   slug?: string
 }
 
+// Telly placeholder findings — shown only until the CMS keyFindings
+// array is populated. Anchors point at the generic trend-NN ids the
+// Telly ReportView branch stamps on each CMS trend section.
+const TELLY_FALLBACK_SECTIONS: ResolvedSection[] = [
+  { number: '01', title: 'Every Screen Is a First Screen', description: 'Makers are building for the phone, the living room, and the feed at the same time.', color: '#000000', hoverBg: '#ef1e40', anchor: 'trend-01' },
+  { number: '02', title: 'Smaller Teams, Bigger Output', description: 'Lean crews and new tools are closing the gap between idea and finished work.', color: '#000000', hoverBg: '#c23799', anchor: 'trend-02' },
+  { number: '03', title: 'Craft Still Wins', description: 'Audiences reward work that is made with care, no matter the runtime or platform.', color: '#000000', hoverBg: '#ef1e40', anchor: 'trend-03' },
+]
+
 export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {}) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const isLovie = property === 'lovie'
+  const isTelly = property === 'telly'
   const isNordics = isLovie && slug === 'lovie-creative-hubs-nordics'
   const isSharedInfluence =
     property === 'anthem' && slug === 'shared-influence-creator-partnerships-nonprofit'
@@ -225,6 +236,14 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
         headingIconRotation: '-8deg',
         subtitle: 'A playbook for creator partnerships that drive social impact.',
       }
+    : isTelly
+    ? {
+        sectionBg: '#ffffff',
+        cardDefaultBg: '#f3f3f3',
+        headingIcon: '/telly/telly-logo-black.svg',
+        headingIconRotation: '0deg',
+        subtitle: 'A look at what is shaping video and television across every screen in 2026.',
+      }
     : {
         sectionBg: '#E3DDCA',
         cardDefaultBg: '#d5cfbc',
@@ -237,11 +256,13 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
     ? NORDICS_FALLBACK_SECTIONS
     : isLovie
       ? LOVIE_FALLBACK_SECTIONS
-      : FALLBACK_SECTIONS
+      : isTelly
+        ? TELLY_FALLBACK_SECTIONS
+        : FALLBACK_SECTIONS
   // CMS-driven when keyFindings is populated; otherwise the property's
   // hardcoded fallback list ships. Default text color is brand-aware:
   // dark moss for Anthem, true black for Lovie.
-  const defaultTextColor = isLovie ? '#000000' : '#21261A'
+  const defaultTextColor = isLovie || isTelly ? '#000000' : '#21261A'
   const sections: ResolvedSection[] =
     findings && findings.length > 0
       ? findings.map((f, i) => ({
@@ -574,22 +595,41 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
       className="relative overflow-hidden px-5 md:px-[60px] pt-20 md:pt-28 pb-10 md:pb-14"
       style={{ background: theme.sectionBg }}
     >
-      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
+      {/* Telly — slow wavy signal lines behind the section, a quiet nod
+          to the video subject matter. Faint so the cards stay legible. */}
+      {isTelly && <SignalWaves opacity={0.2} />}
+      <div className="relative" style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
+        {/* Telly — the Screens wordmark sits centered above the title
+            (in flow) rather than as the Anthem-style floating sticker,
+            whose absolute offsets are tuned to Anthem's round icon. */}
+        {isTelly && (
+          <motion.img
+            src={theme.headingIcon}
+            alt=""
+            className="block mx-auto mb-6 md:mb-8 w-[56px] md:w-[76px] h-auto"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          />
+        )}
         {/* Heading */}
         <motion.h2
           className="mb-10 md:mb-14 text-[48px] md:text-[80px] leading-[1.1] text-center relative inline-flex items-start justify-center w-full"
-          style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
+          style={{ fontFamily: 'var(--font-display)', color: isTelly ? '#000000' : '#21261A', fontWeight: isTelly ? 700 : 400 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <img
-            src={theme.headingIcon}
-            alt=""
-            className="w-[60px] h-[60px] md:w-[100px] md:h-[100px] absolute left-[8%] md:left-[calc(50%_-_5.2em_+_10px)]"
-            style={{ transform: `rotate(${theme.headingIconRotation})`, top: '-0.15em' }}
-          />
+          {!isTelly && (
+            <img
+              src={theme.headingIcon}
+              alt=""
+              className="w-[60px] h-[60px] md:w-[100px] md:h-[100px] absolute left-[8%] md:left-[calc(50%_-_5.2em_+_10px)]"
+              style={{ transform: `rotate(${theme.headingIconRotation})`, top: '-0.15em' }}
+            />
+          )}
           Inside The Report
         </motion.h2>
 

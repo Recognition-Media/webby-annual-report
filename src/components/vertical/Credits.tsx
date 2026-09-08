@@ -79,15 +79,36 @@ function fromCms(list: CreditPerson[] | undefined, fallback: Person[]): Person[]
   }))
 }
 
+type CreditsPalette = { bg: string; fg: string; accent: string; font: string; headingWeight: number }
+
+const ANTHEM_PALETTE: CreditsPalette = {
+  bg: '#21261A',
+  fg: '#E3DDCA',
+  accent: '#D17DD0',
+  font: "'roc-grotesk-variable', -apple-system, sans-serif",
+  headingWeight: 400,
+}
+
+const TELLY_PALETTE: CreditsPalette = {
+  bg: '#000000',
+  fg: '#ffffff',
+  accent: '#ef1e40',
+  font: "'Basetica', -apple-system, sans-serif",
+  headingWeight: 700,
+}
+
 export function Credits({ report }: { report?: Report } = {}) {
   const isLovie = report?.property === 'lovie'
+  const isTelly = report?.property === 'telly'
 
   if (isLovie) return <LovieCredits report={report} />
+  if (isTelly) return <AnthemCredits report={report} palette={TELLY_PALETTE} />
   return <AnthemCredits report={report} />
 }
 
 // Anthem credits — dark moss block with cream text + lilac accents.
-function AnthemCredits({ report }: { report: Report | undefined }) {
+// Telly reuses the layout with its own palette (black / white / red).
+function AnthemCredits({ report, palette = ANTHEM_PALETTE }: { report: Report | undefined; palette?: CreditsPalette }) {
   const createdBy = fromCms(report?.creditsCreatedBy, CREATED_BY)
   const contributors = fromCms(report?.creditsContributors, CONTRIBUTORS)
   // Shared Influence bumps name weight to 700; SoSI keeps the lighter 500.
@@ -97,12 +118,12 @@ function AnthemCredits({ report }: { report: Report | undefined }) {
     <section
       id="credits"
       className="relative px-5 md:px-[60px] py-20 md:py-28"
-      style={{ background: '#21261A', color: '#E3DDCA' }}
+      style={{ background: palette.bg, color: palette.fg }}
     >
       <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <motion.h2
           className="text-center text-[32px] md:text-[56px] leading-[1.1] mb-16 md:mb-20"
-          style={{ fontFamily: 'var(--font-display)', color: '#E3DDCA', fontWeight: 400 }}
+          style={{ fontFamily: 'var(--font-display)', color: palette.fg, fontWeight: palette.headingWeight }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -112,9 +133,9 @@ function AnthemCredits({ report }: { report: Report | undefined }) {
         </motion.h2>
 
         <div className="mx-auto" style={{ maxWidth: 880 }}>
-          <AnthemPeopleGroup title="Created By" people={createdBy} columns={2} delay={0.1} boldNames={boldNames} />
+          <AnthemPeopleGroup title="Created By" people={createdBy} columns={2} delay={0.1} boldNames={boldNames} palette={palette} />
           <div className="mt-14 md:mt-16">
-            <AnthemPeopleGroup title="Contributors" people={contributors} columns={3} delay={0.2} boldNames={boldNames} />
+            <AnthemPeopleGroup title="Contributors" people={contributors} columns={3} delay={0.2} boldNames={boldNames} palette={palette} />
           </div>
         </div>
       </div>
@@ -122,8 +143,22 @@ function AnthemCredits({ report }: { report: Report | undefined }) {
   )
 }
 
-function AnthemPeopleGroup({ title, people, columns, delay, boldNames = false }: { title: string; people: Person[]; columns: 2 | 3; delay: number; boldNames?: boolean }) {
-  const accent = '#D17DD0'
+function AnthemPeopleGroup({
+  title,
+  people,
+  columns,
+  delay,
+  boldNames = false,
+  palette = ANTHEM_PALETTE,
+}: {
+  title: string
+  people: Person[]
+  columns: 2 | 3
+  delay: number
+  boldNames?: boolean
+  palette?: CreditsPalette
+}) {
+  const accent = palette.accent
   const gridClass =
     columns === 3
       ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4'
@@ -132,7 +167,7 @@ function AnthemPeopleGroup({ title, people, columns, delay, boldNames = false }:
     <div>
       <motion.h3
         className="text-[11px] md:text-[12px] uppercase tracking-[3px] font-semibold mb-5 pb-2 text-left"
-        style={{ color: accent, fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif", borderBottom: `1px solid rgba(209, 125, 208, 0.25)` }}
+        style={{ color: accent, fontFamily: palette.font, borderBottom: `1px solid color-mix(in srgb, ${accent} 25%, transparent)` }}
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -150,16 +185,16 @@ function AnthemPeopleGroup({ title, people, columns, delay, boldNames = false }:
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.35, delay: delay + 0.05 + i * 0.025 }}
           >
-            <p className={`text-[14px] md:text-[15px] leading-tight ${boldNames ? 'font-bold' : 'font-medium'}`} style={{ color: '#E3DDCA', fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>
+            <p className={`text-[14px] md:text-[15px] leading-tight ${boldNames ? 'font-bold' : 'font-medium'}`} style={{ color: palette.fg, fontFamily: palette.font }}>
               {person.url ? (
-                <a href={person.url} target="_blank" rel="noopener noreferrer" className="transition-colors hover:opacity-100" style={{ color: '#E3DDCA', textDecoration: 'none', borderBottom: `1px solid rgba(209, 125, 208, 0.4)` }}>
+                <a href={person.url} target="_blank" rel="noopener noreferrer" className="transition-colors hover:opacity-100" style={{ color: palette.fg, textDecoration: 'none', borderBottom: `1px solid color-mix(in srgb, ${accent} 40%, transparent)` }}>
                   {person.name}
                 </a>
               ) : (
                 person.name
               )}
             </p>
-            <p className="text-[11px] md:text-[12px] leading-[1.4] mt-0.5" style={{ color: '#E3DDCA', opacity: 0.55, fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}>
+            <p className="text-[11px] md:text-[12px] leading-[1.4] mt-0.5" style={{ color: palette.fg, opacity: 0.55, fontFamily: palette.font }}>
               {person.title}
             </p>
           </motion.li>

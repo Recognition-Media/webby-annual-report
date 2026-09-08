@@ -42,6 +42,7 @@ const loviePortableTextComponents: PortableTextComponents = {
 export function IntroLetter({ report }: { report: Report }) {
   const author = report.letterAuthors?.[0]
   const isLovie = report.property === 'lovie'
+  const isTelly = report.property === 'telly'
   const isNordics = isLovie && report.slug?.current === 'lovie-creative-hubs-nordics'
   const lovieAccent = isNordics ? '#016BA7' : '#ff6000'
   // Shared Influence: Anthem-property report with its own opening —
@@ -60,8 +61,14 @@ export function IntroLetter({ report }: { report: Report }) {
     return <NordicsOpening report={report} />
   }
 
-  const authorName = author?.name || (isLovie ? 'Jesse Feister' : 'Patricia McLoughlin')
-  const authorTitle = author?.title || (isLovie ? 'Group Executive Director, The Lovie Awards' : 'General Manager, The Anthem Awards')
+  const authorName = author?.name || (isLovie ? 'Jesse Feister' : isTelly ? 'Sabrina Dridje' : 'Patricia McLoughlin')
+  const authorTitle =
+    author?.title ||
+    (isLovie
+      ? 'Group Executive Director, The Lovie Awards'
+      : isTelly
+        ? 'Managing Director, The Telly Awards'
+        : 'General Manager, The Anthem Awards')
 
   // Color fork — Anthem keeps its dark moss palette with purple accents.
   // Lovie sits on the lime brand background with orange accents and dark text.
@@ -83,6 +90,18 @@ export function IntroLetter({ report }: { report: Report }) {
         authorPhotoImgClass: 'object-cover object-center',
         bodyTextClasses:
           '[&_p]:mb-5 [&_p]:text-[15px] md:[&_p]:text-[16px] [&_p]:text-black [&_p]:leading-[28px] [&_strong]:text-black [&_strong]:font-medium [&_blockquote]:border-none [&_blockquote]:pl-0',
+      }
+    : isTelly
+    ? {
+        sectionBg: '#ffffff',
+        eyebrowColor: '#ef1e40',
+        textColor: '#000000',
+        textColorMuted: 'rgba(0,0,0,0.55)',
+        accentColor: '#ef1e40',
+        authorPhoto: '/telly/author-placeholder.svg',
+        authorPhotoImgClass: 'object-cover object-center',
+        bodyTextClasses:
+          '[&_p]:mb-5 [&_p]:text-[15px] md:[&_p]:text-[16px] [&_p]:text-black [&_p]:leading-[28px] [&_strong]:text-black [&_strong]:font-bold [&_blockquote]:border-none [&_blockquote]:pl-0',
       }
     : {
         sectionBg: '#21261A',
@@ -122,11 +141,11 @@ export function IntroLetter({ report }: { report: Report }) {
 
           <div className="w-[200px] h-[250px] md:w-[300px] md:h-[390px] relative rounded-lg overflow-hidden mb-4">
             <Image
-              src={theme.authorPhoto}
-              alt={authorName}
+              src={author?.photo?.url || theme.authorPhoto}
+              alt={author?.photo?.alt || authorName}
               fill
               sizes="(min-width: 768px) 300px, 200px"
-              className={theme.authorPhotoImgClass}
+              className={author?.photo?.url ? 'object-cover object-center' : theme.authorPhotoImgClass}
             />
           </div>
           <p className="font-medium text-[15px]" style={{ color: theme.textColor }}>{authorName}</p>
@@ -137,19 +156,23 @@ export function IntroLetter({ report }: { report: Report }) {
         <div className="flex-1">
           {/* Header */}
           <motion.h2
-            className={isLovie ? 'mb-6 text-[22px] md:text-[24px] leading-[1.3] font-bold' : 'mb-6 text-[32px] md:text-[32px] leading-[1.2]'}
+            className={isLovie || isTelly ? 'mb-6 text-[22px] md:text-[24px] leading-[1.3] font-bold' : 'mb-6 text-[32px] md:text-[32px] leading-[1.2]'}
             style={{
               fontFamily: 'var(--font-display)',
               color: theme.textColor,
-              fontStyle: isLovie ? 'normal' : 'italic',
-              fontWeight: isLovie ? 700 : 400,
+              fontStyle: isLovie || isTelly ? 'normal' : 'italic',
+              fontWeight: isLovie || isTelly ? 700 : 400,
             }}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            {isLovie ? 'Europe has never been one digital story.' : 'Our community is not waiting.'}
+            {isLovie
+              ? 'Europe has never been one digital story.'
+              : isTelly
+                ? 'Video has never had more screens.'
+                : 'Our community is not waiting.'}
           </motion.h2>
 
           {/* Divider */}
@@ -168,14 +191,43 @@ export function IntroLetter({ report }: { report: Report }) {
               // Roc Grotesk variable typeface.
               fontFamily: isLovie
                 ? "'Scto Grotesk A', -apple-system, sans-serif"
-                : "'roc-grotesk-variable', -apple-system, sans-serif",
+                : isTelly
+                  ? "'Basetica', -apple-system, sans-serif"
+                  : "'roc-grotesk-variable', -apple-system, sans-serif",
             }}
           >
-            {isLovie ? (
+            {isLovie || isTelly ? (
               report.letterBody && report.letterBody.length > 0 ? (
                 // CMS-driven path — renders whatever Jordana has written
                 // in Studio's "Welcome Letter" rich text field.
                 <PortableText value={report.letterBody} components={loviePortableTextComponents} />
+              ) : isTelly ? (
+                <>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    Television, streaming, social, branded content, and the screens in our pockets: video is being made for more places, by more people, than at any point in the history of the medium. The work is faster, more personal, and more ambitious than ever.
+                  </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <strong style={{ fontWeight: 700 }}>The Telly Awards sits at the center of that work.</strong> Each year, more than 13,000 entries from all 50 states and five continents give us a rare view of where the industry is heading. This report is our way of sharing what we see, directly, with the community that makes it.
+                  </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    Here is what the makers told us, and what we think it means for the year ahead.
+                  </motion.p>
+                </>
               ) : (
                 // Hardcoded fallback — used only when the CMS field is
                 // empty. Mirrors what shipped before the field was wired.

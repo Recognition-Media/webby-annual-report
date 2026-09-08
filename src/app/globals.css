@@ -327,6 +327,61 @@ body.lovie-template {
 }
 
 /* =========================================================================
+   Telly (vertical template) theme overrides
+   Applied when body has class `telly-template` (set by vertical/ReportView
+   when report.property === 'telly'). Brand: Basetica, black/white/red with
+   a purple accent (from the Telly Visual Guidelines).
+   ========================================================================= */
+
+@font-face {
+  font-family: 'Basetica';
+  src: url('/telly/fonts/basetica-thin.woff') format('woff');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Basetica';
+  src: url('/telly/fonts/basetica-regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Basetica';
+  src: url('/telly/fonts/basetica-bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --telly-red: #ef1e40;
+  --telly-purple: #c23799;
+  --telly-black: #000000;
+  --telly-white: #ffffff;
+  --telly-gradient: linear-gradient(-45deg, var(--telly-red) 0%, var(--telly-purple) 100%);
+}
+
+body.telly-template {
+  background: var(--telly-white);
+  color: var(--telly-black);
+  font-family: 'Basetica', -apple-system, sans-serif;
+  --font-sans: 'Basetica', -apple-system, sans-serif;
+  --font-display: 'Basetica', -apple-system, sans-serif;
+  --color-primary-blue: var(--telly-red);
+  --color-primary-green: var(--telly-purple);
+  --color-lime-accent: var(--telly-red);
+  --color-blue-gradient: var(--telly-red);
+  /* Shared vertical components read the Anthem tokens for text/ground;
+     remap so cream→black text and moss→white ground. */
+  --anthem-cream: var(--telly-black);
+  --anthem-moss: var(--telly-white);
+  --anthem-red: var(--telly-red);
+  --anthem-green: var(--telly-purple);
+}
+
+/* =========================================================================
    Signup gate field theming (vertical template — Anthem + Lovie)
    The gate sets --gate-text / --gate-accent / --gate-font inline per property.
    Input border/focus/placeholder colors can't be done with inline styles
