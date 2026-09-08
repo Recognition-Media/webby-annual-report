@@ -11,6 +11,7 @@ const HOST_TO_PROPERTY: Record<string, string> = {
   'reports.webbyawards.com': '/webby',
   'reports.anthemawards.com': '/anthem',
   'reports.lovieawards.com': '/lovie',
+  'reports.tellyawards.com': '/telly',
 }
 
 export default function HomePage() {

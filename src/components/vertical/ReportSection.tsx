@@ -303,6 +303,7 @@ interface TrendContentProps {
   quotes?: TrendQuote[]
   quotesEyebrow?: string
   video?: TrendVideo
+  background?: string
 }
 
 export function TrendContent({
@@ -317,12 +318,13 @@ export function TrendContent({
   quotes,
   quotesEyebrow = 'What Our Community Is Saying',
   video,
+  background = '#E3DDCA',
 }: TrendContentProps) {
   const defaultBorderColors = ['#8C001C', '#D17DD0', '#066DBA', '#00B469']
   return (
     <section
       className="relative px-5 md:px-[60px] py-20 md:py-28"
-      style={{ background: '#E3DDCA' }}
+      style={{ background }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         <div className="flex flex-col md:flex-row gap-12 md:gap-16">

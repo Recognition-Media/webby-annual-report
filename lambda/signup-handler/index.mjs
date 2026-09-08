@@ -14,6 +14,7 @@ export const ALLOWED_ORIGINS = [
   'https://reports.webbyawards.com',
   'https://reports.anthemawards.com',
   'https://reports.lovieawards.com',
+  'https://reports.tellyawards.com',
   'http://localhost:3000',
   'http://localhost:3001',
 ]

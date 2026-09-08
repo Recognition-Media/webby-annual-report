@@ -7,6 +7,14 @@ export default defineType({
   fields: [
     { name: 'name', title: 'Name', type: 'string', validation: (r) => r.required() },
     { name: 'title', title: 'Title', type: 'string' },
+    {
+      name: 'photo',
+      title: 'Photo',
+      type: 'image',
+      description: 'Portrait shown beside the Welcome Letter (roughly 3:4). Leave empty to use the property default.',
+      options: { hotspot: true },
+      fields: [{ name: 'alt', title: 'Alt Text', type: 'string' }],
+    },
     { name: 'linkedInUrl', title: 'LinkedIn URL', type: 'url' },
   ],
 })

@@ -86,11 +86,12 @@ test('buildEventPayload defaults specifier to an empty string when omitted', () 
   assert.equal(payload.attributes.specifier, '')
 })
 
-test('corsHeaders allows all three report origins', () => {
+test('corsHeaders allows all four report origins', () => {
   for (const origin of [
     'https://reports.webbyawards.com',
     'https://reports.anthemawards.com',
     'https://reports.lovieawards.com',
+    'https://reports.tellyawards.com',
   ]) {
     assert.equal(corsHeaders(origin)['Access-Control-Allow-Origin'], origin)
   }

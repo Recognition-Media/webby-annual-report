@@ -87,6 +87,20 @@ const GATE_THEMES: Record<string, GateTheme> = {
     privacyName: 'Lovie Awards',
     rounded: true,
   },
+  telly: {
+    overlay: 'rgba(0, 0, 0, 0.8)',
+    frame: '#ef1e40',
+    card: '#ffffff',
+    logo: '/telly/telly-logo-black.svg',
+    logoAlt: 'The Telly Awards',
+    font: "'Basetica', -apple-system, sans-serif",
+    text: '#000000',
+    accent: '#ef1e40',
+    buttonText: '#ffffff',
+    privacyUrl: 'https://www.tellyawards.com/privacy-policy/',
+    privacyName: 'Telly Awards',
+    rounded: false,
+  },
 }
 
 function FieldInput({ field, value, onChange }: { field: FormField; value: string; onChange: (v: string) => void }) {
@@ -137,12 +151,17 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
   const isSharedInfluence = slug === 'shared-influence-creator-partnerships-nonprofit'
   // Slug-scoped fallback copy so the gate reads correctly before the
   // CMS signupTitle/signupSubhead fields are populated for this report.
+  const isTelly = report.property === 'telly'
   const defaultTitle = isSharedInfluence
     ? 'Shared Influence Report'
-    : '2026 State of Social Impact Report'
+    : isTelly
+      ? '2026 State of Video Report'
+      : '2026 State of Social Impact Report'
   const defaultSubhead = isSharedInfluence
     ? "A playbook for creator partnerships that drive social impact, with real advice from experts. Sign up to explore the report."
-    : "Hear directly from impact leaders on what's shaping the work in 2026. Sign up to explore the report."
+    : isTelly
+      ? 'Hear directly from the makers shaping video and television across every screen. Sign up to explore the report.'
+      : "Hear directly from impact leaders on what's shaping the work in 2026. Sign up to explore the report."
 
   function updateField(label: string, value: string) {
     setFormData((prev) => ({ ...prev, [label]: value }))

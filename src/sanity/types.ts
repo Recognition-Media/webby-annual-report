@@ -29,6 +29,7 @@ export interface LetterAuthor {
   name: string
   title?: string
   linkedInUrl?: string
+  photo?: { url: string; alt?: string }
 }
 
 export interface FeaturedProject {

@@ -15,6 +15,7 @@ import { TrendSection } from '../TrendSection'
 import { TrendContainer } from '../TrendContainer'
 import { AnthemFooter } from './AnthemFooter'
 import { LovieFooter } from './LovieFooter'
+import { TellyFooter } from './TellyFooter'
 import {
   TwoColumnSlab,
   SectionHeader,
@@ -387,6 +388,10 @@ export function ReportView({ report }: { report: Report }) {
     report.property === 'lovie' &&
     report.slug?.current === 'lovie-creative-hubs-nordics'
 
+  // Telly reports are fully CMS-driven (no per-slug hardcoded content):
+  // section covers + trend modules come straight from Sanity.
+  const isTelly = report.property === 'telly'
+
   // Apply vertical-template theme (background, fonts, palette) only while this
   // template is mounted. Lovie reports get `lovie-template`; everything else
   // using the vertical layout (Anthem) keeps `anthem-template`. Webby reports
@@ -397,7 +402,12 @@ export function ReportView({ report }: { report: Report }) {
   // etc.) can be scoped without leaking into other reports on the same
   // template.
   useEffect(() => {
-    const themeClass = report.property === 'lovie' ? 'lovie-template' : 'anthem-template'
+    const themeClass =
+      report.property === 'lovie'
+        ? 'lovie-template'
+        : report.property === 'telly'
+          ? 'telly-template'
+          : 'anthem-template'
     const slugClass = report.slug?.current ? `report-${report.slug.current}` : null
     const classes = [themeClass, slugClass].filter(Boolean) as string[]
     document.body.classList.add(...classes)
@@ -628,7 +638,11 @@ export function ReportView({ report }: { report: Report }) {
           Shared Influence and Nordics, which use a sticky top nav
           instead. */}
       {!isSharedInfluence && !isNordics && (
-        <AnthemBottomNav active={entered} property={report.property} />
+        <AnthemBottomNav
+          active={entered}
+          property={report.property}
+          trendTitles={(report.trendSections || []).filter((s) => s.enabled !== false).map((s) => s.trendTitle)}
+        />
       )}
 
       {/* Mobile navigation — hidden for Shared Influence and Nordics,
@@ -661,7 +675,7 @@ export function ReportView({ report }: { report: Report }) {
                 SVG and Lovie-aware theming through the `property` prop.
                 Shared Influence skips this render and loops through its
                 own `sectionCovers` array below instead. */}
-            {!isSharedInfluence && (
+            {!isSharedInfluence && !isTelly && (
               <ReportSectionCover
                 sectionNumber={report.section01Cover?.sectionNumber || '01'}
                 title={
@@ -770,6 +784,69 @@ export function ReportView({ report }: { report: Report }) {
                   accentColor="#00B469"
                   takeaways={SHARED_INFLUENCE_TAKEAWAYS}
                 />
+              </>
+            ) : isTelly ? (
+              <>
+                {/* Telly — fully CMS-driven. One block per enabled
+                    trendSection: optional cover from sectionCovers[i],
+                    then the trend copy + data bars + quotes. Each block
+                    is id'd trend-NN so the hero menu, bottom nav, and
+                    mobile nav can target it. */}
+                {(report.trendSections ?? [])
+                  .filter((t) => t.enabled !== false)
+                  .map((trend, i) => {
+                    const num = String(i + 1).padStart(2, '0')
+                    const accent = trend.accentColor || (i % 2 === 0 ? '#ef1e40' : '#c23799')
+                    const cover = report.sectionCovers?.[i]
+                    const dataModule =
+                      trend.showData && trend.dataStats && trend.dataStats.length > 0
+                        ? {
+                            eyebrow: trend.dataEyebrow,
+                            question: trend.dataHeadline || '',
+                            bars: trend.dataStats.map((s, j) => ({
+                              label: s.label,
+                              value: s.value,
+                              displayValue: `${s.value}%`,
+                              color: j % 2 === 0 ? '#ef1e40' : '#c23799',
+                            })),
+                          }
+                        : undefined
+                    const quotes = trend.showQuotes !== false ? resolveTrendQuotes(trend.expertQuotes, []) : []
+                    return (
+                      <div key={i} id={`trend-${num}`}>
+                        {cover && (
+                          <ReportSectionCover
+                            sectionNumber={cover.sectionNumber || num}
+                            title={cover.title || trend.trendTitle}
+                            subtitle={cover.subtitle || ''}
+                            copy={cover.copy || ''}
+                            accentColor={cover.accentColor || accent}
+                            property={report.property}
+                            minHeightPx={530}
+                            titleFontFamily="'Basetica', -apple-system, sans-serif"
+                            titleFontWeight={700}
+                            subtitleFontFamily="'Basetica', -apple-system, sans-serif"
+                          />
+                        )}
+                        <TrendContent
+                          trendNumber={num}
+                          title={trend.trendTitle}
+                          body={portableTextToBody(trend.trendBody, [])}
+                          accentColor={accent}
+                          dataModule={dataModule}
+                          background="#ffffff"
+                        />
+                        {quotes.length > 0 && (
+                          <QuoteVideoSection
+                            eyebrow="What Our Community Is Saying"
+                            quotes={quotes}
+                            accentColor={accent}
+                            background="#ffffff"
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
               </>
             ) : report.property === 'lovie' ? (
               <>
@@ -2145,6 +2222,8 @@ export function ReportView({ report }: { report: Report }) {
 
             {report.property === 'lovie' ? (
               <LovieFooter report={report} />
+            ) : report.property === 'telly' ? (
+              <TellyFooter report={report} />
             ) : (
               <AnthemFooter report={report} />
             )}
