@@ -34,7 +34,12 @@ export const reportBySlugQuery = groq`
     auditorCardDescription,
     auditorCardUrl,
     letterBody,
-    letterAuthors,
+    letterAuthors[] {
+      name,
+      title,
+      linkedInUrl,
+      photo { "url": asset->url, "alt": coalesce(alt, asset->altText) }
+    },
     nordicsHook,
     carouselImages,
     trendIntroEyebrow,
