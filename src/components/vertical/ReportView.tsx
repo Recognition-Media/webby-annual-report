@@ -850,14 +850,16 @@ export function ReportView({ report }: { report: Report }) {
                           body={portableTextToBody(trend.trendBody, [])}
                           accentColor={accent}
                           dataModule={dataModule}
-                          background="#ffffff"
+                          background="#110E1F"
+                          property={report.property}
                         />
                         {quotes.length > 0 && (
                           <QuoteVideoSection
                             eyebrow="What Our Community Is Saying"
                             quotes={quotes}
                             accentColor={accent}
-                            background="#ffffff"
+                            background="#110E1F"
+                            property={report.property}
                           />
                         )}
                         {trend.showWinnerLists !== false &&

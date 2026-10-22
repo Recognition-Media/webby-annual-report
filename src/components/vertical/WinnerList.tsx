@@ -17,12 +17,12 @@ export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40
     <section
       id={id}
       className="relative px-5 md:px-[60px] py-16 md:py-20"
-      style={{ background: '#ffffff' }}
+      style={{ background: '#110E1F' }}
     >
       <div style={{ maxWidth: 1000, margin: '0 auto', width: '100%' }}>
         <motion.h3
           className="text-[22px] md:text-[28px] leading-[1.2] mb-4"
-          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#000000', fontWeight: 700 }}
+          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -33,7 +33,7 @@ export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40
         {intro && (
           <motion.p
             className="text-[14px] md:text-[16px] leading-[1.6] mb-8 max-w-[760px]"
-            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(0,0,0,0.65)' }}
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(255,255,255,0.65)' }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -47,7 +47,7 @@ export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40
             <motion.li
               key={i}
               className="flex items-baseline gap-4 md:gap-6 py-4 border-t"
-              style={{ borderColor: 'rgba(0,0,0,0.1)' }}
+              style={{ borderColor: 'rgba(255,255,255,0.12)' }}
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -62,7 +62,7 @@ export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40
               <span className="flex-1 min-w-0">
                 <span
                   className="text-[14px] md:text-[16px]"
-                  style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#000000', fontWeight: entry.highlight ? 700 : 500 }}
+                  style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: entry.highlight ? 700 : 500 }}
                 >
                   {entry.name}
                 </span>
@@ -75,12 +75,12 @@ export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline"
-                        style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#000000', textUnderlineOffset: 2, fontStyle: 'italic' }}
+                        style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', textUnderlineOffset: 2, fontStyle: 'italic' }}
                       >
                         {entry.workTitle}
                       </a>
                     ) : (
-                      <span style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#000000', fontStyle: 'italic' }}>
+                      <span style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontStyle: 'italic' }}>
                         {entry.workTitle}
                       </span>
                     )}

@@ -24,6 +24,9 @@ interface QuoteVideoSectionProps {
   imageVariant?: 'cover' | 'contain'
   accentColor?: string
   background?: string
+  /** Drives text-color theming (Telly reads white instead of the
+   * default Anthem near-black). Other properties are unaffected. */
+  property?: 'webby' | 'anthem' | 'telly' | 'lovie'
 }
 
 export function QuoteVideoSection({
@@ -39,8 +42,15 @@ export function QuoteVideoSection({
   imageVariant = 'cover',
   accentColor = '#8C001C',
   background = '#E3DDCA',
+  property,
 }: QuoteVideoSectionProps) {
   const defaultBorderColors = ['#8C001C', '#D17DD0', '#066DBA', '#00B469']
+  const isTelly = property === 'telly'
+  const textColor = isTelly ? '#ffffff' : '#21261A'
+  const mutedTextColor = isTelly ? 'rgba(255,255,255,0.6)' : '#21261A'
+  const placeholderBg = isTelly ? 'rgba(255,255,255,0.08)' : '#d5cfbc'
+  const videoGroundColor = isTelly ? '#000000' : '#21261A'
+  const lightChipColor = isTelly ? '#ffffff' : '#E3DDCA'
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -77,7 +87,7 @@ export function QuoteVideoSection({
           <div className="md:w-[50%]">
             <motion.p
               className="mb-6 text-[24px] md:text-[36px]"
-              style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
+              style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 400 }}
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -120,18 +130,18 @@ export function QuoteVideoSection({
                       </div>
                     ) : (
                       <div
-                        className="w-[132px] h-[132px] rounded-full bg-[#d5cfbc] flex-shrink-0"
-                        style={{ border: `2px solid ${color}` }}
+                        className="w-[132px] h-[132px] rounded-full flex-shrink-0"
+                        style={{ background: placeholderBg, border: `2px solid ${color}` }}
                       />
                     )}
                     <div className="pl-4" style={{ borderLeft: `3px solid ${color}` }}>
                       <p
                         className="text-[15px] md:text-[17px] leading-[1.6] mb-2"
-                        style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontStyle: 'italic' }}
+                        style={{ fontFamily: 'var(--font-display)', color: textColor, fontStyle: 'italic' }}
                       >
                         {quote.text}
                       </p>
-                      <p className="text-[13px]" style={{ color: '#21261A', opacity: 0.5 }}>
+                      <p className="text-[13px]" style={{ color: mutedTextColor }}>
                         — <strong style={{ fontWeight: 600 }}>{quote.name}</strong>, {quote.title}
                       </p>
                     </div>
@@ -148,7 +158,7 @@ export function QuoteVideoSection({
                 {/* Video player — 16:9 */}
                 <motion.div
                   className="rounded-lg overflow-hidden relative cursor-pointer"
-                  style={{ background: '#21261A', paddingBottom: '56.25%' }}
+                  style={{ background: videoGroundColor, paddingBottom: '56.25%' }}
                   initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -166,25 +176,25 @@ export function QuoteVideoSection({
                     className="absolute inset-0 flex items-center justify-center transition-opacity duration-300"
                     style={{ opacity: isPlaying ? 0 : 1 }}
                   >
-                    <div className="w-14 h-14 rounded-full border-2 border-[#E3DDCA] flex items-center justify-center bg-[#21261A]/50">
+                    <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ border: `2px solid ${lightChipColor}`, background: `${videoGroundColor}80` }}>
                       <svg width="16" height="18" viewBox="0 0 12 14" fill="none">
-                        <path d="M0 0L12 7L0 14V0Z" fill="#E3DDCA" />
+                        <path d="M0 0L12 7L0 14V0Z" fill={lightChipColor} />
                       </svg>
                     </div>
                   </div>
                 </motion.div>
                 <div className="py-3 flex items-center justify-between">
                   <div>
-                    <p className="text-[14px] font-semibold" style={{ color: '#21261A' }}>{videoName}</p>
-                    <p className="text-[13px]" style={{ color: '#21261A', opacity: 0.55 }}>{videoTitle}</p>
+                    <p className="text-[14px] font-semibold" style={{ color: textColor }}>{videoName}</p>
+                    <p className="text-[13px]" style={{ color: mutedTextColor }}>{videoTitle}</p>
                   </div>
                   <button
                     onClick={togglePlay}
                     className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[2px] py-2.5 px-5 rounded-full transition-colors cursor-pointer flex-shrink-0"
-                    style={{ background: accentColor, color: '#E3DDCA' }}
+                    style={{ background: accentColor, color: lightChipColor }}
                   >
                     <svg width="12" height="10" viewBox="0 0 14 12" fill="none">
-                      <path d="M0 12L7 0L14 12H0Z" fill="#E3DDCA" />
+                      <path d="M0 12L7 0L14 12H0Z" fill={lightChipColor} />
                     </svg>
                     {isPlaying ? 'Pause' : videoLabel}
                   </button>

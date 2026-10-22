@@ -239,9 +239,9 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
       }
     : isTelly
     ? {
-        sectionBg: '#ffffff',
-        cardDefaultBg: '#f3f3f3',
-        headingIcon: '/telly/telly-logo-black.svg',
+        sectionBg: '#110E1F',
+        cardDefaultBg: 'rgba(255,255,255,0.08)',
+        headingIcon: '/telly/telly-logo-white.svg',
         headingIconRotation: '0deg',
         subtitle: 'A look at what is shaping video and television across every screen in 2026.',
       }
@@ -616,7 +616,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
           />
           <motion.h2
             className="mb-4 text-[40px] md:text-[64px] leading-[1.1] text-center"
-            style={{ fontFamily: 'var(--font-display)', color: '#000000', fontWeight: 700 }}
+            style={{ fontFamily: 'var(--font-display)', color: '#ffffff', fontWeight: 700 }}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -626,7 +626,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
           </motion.h2>
           <motion.p
             className="text-center text-[14px] md:text-[16px] mb-12 md:mb-16"
-            style={{ color: '#21261A', opacity: 0.6, fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}
+            style={{ color: '#ffffff', opacity: 0.6, fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -659,30 +659,30 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
                     onMouseEnter={() => setHoveredIndex(i)}
                     onMouseLeave={() => setHoveredIndex(null)}
                     className="flex items-baseline gap-4 md:gap-6 py-4 md:py-5 border-t cursor-pointer"
-                    style={{ borderColor: 'rgba(0,0,0,0.1)' }}
+                    style={{ borderColor: 'rgba(255,255,255,0.12)' }}
                   >
                     <span
                       className="text-[20px] md:text-[26px] font-bold flex-shrink-0 transition-colors duration-200"
-                      style={{ color: isHovered ? section.hoverBg : '#000000', minWidth: 40 }}
+                      style={{ color: isHovered ? section.hoverBg : '#ffffff', minWidth: 40 }}
                     >
                       {section.number}
                     </span>
                     <span className="flex-1">
                       <span
                         className="block text-[17px] md:text-[22px] leading-[1.3] transition-colors duration-200"
-                        style={{ fontWeight: 600, color: isHovered ? section.hoverBg : '#000000' }}
+                        style={{ fontWeight: 600, color: isHovered ? section.hoverBg : '#ffffff' }}
                       >
                         {section.title}
                       </span>
                       {section.description && (
-                        <span className="block text-[12px] md:text-[13px] mt-1" style={{ color: 'rgba(0,0,0,0.5)' }}>
+                        <span className="block text-[12px] md:text-[13px] mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
                           {section.description}
                         </span>
                       )}
                     </span>
                     <span
                       className="text-[18px] md:text-[22px] flex-shrink-0 transition-transform duration-200"
-                      style={{ color: isHovered ? section.hoverBg : '#000000', transform: isHovered ? 'translateX(6px)' : 'none' }}
+                      style={{ color: isHovered ? section.hoverBg : '#ffffff', transform: isHovered ? 'translateX(6px)' : 'none' }}
                     >
                       →
                     </span>
@@ -705,7 +705,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
                             </span>
                             <span
                               className="text-[13px] md:text-[14px] leading-[1.4] group-hover:underline"
-                              style={{ color: 'rgba(0,0,0,0.75)', textUnderlineOffset: 2 }}
+                              style={{ color: 'rgba(255,255,255,0.8)', textUnderlineOffset: 2 }}
                             >
                               {sub.title}
                             </span>

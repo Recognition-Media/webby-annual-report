@@ -122,6 +122,8 @@ export function ReportSectionCover({
   hideSectionNumber = false,
 }: ReportSectionCoverProps) {
   const isLovie = property === 'lovie'
+  const isTelly = property === 'telly'
+  const coverTextColor = isTelly ? '#ffffff' : '#21261A'
   const hasExplicitMinHeight = typeof minHeightPx === 'number'
   // Skip the explicit min-height on mobile — it forces a large gap
   // between the cover and the first content block when the cover's
@@ -145,7 +147,7 @@ export function ReportSectionCover({
             : 'md:min-h-screen md:flex md:flex-col md:items-center md:justify-center'
       }`}
       style={{
-        background: isLovie ? '#f2eeed' : '#E3DDCA',
+        background: isLovie ? '#f2eeed' : isTelly ? '#110E1F' : '#E3DDCA',
         paddingTop: compact ? (isMobile ? 56 : 80) : 50,
         paddingBottom: compact ? (isMobile ? 24 : 60) : 50,
         ...(hasExplicitMinHeight && !isMobile ? { minHeight: minHeightPx } : {}),
@@ -191,7 +193,7 @@ export function ReportSectionCover({
           {/* Title */}
           <motion.h2
             className="text-[32px] md:text-[56px] lg:text-[64px] leading-[1.05] mb-6"
-            style={{ fontFamily: titleFontFamily, color: '#21261A', fontWeight: titleFontWeight }}
+            style={{ fontFamily: titleFontFamily, color: coverTextColor, fontWeight: titleFontWeight }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -214,7 +216,7 @@ export function ReportSectionCover({
             className="text-[18px] md:text-[22px] leading-[1.4] mb-8 max-w-[800px] mx-auto"
             style={{
               fontFamily: subtitleFontFamily,
-              color: '#21261A',
+              color: coverTextColor,
               fontStyle: subtitleItalic ? 'italic' : 'normal',
               fontWeight: 400,
             }}
@@ -238,7 +240,7 @@ export function ReportSectionCover({
                 fontFamily: isLovie
                   ? "'Scto Grotesk A', -apple-system, sans-serif"
                   : "'roc-grotesk-variable', -apple-system, sans-serif",
-                color: '#21261A',
+                color: coverTextColor,
                 opacity: 0.65,
               }}
               initial={{ opacity: 0, y: 10 }}
@@ -304,6 +306,9 @@ interface TrendContentProps {
   quotesEyebrow?: string
   video?: TrendVideo
   background?: string
+  /** Drives text-color theming (Telly reads white instead of the
+   * default Anthem near-black). Other properties are unaffected. */
+  property?: 'webby' | 'anthem' | 'telly' | 'lovie'
 }
 
 export function TrendContent({
@@ -319,8 +324,13 @@ export function TrendContent({
   quotesEyebrow = 'What Our Community Is Saying',
   video,
   background = '#E3DDCA',
+  property,
 }: TrendContentProps) {
   const defaultBorderColors = ['#8C001C', '#D17DD0', '#066DBA', '#00B469']
+  const isTelly = property === 'telly'
+  const textColor = isTelly ? '#ffffff' : '#21261A'
+  const dividerColor = isTelly ? 'rgba(255,255,255,0.15)' : 'rgba(33,38,26,0.15)'
+  const trackColor = isTelly ? 'rgba(255,255,255,0.1)' : 'rgba(33,38,26,0.1)'
   return (
     <section
       className="relative px-5 md:px-[60px] py-20 md:py-28"
@@ -345,7 +355,7 @@ export function TrendContent({
             {/* Trend title */}
             <motion.h3
               className="text-[24px] md:text-[36px] leading-[1.15] mb-6"
-              style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
+              style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 400 }}
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -364,7 +374,7 @@ export function TrendContent({
                 className="text-[15px] md:text-[18px] leading-[1.6] md:leading-[30px] mb-6"
                 style={{
                   fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
-                  color: '#21261A',
+                  color: textColor,
                 }}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -382,7 +392,7 @@ export function TrendContent({
                   <motion.div
                     key={i}
                     className="py-5 border-t"
-                    style={{ borderColor: 'rgba(33,38,26,0.15)' }}
+                    style={{ borderColor: dividerColor }}
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -396,7 +406,7 @@ export function TrendContent({
                     </div>
                     <div
                       className="text-[12px] md:text-[13px] leading-[1.4]"
-                      style={{ color: '#21261A', opacity: 0.6 }}
+                      style={{ color: textColor, opacity: 0.6 }}
                     >
                       {stat.label}
                     </div>
@@ -440,7 +450,7 @@ export function TrendContent({
                 )}
                 <h4
                   className="leading-[1.4] mb-8 w-full"
-                  style={{ fontSize: 16, fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
+                  style={{ fontSize: 16, fontFamily: 'var(--font-display)', color: textColor, fontWeight: 400 }}
                 >
                   {dataModule.question}
                 </h4>
@@ -455,10 +465,10 @@ export function TrendContent({
                       transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
                     >
                       <div className="flex justify-between items-baseline mb-2">
-                        <span className="text-[13px] md:text-[14px]" style={{ color: '#21261A' }}>{bar.label}</span>
-                        <span className="text-[18px] md:text-[22px]" style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 700 }}>{bar.displayValue}</span>
+                        <span className="text-[13px] md:text-[14px]" style={{ color: textColor }}>{bar.label}</span>
+                        <span className="text-[18px] md:text-[22px]" style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 700 }}>{bar.displayValue}</span>
                       </div>
-                      <div className="h-[8px] rounded-full" style={{ background: 'rgba(33,38,26,0.1)' }}>
+                      <div className="h-[8px] rounded-full" style={{ background: trackColor }}>
                         <motion.div
                           className="h-full rounded-full"
                           style={{ background: bar.color }}

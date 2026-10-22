@@ -22,12 +22,12 @@ const aboutBodyComponents: PortableTextComponents = {
 }
 
 export function TellyAbout({ report }: { report: Report }) {
-  const logoUrl = report.aboutLogo ? urlFor(report.aboutLogo).width(240).url() : '/telly/telly-logo-black.svg'
+  const logoUrl = report.aboutLogo ? urlFor(report.aboutLogo).width(240).url() : '/telly/telly-logo-white.svg'
   return (
     <section
       id="about-telly"
       className="relative px-5 md:px-[60px] py-20 md:py-28 text-center"
-      style={{ background: '#ffffff' }}
+      style={{ background: '#110E1F' }}
     >
       <div style={{ maxWidth: 720, margin: '0 auto', width: '100%' }}>
         <motion.img
@@ -53,7 +53,7 @@ export function TellyAbout({ report }: { report: Report }) {
         )}
         <motion.h2
           className="text-[32px] md:text-[48px] leading-[1.1] mb-8"
-          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#000000', fontWeight: 700 }}
+          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -64,7 +64,7 @@ export function TellyAbout({ report }: { report: Report }) {
         {report.aboutBody && report.aboutBody.length > 0 && (
           <motion.div
             className="text-[15px] md:text-[17px] leading-[1.7] mb-8 [&_p]:mb-5"
-            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(0,0,0,0.75)' }}
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(255,255,255,0.75)' }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

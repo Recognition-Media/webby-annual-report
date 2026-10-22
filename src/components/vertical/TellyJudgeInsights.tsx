@@ -28,7 +28,7 @@ export function TellyJudgeInsights({
     <section
       id="judge-insights"
       className="relative px-5 md:px-[60px] py-20 md:py-28"
-      style={{ background: '#f3f3f3' }}
+      style={{ background: '#110E1F' }}
     >
       <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <motion.p
@@ -44,7 +44,7 @@ export function TellyJudgeInsights({
         {heading && (
           <motion.h2
             className="text-[32px] md:text-[48px] leading-[1.1] mb-14 md:mb-20 text-center"
-            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#000000', fontWeight: 700 }}
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -66,11 +66,11 @@ export function TellyJudgeInsights({
             >
               <div
                 className="text-[15px] md:text-[17px] leading-[1.6] mb-3"
-                style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#000000', fontStyle: 'italic' }}
+                style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontStyle: 'italic' }}
               >
                 <PortableText value={q.quoteText} components={quoteComponents} />
               </div>
-              <p className="text-[13px]" style={{ color: 'rgba(0,0,0,0.55)' }}>
+              <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 — <strong style={{ fontWeight: 600 }}>{q.name}</strong>{q.title ? `, ${q.title}` : ''}
               </p>
             </motion.div>

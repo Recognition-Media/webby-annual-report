@@ -19,7 +19,7 @@ function RankedList({ heading, items, accentColor }: { heading?: string; items?:
         {items.map((item, i) => (
           <li key={i} className="flex gap-3 items-baseline">
             <span className="text-[14px] font-bold" style={{ color: accentColor, minWidth: 20 }}>{i + 1}</span>
-            <span className="text-[15px] md:text-[16px]" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#000000' }}>{item}</span>
+            <span className="text-[15px] md:text-[16px]" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff' }}>{item}</span>
           </li>
         ))}
       </ol>
@@ -32,12 +32,12 @@ export function TellyFacts({ report }: { report: Report }) {
     <section
       id="telly-facts"
       className="relative px-5 md:px-[60px] py-20 md:py-28"
-      style={{ background: '#ffffff' }}
+      style={{ background: '#110E1F' }}
     >
       <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <motion.h2
           className="text-[40px] md:text-[64px] leading-[1.05] mb-14 md:mb-20 text-center"
-          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#000000', fontWeight: 700 }}
+          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -59,7 +59,7 @@ export function TellyFacts({ report }: { report: Report }) {
               <div className="text-[56px] md:text-[88px] leading-none" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ef1e40', fontWeight: 700 }}>
                 {report.factsEntryCount}
               </div>
-              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: 'rgba(0,0,0,0.6)' }}>{report.factsEntryLabel}</p>
+              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: 'rgba(255,255,255,0.65)' }}>{report.factsEntryLabel}</p>
             </motion.div>
           )}
           {report.factsJudgeCount && (
@@ -73,7 +73,7 @@ export function TellyFacts({ report }: { report: Report }) {
               <div className="text-[56px] md:text-[88px] leading-none" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#c23799', fontWeight: 700 }}>
                 {report.factsJudgeCount}
               </div>
-              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: 'rgba(0,0,0,0.6)' }}>{report.factsJudgeLabel}</p>
+              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: 'rgba(255,255,255,0.65)' }}>{report.factsJudgeLabel}</p>
             </motion.div>
           )}
         </div>
