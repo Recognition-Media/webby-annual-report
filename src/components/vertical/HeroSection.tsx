@@ -8,6 +8,7 @@ import { ImageCarousel } from '../ImageCarousel'
 import { urlFor } from '@/sanity/image'
 import { useImageBrightness, type Tone } from '@/lib/useImageBrightness'
 import { trackCtaClick } from '@/lib/analytics'
+import { TellyHeroArticle } from './TellyHeroArticle'
 
 const LOCAL_HERO_IMAGES = [
   '/anthem/hero-1.jpg',
@@ -314,7 +315,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         heroImages: ['/telly/hero-gradient.svg'],
         heroImagesMobile: undefined as string[] | undefined,
         heroCaptions: [] as string[],
-        heroBgColor: '#000000',
+        heroBgColor: '#110E1F',
         gradientOverlay: 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.55) 100%)',
         titleColor: '#ffffff',
         subtitleColor: '#ffffff',
@@ -369,7 +370,10 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
       className={`relative w-full h-screen overflow-hidden ${textTone === 'light' ? 'text-light' : 'text-dark'}`}
       style={{ background: theme.heroBgColor }}
     >
-      {/* Full-bleed background carousel */}
+      {/* Full-bleed background carousel — Telly's "Spliced Trophy" hero
+          (Figma 48th Annual Telly Awards, node 2059:13037) sits on a flat
+          dark ground instead, so it skips this entirely. */}
+      {!isTelly && (
       <div className="absolute inset-0">
         {/* CMS carousel images override the local fallback */}
         <LocalHeroCarousel
@@ -408,6 +412,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           />
         )}
       </div>
+      )}
 
       {/* Minimal top bar. Hidden for Shared Influence and Nordics —
           both use dedicated sticky top nav components mounted in
@@ -538,10 +543,21 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         <DraggableIcon key={i} icon={icon} index={i} />
       ))}
 
+      {/* Telly — "Spliced Trophy w/ Icons" two-column article layout
+          (Figma 48th Annual Telly Awards, node 2059:13037), vertically
+          centered instead of bottom-anchored since it's a card-shaped
+          composition rather than text over a full-bleed photo. */}
+      {isTelly && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none pt-[140px] md:pt-0">
+          <TellyHeroArticle onEnter={onSeeReport} />
+        </div>
+      )}
+
       {/* Center-aligned content — shifted down 40%.
           pointer-events-none on the wrapper so the empty space lets click+drag
           pass through to the cause icons underneath; the button below opts
           back in via pointer-events-auto. */}
+      {!isTelly && (
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-end text-center px-6 md:px-10 pointer-events-none pb-[23vh] md:pb-[10vh]">
         <motion.h1
           className={theme.titleClassName}
@@ -608,6 +624,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           <span>↓</span>
         </motion.button>
       </div>
+      )}
 
     </section>
   )
