@@ -20,6 +20,7 @@ import { TellyAbout } from './TellyAbout'
 import { TellyFacts } from './TellyFacts'
 import { TellyJudgeInsights } from './TellyJudgeInsights'
 import { WinnerList } from './WinnerList'
+import { TellyBackToContents } from './TellyBackToContents'
 import {
   TwoColumnSlab,
   SectionHeader,
@@ -665,6 +666,7 @@ export function ReportView({ report }: { report: Report }) {
       {/* Report content — snap scrolling + nav dots activate after entry */}
       {hasAccess && (
         <div ref={reportRef}>
+          {isTelly && <TellyBackToContents />}
           <ReportScroll active={entered} trendCount={report.trendSections?.length ?? 0} snap={false}>
             {isTelly && <TellyAbout report={report} />}
             <IntroLetter report={report} />
