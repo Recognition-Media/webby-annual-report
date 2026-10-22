@@ -309,7 +309,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         ctaUrl: 'https://www.tellyawards.com/',
         ctaBgClass: 'bg-[#ef1e40] hover:bg-[#c8152f]',
         ctaTextColorClass: 'text-white',
-        brandLabel: 'By The Telly Awards',
+        brandLabel: '',
         brandLabelColor: '#ffffff',
         heroImages: ['/telly/hero-gradient.svg'],
         heroImagesMobile: undefined as string[] | undefined,
