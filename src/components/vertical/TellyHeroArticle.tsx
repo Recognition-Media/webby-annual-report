@@ -60,7 +60,19 @@ const ICONS: { src: string; inset: [number, number, number, number] }[] = [
   { src: '/telly/hero-v2/icon-f.svg', inset: [71.34, 2.6, 21.04, 85.58] },
 ]
 
-export function TellyHeroArticle({ onEnter }: { onEnter?: () => void }) {
+interface TellyHeroArticleProps {
+  titleLine1?: string
+  titleLine2?: string
+  subtitle?: string
+  onEnter?: () => void
+}
+
+export function TellyHeroArticle({
+  titleLine1 = 'The Telly Awards',
+  titleLine2 = "What's On Demand",
+  subtitle = "This is what moves us, this is what's moving the needle, this is what's moving the market.",
+  onEnter,
+}: TellyHeroArticleProps) {
   return (
     <div className="w-full max-w-[1300px] mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-14 px-6 md:px-10 pointer-events-auto">
       {/* Left: headline, subtitle, button */}
@@ -72,7 +84,7 @@ export function TellyHeroArticle({ onEnter }: { onEnter?: () => void }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.3 }}
         >
-          The Telly<br />Awards
+          {titleLine1}<br />{titleLine2}
         </motion.h1>
         <motion.p
           className="mb-8 mx-auto md:mx-0"
@@ -81,7 +93,7 @@ export function TellyHeroArticle({ onEnter }: { onEnter?: () => void }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.45 }}
         >
-          Honoring excellence in video and television across all screens
+          {subtitle}
         </motion.p>
         <motion.button
           onClick={() => onEnter?.()}

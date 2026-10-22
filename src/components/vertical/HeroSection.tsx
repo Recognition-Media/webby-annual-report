@@ -548,7 +548,12 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           composition rather than text over a full-bleed photo. */}
       {isTelly && (
         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none pt-[140px] md:pt-0">
-          <TellyHeroArticle onEnter={onSeeReport} />
+          <TellyHeroArticle
+            titleLine1={report.heroHeadline?.split('\\n')[0] || 'The Telly Awards'}
+            titleLine2={report.heroHeadline?.split('\\n')[1] || "What's On Demand"}
+            subtitle={report.heroSubtitle || "This is what moves us, this is what's moving the needle, this is what's moving the market."}
+            onEnter={onSeeReport}
+          />
         </div>
       )}
 
