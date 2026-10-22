@@ -444,7 +444,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             className={`hidden md:block text-[10px] tracking-[2px] uppercase rounded-full py-2.5 px-6 ${isSharedInfluence ? '' : 'transition-colors ' + theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
             style={isSharedInfluence ? siCtaStyle(hoverEnter) : undefined}
           >
-            Enter Now
+            {isTelly ? 'Explore The Report' : 'Enter Now'}
           </a>
           <div className="relative">
             <button
@@ -517,7 +517,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
                     className={`md:hidden w-full text-left px-5 py-4 flex items-center justify-between gap-3 transition-colors hover:brightness-110 ${theme.ctaBgClass}`}
                   >
                     <span className={`text-[13px] tracking-[1px] uppercase font-medium ${theme.ctaTextColorClass}`}>
-                      Enter Now
+                      {isTelly ? 'Explore The Report' : 'Enter Now'}
                     </span>
                     <span className={`text-base ${theme.ctaTextColorClass}`}>→</span>
                   </a>
