@@ -16,6 +16,10 @@ import { TrendContainer } from '../TrendContainer'
 import { AnthemFooter } from './AnthemFooter'
 import { LovieFooter } from './LovieFooter'
 import { TellyFooter } from './TellyFooter'
+import { TellyAbout } from './TellyAbout'
+import { TellyFacts } from './TellyFacts'
+import { TellyJudgeInsights } from './TellyJudgeInsights'
+import { WinnerList } from './WinnerList'
 import {
   TwoColumnSlab,
   SectionHeader,
@@ -662,6 +666,7 @@ export function ReportView({ report }: { report: Report }) {
       {hasAccess && (
         <div ref={reportRef}>
           <ReportScroll active={entered} trendCount={report.trendSections?.length ?? 0} snap={false}>
+            {isTelly && <TellyAbout report={report} />}
             <IntroLetter report={report} />
 
             {/* By the Numbers — hidden for Anthem redesign */}
@@ -670,6 +675,15 @@ export function ReportView({ report }: { report: Report }) {
             {/* IADAS — hidden for Anthem redesign */}
             {/* <IadasSection report={report} /> */}
             <KeyFindings findings={report.keyFindings} property={report.property} slug={report.slug?.current} />
+
+            {isTelly && <TellyFacts report={report} />}
+            {isTelly && (
+              <TellyJudgeInsights
+                eyebrow={report.judgeInsightsEyebrow}
+                heading={report.judgeInsightsHeading}
+                quotes={report.judgeQuotes ?? []}
+              />
+            )}
 
             {/* Section 1 cover. CMS-driven; Lovie reports get the heart-token
                 SVG and Lovie-aware theming through the `property` prop.
@@ -844,6 +858,16 @@ export function ReportView({ report }: { report: Report }) {
                             background="#ffffff"
                           />
                         )}
+                        {trend.showWinnerLists !== false &&
+                          (trend.winnerLists ?? []).map((list, j) => (
+                            <WinnerList
+                              key={j}
+                              heading={list.heading}
+                              intro={list.intro}
+                              entries={list.entries}
+                              accentColor={accent}
+                            />
+                          ))}
                       </div>
                     )
                   })}
