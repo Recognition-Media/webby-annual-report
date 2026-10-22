@@ -22,6 +22,9 @@ export default defineType({
     { name: 'analytics', title: 'Analytics' },
     { name: 'credits', title: 'Credits' },
     { name: 'footer', title: 'Footer' },
+    { name: 'tellyAbout', title: 'About Page (Telly)', hidden: ({ document }) => document?.property !== 'telly' },
+    { name: 'tellyFacts', title: 'Facts Page (Telly)', hidden: ({ document }) => document?.property !== 'telly' },
+    { name: 'tellyJudgeInsights', title: 'Judge Insights (Telly)', hidden: ({ document }) => document?.property !== 'telly' },
   ],
   fields: [
     // Core / Settings
@@ -199,6 +202,33 @@ export default defineType({
     // Credits (Anthem vertical template — closing credits page)
     { name: 'creditsCreatedBy', title: 'Created By', type: 'array', of: [{ type: 'creditPerson' }], group: 'credits', description: 'Internal team members who built the report' },
     { name: 'creditsContributors', title: 'Contributors', type: 'array', of: [{ type: 'creditPerson' }], group: 'credits', description: 'External contributors / quoted experts' },
+
+    // About Page (Telly only) — the "About The Telly Awards" page that
+    // follows the hero, before the Welcome Letter.
+    { name: 'aboutEyebrow', title: 'Eyebrow', type: 'string', initialValue: 'About', group: 'tellyAbout' },
+    { name: 'aboutHeading', title: 'Heading', type: 'string', initialValue: 'About The Telly Awards', group: 'tellyAbout' },
+    { name: 'aboutBody', title: 'Body', type: 'array', of: [{ type: 'block' }], group: 'tellyAbout' },
+    { name: 'aboutLogo', title: 'Logo', type: 'image', group: 'tellyAbout', description: 'Optional — falls back to the Telly wordmark already shipped in /public/telly.' },
+    { name: 'aboutCtaText', title: 'CTA Button Text', type: 'string', initialValue: 'Enter Now', group: 'tellyAbout' },
+    { name: 'aboutCtaUrl', title: 'CTA Button URL', type: 'url', group: 'tellyAbout' },
+
+    // Facts Page (Telly only)
+    { name: 'factsEntryCount', title: 'Entry Count', type: 'string', description: 'e.g. "13,876"', group: 'tellyFacts' },
+    { name: 'factsEntryLabel', title: 'Entry Count Label', type: 'string', initialValue: 'Entries This Season', group: 'tellyFacts' },
+    { name: 'factsJudgeCount', title: 'Judge Count', type: 'string', description: 'e.g. "575"', group: 'tellyFacts' },
+    { name: 'factsJudgeLabel', title: 'Judge Count Label', type: 'string', initialValue: 'Judging Council Members', group: 'tellyFacts' },
+    { name: 'factsTopTitlesHeading', title: 'Top Titles Heading', type: 'string', group: 'tellyFacts' },
+    { name: 'factsTopTitles', title: 'Top Titles', type: 'array', of: [{ type: 'string' }], description: 'Ranked list, e.g. the top job titles of winning entrants.', group: 'tellyFacts' },
+    { name: 'factsTopCitiesNationalHeading', title: 'Top National Cities Heading', type: 'string', group: 'tellyFacts' },
+    { name: 'factsTopCitiesNational', title: 'Top National Cities', type: 'array', of: [{ type: 'string' }], group: 'tellyFacts' },
+    { name: 'factsTopCitiesInternationalHeading', title: 'Top International Cities Heading', type: 'string', group: 'tellyFacts' },
+    { name: 'factsTopCitiesInternational', title: 'Top International Cities', type: 'array', of: [{ type: 'string' }], group: 'tellyFacts' },
+
+    // Judge Insights (Telly only) — standalone "Insights from the Season"
+    // page, independent of any single trend.
+    { name: 'judgeInsightsEyebrow', title: 'Eyebrow', type: 'string', initialValue: 'Insights From The Season', group: 'tellyJudgeInsights' },
+    { name: 'judgeInsightsHeading', title: 'Heading', type: 'string', group: 'tellyJudgeInsights' },
+    { name: 'judgeQuotes', title: 'Judge Quotes', type: 'array', of: [{ type: 'expertQuote' }], group: 'tellyJudgeInsights' },
   ],
   orderings: [
     { title: 'Year (Newest)', name: 'yearDesc', by: [{ field: 'year', direction: 'desc' }] },

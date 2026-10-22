@@ -14,6 +14,8 @@ import keyFinding from './objects/keyFinding'
 import creditPerson from './objects/creditPerson'
 import insideTheHubs from './objects/insideTheHubs'
 import lovieTakeaway from './objects/lovieTakeaway'
+import winEntry from './objects/winEntry'
+import winnerList from './objects/winnerList'
 import {
   siBodyBlock,
   siSectionHeaderBlock,
@@ -44,6 +46,8 @@ export const schemaTypes = [
   creditPerson,
   insideTheHubs,
   lovieTakeaway,
+  winEntry,
+  winnerList,
   // Shared Influence content blocks (Option C repeatable-block pattern)
   siBodyBlock,
   siSectionHeaderBlock,

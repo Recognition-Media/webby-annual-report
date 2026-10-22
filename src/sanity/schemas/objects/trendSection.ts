@@ -12,6 +12,7 @@ export default defineType({
     { name: 'quotes', title: 'Expert Quotes', options: { collapsible: true, collapsed: true } },
     { name: 'video', title: 'Video Module', options: { collapsible: true, collapsed: true } },
     { name: 'images', title: 'Images', options: { collapsible: true, collapsed: true } },
+    { name: 'winners', title: 'Winner Lists (Telly)', options: { collapsible: true, collapsed: true } },
   ],
   fields: [
     { name: 'enabled', title: 'Enabled', type: 'boolean', initialValue: true, description: 'Show or hide this entire trend' },
@@ -116,6 +117,13 @@ export default defineType({
 
     // Images
     { name: 'sectionImages', title: 'Images', type: 'array', of: [{ type: 'image', options: { hotspot: true }, fields: [{ name: 'alt', title: 'Alt Text', type: 'string' }] }], fieldset: 'images' },
+
+    // Winner Lists (Telly) — ranked lists of winning organizations/
+    // creators with an optional social-proof stat. Other properties
+    // leave showWinnerLists off, so this never appears in their render
+    // path; Telly's ReportView branch reads it per trendSection.
+    { name: 'showWinnerLists', title: 'Show Winner Lists', type: 'boolean', initialValue: false, description: 'Telly only — toggle one or more ranked winner lists for this trend/section.', fieldset: 'winners' },
+    { name: 'winnerLists', title: 'Winner Lists', type: 'array', of: [{ type: 'winnerList' }], hidden: ({ parent }) => parent?.showWinnerLists === false, fieldset: 'winners' },
 
     // Content Slabs (Shared Influence — Option C repeatable-block pattern).
     // When populated, the Shared Influence renderer prefers this field

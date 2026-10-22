@@ -38,6 +38,22 @@ export interface FeaturedProject {
   image?: SanityImage
 }
 
+export interface WinEntry {
+  name: string
+  workTitle?: string
+  workUrl?: string
+  metricValue?: string
+  metricPlatform?: 'linkedin' | 'instagram' | 'vimeo' | 'youtube' | 'tiktok' | 'website'
+  metricUrl?: string
+  highlight?: boolean
+}
+
+export interface WinnerList {
+  heading: string
+  intro?: string
+  entries: WinEntry[]
+}
+
 export interface ExpertQuote {
   name: string
   title?: string
@@ -107,6 +123,8 @@ export interface TrendSection {
   videoUrl?: string
   sectionImages?: (SanityImage & { alt?: string })[]
   contentSlabs?: SIContentSlab[]
+  showWinnerLists?: boolean
+  winnerLists?: WinnerList[]
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -338,4 +356,23 @@ export interface Report {
   footerBody?: PortableTextBlock[]
   creditsCreatedBy?: CreditPerson[]
   creditsContributors?: CreditPerson[]
+  aboutEyebrow?: string
+  aboutHeading?: string
+  aboutBody?: PortableTextBlock[]
+  aboutLogo?: SanityImage
+  aboutCtaText?: string
+  aboutCtaUrl?: string
+  factsEntryCount?: string
+  factsEntryLabel?: string
+  factsJudgeCount?: string
+  factsJudgeLabel?: string
+  factsTopTitlesHeading?: string
+  factsTopTitles?: string[]
+  factsTopCitiesNationalHeading?: string
+  factsTopCitiesNational?: string[]
+  factsTopCitiesInternationalHeading?: string
+  factsTopCitiesInternational?: string[]
+  judgeInsightsEyebrow?: string
+  judgeInsightsHeading?: string
+  judgeQuotes?: ExpertQuote[]
 }
