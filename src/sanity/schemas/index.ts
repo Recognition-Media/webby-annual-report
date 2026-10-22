@@ -11,6 +11,7 @@ import formField from './objects/formField'
 import footerLink from './objects/footerLink'
 import sectionCover from './objects/sectionCover'
 import keyFinding from './objects/keyFinding'
+import keyFindingSubItem from './objects/keyFindingSubItem'
 import creditPerson from './objects/creditPerson'
 import insideTheHubs from './objects/insideTheHubs'
 import lovieTakeaway from './objects/lovieTakeaway'
@@ -43,6 +44,7 @@ export const schemaTypes = [
   footerLink,
   sectionCover,
   keyFinding,
+  keyFindingSubItem,
   creditPerson,
   insideTheHubs,
   lovieTakeaway,

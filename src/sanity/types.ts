@@ -244,12 +244,18 @@ export interface FooterLink {
   url: string
 }
 
+export interface KeyFindingSubItem {
+  title: string
+  anchor?: string
+}
+
 export interface KeyFinding {
   number: string
   title: string
   description?: string
   hoverColor?: string
   anchor?: string
+  subItems?: KeyFindingSubItem[]
 }
 
 export interface LovieTakeaway {

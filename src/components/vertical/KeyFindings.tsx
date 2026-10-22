@@ -185,6 +185,7 @@ type ResolvedSection = {
   color: string
   hoverBg: string
   anchor: string
+  subItems?: { title: string; anchor?: string }[]
 }
 
 interface KeyFindingsProps {
@@ -272,6 +273,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
           color: defaultTextColor,
           hoverBg: f.hoverColor || fallback[i % fallback.length].hoverBg,
           anchor: f.anchor || fallback[i % fallback.length].anchor,
+          subItems: f.subItems,
         }))
       : fallback
 
@@ -588,21 +590,21 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
     )
   }
 
-  return (
-    <section
-      id="key-findings"
-      data-snap
-      className="relative overflow-hidden px-5 md:px-[60px] pt-20 md:pt-28 pb-10 md:pb-14"
-      style={{ background: theme.sectionBg }}
-    >
-      {/* Telly — slow wavy signal lines behind the section, a quiet nod
-          to the video subject matter. Faint so the cards stay legible. */}
-      {isTelly && <SignalWaves opacity={0.2} />}
-      <div className="relative" style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
-        {/* Telly — the Screens wordmark sits centered above the title
-            (in flow) rather than as the Anthem-style floating sticker,
-            whose absolute offsets are tuned to Anthem's round icon. */}
-        {isTelly && (
+  // Telly — Table of Contents reads as a "TV guide" index: a numbered
+  // list of top-level entries (Facts, Insights From The Season, each
+  // section), with lettered sub-pages (the winner lists inside a
+  // section) nested underneath. Distinct from Anthem's card grid below
+  // because sub-items don't fit a square tile.
+  if (isTelly) {
+    return (
+      <section
+        id="key-findings"
+        data-snap
+        className="relative overflow-hidden px-5 md:px-[60px] pt-20 md:pt-28 pb-16 md:pb-24"
+        style={{ background: theme.sectionBg }}
+      >
+        <SignalWaves opacity={0.2} />
+        <div className="relative" style={{ maxWidth: 820, margin: '0 auto', width: '100%' }}>
           <motion.img
             src={theme.headingIcon}
             alt=""
@@ -612,24 +614,138 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           />
-        )}
+          <motion.h2
+            className="mb-4 text-[40px] md:text-[64px] leading-[1.1] text-center"
+            style={{ fontFamily: 'var(--font-display)', color: '#000000', fontWeight: 700 }}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            Inside The Report
+          </motion.h2>
+          <motion.p
+            className="text-center text-[14px] md:text-[16px] mb-12 md:mb-16"
+            style={{ color: '#21261A', opacity: 0.6, fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            {theme.subtitle}
+          </motion.p>
+
+          <ol className="list-none p-0 m-0">
+            {sections.map((section, i) => {
+              const isHovered = hoveredIndex === i
+              return (
+                <motion.li
+                  key={section.number}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.05 + i * 0.05 }}
+                >
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => scrollToAnchor(section.anchor)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        scrollToAnchor(section.anchor)
+                      }
+                    }}
+                    onMouseEnter={() => setHoveredIndex(i)}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                    className="flex items-baseline gap-4 md:gap-6 py-4 md:py-5 border-t cursor-pointer"
+                    style={{ borderColor: 'rgba(0,0,0,0.1)' }}
+                  >
+                    <span
+                      className="text-[20px] md:text-[26px] font-bold flex-shrink-0 transition-colors duration-200"
+                      style={{ color: isHovered ? section.hoverBg : '#000000', minWidth: 40 }}
+                    >
+                      {section.number}
+                    </span>
+                    <span className="flex-1">
+                      <span
+                        className="block text-[17px] md:text-[22px] leading-[1.3] transition-colors duration-200"
+                        style={{ fontWeight: 600, color: isHovered ? section.hoverBg : '#000000' }}
+                      >
+                        {section.title}
+                      </span>
+                      {section.description && (
+                        <span className="block text-[12px] md:text-[13px] mt-1" style={{ color: 'rgba(0,0,0,0.5)' }}>
+                          {section.description}
+                        </span>
+                      )}
+                    </span>
+                    <span
+                      className="text-[18px] md:text-[22px] flex-shrink-0 transition-transform duration-200"
+                      style={{ color: isHovered ? section.hoverBg : '#000000', transform: isHovered ? 'translateX(6px)' : 'none' }}
+                    >
+                      →
+                    </span>
+                  </div>
+
+                  {section.subItems && section.subItems.length > 0 && (
+                    <ul className="list-none pl-[56px] md:pl-[70px] pb-4 md:pb-5 flex flex-col gap-1">
+                      {section.subItems.map((sub, j) => (
+                        <li key={j}>
+                          <button
+                            type="button"
+                            onClick={() => scrollToAnchor(sub.anchor || '')}
+                            className="flex items-baseline gap-3 py-1.5 text-left w-full group cursor-pointer"
+                          >
+                            <span
+                              className="text-[12px] md:text-[13px] font-medium flex-shrink-0"
+                              style={{ color: section.hoverBg, minWidth: 18 }}
+                            >
+                              {String.fromCharCode(65 + j)}
+                            </span>
+                            <span
+                              className="text-[13px] md:text-[14px] leading-[1.4] group-hover:underline"
+                              style={{ color: 'rgba(0,0,0,0.75)', textUnderlineOffset: 2 }}
+                            >
+                              {sub.title}
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </motion.li>
+              )
+            })}
+          </ol>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section
+      id="key-findings"
+      data-snap
+      className="relative overflow-hidden px-5 md:px-[60px] pt-20 md:pt-28 pb-10 md:pb-14"
+      style={{ background: theme.sectionBg }}
+    >
+      <div className="relative" style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         {/* Heading */}
         <motion.h2
           className="mb-10 md:mb-14 text-[48px] md:text-[80px] leading-[1.1] text-center relative inline-flex items-start justify-center w-full"
-          style={{ fontFamily: 'var(--font-display)', color: isTelly ? '#000000' : '#21261A', fontWeight: isTelly ? 700 : 400 }}
+          style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          {!isTelly && (
-            <img
-              src={theme.headingIcon}
-              alt=""
-              className="w-[60px] h-[60px] md:w-[100px] md:h-[100px] absolute left-[8%] md:left-[calc(50%_-_5.2em_+_10px)]"
-              style={{ transform: `rotate(${theme.headingIconRotation})`, top: '-0.15em' }}
-            />
-          )}
+          <img
+            src={theme.headingIcon}
+            alt=""
+            className="w-[60px] h-[60px] md:w-[100px] md:h-[100px] absolute left-[8%] md:left-[calc(50%_-_5.2em_+_10px)]"
+            style={{ transform: `rotate(${theme.headingIconRotation})`, top: '-0.15em' }}
+          />
           Inside The Report
         </motion.h2>
 

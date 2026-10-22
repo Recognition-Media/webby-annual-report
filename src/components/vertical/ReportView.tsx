@@ -862,6 +862,7 @@ export function ReportView({ report }: { report: Report }) {
                           (trend.winnerLists ?? []).map((list, j) => (
                             <WinnerList
                               key={j}
+                              id={`trend-${num}-list-${j}`}
                               heading={list.heading}
                               intro={list.intro}
                               entries={list.entries}

@@ -27,6 +27,13 @@ export default defineType({
       },
     },
     { name: 'anchor', title: 'Anchor (DOM id of target section)', type: 'string', description: 'e.g. "section-01" or "thank-you"' },
+    {
+      name: 'subItems',
+      title: 'Sub-Pages',
+      type: 'array',
+      of: [{ type: 'keyFindingSubItem' }],
+      description: 'Telly only — lettered sub-pages shown nested under this entry (e.g. the winner lists inside a section).',
+    },
   ],
   preview: {
     select: { number: 'number', title: 'title' },

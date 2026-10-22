@@ -47,7 +47,7 @@ export const reportBySlugQuery = groq`
     trendIntroBody,
     trendIntroStats,
     trendIntroCta,
-    keyFindings[] { number, title, description, hoverColor, anchor },
+    keyFindings[] { number, title, description, hoverColor, anchor, subItems[] { title, anchor } },
     aboutEyebrow,
     aboutHeading,
     aboutBody,

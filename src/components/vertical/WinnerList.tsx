@@ -13,16 +13,18 @@ const PLATFORM_LABELS: Record<string, string> = {
 }
 
 interface WinnerListProps {
+  id?: string
   heading: string
   intro?: string
   entries: WinEntry[]
   accentColor?: string
 }
 
-export function WinnerList({ heading, intro, entries, accentColor = '#ef1e40' }: WinnerListProps) {
+export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40' }: WinnerListProps) {
   if (!entries || entries.length === 0) return null
   return (
     <section
+      id={id}
       className="relative px-5 md:px-[60px] py-16 md:py-20"
       style={{ background: '#ffffff' }}
     >
