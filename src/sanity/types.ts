@@ -42,9 +42,6 @@ export interface WinEntry {
   name: string
   workTitle?: string
   workUrl?: string
-  metricValue?: string
-  metricPlatform?: 'linkedin' | 'instagram' | 'vimeo' | 'youtube' | 'tiktok' | 'website'
-  metricUrl?: string
   highlight?: boolean
 }
 

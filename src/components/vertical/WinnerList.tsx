@@ -3,15 +3,6 @@
 import { motion } from 'framer-motion'
 import type { WinEntry } from '@/sanity/types'
 
-const PLATFORM_LABELS: Record<string, string> = {
-  linkedin: 'LinkedIn',
-  instagram: 'Instagram',
-  vimeo: 'Vimeo',
-  youtube: 'YouTube',
-  tiktok: 'TikTok',
-  website: 'Website',
-}
-
 interface WinnerListProps {
   id?: string
   heading: string
@@ -96,18 +87,6 @@ export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40
                   </>
                 )}
               </span>
-              {entry.metricValue && (
-                <a
-                  href={entry.metricUrl || entry.workUrl || undefined}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 text-[11px] md:text-[12px] py-1.5 px-3 rounded-full whitespace-nowrap"
-                  style={{ background: 'rgba(0,0,0,0.06)', color: '#000000', fontFamily: "'Basetica', -apple-system, sans-serif" }}
-                >
-                  {entry.metricValue}
-                  {entry.metricPlatform && ` · ${PLATFORM_LABELS[entry.metricPlatform] || entry.metricPlatform}`}
-                </a>
-              )}
             </motion.li>
           ))}
         </ol>
