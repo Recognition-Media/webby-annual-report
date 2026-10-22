@@ -101,14 +101,13 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
     report.property === 'anthem' &&
     report.slug?.current === 'shared-influence-creator-partnerships-nonprofit'
   const isTelly = report.property === 'telly'
-  // Telly nav is built from the CMS trend list (ids match the trend-NN
-  // wrappers the Telly ReportView branch renders) plus the About footer.
-  const tellyNavSections = [
-    ...(report.trendSections ?? [])
-      .filter((t) => t.enabled !== false)
-      .map((t, i) => ({ id: `trend-${String(i + 1).padStart(2, '0')}`, label: t.trendTitle })),
-    { id: 'about-telly', label: 'About The Telly Awards' },
-  ]
+  // Telly nav mirrors the Table of Contents (CMS keyFindings) exactly,
+  // same order, same labels and anchors — so the hamburger menu never
+  // drifts out of sync with what the ToC itself lists.
+  const tellyNavSections = (report.keyFindings ?? []).map((f) => ({
+    id: f.anchor || '',
+    label: f.title,
+  }))
   // Hover state for the Shared Influence pills. We track this in React
   // and apply the base + hover colours via inline style so nothing in
   // the Tailwind cascade can override it (CSS-only approach lost the
