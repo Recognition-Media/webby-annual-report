@@ -52,8 +52,6 @@ export const reportBySlugQuery = groq`
     aboutHeading,
     aboutBody,
     aboutLogo,
-    aboutCtaText,
-    aboutCtaUrl,
     factsEntryCount,
     factsEntryLabel,
     factsJudgeCount,

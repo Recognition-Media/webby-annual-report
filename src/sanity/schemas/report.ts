@@ -209,8 +209,6 @@ export default defineType({
     { name: 'aboutHeading', title: 'Heading', type: 'string', initialValue: 'About The Telly Awards', group: 'tellyAbout' },
     { name: 'aboutBody', title: 'Body', type: 'array', of: [{ type: 'block' }], group: 'tellyAbout' },
     { name: 'aboutLogo', title: 'Logo', type: 'image', group: 'tellyAbout', description: 'Optional — falls back to the Telly wordmark already shipped in /public/telly.' },
-    { name: 'aboutCtaText', title: 'CTA Button Text', type: 'string', initialValue: 'Enter Now', group: 'tellyAbout' },
-    { name: 'aboutCtaUrl', title: 'CTA Button URL', type: 'url', group: 'tellyAbout' },
 
     // Facts Page (Telly only)
     { name: 'factsEntryCount', title: 'Entry Count', type: 'string', description: 'e.g. "13,876"', group: 'tellyFacts' },

@@ -360,8 +360,6 @@ export interface Report {
   aboutHeading?: string
   aboutBody?: PortableTextBlock[]
   aboutLogo?: SanityImage
-  aboutCtaText?: string
-  aboutCtaUrl?: string
   factsEntryCount?: string
   factsEntryLabel?: string
   factsJudgeCount?: string

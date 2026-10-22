@@ -2,8 +2,24 @@
 
 import { motion } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
+import type { PortableTextComponents } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
+
+const aboutBodyComponents: PortableTextComponents = {
+  marks: {
+    link: ({ value, children }) => (
+      <a
+        href={value?.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: '#ef1e40', textDecoration: 'underline', textUnderlineOffset: 2 }}
+      >
+        {children}
+      </a>
+    ),
+  },
+}
 
 export function TellyAbout({ report }: { report: Report }) {
   const logoUrl = report.aboutLogo ? urlFor(report.aboutLogo).width(240).url() : '/telly/telly-logo-black.svg'
@@ -54,23 +70,8 @@ export function TellyAbout({ report }: { report: Report }) {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.15 }}
           >
-            <PortableText value={report.aboutBody} />
+            <PortableText value={report.aboutBody} components={aboutBodyComponents} />
           </motion.div>
-        )}
-        {report.aboutCtaText && report.aboutCtaUrl && (
-          <motion.a
-            href={report.aboutCtaUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[2px] py-3 px-7 rounded-full"
-            style={{ background: '#ef1e40', color: '#ffffff', fontFamily: "'Basetica', -apple-system, sans-serif" }}
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            {report.aboutCtaText}
-          </motion.a>
         )}
       </div>
     </section>
