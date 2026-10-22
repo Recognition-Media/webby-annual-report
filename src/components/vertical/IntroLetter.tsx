@@ -136,7 +136,7 @@ export function IntroLetter({ report }: { report: Report }) {
               color: theme.eyebrowColor,
             }}
           >
-            Introduction
+            {isTelly ? "What's Inside This Report" : 'Introduction'}
           </p>
 
           <div className="w-[200px] h-[250px] md:w-[300px] md:h-[390px] relative rounded-lg overflow-hidden mb-4">

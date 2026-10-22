@@ -303,7 +303,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         // Telly — brand gradient ground (purple → red), white Screens
         // lockup, red CTA pill, Basetica bold title. Headline/subtitle
         // come from the CMS hero fields with generic fallbacks.
-        logoSrc: '/telly/telly-logo-white.svg',
+        logoSrc: '/telly/telly-logo-horizontal-white.png',
         logoAlt: 'The Telly Awards',
         logoClassName: 'w-[64px] h-auto md:w-[84px] lg:w-[96px]',
         ctaUrl: 'https://www.tellyawards.com/',

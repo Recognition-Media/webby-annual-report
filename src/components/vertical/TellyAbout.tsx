@@ -22,7 +22,7 @@ const aboutBodyComponents: PortableTextComponents = {
 }
 
 export function TellyAbout({ report }: { report: Report }) {
-  const logoUrl = report.aboutLogo ? urlFor(report.aboutLogo).width(240).url() : '/telly/telly-logo-white.svg'
+  const logoUrl = report.aboutLogo ? urlFor(report.aboutLogo).width(240).url() : '/telly/telly-logo-horizontal-white.png'
   return (
     <section
       id="about-telly"

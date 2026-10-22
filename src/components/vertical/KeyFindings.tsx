@@ -241,7 +241,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
     ? {
         sectionBg: '#110E1F',
         cardDefaultBg: 'rgba(255,255,255,0.08)',
-        headingIcon: '/telly/telly-logo-white.svg',
+        headingIcon: '/telly/telly-logo-horizontal-white.png',
         headingIconRotation: '0deg',
         subtitle: 'A look at what is shaping video and television across every screen in 2026.',
       }
@@ -622,7 +622,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            Inside The Report
+            Table of Contents
           </motion.h2>
           <motion.p
             className="text-center text-[14px] md:text-[16px] mb-12 md:mb-16"

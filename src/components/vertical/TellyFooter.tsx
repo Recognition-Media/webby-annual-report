@@ -63,7 +63,7 @@ export function TellyFooter({ report }: { report: Report }) {
     >
       <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
         <motion.img
-          src="/telly/telly-logo-white.svg"
+          src="/telly/telly-logo-horizontal-white.png"
           alt="The Telly Awards"
           style={{ width: 84, height: 'auto', margin: '0 auto 40px', display: 'block' }}
           initial={{ opacity: 0, y: 10 }}

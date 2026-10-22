@@ -91,7 +91,7 @@ const GATE_THEMES: Record<string, GateTheme> = {
     overlay: 'rgba(0, 0, 0, 0.8)',
     frame: '#ef1e40',
     card: '#110E1F',
-    logo: '/telly/telly-logo-white.svg',
+    logo: '/telly/telly-logo-horizontal-white.png',
     logoAlt: 'The Telly Awards',
     font: "'Basetica', -apple-system, sans-serif",
     text: '#ffffff',
