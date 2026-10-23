@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
 import type { ExpertQuote } from '@/sanity/types'
+import { urlFor } from '@/sanity/image'
 
 const quoteComponents: PortableTextComponents = {
   block: {
@@ -54,27 +55,46 @@ export function TellyJudgeInsights({
           </motion.h2>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-10">
-          {quotes.map((q, i) => (
-            <motion.div
-              key={i}
-              className="pl-5"
-              style={{ borderLeft: `3px solid ${i % 2 === 0 ? '#ef1e40' : '#c23799'}` }}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.05 + i * 0.06 }}
-            >
-              <div
-                className="text-[15px] md:text-[17px] leading-[1.6] mb-3"
-                style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontStyle: 'italic' }}
+          {quotes.map((q, i) => {
+            const accent = i % 2 === 0 ? '#ef1e40' : '#c23799'
+            const headshotUrl = q.headshot ? urlFor(q.headshot).width(160).height(160).fit('crop').url() : q.headshotUrl
+            return (
+              <motion.div
+                key={i}
+                className="flex gap-4 items-start"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.05 + i * 0.06 }}
               >
-                <PortableText value={q.quoteText} components={quoteComponents} />
-              </div>
-              <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                — <strong style={{ fontWeight: 600 }}>{q.name}</strong>{q.title ? `, ${q.title}` : ''}
-              </p>
-            </motion.div>
-          ))}
+                {headshotUrl ? (
+                  <div
+                    className="w-[64px] h-[64px] md:w-[80px] md:h-[80px] rounded-full overflow-hidden flex-shrink-0"
+                    style={{ border: `2px solid ${accent}` }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- CMS-driven headshot, not a static project asset */}
+                    <img src={headshotUrl} alt={q.name} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div
+                    className="w-[64px] h-[64px] md:w-[80px] md:h-[80px] rounded-full flex-shrink-0"
+                    style={{ background: 'rgba(255,255,255,0.08)', border: `2px solid ${accent}` }}
+                  />
+                )}
+                <div className="pl-4" style={{ borderLeft: `3px solid ${accent}` }}>
+                  <div
+                    className="text-[15px] md:text-[17px] leading-[1.6] mb-3"
+                    style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontStyle: 'italic' }}
+                  >
+                    <PortableText value={q.quoteText} components={quoteComponents} />
+                  </div>
+                  <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                    — <strong style={{ fontWeight: 600 }}>{q.name}</strong>{q.title ? `, ${q.title}` : ''}
+                  </p>
+                </div>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </section>
