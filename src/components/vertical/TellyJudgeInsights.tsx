@@ -6,6 +6,10 @@ import type { PortableTextComponents } from '@portabletext/react'
 import type { ExpertQuote } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
 
+// Telly's pop-art accent palette (48th Annual Telly Awards Figma deck),
+// cycled per quote so headshot borders show more than just red/purple.
+const ACCENTS = ['#ef1e40', '#0C75FF', '#F41FC9', '#2EFB5E']
+
 const quoteComponents: PortableTextComponents = {
   block: {
     normal: ({ children }) => <p className="mb-2">{children}</p>,
@@ -56,7 +60,7 @@ export function TellyJudgeInsights({
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-10">
           {quotes.map((q, i) => {
-            const accent = i % 2 === 0 ? '#ef1e40' : '#c23799'
+            const accent = ACCENTS[i % ACCENTS.length]
             const headshotUrl = q.headshot ? urlFor(q.headshot).width(160).height(160).fit('crop').url() : q.headshotUrl
             return (
               <motion.div
@@ -88,7 +92,7 @@ export function TellyJudgeInsights({
                   >
                     <PortableText value={q.quoteText} components={quoteComponents} />
                   </div>
-                  <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                  <p className="text-[13px]" style={{ color: 'rgba(216,245,255,0.6)' }}>
                     — <strong style={{ fontWeight: 600 }}>{q.name}</strong>{q.title ? `, ${q.title}` : ''}
                   </p>
                 </div>

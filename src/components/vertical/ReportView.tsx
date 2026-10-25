@@ -65,6 +65,12 @@ import { MobileNav } from '../MobileNav'
 
 type ResolvedQuote = { name: string; title: string; text: string; headshotUrl?: string; borderColor?: string }
 
+// Telly's pop-art accent palette, pulled from the 48th Annual Telly
+// Awards Figma deck (the hero's icon badges use these same four colors).
+// Cycled one per section/trend so the 4 Telly sections each read as a
+// distinct color instead of alternating just red/purple.
+const TELLY_SECTION_ACCENTS = ['#0C75FF', '#F41FC9', '#2EFB5E', '#ef1e40']
+
 function portableTextToPlain(blocks: PortableTextBlock[] | undefined): string {
   if (!blocks) return ''
   return blocks
@@ -812,18 +818,21 @@ export function ReportView({ report }: { report: Report }) {
                   .filter((t) => t.enabled !== false)
                   .map((trend, i) => {
                     const num = String(i + 1).padStart(2, '0')
-                    const accent = trend.accentColor || (i % 2 === 0 ? '#ef1e40' : '#c23799')
+                    // Telly's pop-art palette (from the 48th Annual Telly
+                    // Awards Figma deck) cycled one per section so each of
+                    // the 4 sections reads as its own distinct color.
+                    const accent = trend.accentColor || TELLY_SECTION_ACCENTS[i % TELLY_SECTION_ACCENTS.length]
                     const cover = report.sectionCovers?.[i]
                     const dataModule =
                       trend.showData && trend.dataStats && trend.dataStats.length > 0
                         ? {
                             eyebrow: trend.dataEyebrow,
                             question: trend.dataHeadline || '',
-                            bars: trend.dataStats.map((s, j) => ({
+                            bars: trend.dataStats.map((s) => ({
                               label: s.label,
                               value: s.value,
                               displayValue: `${s.value}%`,
-                              color: j % 2 === 0 ? '#ef1e40' : '#c23799',
+                              color: accent,
                             })),
                           }
                         : undefined

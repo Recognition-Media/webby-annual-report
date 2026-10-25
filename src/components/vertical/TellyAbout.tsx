@@ -64,7 +64,7 @@ export function TellyAbout({ report }: { report: Report }) {
         {report.aboutBody && report.aboutBody.length > 0 && (
           <motion.div
             className="text-[15px] md:text-[17px] leading-[1.7] mb-8 [&_p]:mb-5"
-            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(255,255,255,0.75)' }}
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(216,245,255,0.75)' }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

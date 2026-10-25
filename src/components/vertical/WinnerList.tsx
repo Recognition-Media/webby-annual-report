@@ -33,7 +33,7 @@ export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40
         {intro && (
           <motion.p
             className="text-[14px] md:text-[16px] leading-[1.6] mb-8 max-w-[760px]"
-            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(255,255,255,0.65)' }}
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(216,245,255,0.65)' }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

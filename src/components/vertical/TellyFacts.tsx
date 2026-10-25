@@ -59,7 +59,7 @@ export function TellyFacts({ report }: { report: Report }) {
               <div className="text-[56px] md:text-[88px] leading-none" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ef1e40', fontWeight: 700 }}>
                 {report.factsEntryCount}
               </div>
-              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: 'rgba(255,255,255,0.65)' }}>{report.factsEntryLabel}</p>
+              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: 'rgba(216,245,255,0.65)' }}>{report.factsEntryLabel}</p>
             </motion.div>
           )}
           {report.factsJudgeCount && (
@@ -73,7 +73,7 @@ export function TellyFacts({ report }: { report: Report }) {
               <div className="text-[56px] md:text-[88px] leading-none" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#c23799', fontWeight: 700 }}>
                 {report.factsJudgeCount}
               </div>
-              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: 'rgba(255,255,255,0.65)' }}>{report.factsJudgeLabel}</p>
+              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: 'rgba(216,245,255,0.65)' }}>{report.factsJudgeLabel}</p>
             </motion.div>
           )}
         </div>

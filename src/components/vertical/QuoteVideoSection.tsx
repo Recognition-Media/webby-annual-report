@@ -44,8 +44,11 @@ export function QuoteVideoSection({
   background = '#E3DDCA',
   property,
 }: QuoteVideoSectionProps) {
-  const defaultBorderColors = ['#8C001C', '#D17DD0', '#066DBA', '#00B469']
   const isTelly = property === 'telly'
+  // Telly quotes always use the section's own accent (passed in as
+  // accentColor) rather than cycling through Anthem's 4-color rotation,
+  // so a quote's border matches the cover/divider color above it.
+  const defaultBorderColors = isTelly ? [accentColor] : ['#8C001C', '#D17DD0', '#066DBA', '#00B469']
   const textColor = isTelly ? '#ffffff' : '#21261A'
   const mutedTextColor = isTelly ? 'rgba(255,255,255,0.6)' : '#21261A'
   const placeholderBg = isTelly ? 'rgba(255,255,255,0.08)' : '#d5cfbc'

@@ -96,7 +96,7 @@ export function IntroLetter({ report }: { report: Report }) {
         sectionBg: '#110E1F',
         eyebrowColor: '#ef1e40',
         textColor: '#ffffff',
-        textColorMuted: 'rgba(255,255,255,0.55)',
+        textColorMuted: 'rgba(216,245,255,0.55)',
         accentColor: '#ef1e40',
         authorPhoto: '/telly/author-placeholder.svg',
         authorPhotoImgClass: 'object-cover object-center',

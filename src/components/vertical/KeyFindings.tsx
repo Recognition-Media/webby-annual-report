@@ -675,7 +675,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
                         {section.title}
                       </span>
                       {section.description && (
-                        <span className="block text-[12px] md:text-[13px] mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        <span className="block text-[12px] md:text-[13px] mt-1" style={{ color: 'rgba(216,245,255,0.55)' }}>
                           {section.description}
                         </span>
                       )}
@@ -705,7 +705,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
                             </span>
                             <span
                               className="text-[13px] md:text-[14px] leading-[1.4] group-hover:underline"
-                              style={{ color: 'rgba(255,255,255,0.8)', textUnderlineOffset: 2 }}
+                              style={{ color: 'rgba(216,245,255,0.8)', textUnderlineOffset: 2 }}
                             >
                               {sub.title}
                             </span>
