@@ -869,10 +869,6 @@ export function ReportView({ report }: { report: Report }) {
                             accentColor={accent}
                             background="#110E1F"
                             property={report.property}
-                            // Fill the otherwise-empty right column with the
-                            // featured quote's own headshot when one exists.
-                            imageSrc={quotes[0]?.headshotUrl}
-                            imageAlt={quotes[0]?.name}
                           />
                         )}
                         {trend.showWinnerLists !== false &&

@@ -127,7 +127,12 @@ export function QuoteVideoSection({
                           <img
                             src={quote.headshotUrl}
                             alt={quote.name}
-                            className="w-full h-full object-cover object-top scale-[1.4]"
+                            // Telly headshots are pre-cropped to a square
+                            // centered on the face, so a plain center-crop
+                            // is correct; the 1.4x zoom + top-anchor below
+                            // was tuned for Anthem's portrait source photos
+                            // and chopped the top of Telly headshots off.
+                            className={isTelly ? 'w-full h-full object-cover object-center' : 'w-full h-full object-cover object-top scale-[1.4]'}
                           />
                         )}
                       </div>
