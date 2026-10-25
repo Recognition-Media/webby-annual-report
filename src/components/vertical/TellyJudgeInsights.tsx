@@ -10,9 +10,12 @@ import { urlFor } from '@/sanity/image'
 // cycled per quote so headshot borders show more than just red/purple.
 const ACCENTS = ['#ef1e40', '#0C75FF', '#F41FC9', '#2EFB5E']
 
+// Every judge quote is currently a single block — rendered inline (not
+// as a <p>) so the literal opening/closing quotation marks below sit
+// flush against the quote text instead of wrapping onto their own line.
 const quoteComponents: PortableTextComponents = {
   block: {
-    normal: ({ children }) => <p className="mb-2">{children}</p>,
+    normal: ({ children }) => <>{children}</>,
   },
   marks: {
     strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
@@ -90,10 +93,11 @@ export function TellyJudgeInsights({
                     className="text-[15px] md:text-[17px] leading-[1.6] mb-3"
                     style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontStyle: 'italic' }}
                   >
-                    <PortableText value={q.quoteText} components={quoteComponents} />
+                    "<PortableText value={q.quoteText} components={quoteComponents} />"
                   </div>
                   <p className="text-[13px]" style={{ color: 'rgba(216,245,255,0.6)' }}>
-                    — <strong style={{ fontWeight: 600 }}>{q.name}</strong>{q.title ? `, ${q.title}` : ''}
+                    <strong style={{ fontWeight: 600, color: '#ffffff' }}>{q.name}</strong>
+                    {q.title && <><br />{q.title}</>}
                   </p>
                 </div>
               </motion.div>

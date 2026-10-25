@@ -142,11 +142,18 @@ export function QuoteVideoSection({
                         className="text-[15px] md:text-[17px] leading-[1.6] mb-2"
                         style={{ fontFamily: 'var(--font-display)', color: textColor, fontStyle: 'italic' }}
                       >
-                        {quote.text}
+                        {isTelly ? `"${quote.text}"` : quote.text}
                       </p>
-                      <p className="text-[13px]" style={{ color: mutedTextColor }}>
-                        — <strong style={{ fontWeight: 600 }}>{quote.name}</strong>, {quote.title}
-                      </p>
+                      {isTelly ? (
+                        <p className="text-[13px]" style={{ color: mutedTextColor }}>
+                          <strong style={{ fontWeight: 600, color: textColor }}>{quote.name}</strong>
+                          {quote.title && <><br />{quote.title}</>}
+                        </p>
+                      ) : (
+                        <p className="text-[13px]" style={{ color: mutedTextColor }}>
+                          — <strong style={{ fontWeight: 600 }}>{quote.name}</strong>, {quote.title}
+                        </p>
+                      )}
                     </div>
                   </motion.div>
                 )
