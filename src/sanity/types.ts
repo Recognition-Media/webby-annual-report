@@ -43,11 +43,22 @@ export interface WinEntry {
   workTitle?: string
   workUrl?: string
   highlight?: boolean
+  videoUrl?: string
+  videoThumbnail?: SanityImage
+  videoDescription?: string
+  orgDescription?: string
+  orgLinkText?: string
+  logo?: SanityImage
 }
 
 export interface WinnerList {
   heading: string
   intro?: string
+  posterRow?: boolean
+  rankedRow?: boolean
+  directoryRow?: boolean
+  statValue?: string
+  statCaption?: string
   entries: WinEntry[]
 }
 
@@ -122,6 +133,17 @@ export interface TrendSection {
   contentSlabs?: SIContentSlab[]
   showWinnerLists?: boolean
   winnerLists?: WinnerList[]
+  quoteInsertAfterListIndex?: number
+  showSharedVideoGuide?: boolean
+  statDisplay?: 'donut' | 'highlights'
+  statPersistOnceShown?: boolean
+  statPlacement?: 'sidebar' | 'inline'
+  statInsertAfterListIndex?: number
+  sectionStatHeading?: string
+  sectionStatValue?: number
+  sectionStatCaption?: string
+  showJudgePopup?: boolean
+  judgePopupQuotes?: ExpertQuote[]
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -252,6 +274,7 @@ export interface KeyFinding {
   description?: string
   hoverColor?: string
   anchor?: string
+  image?: SanityImage
   subItems?: KeyFindingSubItem[]
 }
 

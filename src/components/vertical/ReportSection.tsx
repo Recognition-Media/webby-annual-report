@@ -156,8 +156,10 @@ export function ReportSectionCover({
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         {/* Center-aligned: number, title, rule, subtitle */}
         <div className="text-center">
-          {/* Section number (or SVG token for Lovie) */}
-          {hideSectionNumber ? null : sectionNumberSvg ? (
+          {/* Section number (or SVG token for Lovie). Telly reads the
+              number as a small raised mark inline with the title
+              instead — rendered below, inside the heading. */}
+          {hideSectionNumber || isTelly ? null : sectionNumberSvg ? (
             <motion.img
               src={sectionNumberSvg}
               alt={`Section ${sectionNumber}`}
@@ -199,6 +201,20 @@ export function ReportSectionCover({
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
+            {isTelly && !hideSectionNumber && (
+              <span
+                style={{
+                  fontSize: '0.3em',
+                  fontWeight: 700,
+                  color: accentColor,
+                  position: 'relative',
+                  top: '-0.5em',
+                  marginRight: '0.12em',
+                }}
+              >
+                {sectionNumber}
+              </span>
+            )}
             {title}
           </motion.h2>
 
@@ -211,28 +227,34 @@ export function ReportSectionCover({
             transition={{ duration: 0.4, delay: 0.2 }}
           />
 
-          {/* Subtitle */}
-          <motion.p
-            className="text-[18px] md:text-[22px] leading-[1.4] mb-8 max-w-[800px] mx-auto"
-            style={{
-              fontFamily: subtitleFontFamily,
-              color: coverTextColor,
-              fontStyle: subtitleItalic ? 'italic' : 'normal',
-              fontWeight: 400,
-            }}
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-          >
-            {subtitle}
-          </motion.p>
+          {/* Subtitle — Telly folds this straight into the body copy
+              paragraph below (same small size, no gap) instead of
+              rendering it as its own larger headline line. */}
+          {!isTelly && (
+            <motion.p
+              className="text-[18px] md:text-[22px] leading-[1.4] mb-8 max-w-[800px] mx-auto"
+              style={{
+                fontFamily: subtitleFontFamily,
+                color: coverTextColor,
+                fontStyle: subtitleItalic ? 'italic' : 'normal',
+                fontWeight: 400,
+              }}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+            >
+              {subtitle}
+            </motion.p>
+          )}
         </div>
 
-        {/* Left-aligned: body copy, centered on page axis. Skipped when
-            the cover doesn't ship a paragraph (e.g. Nordics Ones to
-            Watch, where the subtitle alone tells the whole story). */}
-        {copy && (
+        {/* Left-aligned: body copy, centered on page axis. Telly merges
+            the subtitle sentence in here too so the whole description
+            reads as one continuous paragraph at a single size. Skipped
+            when the cover doesn't ship a paragraph (e.g. Nordics Ones
+            to Watch, where the subtitle alone tells the whole story). */}
+        {(isTelly ? subtitle || copy : copy) && (
           <div className="max-w-[588px] mx-auto">
             <motion.p
               className="text-[16px] md:text-[18px] leading-[30px] text-center"
@@ -248,7 +270,7 @@ export function ReportSectionCover({
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.35 }}
             >
-              {copy}
+              {isTelly ? [subtitle, copy].filter(Boolean).join(' ') : copy}
             </motion.p>
           </div>
         )}
@@ -295,7 +317,9 @@ interface SentimentGauge {
 
 interface TrendContentProps {
   trendNumber: string
-  title: string
+  /** Omit when a section cover right above already shows this title —
+   * avoids repeating the same heading twice in a row. */
+  title?: string
   body: React.ReactNode[]
   accentColor?: string
   stats?: { label: string; value: string; change?: string }[]
@@ -333,36 +357,41 @@ export function TrendContent({
   const trackColor = isTelly ? 'rgba(255,255,255,0.1)' : 'rgba(33,38,26,0.1)'
   return (
     <section
-      className="relative px-5 md:px-[60px] py-20 md:py-28"
+      className={`relative px-5 md:px-[60px] ${title ? 'py-20 md:py-28' : 'pt-6 md:pt-8 pb-20 md:pb-28'}`}
       style={{ background }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         <div className="flex flex-col md:flex-row gap-12 md:gap-16">
           {/* Left column: copy stack */}
           <div className="md:w-[50%]">
-            {/* Trend eyebrow */}
-            <motion.p
-              className="uppercase font-medium mb-6"
-              style={{ fontSize: 14, letterSpacing: 4, color: accentColor }}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              Trend {trendNumber}
-            </motion.p>
+            {/* Trend eyebrow — skipped along with the title when a cover
+                right above already shows the section number/name */}
+            {title && (
+              <motion.p
+                className="uppercase font-medium mb-6"
+                style={{ fontSize: 14, letterSpacing: 4, color: accentColor }}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                Trend {trendNumber}
+              </motion.p>
+            )}
 
-            {/* Trend title */}
-            <motion.h3
-              className="text-[24px] md:text-[36px] leading-[1.15] mb-6"
-              style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 400 }}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              {title}
-            </motion.h3>
+            {/* Trend title — skipped when a cover right above already shows it */}
+            {title && (
+              <motion.h3
+                className="text-[24px] md:text-[36px] leading-[1.15] mb-6"
+                style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 400 }}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+              >
+                {title}
+              </motion.h3>
+            )}
 
             {/* Accent divider */}
             <div style={{ width: 36, height: 2, background: accentColor, marginBottom: 24 }} />
@@ -455,37 +484,108 @@ export function TrendContent({
                   {dataModule.question}
                 </h4>
 
-                <div className="flex flex-col gap-6 w-full">
-                  {dataModule.bars.map((bar, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
-                    >
-                      <div className="flex justify-between items-baseline mb-2">
-                        <span className="text-[13px] md:text-[14px]" style={{ color: textColor }}>{bar.label}</span>
-                        <span className="text-[18px] md:text-[22px]" style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 700 }}>{bar.displayValue}</span>
-                      </div>
-                      <div className="h-[8px] rounded-full" style={{ background: trackColor }}>
+                {/* Telly reads each stat as a donut ring with the
+                    percentage front and center, since leading with a
+                    label ("agree that...") before the number it refers
+                    to reads backwards. Other properties keep the
+                    horizontal fill bar below. */}
+                {isTelly ? (
+                  <div className="flex flex-col gap-8 w-full">
+                    {dataModule.bars.map((bar, i) => {
+                      const size = 112
+                      const strokeWidth = 10
+                      const radius = (size - strokeWidth) / 2
+                      const circumference = 2 * Math.PI * radius
+                      return (
                         <motion.div
-                          className="h-full rounded-full"
-                          style={{ background: bar.color }}
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${bar.value}%` }}
+                          key={i}
+                          className="flex items-center gap-6"
+                          initial={{ opacity: 0, x: -10 }}
+                          whileInView={{ opacity: 1, x: 0 }}
                           viewport={{ once: true }}
-                          transition={{ duration: 0.8, delay: 0.2 + i * 0.1, ease: 'easeOut' }}
-                        />
-                      </div>
-                      {bar.change && (
-                        <p className="text-[11px] mt-1.5 font-medium" style={{ color: bar.color }}>
-                          {bar.change}
-                        </p>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
+                          transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
+                        >
+                          <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+                            <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+                              <circle
+                                cx={size / 2}
+                                cy={size / 2}
+                                r={radius}
+                                fill="none"
+                                stroke={trackColor}
+                                strokeWidth={strokeWidth}
+                              />
+                              <motion.circle
+                                cx={size / 2}
+                                cy={size / 2}
+                                r={radius}
+                                fill="none"
+                                stroke={bar.color}
+                                strokeWidth={strokeWidth}
+                                strokeLinecap="round"
+                                strokeDasharray={circumference}
+                                initial={{ strokeDashoffset: circumference }}
+                                whileInView={{ strokeDashoffset: circumference * (1 - bar.value / 100) }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 1, delay: 0.2 + i * 0.1, ease: 'easeOut' }}
+                              />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span
+                                className="text-[20px] md:text-[22px]"
+                                style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 700 }}
+                              >
+                                {bar.displayValue}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] md:text-[14px] leading-[1.5]" style={{ color: textColor }}>
+                              {bar.label}
+                            </p>
+                            {bar.change && (
+                              <p className="text-[11px] mt-1.5 font-medium" style={{ color: bar.color }}>
+                                {bar.change}
+                              </p>
+                            )}
+                          </div>
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-6 w-full">
+                    {dataModule.bars.map((bar, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
+                      >
+                        <div className="flex justify-between items-baseline mb-2">
+                          <span className="text-[13px] md:text-[14px]" style={{ color: textColor }}>{bar.label}</span>
+                          <span className="text-[18px] md:text-[22px]" style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 700 }}>{bar.displayValue}</span>
+                        </div>
+                        <div className="h-[8px] rounded-full" style={{ background: trackColor }}>
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{ background: bar.color }}
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${bar.value}%` }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: 0.2 + i * 0.1, ease: 'easeOut' }}
+                          />
+                        </div>
+                        {bar.change && (
+                          <p className="text-[11px] mt-1.5 font-medium" style={{ color: bar.color }}>
+                            {bar.change}
+                          </p>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
               )}
 

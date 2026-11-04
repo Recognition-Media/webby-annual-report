@@ -18,8 +18,15 @@ import { LovieFooter } from './LovieFooter'
 import { TellyFooter } from './TellyFooter'
 import { TellyAbout } from './TellyAbout'
 import { TellyFacts } from './TellyFacts'
-import { TellyJudgeInsights } from './TellyJudgeInsights'
+import { TellyTitlesTicker } from './TellyTitlesTicker'
 import { WinnerList } from './WinnerList'
+import { PosterRowList } from './PosterRowList'
+import { RankedThumbnailRow } from './RankedThumbnailRow'
+import { PartnerDirectoryList } from './PartnerDirectoryList'
+import { SectionStickyBar, StickySectionGroup } from './SectionStickyBar'
+import { SectionStatDonut } from './SectionStatDonut'
+import { ChannelGuideGroup, StatHighlightsRow } from './ChannelGuideGroup'
+import { TellyJudgePopup } from './TellyJudgePopup'
 import { TellyBackToContents } from './TellyBackToContents'
 import {
   TwoColumnSlab,
@@ -403,6 +410,19 @@ export function ReportView({ report }: { report: Report }) {
   // section covers + trend modules come straight from Sanity.
   const isTelly = report.property === 'telly'
 
+  // Every Telly trend section, precomputed once — passed into each
+  // section's sticky bar so it can double as a scroll-along table of
+  // contents (click the bar to jump to any other section).
+  const tellyJumpSections = isTelly
+    ? (report.trendSections ?? [])
+        .filter((t) => t.enabled !== false)
+        .map((t, i) => ({
+          anchorId: `trend-${String(i + 1).padStart(2, '0')}`,
+          title: t.trendTitle,
+          accentColor: t.accentColor || TELLY_SECTION_ACCENTS[i % TELLY_SECTION_ACCENTS.length],
+        }))
+    : []
+
   // Apply vertical-template theme (background, fonts, palette) only while this
   // template is mounted. Lovie reports get `lovie-template`; everything else
   // using the vertical layout (Anthem) keeps `anthem-template`. Webby reports
@@ -544,7 +564,14 @@ export function ReportView({ report }: { report: Report }) {
   }, [hasAccess])
 
   function handleSeeReport(anchor?: string) {
-    if (anchor) setScrollTarget(anchor)
+    // Telly's hero stays mounted permanently (see the `!entered || isTelly`
+    // guard below) so visitors can scroll back up to it — unlike the other
+    // properties, there's no "top of report" left at scroll position 0 for
+    // ReportScroll's own scrollTo(0,0) to land on, so a plain "Explore The
+    // Report" click (no anchor) needs an explicit target of its own: the
+    // Table of Contents ("Just Released").
+    const effectiveAnchor = anchor || (isTelly ? 'key-findings' : undefined)
+    if (effectiveAnchor) setScrollTarget(effectiveAnchor)
     if (!hasAccess) {
       setShowGate(true)
       return
@@ -564,13 +591,13 @@ export function ReportView({ report }: { report: Report }) {
     // would fight any scrolling the user does in the meantime and
     // make it feel like the page is locked at the Opening Letter
     // (reported by Chrome users).
-    if (!anchor) return
+    if (!effectiveAnchor) return
 
     // Anchor specified → poll briefly in case the target hasn't
     // hydrated yet (framer-motion wrappers around trend sections can
     // delay the id landing in the DOM by a frame or two).
     function tryScroll(remainingTries: number) {
-      const el = document.getElementById(anchor!)
+      const el = document.getElementById(effectiveAnchor!)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
         setScrollTarget(null)
@@ -620,8 +647,11 @@ export function ReportView({ report }: { report: Report }) {
         />
       )}
 
-      {/* Hero — hidden once you've entered the report */}
-      {!entered && (
+      {/* Hero — hidden once you've entered the report for every property
+          except Telly, whose hero (the rotating TV carousel) stays mounted
+          permanently so visitors can scroll back up to it as a real
+          top-of-page section rather than a one-way splash. */}
+      {(!entered || isTelly) && (
         <HeroSection report={report} carouselImages={report.carouselImages} onSeeReport={handleSeeReport} />
       )}
 
@@ -674,24 +704,29 @@ export function ReportView({ report }: { report: Report }) {
         <div ref={reportRef}>
           {isTelly && <TellyBackToContents />}
           <ReportScroll active={entered} trendCount={report.trendSections?.length ?? 0} snap={false}>
-            {isTelly && <TellyAbout report={report} />}
-            <IntroLetter report={report} />
+            {/* Telly wants the Table of Contents to be the very first
+                thing after the hero, with "What's Inside This Report"
+                following it — every other property keeps the original
+                intro-letter-first order. */}
+            {isTelly && <KeyFindings findings={report.keyFindings} property={report.property} slug={report.slug?.current} />}
+
+            {/* Scrolling "Who's Behind the Best Video Work" ticker — moved
+                out of The Facts into its own slim banner here, between the
+                Table of Contents and Shows & Series. Telly-only. */}
+            {isTelly && <TellyTitlesTicker report={report} />}
+
+            {/* Telly's opening letter now lives in the hero carousel's
+                second slide (TellyIntroSlide) instead of its own full
+                section — removed here per Ann's request. Every other
+                property keeps it as a standalone section, unchanged. */}
+            {!isTelly && <IntroLetter report={report} />}
 
             {/* By the Numbers — hidden for Anthem redesign */}
             {/* <EntryStats stats={report.entryStats} eyebrow={report.byTheNumbersEyebrow} statement={report.byTheNumbersStatement} /> */}
 
             {/* IADAS — hidden for Anthem redesign */}
             {/* <IadasSection report={report} /> */}
-            <KeyFindings findings={report.keyFindings} property={report.property} slug={report.slug?.current} />
-
-            {isTelly && <TellyFacts report={report} />}
-            {isTelly && (
-              <TellyJudgeInsights
-                eyebrow={report.judgeInsightsEyebrow}
-                heading={report.judgeInsightsHeading}
-                quotes={report.judgeQuotes ?? []}
-              />
-            )}
+            {!isTelly && <KeyFindings findings={report.keyFindings} property={report.property} slug={report.slug?.current} />}
 
             {/* Section 1 cover. CMS-driven; Lovie reports get the heart-token
                 SVG and Lovie-aware theming through the `property` prop.
@@ -828,6 +863,7 @@ export function ReportView({ report }: { report: Report }) {
                         ? {
                             eyebrow: trend.dataEyebrow,
                             question: trend.dataHeadline || '',
+                            variant: trend.statDisplay === 'highlights' ? ('highlights' as const) : ('donut' as const),
                             bars: trend.dataStats.map((s) => ({
                               label: s.label,
                               value: s.value,
@@ -837,8 +873,27 @@ export function ReportView({ report }: { report: Report }) {
                           }
                         : undefined
                     const quotes = trend.showQuotes !== false ? resolveTrendQuotes(trend.expertQuotes, []) : []
+                    // When the stat module is placed "inline" it renders as
+                    // its own horizontal row between two winner lists,
+                    // under the sticky section bar — regardless of whether
+                    // this trend also uses the shared-video-guide sidebar.
+                    const statInline = trend.statPlacement === 'inline' && !!dataModule
                     return (
                       <div key={i} id={`trend-${num}`}>
+                        {trend.showJudgePopup && trend.judgePopupQuotes && trend.judgePopupQuotes.length > 0 && (
+                          <TellyJudgePopup quotes={trend.judgePopupQuotes} anchorId={`trend-${num}`} />
+                        )}
+                        {/* Sticky name bar sits above the section's own
+                            heading/intro (not just the winner lists below
+                            it) so it pins to the top of the viewport from
+                            the moment you arrive at this section — also
+                            doubles as a jump-to-section table of contents. */}
+                        <SectionStickyBar
+                          title={trend.trendTitle}
+                          accentColor={accent}
+                          sections={tellyJumpSections}
+                          currentAnchorId={`trend-${num}`}
+                        />
                         {cover && (
                           <ReportSectionCover
                             sectionNumber={cover.sectionNumber || num}
@@ -847,41 +902,133 @@ export function ReportView({ report }: { report: Report }) {
                             copy={cover.copy || ''}
                             accentColor={cover.accentColor || accent}
                             property={report.property}
-                            minHeightPx={530}
+                            minHeightPx={cover.subtitle || cover.copy ? 530 : 320}
                             titleFontFamily="'Basetica', -apple-system, sans-serif"
                             titleFontWeight={700}
                             subtitleFontFamily="'Basetica', -apple-system, sans-serif"
                           />
                         )}
-                        <TrendContent
-                          trendNumber={num}
-                          title={trend.trendTitle}
-                          body={portableTextToBody(trend.trendBody, [])}
-                          accentColor={accent}
-                          dataModule={dataModule}
-                          background="#110E1F"
-                          property={report.property}
-                        />
-                        {quotes.length > 0 && (
-                          <QuoteVideoSection
-                            eyebrow="What Our Community Is Saying"
-                            quotes={quotes}
-                            accentColor={accent}
-                            background="#110E1F"
-                            property={report.property}
-                          />
-                        )}
-                        {trend.showWinnerLists !== false &&
-                          (trend.winnerLists ?? []).map((list, j) => (
-                            <WinnerList
-                              key={j}
-                              id={`trend-${num}-list-${j}`}
-                              heading={list.heading}
-                              intro={list.intro}
-                              entries={list.entries}
+                        {(() => {
+                          const trendTitle = cover ? undefined : trend.trendTitle
+                          const trendBodyParagraphs = portableTextToBody(trend.trendBody, [])
+                          const trendContentDataModule = statInline ? undefined : dataModule
+                          if (!trendTitle && trendBodyParagraphs.length === 0 && !trendContentDataModule) return null
+                          return (
+                            <TrendContent
+                              trendNumber={num}
+                              title={trendTitle}
+                              body={trendBodyParagraphs}
+                              accentColor={accent}
+                              dataModule={trendContentDataModule}
+                              background="#110E1F"
+                              property={report.property}
+                            />
+                          )
+                        })()}
+                        {(() => {
+                          const listsArr = trend.showWinnerLists !== false ? (trend.winnerLists ?? []) : []
+                          // Lets editors position the community quote
+                          // block between two winner lists (default:
+                          // before all of them, matching the prior
+                          // hardcoded order).
+                          const insertAt = Math.min(Math.max(trend.quoteInsertAfterListIndex ?? 0, 0), listsArr.length)
+                          const quoteBlock = quotes.length > 0 ? (
+                            <QuoteVideoSection
+                              key="community-quote"
+                              eyebrow="What Our Community Is Saying"
+                              quotes={quotes}
+                              accentColor={accent}
+                              background="#110E1F"
+                              property={report.property}
+                            />
+                          ) : null
+                          const statInsertAt = Math.min(Math.max(trend.statInsertAfterListIndex ?? 0, 0), listsArr.length)
+                          const statBlock = statInline ? (
+                            <StatHighlightsRow key="stat-highlights" eyebrow={dataModule!.eyebrow} bars={dataModule!.bars} accentColor={accent} />
+                          ) : null
+                          const items = []
+                          listsArr.forEach((list, j) => {
+                            if (j === insertAt && quoteBlock) items.push(quoteBlock)
+                            if (j === statInsertAt && statBlock) items.push(statBlock)
+                            items.push(
+                              list.posterRow ? (
+                                <PosterRowList
+                                  key={`list-${j}`}
+                                  id={`trend-${num}-list-${j}`}
+                                  heading={list.heading}
+                                  intro={list.intro}
+                                  statValue={list.statValue}
+                                  statCaption={list.statCaption}
+                                  entries={list.entries}
+                                  videoAspectRatio={
+                                    list.heading === 'Wins to Watch: Vertical Video Series' ? '9 / 16' : '16 / 9'
+                                  }
+                                />
+                              ) : list.rankedRow ? (
+                                <RankedThumbnailRow
+                                  key={`list-${j}`}
+                                  id={`trend-${num}-list-${j}`}
+                                  heading={list.heading}
+                                  intro={list.intro}
+                                  entries={list.entries}
+                                  colorOverrides={
+                                    list.heading === 'Top 5 Media and Entertainment Networks'
+                                      ? { 0: '#0C75FF', 1: '#F41FC9', 2: '#ef1e40', 4: '#0C75FF' }
+                                      : undefined
+                                  }
+                                />
+                              ) : list.directoryRow ? (
+                                <PartnerDirectoryList
+                                  key={`list-${j}`}
+                                  id={`trend-${num}-list-${j}`}
+                                  heading={list.heading}
+                                  intro={list.intro}
+                                  entries={list.entries}
+                                />
+                              ) : (
+                                <WinnerList
+                                  key={`list-${j}`}
+                                  id={`trend-${num}-list-${j}`}
+                                  heading={list.heading}
+                                  intro={list.intro}
+                                  entries={list.entries}
+                                  accentColor={accent}
+                                />
+                              )
+                            )
+                          })
+                          if (insertAt >= listsArr.length && quoteBlock) items.push(quoteBlock)
+                          if (statInsertAt >= listsArr.length && statBlock) items.push(statBlock)
+                          // Channel Surfing-style trends share one big sticky
+                          // player across all their winner lists instead of
+                          // each list getting its own small preview pane.
+                          const sectionStat = trend.sectionStatValue != null && (
+                            <SectionStatDonut
+                              key="section-stat"
+                              heading={trend.sectionStatHeading}
+                              value={trend.sectionStatValue}
+                              caption={trend.sectionStatCaption || ''}
                               accentColor={accent}
                             />
-                          ))}
+                          )
+                          return trend.showSharedVideoGuide ? (
+                            <ChannelGuideGroup
+                              id={`trend-${num}-guide`}
+                              accentColor={accent}
+                              stat={statInline ? undefined : dataModule}
+                              statAnchorId={statInline ? undefined : `trend-${num}-list-${listsArr.length - 1}`}
+                              statPersistOnceShown={statInline ? undefined : trend.statPersistOnceShown}
+                            >
+                              {sectionStat}
+                              {items}
+                            </ChannelGuideGroup>
+                          ) : (
+                            <StickySectionGroup id={`trend-${num}-group`}>
+                              {sectionStat}
+                              {items}
+                            </StickySectionGroup>
+                          )
+                        })()}
                       </div>
                     )
                   })}
@@ -2257,6 +2404,14 @@ export function ReportView({ report }: { report: Report }) {
             )}
 
             <Credits report={report} />
+
+            {isTelly && <TellyAbout report={report} />}
+
+            {/* "The Facts" moved here from the hero carousel per Ann's
+                request — now its own section at the bottom of the page,
+                right after "About The Telly Awards" instead of rotating
+                through the homepage. */}
+            {isTelly && <TellyFacts report={report} />}
 
             {report.property === 'lovie' ? (
               <LovieFooter report={report} />

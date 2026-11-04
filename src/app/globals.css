@@ -187,6 +187,27 @@ body {
   to { transform: rotate(90deg); }
 }
 
+/* Telly-only — scrolling titles ticker (TellyTitlesTicker.tsx). Scoped by
+   the telly- prefix so no other property is affected. */
+@keyframes tellyTickerScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.telly-ticker-track {
+  animation: tellyTickerScroll 28s linear infinite;
+}
+
+.telly-ticker:hover .telly-ticker-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .telly-ticker-track {
+    animation: none;
+  }
+}
+
 /* Scroll snap for report sections */
 html.snap-active {
   scroll-snap-type: y mandatory;

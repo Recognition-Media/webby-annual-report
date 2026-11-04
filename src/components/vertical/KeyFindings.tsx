@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import type { KeyFinding } from '@/sanity/types'
+import type { KeyFinding, SanityImage } from '@/sanity/types'
+import { urlFor } from '@/sanity/image'
 import { CountryItaly, CountryPortugal, CountrySpain } from '../lovie/CountryStickers'
 import { SignalWaves } from './SignalWaves'
 
@@ -185,6 +186,7 @@ type ResolvedSection = {
   color: string
   hoverBg: string
   anchor: string
+  image?: SanityImage
   subItems?: { title: string; anchor?: string }[]
 }
 
@@ -243,7 +245,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
         cardDefaultBg: 'rgba(255,255,255,0.08)',
         headingIcon: '/telly/telly-logo-horizontal-white.png',
         headingIconRotation: '0deg',
-        subtitle: 'A look at what is shaping video and television across every screen in 2026.',
+        subtitle: 'Fresh off the presses — four trends just added to the 2026 guide. Tap in to start.',
       }
     : {
         sectionBg: '#E3DDCA',
@@ -273,6 +275,7 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
           color: defaultTextColor,
           hoverBg: f.hoverColor || fallback[i % fallback.length].hoverBg,
           anchor: f.anchor || fallback[i % fallback.length].anchor,
+          image: f.image,
           subItems: f.subItems,
         }))
       : fallback
@@ -590,11 +593,11 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
     )
   }
 
-  // Telly — Table of Contents reads as a "TV guide" index: a numbered
-  // list of top-level entries (Facts, Insights From The Season, each
-  // section), with lettered sub-pages (the winner lists inside a
-  // section) nested underneath. Distinct from Anthem's card grid below
-  // because sub-items don't fit a square tile.
+  // Telly — Table of Contents reads as a "Poster Wall": one full-bleed
+  // card per section (image if set in the CMS, otherwise a dark-to-accent
+  // gradient fallback), with the section's eyebrow/title and a numbered
+  // badge. Clicking anywhere on a card scrolls to that section, same
+  // scrollToAnchor mechanism as every other property's ToC.
   if (isTelly) {
     return (
       <section
@@ -604,28 +607,28 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
         style={{ background: theme.sectionBg }}
       >
         <SignalWaves opacity={0.2} />
-        <div className="relative" style={{ maxWidth: 820, margin: '0 auto', width: '100%' }}>
+        <div className="relative" style={{ maxWidth: 1180, margin: '0 auto', width: '100%' }}>
           <motion.img
             src={theme.headingIcon}
             alt=""
-            className="block mx-auto mb-6 md:mb-8 w-[56px] md:w-[76px] h-auto"
+            className="block mb-6 md:mb-8 w-[56px] md:w-[76px] h-auto"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           />
           <motion.h2
-            className="mb-4 text-[40px] md:text-[64px] leading-[1.1] text-center"
+            className="mb-4 text-[40px] md:text-[64px] leading-[1.1]"
             style={{ fontFamily: 'var(--font-display)', color: '#ffffff', fontWeight: 700 }}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            Table of Contents
+            Just Released
           </motion.h2>
           <motion.p
-            className="text-center text-[14px] md:text-[16px] mb-12 md:mb-16"
+            className="text-[14px] md:text-[16px] mb-12 md:mb-16"
             style={{ color: '#ffffff', opacity: 0.6, fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif" }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -635,89 +638,126 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
             {theme.subtitle}
           </motion.p>
 
-          <ol className="list-none p-0 m-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {sections.map((section, i) => {
-              const isHovered = hoveredIndex === i
+              const bgImageUrl = section.image ? urlFor(section.image).width(640).height(960).fit('crop').url() : null
               return (
-                <motion.li
+                <motion.div
                   key={section.number}
-                  initial={{ opacity: 0, y: 10 }}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => scrollToAnchor(section.anchor)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      scrollToAnchor(section.anchor)
+                    }
+                  }}
+                  className="group relative block cursor-pointer rounded-[10px] overflow-hidden isolate"
+                  style={{ aspectRatio: '2 / 3', containerType: 'inline-size' }}
+                  initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: 0.05 + i * 0.05 }}
+                  transition={{ duration: 0.4, delay: 0.05 + i * 0.08 }}
                 >
                   <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => scrollToAnchor(section.anchor)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        scrollToAnchor(section.anchor)
-                      }
+                    className={`absolute inset-0 transition-transform duration-300 ${bgImageUrl ? 'scale-[1.05] group-hover:scale-[1.1]' : 'group-hover:scale-105'}`}
+                    style={{
+                      backgroundImage: bgImageUrl ? `url(${bgImageUrl})` : `linear-gradient(165deg, rgba(5,4,10,0.95), ${section.hoverBg})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
                     }}
-                    onMouseEnter={() => setHoveredIndex(i)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                    className="flex items-baseline gap-4 md:gap-6 py-4 md:py-5 border-t cursor-pointer"
-                    style={{ borderColor: 'rgba(255,255,255,0.12)' }}
-                  >
-                    <span
-                      className="text-[20px] md:text-[26px] font-bold flex-shrink-0 transition-colors duration-200"
-                      style={{ color: isHovered ? section.hoverBg : '#ffffff', minWidth: 40 }}
-                    >
-                      {section.number}
-                    </span>
-                    <span className="flex-1">
-                      <span
-                        className="block text-[17px] md:text-[22px] leading-[1.3] transition-colors duration-200"
-                        style={{ fontWeight: 600, color: isHovered ? section.hoverBg : '#ffffff' }}
-                      >
-                        {section.title}
-                      </span>
-                      {section.description && (
-                        <span className="block text-[12px] md:text-[13px] mt-1" style={{ color: 'rgba(216,245,255,0.55)' }}>
-                          {section.description}
-                        </span>
-                      )}
-                    </span>
-                    <span
-                      className="text-[18px] md:text-[22px] flex-shrink-0 transition-transform duration-200"
-                      style={{ color: isHovered ? section.hoverBg : '#ffffff', transform: isHovered ? 'translateX(6px)' : 'none' }}
-                    >
-                      →
-                    </span>
-                  </div>
-
-                  {section.subItems && section.subItems.length > 0 && (
-                    <ul className="list-none pl-[56px] md:pl-[70px] pb-4 md:pb-5 flex flex-col gap-1">
-                      {section.subItems.map((sub, j) => (
-                        <li key={j}>
-                          <button
-                            type="button"
-                            onClick={() => scrollToAnchor(sub.anchor || '')}
-                            className="flex items-baseline gap-3 py-1.5 text-left w-full group cursor-pointer"
-                          >
-                            <span
-                              className="text-[12px] md:text-[13px] font-medium flex-shrink-0"
-                              style={{ color: section.hoverBg, minWidth: 18 }}
-                            >
-                              {String.fromCharCode(65 + j)}
-                            </span>
-                            <span
-                              className="text-[13px] md:text-[14px] leading-[1.4] group-hover:underline"
-                              style={{ color: 'rgba(216,245,255,0.8)', textUnderlineOffset: 2 }}
-                            >
-                              {sub.title}
-                            </span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+                  />
+                  {/* Ann's cover-image exports have their own rounded
+                      corners baked in, anti-aliased against a white
+                      canvas — composited at 1:1 that white edge peeks
+                      past our own rounded clip. Scaling the image up
+                      ~5% pushes that fringe outside the card's visible
+                      rounded-[10px] bounds so only the solid interior
+                      shows; the hover zoom goes a little further on top
+                      of that base scale instead of resetting to 1.05. */}
+                  {/* Once a card has its own CMS cover image, it's a
+                      fully designed, flattened graphic (title + caption
+                      already baked in by Ann) — the generated title,
+                      caption, and the dark legibility gradient (needed
+                      only to read generated text over a plain photo) all
+                      get skipped so her artwork shows through untouched.
+                      The numbered badge below still renders on top either
+                      way, since it's a shared UI affordance across the
+                      row, not part of her per-card design. */}
+                  {!bgImageUrl && (
+                    <div
+                      className="absolute inset-0"
+                      style={{ background: 'linear-gradient(to top, rgba(8,6,18,0.96) 0%, rgba(8,6,18,0.55) 42%, rgba(8,6,18,0) 70%)' }}
+                    />
                   )}
-                </motion.li>
+                  {/* "Fill the rectangle" treatment, all 4 cards — per
+                      Ann's reference mockup: the title stacks one word per
+                      line, packed tight starting at the top of the card
+                      (not centered — Ann flagged an earlier justify-between
+                      pass as "too spacey" for cards 2-4), with the leftover
+                      space falling below the title, before the caption.
+                      Shows & Series (i === 0) is the one exception: Ann's
+                      final reference for that card specifically wants the
+                      middle word ("&") shifted to sit at the true vertical
+                      center between "SHOWS" and "SERIES", which is exactly
+                      what justify-between gives a 3-line flex column — so
+                      it keeps that distribution while the other three
+                      cards stay packed tight at the top. Sized off the
+                      card's own width (container query units, not viewport
+                      width, so it scales correctly whether the card is in
+                      a 1-, 2- or 4-column row), calibrated against the
+                      title's LONGEST word (not word count) — a 2-word
+                      title like "Channel Surfing" has fewer lines to fill
+                      the card's height, but "Channel" and "Surfing" are
+                      each 7 letters, so sizing off word count alone
+                      (bigger font for fewer words) overflowed the card's
+                      own width. The caption stays left-aligned and pinned
+                      at the very bottom via the flex column so it's never
+                      crowded out as the title grows. */}
+                  {!bgImageUrl && (() => {
+                    const words = section.title.split(' ')
+                    const longestWordLen = Math.max(...words.map((w) => w.length))
+                    const midCqi = Math.min(24, Math.max(12, Math.round(130 / longestWordLen)))
+                    const minPx = Math.round(midCqi * 1.8)
+                    const maxPx = Math.round(midCqi * 5.2)
+                    return (
+                      <div className="absolute inset-0 p-[14px] flex flex-col">
+                        <h3
+                          className={`uppercase flex-1 flex flex-col text-center ${i === 0 ? 'justify-between' : 'justify-start'}`}
+                          style={{
+                            fontFamily: 'var(--font-display)',
+                            color: '#E5E5E5',
+                            fontWeight: 800,
+                            fontSize: `clamp(${minPx}px, ${midCqi}cqi, ${maxPx}px)`,
+                            lineHeight: 0.95,
+                          }}
+                        >
+                          {words.map((word, wi) => (
+                            <span key={wi} className="block">{word}</span>
+                          ))}
+                        </h3>
+                        {section.description && (
+                          <p
+                            className="uppercase"
+                            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", fontSize: 10, letterSpacing: 1.5, fontWeight: 700, color: section.hoverBg }}
+                          >
+                            {section.description}
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })()}
+                  <span
+                    className="absolute flex items-center justify-center rounded-full"
+                    style={{ right: 18, bottom: 18, width: 26, height: 26, background: '#ffffff', color: '#110E1F', fontFamily: "'Basetica', -apple-system, sans-serif", fontWeight: 700, fontSize: 11 }}
+                  >
+                    {section.number}
+                  </span>
+                </motion.div>
               )
             })}
-          </ol>
+          </div>
         </div>
       </section>
     )

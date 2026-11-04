@@ -10,7 +10,7 @@ import { NordicsFlagStripes } from './NordicsFlagStripes'
 // Custom renderers so Lovie's CMS-driven letter body matches the
 // styling of the hardcoded fallback: paragraphs fade in on scroll,
 // bold marks render at 700, links stay editorial.
-const loviePortableTextComponents: PortableTextComponents = {
+export const loviePortableTextComponents: PortableTextComponents = {
   block: {
     normal: ({ children }) => (
       <motion.p

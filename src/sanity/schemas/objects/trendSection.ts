@@ -13,6 +13,7 @@ export default defineType({
     { name: 'video', title: 'Video Module', options: { collapsible: true, collapsed: true } },
     { name: 'images', title: 'Images', options: { collapsible: true, collapsed: true } },
     { name: 'winners', title: 'Winner Lists (Telly)', options: { collapsible: true, collapsed: true } },
+    { name: 'judgePopup', title: 'Judge Quote Popup (Telly)', options: { collapsible: true, collapsed: true } },
   ],
   fields: [
     { name: 'enabled', title: 'Enabled', type: 'boolean', initialValue: true, description: 'Show or hide this entire trend' },
@@ -124,6 +125,110 @@ export default defineType({
     // path; Telly's ReportView branch reads it per trendSection.
     { name: 'showWinnerLists', title: 'Show Winner Lists', type: 'boolean', initialValue: false, description: 'Telly only — toggle one or more ranked winner lists for this trend/section.', fieldset: 'winners' },
     { name: 'winnerLists', title: 'Winner Lists', type: 'array', of: [{ type: 'winnerList' }], hidden: ({ parent }) => parent?.showWinnerLists === false, fieldset: 'winners' },
+    {
+      name: 'quoteInsertAfterListIndex',
+      title: 'Quote Position Among Winner Lists',
+      type: 'number',
+      description: 'Telly only — where the "What Our Community Is Saying" quote block appears relative to the winner lists above. Leave blank (or 0) to show it before all lists. Set to 1 to show it after the first list, 2 after the second, etc.',
+      hidden: ({ parent }) => parent?.showWinnerLists === false,
+      fieldset: 'winners',
+    },
+    {
+      name: 'showSharedVideoGuide',
+      title: 'Share One Video Player Across All Winner Lists',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Telly only — instead of each winner list getting its own small preview pane, all the lists in this trend share one big sticky video player (muted autoplay preview on hover, no per-row pop-out). Used for Channel Surfing\'s four Top-5 lists.',
+      hidden: ({ parent }) => parent?.showWinnerLists === false,
+      fieldset: 'winners',
+    },
+    {
+      name: 'statDisplay',
+      title: 'Shared Video Guide Stat Style',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Donut bars (one question, multiple answers)', value: 'donut' },
+          { title: 'Big-number highlights (several standalone stats)', value: 'highlights' },
+        ],
+      },
+      initialValue: 'donut',
+      description: 'Telly only — how the data stats module under the shared video player renders. "Donut bars" compares answers to one question (e.g. Channel Surfing\'s AI stat). "Big-number highlights" shows each Data Stat as its own large standalone percentage — use this when the stats are independent facts rather than answers to one question.',
+      hidden: ({ parent }) => parent?.showSharedVideoGuide !== true || parent?.showData === false,
+      fieldset: 'winners',
+    },
+    {
+      name: 'statPersistOnceShown',
+      title: 'Keep Stat Visible Once Shown',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Telly only — once the stat module scrolls into view, keep it visible for the rest of this trend\'s winner lists instead of hiding again when scrolling back up past its anchor list. Only applies when Stat Placement is "Sidebar".',
+      hidden: ({ parent }) => parent?.showSharedVideoGuide !== true || parent?.statPlacement === 'inline',
+      fieldset: 'winners',
+    },
+    {
+      name: 'statPlacement',
+      title: 'Stat Placement',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Sidebar (under the shared video player)', value: 'sidebar' },
+          { title: 'Inline (horizontal row between winner lists)', value: 'inline' },
+        ],
+      },
+      initialValue: 'sidebar',
+      description: 'Telly only — "Sidebar" shows the stat module under the shared video player (it hides/shows as you scroll near its anchor list). "Inline" instead renders it as its own horizontal row in the main column, positioned between two winner lists via Stat Position Among Winner Lists — this keeps the sidebar short so the video player can keep tracking all the way to the end of the section.',
+      hidden: ({ parent }) => parent?.showSharedVideoGuide !== true || parent?.showData === false,
+      fieldset: 'winners',
+    },
+    {
+      name: 'statInsertAfterListIndex',
+      title: 'Stat Position Among Winner Lists',
+      type: 'number',
+      description: 'Telly only — where the inline stat row appears relative to the winner lists above (only used when Stat Placement is "Inline"). Leave blank (or 0) to show it before all lists. Set to 1 to show it after the first list, 2 after the second, etc.',
+      hidden: ({ parent }) => parent?.showSharedVideoGuide !== true || parent?.statPlacement !== 'inline',
+      fieldset: 'winners',
+    },
+    {
+      name: 'sectionStatHeading',
+      title: 'Section Stat Heading',
+      type: 'string',
+      description: 'Telly only — short line shown above the donut stat that renders right below this trend\'s sticky section bar, before its first winner list (e.g. "Microseries Are Reshaping Development"). Leave blank for no heading.',
+      hidden: ({ parent }) => parent?.showWinnerLists === false,
+      fieldset: 'winners',
+    },
+    {
+      name: 'sectionStatValue',
+      title: 'Section Stat Value',
+      type: 'number',
+      description: 'Telly only — percentage (0-100) for the donut stat below the sticky bar. Leave blank for no stat.',
+      hidden: ({ parent }) => parent?.showWinnerLists === false,
+      fieldset: 'winners',
+    },
+    {
+      name: 'sectionStatCaption',
+      title: 'Section Stat Caption',
+      type: 'text',
+      rows: 2,
+      description: 'Telly only — supporting sentence beside the donut stat below the sticky bar, e.g. "believe microseries are changing how TV and online shows & series will be developed and distributed."',
+      hidden: ({ parent }) => parent?.showWinnerLists === false,
+      fieldset: 'winners',
+    },
+
+    // Judge Quote Popup (Telly) — an ad-break-style interstitial that
+    // appears the first time a viewer scrolls into this trend section:
+    // "Choose Your Telly Judge To Hear From" with 3 judges to pick from,
+    // then the chosen quote displays and auto-dismisses after 5 seconds.
+    { name: 'showJudgePopup', title: 'Show Judge Quote Popup', type: 'boolean', initialValue: false, description: 'Telly only — shows a "choose your judge" interstitial the first time a viewer scrolls into this section.', fieldset: 'judgePopup' },
+    {
+      name: 'judgePopupQuotes',
+      title: 'Judge Choices (pick 3)',
+      type: 'array',
+      of: [{ type: 'expertQuote' }],
+      description: 'Telly only — the 3 judges offered in this section\'s popup. To avoid repeats, check which judges have already been used in earlier sections before picking here.',
+      hidden: ({ parent }) => parent?.showJudgePopup !== true,
+      fieldset: 'judgePopup',
+    },
 
     // Content Slabs (Shared Influence — Option C repeatable-block pattern).
     // When populated, the Shared Influence renderer prefers this field

@@ -303,9 +303,9 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         // Telly — brand gradient ground (purple → red), white Screens
         // lockup, red CTA pill, Basetica bold title. Headline/subtitle
         // come from the CMS hero fields with generic fallbacks.
-        logoSrc: '/telly/telly-logo-horizontal-white.png',
+        logoSrc: '/telly/judges/telly-logo-horizontal-white-cropped.png',
         logoAlt: 'The Telly Awards',
-        logoClassName: 'w-[64px] h-auto md:w-[84px] lg:w-[96px]',
+        logoClassName: 'h-10 md:h-14 lg:h-16 w-auto',
         ctaUrl: 'https://www.tellyawards.com/',
         ctaBgClass: 'bg-[#ef1e40] hover:bg-[#c8152f]',
         ctaTextColorClass: 'text-white',
@@ -314,7 +314,10 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         heroImages: ['/telly/hero-gradient.svg'],
         heroImagesMobile: undefined as string[] | undefined,
         heroCaptions: [] as string[],
-        heroBgColor: '#110E1F',
+        // "Warm Marquee" — lifts the hero/homepage carousel off the rest
+        // of the report (which stays #110E1F everywhere else) with a
+        // plum-to-near-black gradient, picking up the red CTA/on-air dot.
+        heroBgColor: 'linear-gradient(160deg, #2B1220 0%, #190D1B 60%, #120A17 100%)',
         gradientOverlay: 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.55) 100%)',
         titleColor: '#ffffff',
         subtitleColor: '#ffffff',
@@ -366,7 +369,15 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
   return (
     <section
       id="hero"
-      className={`relative w-full h-screen overflow-hidden ${textTone === 'light' ? 'text-light' : 'text-dark'}`}
+      // Telly's hero rotates in a second, taller carousel slide
+      // (TellyIntroSlide) — a fixed h-screen + overflow-hidden clips that
+      // slide's bottom whenever its content runs taller than the
+      // viewport, hiding the dot pagination used to get back to the first
+      // slide. min-h-screen lets the section grow to fit instead of
+      // clipping; dropping overflow-hidden stops it cutting that overflow
+      // off. Every other property keeps the original fixed-height,
+      // clipped section unchanged.
+      className={`relative w-full ${isTelly ? 'min-h-screen' : 'h-screen overflow-hidden'} ${textTone === 'light' ? 'text-light' : 'text-dark'}`}
       style={{ background: theme.heroBgColor }}
     >
       {/* Full-bleed background carousel — Telly's "Spliced Trophy" hero
@@ -546,9 +557,18 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           (Figma 48th Annual Telly Awards, node 2059:13037), vertically
           centered instead of bottom-anchored since it's a card-shaped
           composition rather than text over a full-bleed photo. */}
+      {/* pt-[140px] used to drop to 0 on desktop (md:), relying on flex
+          centering alone to clear the absolutely-positioned logo bar
+          above. That only works while the viewport is tall enough
+          relative to the hero content — browser zoom shrinks the
+          effective viewport height without changing its width, so at
+          in-between zoom levels the centered content could ride up into
+          the fixed logo bar. Keeping a constant top clearance regardless
+          of breakpoint fixes that at every zoom level. */}
       {isTelly && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none pt-[140px] md:pt-0">
+        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none pt-[140px]">
           <TellyHeroArticle
+            report={report}
             titleLine1={report.heroHeadline?.split('\\n')[0] || 'The Telly Awards'}
             titleLine2={report.heroHeadline?.split('\\n')[1] || "What's On Demand"}
             subtitle={report.heroSubtitle || "This is what moves us, this is what's moving the needle, this is what's moving the market."}

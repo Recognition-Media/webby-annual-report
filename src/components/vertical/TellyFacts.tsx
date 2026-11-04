@@ -27,16 +27,20 @@ function RankedList({ heading, items, accentColor }: { heading?: string; items?:
   )
 }
 
-export function TellyFacts({ report }: { report: Report }) {
+// `transparentBg` drops the section's own solid background and tightens
+// vertical padding so it can be embedded as a slide inside
+// TellyHeroArticle's rotating carousel — letting that carousel's own
+// background wash show through instead of this section painting over it.
+export function TellyFacts({ report, transparentBg }: { report: Report; transparentBg?: boolean }) {
   return (
     <section
       id="telly-facts"
-      className="relative px-5 md:px-[60px] py-20 md:py-28"
-      style={{ background: '#110E1F' }}
+      className={`relative px-5 md:px-[60px] ${transparentBg ? 'py-6 md:py-8 max-h-[64vh] md:max-h-none overflow-y-auto md:overflow-visible' : 'py-20 md:py-28'}`}
+      style={{ background: transparentBg ? 'transparent' : '#110E1F' }}
     >
       <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <motion.h2
-          className="text-[40px] md:text-[64px] leading-[1.05] mb-14 md:mb-20 text-center"
+          className={`text-[40px] md:text-[64px] leading-[1.05] text-center ${transparentBg ? 'mb-8 md:mb-10' : 'mb-14 md:mb-20'}`}
           style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -47,7 +51,7 @@ export function TellyFacts({ report }: { report: Report }) {
         </motion.h2>
 
         {/* Two headline stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 md:mb-24">
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 ${transparentBg ? 'mb-8 md:mb-12' : 'mb-16 md:mb-24'}`}>
           {report.factsEntryCount && (
             <motion.div
               className="text-center"
@@ -78,9 +82,11 @@ export function TellyFacts({ report }: { report: Report }) {
           )}
         </div>
 
-        {/* Ranked lists */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
-          <RankedList heading={report.factsTopTitlesHeading} items={report.factsTopTitles} accentColor="#ef1e40" />
+        {/* Ranked lists — "Who's Behind the Best Video Work" moved out to
+            TellyTitlesTicker (a scrolling banner between the Table of
+            Contents and Shows & Series), so only the two city lists
+            remain here. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
           <RankedList heading={report.factsTopCitiesNationalHeading} items={report.factsTopCitiesNational} accentColor="#c23799" />
           <RankedList heading={report.factsTopCitiesInternationalHeading} items={report.factsTopCitiesInternational} accentColor="#ef1e40" />
         </div>
