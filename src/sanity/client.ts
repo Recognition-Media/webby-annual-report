@@ -18,11 +18,20 @@ const sanityClient = createClient({
 // invalidate it (a server restart does NOT clear this on its own, since
 // the cache can survive across restarts). `cache: 'no-store'` opts every
 // query out of that cache so content edits always show up on the next
-// request — negligible cost here since Sanity is already the source of
-// truth being fetched fresh each time regardless.
+// request in dev.
+//
+// Dev-only: `output: 'export'` (the production build) requires every
+// page to resolve as fully static, and `cache: 'no-store'` makes Next
+// treat the fetch as dynamic — which `next build` for a static export
+// can't do at all, failing the whole build. Production doesn't need this
+// anyway: it's a one-shot build against whatever Sanity holds at that
+// moment, never a long-running process that could go stale.
 const originalFetch = sanityClient.fetch.bind(sanityClient)
 
-export const client = Object.assign(sanityClient, {
-  fetch: ((query: unknown, params?: unknown, options?: Record<string, unknown>) =>
-    originalFetch(query as never, params as never, { cache: 'no-store', ...options } as never)) as unknown as typeof sanityClient.fetch,
-})
+export const client =
+  process.env.NODE_ENV === 'production'
+    ? sanityClient
+    : Object.assign(sanityClient, {
+        fetch: ((query: unknown, params?: unknown, options?: Record<string, unknown>) =>
+          originalFetch(query as never, params as never, { cache: 'no-store', ...options } as never)) as unknown as typeof sanityClient.fetch,
+      })
