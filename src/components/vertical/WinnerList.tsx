@@ -50,6 +50,12 @@ export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40
 
   const activeEntry = activeIndex !== null ? entries[activeIndex] : null
   const openEntry = openEntryIndex !== null ? entries[openEntryIndex] : null
+
+  // Flip to the next/previous video-enabled entry in this same stream
+  // without closing the modal.
+  const openVideoPos = openEntryIndex !== null ? videoIndexes.indexOf(openEntryIndex) : -1
+  const nextPlayableIndex = openVideoPos >= 0 && openVideoPos < videoIndexes.length - 1 ? videoIndexes[openVideoPos + 1] : null
+  const prevPlayableIndex = openVideoPos > 0 ? videoIndexes[openVideoPos - 1] : null
   const activeColor = activeIndex !== null ? CHANNEL_ACTIVE_COLOR : accentColor
 
   function activateRow(i: number) {
@@ -308,6 +314,8 @@ export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40
           title={openEntry.workTitle || openEntry.name}
           subtitle={openEntry.workTitle ? openEntry.name : undefined}
           onClose={() => setOpenEntryIndex(null)}
+          onNext={nextPlayableIndex !== null ? () => setOpenEntryIndex(nextPlayableIndex) : undefined}
+          onPrev={prevPlayableIndex !== null ? () => setOpenEntryIndex(prevPlayableIndex) : undefined}
         />
       )}
     </section>

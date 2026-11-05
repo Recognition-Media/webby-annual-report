@@ -13,16 +13,24 @@ interface VideoPopoutModalProps {
    * vertical/mobile-native video — also narrows the modal's max width so a
    * vertical video doesn't fill the viewport edge-to-edge. */
   aspectRatio?: '16 / 9' | '9 / 16'
+  /** Flip to the next/previous video in the same stream without closing
+   * the modal — right/left arrow keys do the same thing. Omit either
+   * (or leave both undefined) when there's nothing to navigate to, e.g.
+   * a list of one, or this is the first/last video in it. */
+  onNext?: () => void
+  onPrev?: () => void
 }
 
-export function VideoPopoutModal({ videoUrl, title, subtitle, onClose, aspectRatio = '16 / 9' }: VideoPopoutModalProps) {
+export function VideoPopoutModal({ videoUrl, title, subtitle, onClose, aspectRatio = '16 / 9', onNext, onPrev }: VideoPopoutModalProps) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
+      else if (e.key === 'ArrowRight' && onNext) onNext()
+      else if (e.key === 'ArrowLeft' && onPrev) onPrev()
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  }, [onClose, onNext, onPrev])
 
   const embed = getVideoEmbed(videoUrl)
 
@@ -58,25 +66,51 @@ export function VideoPopoutModal({ videoUrl, title, subtitle, onClose, aspectRat
             </button>
           </div>
 
-          <div
-            className="relative w-full rounded-lg overflow-hidden"
-            style={{ aspectRatio, background: '#000000' }}
-          >
-            {embed?.kind === 'video' ? (
-              <video
-                src={embed.src}
-                controls
-                autoPlay
-                className="absolute inset-0 w-full h-full object-contain"
-              />
-            ) : embed?.kind === 'iframe' ? (
-              <iframe
-                src={embed.src}
-                className="absolute inset-0 w-full h-full"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-              />
-            ) : null}
+          <div className="relative">
+            {onPrev && (
+              <button
+                onClick={onPrev}
+                aria-label="Previous video"
+                className="absolute top-1/2 -translate-y-1/2 -left-4 md:-left-14 z-10 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"
+                style={{ background: 'rgba(255,255,255,0.12)', color: '#ffffff' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+            )}
+            {onNext && (
+              <button
+                onClick={onNext}
+                aria-label="Next video"
+                className="absolute top-1/2 -translate-y-1/2 -right-4 md:-right-14 z-10 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"
+                style={{ background: 'rgba(255,255,255,0.12)', color: '#ffffff' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            )}
+            <div
+              className="relative w-full rounded-lg overflow-hidden"
+              style={{ aspectRatio, background: '#000000' }}
+            >
+              {embed?.kind === 'video' ? (
+                <video
+                  src={embed.src}
+                  controls
+                  autoPlay
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+              ) : embed?.kind === 'iframe' ? (
+                <iframe
+                  src={embed.src}
+                  className="absolute inset-0 w-full h-full"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                />
+              ) : null}
+            </div>
           </div>
 
           <div

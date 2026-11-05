@@ -83,6 +83,18 @@ export function PosterRowList({ id, heading, intro, statValue, statCaption, entr
 
   const openEntry = openIndex !== null ? entries[openIndex] : null
 
+  // Flip to the next/previous video-enabled entry in this same stream
+  // without closing the modal — skips over any entry with no videoUrl
+  // (it wouldn't have been clickable to open in the first place).
+  function findPlayable(from: number, direction: 1 | -1) {
+    for (let i = from + direction; i >= 0 && i < entries.length; i += direction) {
+      if (entries[i].videoUrl) return i
+    }
+    return null
+  }
+  const nextPlayableIndex = openIndex !== null ? findPlayable(openIndex, 1) : null
+  const prevPlayableIndex = openIndex !== null ? findPlayable(openIndex, -1) : null
+
   function scrollByAmount(direction: 1 | -1) {
     const el = scrollRef.current
     if (!el) return
@@ -276,6 +288,8 @@ export function PosterRowList({ id, heading, intro, statValue, statCaption, entr
           subtitle={openEntry.orgDescription}
           aspectRatio={videoAspectRatio}
           onClose={() => setOpenIndex(null)}
+          onNext={nextPlayableIndex !== null ? () => setOpenIndex(nextPlayableIndex) : undefined}
+          onPrev={prevPlayableIndex !== null ? () => setOpenIndex(prevPlayableIndex) : undefined}
         />
       )}
     </section>

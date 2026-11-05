@@ -24,10 +24,10 @@ import { PosterRowList } from './PosterRowList'
 import { RankedThumbnailRow } from './RankedThumbnailRow'
 import { PartnerDirectoryList } from './PartnerDirectoryList'
 import { SectionStickyBar, StickySectionGroup } from './SectionStickyBar'
+import { StreamProgressRail } from './StreamProgressRail'
 import { SectionStatDonut } from './SectionStatDonut'
 import { ChannelGuideGroup, StatHighlightsRow } from './ChannelGuideGroup'
 import { TellyJudgePopup } from './TellyJudgePopup'
-import { TellyBackToContents } from './TellyBackToContents'
 import {
   TwoColumnSlab,
   SectionHeader,
@@ -69,6 +69,7 @@ import { AnimatedBg } from '../AnimatedBg'
 import { IdleArrows } from '../IdleArrows'
 import { TrendIntro } from '../TrendIntro'
 import { MobileNav } from '../MobileNav'
+import { jumpToSection } from '@/lib/sectionJump'
 
 type ResolvedQuote = { name: string; title: string; text: string; headshotUrl?: string; borderColor?: string }
 
@@ -410,17 +411,27 @@ export function ReportView({ report }: { report: Report }) {
   // section covers + trend modules come straight from Sanity.
   const isTelly = report.property === 'telly'
 
-  // Every Telly trend section, precomputed once — passed into each
-  // section's sticky bar so it can double as a scroll-along table of
-  // contents (click the bar to jump to any other section).
-  const tellyJumpSections = isTelly
+  // Every Telly trend section plus its individual streams, precomputed
+  // once — feeds the persistent left-hand StreamProgressRail so the
+  // whole report's navigation lives in one place instead of a per-section
+  // top bar. Directory-style lists (e.g. "Our Partners' Work") are logo
+  // carousels, not video streams, and are left out of the rail just like
+  // they were left out of the streams-sidebar mockup Ann approved.
+  const tellyRailSections = isTelly
     ? (report.trendSections ?? [])
         .filter((t) => t.enabled !== false)
-        .map((t, i) => ({
-          anchorId: `trend-${String(i + 1).padStart(2, '0')}`,
-          title: t.trendTitle,
-          accentColor: t.accentColor || TELLY_SECTION_ACCENTS[i % TELLY_SECTION_ACCENTS.length],
-        }))
+        .map((t, i) => {
+          const anchorId = `trend-${String(i + 1).padStart(2, '0')}`
+          return {
+            anchorId,
+            title: t.trendTitle,
+            accentColor: t.accentColor || TELLY_SECTION_ACCENTS[i % TELLY_SECTION_ACCENTS.length],
+            streams: (t.winnerLists ?? [])
+              .map((list, j) => ({ list, j }))
+              .filter(({ list }) => !list.directoryRow)
+              .map(({ list, j }) => ({ anchorId: `${anchorId}-list-${j}`, title: list.heading })),
+          }
+        })
     : []
 
   // Apply vertical-template theme (background, fonts, palette) only while this
@@ -534,7 +545,7 @@ export function ReportView({ report }: { report: Report }) {
     if (scrollTarget) {
       const el = document.getElementById(scrollTarget)
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        jumpToSection(scrollTarget, el)
         setScrollTarget(null)
         return
       }
@@ -599,7 +610,7 @@ export function ReportView({ report }: { report: Report }) {
     function tryScroll(remainingTries: number) {
       const el = document.getElementById(effectiveAnchor!)
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        jumpToSection(effectiveAnchor!, el)
         setScrollTarget(null)
         return
       }
@@ -702,7 +713,6 @@ export function ReportView({ report }: { report: Report }) {
       {/* Report content — snap scrolling + nav dots activate after entry */}
       {hasAccess && (
         <div ref={reportRef}>
-          {isTelly && <TellyBackToContents />}
           <ReportScroll active={entered} trendCount={report.trendSections?.length ?? 0} snap={false}>
             {/* Telly wants the Table of Contents to be the very first
                 thing after the hero, with "What's Inside This Report"
@@ -843,7 +853,15 @@ export function ReportView({ report }: { report: Report }) {
                 />
               </>
             ) : isTelly ? (
-              <>
+              // Real two-column flex row starting here — i.e. beneath the
+              // hero and the "Just Released" Table of Contents above,
+              // which stay full-width and rail-free. StreamProgressRail is
+              // the fixed-width first column; trend content is the second,
+              // flexible column, so the two never overlap and the rail
+              // never needs to know anything about hero/ToC scroll state.
+              <div className="lg:flex">
+                <StreamProgressRail sections={tellyRailSections} />
+                <div className="lg:flex-1 lg:min-w-0">
                 {/* Telly — fully CMS-driven. One block per enabled
                     trendSection: optional cover from sectionCovers[i],
                     then the trend copy + data bars + quotes. Each block
@@ -883,17 +901,15 @@ export function ReportView({ report }: { report: Report }) {
                         {trend.showJudgePopup && trend.judgePopupQuotes && trend.judgePopupQuotes.length > 0 && (
                           <TellyJudgePopup quotes={trend.judgePopupQuotes} anchorId={`trend-${num}`} />
                         )}
-                        {/* Sticky name bar sits above the section's own
-                            heading/intro (not just the winner lists below
-                            it) so it pins to the top of the viewport from
-                            the moment you arrive at this section — also
-                            doubles as a jump-to-section table of contents. */}
-                        <SectionStickyBar
-                          title={trend.trendTitle}
-                          accentColor={accent}
-                          sections={tellyJumpSections}
-                          currentAnchorId={`trend-${num}`}
-                        />
+                        {/* Sticky "You're in: X" status bar, pinned above
+                            this section from the moment it begins. Lives
+                            in the trend-content flex column (to the right
+                            of StreamProgressRail), so it never overlaps
+                            the sidebar — no left-offset math needed, it's
+                            simply scoped to its own column's width. No
+                            jump-menu here anymore now that the sidebar
+                            covers all navigation. */}
+                        <SectionStickyBar title={`You’re in: ${trend.trendTitle}`} accentColor={accent} />
                         {cover && (
                           <ReportSectionCover
                             sectionNumber={cover.sectionNumber || num}
@@ -902,10 +918,11 @@ export function ReportView({ report }: { report: Report }) {
                             copy={cover.copy || ''}
                             accentColor={cover.accentColor || accent}
                             property={report.property}
-                            minHeightPx={cover.subtitle || cover.copy ? 530 : 320}
+                            minHeightPx={cover.subtitle || cover.copy ? 530 : 220}
                             titleFontFamily="'Basetica', -apple-system, sans-serif"
                             titleFontWeight={700}
                             subtitleFontFamily="'Basetica', -apple-system, sans-serif"
+                            hideSectionNumber
                           />
                         )}
                         {(() => {
@@ -960,9 +977,7 @@ export function ReportView({ report }: { report: Report }) {
                                   statValue={list.statValue}
                                   statCaption={list.statCaption}
                                   entries={list.entries}
-                                  videoAspectRatio={
-                                    list.heading === 'Wins to Watch: Vertical Video Series' ? '9 / 16' : '16 / 9'
-                                  }
+                                  videoAspectRatio={list.verticalVideo ? '9 / 16' : '16 / 9'}
                                 />
                               ) : list.rankedRow ? (
                                 <RankedThumbnailRow
@@ -1032,7 +1047,8 @@ export function ReportView({ report }: { report: Report }) {
                       </div>
                     )
                   })}
-              </>
+                </div>
+              </div>
             ) : report.property === 'lovie' ? (
               <>
                 {/* Nordics Trend 01 — hardcoded for now (until CMS

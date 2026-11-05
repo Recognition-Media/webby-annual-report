@@ -6,6 +6,7 @@ import type { KeyFinding, SanityImage } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
 import { CountryItaly, CountryPortugal, CountrySpain } from '../lovie/CountryStickers'
 import { SignalWaves } from './SignalWaves'
+import { jumpToSection } from '@/lib/sectionJump'
 
 const FALLBACK_SECTIONS = [
   {
@@ -168,7 +169,7 @@ function scrollToAnchor(anchor: string) {
   for (const id of candidates) {
     const el = document.getElementById(id)
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      jumpToSection(id, el)
       return
     }
   }

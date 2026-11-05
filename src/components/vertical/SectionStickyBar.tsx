@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { jumpToSection } from '@/lib/sectionJump'
 
 export interface JumpSection {
   anchorId: string
@@ -56,7 +57,7 @@ export function SectionStickyBar({ title, accentColor, sections, currentAnchorId
 
   function jumpTo(anchorId: string) {
     setOpen(false)
-    document.getElementById(anchorId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    jumpToSection(anchorId)
   }
 
   const label = (

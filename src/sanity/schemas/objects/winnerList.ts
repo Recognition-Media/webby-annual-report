@@ -16,7 +16,15 @@ export default defineType({
       title: 'Poster Row Layout (experimental)',
       type: 'boolean',
       initialValue: false,
-      description: 'Telly only — renders this list as a horizontal row of poster/thumbnail cards (streaming-guide style) instead of the ranked table. Clicking a card opens the video in a tall 9:16 pop-out player. Easy to toggle off to revert to the table.',
+      description: 'Telly only — renders this list as a horizontal row of poster/thumbnail cards (streaming-guide style) instead of the ranked table. Clicking a card opens the video in a pop-out player — 16:9 by default, or 9:16 when Vertical Video is also on. Easy to toggle off to revert to the table.',
+    },
+    {
+      name: 'verticalVideo',
+      title: 'Vertical Video',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Poster Row only — this list\'s own work is vertical/mobile-native (e.g. "Binge on the Scroll: Vertical Series"), so its pop-out player opens tall (9:16) instead of the standard widescreen (16:9) shape every other list uses.',
+      hidden: ({ parent }) => !parent?.posterRow,
     },
     {
       name: 'rankedRow',

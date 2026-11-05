@@ -355,15 +355,27 @@ export function TrendContent({
   const textColor = isTelly ? '#ffffff' : '#21261A'
   const dividerColor = isTelly ? 'rgba(255,255,255,0.15)' : 'rgba(33,38,26,0.15)'
   const trackColor = isTelly ? 'rgba(255,255,255,0.1)' : 'rgba(33,38,26,0.1)'
+  // With no right column (a Telly trend whose stat is placed inline
+  // elsewhere, or has none at all), the copy stack used to stay pinned to
+  // a 50%-wide column anyway, wrapping onto far more lines than it needed
+  // to and leaving the whole right half of the section empty — the gap
+  // that pushed the first winner list well below the fold. Telly-only:
+  // let the copy run the full container width instead (capped for
+  // readability), closing that gap. Every other property keeps the
+  // original 50/50 split regardless of whether a right column renders.
+  const hasRightColumn = !!(dataModule || sentimentGauge || customRightColumn)
+  const widenCopy = isTelly && !hasRightColumn
   return (
     <section
-      className={`relative px-5 md:px-[60px] ${title ? 'py-20 md:py-28' : 'pt-6 md:pt-8 pb-20 md:pb-28'}`}
+      className={`relative px-5 md:px-[60px] ${
+        title ? 'py-20 md:py-28' : widenCopy ? 'pt-6 md:pt-8 pb-0' : 'pt-6 md:pt-8 pb-20 md:pb-28'
+      }`}
       style={{ background }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         <div className="flex flex-col md:flex-row gap-12 md:gap-16">
           {/* Left column: copy stack */}
-          <div className="md:w-[50%]">
+          <div className={widenCopy ? 'md:w-full' : 'md:w-[50%]'} style={widenCopy ? { maxWidth: 880 } : undefined}>
             {/* Trend eyebrow — skipped along with the title when a cover
                 right above already shows the section number/name */}
             {title && (

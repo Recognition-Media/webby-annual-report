@@ -6,6 +6,7 @@ import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
 import type { ExpertQuote } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
+import { onSectionJump } from '@/lib/sectionJump'
 
 const QUOTE_DISPLAY_MS = 10000
 const ACCENTS = ['#ef1e40', '#0C75FF', '#F41FC9', '#2EFB5E']
@@ -26,13 +27,16 @@ const quoteComponents: PortableTextComponents = {
 // from the Table of Contents) the trend section it's attached to —
 // tracked via IntersectionObserver on that section's own DOM id, gated
 // on scroll direction (scrolling back up into it never (re-)triggers it)
-// and a short settle delay (a section only briefly crossed while jumping
-// to a different one further down never counts as an arrival) — then
-// never again for the rest of the session, independently per section:
-// visiting sections out of order still shows each one's popup the first
-// time you land on it, whichever order that happens in. Page scroll is
-// locked for as long as the popup is open, so it can't be scrolled past
-// into the next section's own popup while this one is still up — closing
+// for organic scrolling, and coordinated with sectionJump.ts for any
+// jump-to-section action (Table of Contents, sticky-bar dropdown, hero
+// nav) so a long jump that lands further down never pops every section
+// it scrolls through on the way — only the jump's actual destination
+// opens, the instant that jump concludes — then never again for the
+// rest of the session, independently per section: visiting sections out
+// of order still shows each one's popup the first time you land on it,
+// whichever order that happens in. Page scroll is locked for as long as
+// the popup is open, so it can't be scrolled past into the next
+// section's own popup while this one is still up — closing
 // it (✕) or letting it auto-dismiss is what gives scroll back.
 export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; anchorId: string }) {
   const [phase, setPhase] = useState<'hidden' | 'choosing' | 'revealed' | 'dismissed'>('hidden')
@@ -68,12 +72,6 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
   useEffect(() => {
     const target = document.getElementById(anchorId)
     if (!target) return
-    // Table of Contents links (and any other jump-to-section link) can
-    // scroll straight through several sections on the way to the one
-    // actually being navigated to — each would briefly cross the 30%
-    // threshold along the way. Require the section to still be in view
-    // half a second later before treating it as a real "arrival", so
-    // sections merely passed through during that jump never pop.
     // Fires on "arrival" at this section — defined as the section's own
     // box crossing a thin trigger line 30% down the viewport — rather
     // than "30% of the section's total area is visible." That area-ratio
@@ -85,26 +83,84 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
     // popup silently stopped firing. A rootMargin-defined trigger line is
     // independent of the target's total height, so it keeps working no
     // matter how tall a section gets.
+    //
+    // A Table of Contents card, the sticky-bar dropdown, or a hero nav
+    // deep link can all jump straight to a section further down, scrolling
+    // straight through several sections on the way. A fixed settle delay
+    // isn't enough to tell that apart from a genuine arrival: once a
+    // section grows tall, the trigger line can stay inside it well past
+    // any reasonable delay purely because of how far the scroll has to
+    // travel — not because the viewer actually stopped there. So while a
+    // jumpToSection() is in flight, this observer ignores every crossing
+    // outright; the jump's real destination is opened directly, the
+    // instant its own jump concludes (see onSectionJump below), using its
+    // actual position at that moment rather than a timing guess.
     let settleTimer: ReturnType<typeof setTimeout> | null = null
+    let jumpActive = false
+    let isJumpDestination = false
+    let shown = false
+
+    function clearSettle() {
+      if (settleTimer) {
+        clearTimeout(settleTimer)
+        settleTimer = null
+      }
+    }
+
+    function open() {
+      if (shown) return
+      shown = true
+      clearSettle()
+      setPhase('choosing')
+      observer.disconnect()
+      unsubscribeJump()
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (jumpActive) {
+          clearSettle()
+          return
+        }
         if (entry.isIntersecting && scrollDirection.current === 'down') {
-          if (settleTimer) clearTimeout(settleTimer)
-          settleTimer = setTimeout(() => {
-            setPhase('choosing')
-            observer.disconnect()
-          }, 500)
-        } else if (settleTimer) {
-          clearTimeout(settleTimer)
-          settleTimer = null
+          clearSettle()
+          settleTimer = setTimeout(open, 500)
+        } else {
+          clearSettle()
         }
       },
       { threshold: 0, rootMargin: '-30% 0px -69% 0px' }
     )
     observer.observe(target)
+
+    const unsubscribeJump = onSectionJump((targetId) => {
+      if (targetId !== null) {
+        jumpActive = true
+        // A jump can target this section's own anchor directly, or
+        // something nested under it — e.g. the stream-progress rail
+        // jumps straight to an individual stream (`trend-04-list-3`),
+        // which still counts as arriving at its section (`trend-04`).
+        isJumpDestination = targetId === anchorId || targetId?.startsWith(`${anchorId}-`) === true
+        return
+      }
+      // The jump just concluded — if it was heading here, open now based
+      // on where the section actually sits, rather than waiting on the
+      // observer (which won't fire again for a crossing it already
+      // ignored while the jump was in flight, since intersection state
+      // hasn't changed since).
+      jumpActive = false
+      if (isJumpDestination) {
+        isJumpDestination = false
+        const r = target.getBoundingClientRect()
+        const bandY = window.innerHeight * 0.3
+        if (r.top <= bandY && r.bottom > bandY) open()
+      }
+    })
+
     return () => {
       observer.disconnect()
-      if (settleTimer) clearTimeout(settleTimer)
+      unsubscribeJump()
+      clearSettle()
     }
   }, [anchorId])
 

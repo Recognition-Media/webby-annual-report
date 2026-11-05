@@ -362,7 +362,13 @@ export function StatHighlightsRow({ eyebrow, bars, accentColor }: { eyebrow?: st
           </p>
         )}
         <div className="flex flex-col md:flex-row gap-5 md:gap-6">
-          {bars.map((bar, i) => (
+          {bars.map((bar, i) => {
+            // A single stat has the whole row to itself (no neighboring
+            // cards competing for width) — read it bigger, across two
+            // generous lines instead of cramming the same small size used
+            // when several stats share the row side by side.
+            const solo = bars.length === 1
+            return (
             <motion.div
               key={i}
               className="flex-1 min-w-0 flex items-center gap-5 px-6 py-5 md:px-6 md:py-6 rounded-xl"
@@ -376,20 +382,21 @@ export function StatHighlightsRow({ eyebrow, bars, accentColor }: { eyebrow?: st
               transition={{ duration: 0.4, delay: i * 0.12 }}
             >
               <span
-                className="text-[40px] md:text-[48px] leading-none flex-shrink-0"
+                className={solo ? 'text-[56px] md:text-[72px] leading-none flex-shrink-0' : 'text-[40px] md:text-[48px] leading-none flex-shrink-0'}
                 style={{ fontFamily: 'var(--font-display)', color: bar.color, fontWeight: 700 }}
               >
                 {bar.displayValue}
               </span>
               <span className="w-[2px] self-stretch flex-shrink-0" style={{ background: hexToRgba(bar.color, 0.35) }} />
               <span
-                className="text-[13.5px] md:text-[14.5px] leading-[1.5]"
+                className={solo ? 'text-[20px] md:text-[23px] leading-[1.35] max-w-[720px]' : 'text-[13.5px] md:text-[14.5px] leading-[1.5]'}
                 style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 600 }}
               >
                 {bar.label}
               </span>
             </motion.div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

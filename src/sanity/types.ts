@@ -57,6 +57,7 @@ export interface WinnerList {
   posterRow?: boolean
   rankedRow?: boolean
   directoryRow?: boolean
+  verticalVideo?: boolean
   statValue?: string
   statCaption?: string
   entries: WinEntry[]
