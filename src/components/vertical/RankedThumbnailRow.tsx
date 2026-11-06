@@ -7,6 +7,7 @@ import { urlFor } from '@/sanity/image'
 import { hexToRgb, iconColorFor } from '@/lib/channelColors'
 import { VideoPopoutModal } from './VideoPopoutModal'
 import { PlayIcon } from './PlayIcon'
+import { InfoTooltip } from './InfoTooltip'
 
 interface RankedThumbnailRowProps {
   id?: string
@@ -17,6 +18,9 @@ interface RankedThumbnailRowProps {
   // rotation — for when a specific poster needs a specific color (e.g. to
   // match another standout work) rather than whatever the rotation lands on.
   colorOverrides?: Record<number, string>
+  /** Optional longer-form context shown in a hover/tap popover off a small
+   * "i" icon next to the heading — see PosterRowList's InfoTooltip. */
+  infoTooltip?: string
 }
 
 // Same red/blue/pink/green rotation used elsewhere in the Telly report.
@@ -48,7 +52,7 @@ function colorScrim(hex: string) {
 // `videoUrl` play right in the report via the same pop-out player used
 // elsewhere; entries with only a `workUrl` (no embeddable video) fall back
 // to linking out to that page.
-export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides }: RankedThumbnailRowProps) {
+export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides, infoTooltip }: RankedThumbnailRowProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -102,21 +106,24 @@ export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides
   }
 
   return (
-    <section id={id} className="relative px-5 md:px-[60px] py-16 md:py-20" style={{ background: '#110E1F' }}>
-      <div style={{ maxWidth: 1000, margin: '0 auto', width: '100%' }}>
-        <motion.h3
-          className="text-[22px] md:text-[28px] leading-[1.2] mb-4"
-          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          {heading}
-        </motion.h3>
+    <section id={id} className="relative px-5 md:px-[60px] py-8 md:py-10" style={{ background: '#110E1F' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
+        <div className="flex items-center gap-3 mb-4">
+          <motion.h3
+            className="text-[22px] md:text-[28px] leading-[1.2]"
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            {heading}
+          </motion.h3>
+          {infoTooltip && <InfoTooltip text={infoTooltip} />}
+        </div>
         {intro && (
           <motion.p
-            className="text-[16px] md:text-[18px] leading-[1.6] max-w-[760px] mb-10"
+            className="text-[16px] md:text-[20px] leading-[1.6] mb-10"
             style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(216,245,255,0.7)' }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -251,7 +258,15 @@ export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides
   )
 }
 
-function PosterInner({ entry, color, bgImageUrl }: { entry: WinEntry; color: string; bgImageUrl: string | null }) {
+function PosterInner({
+  entry,
+  color,
+  bgImageUrl,
+}: {
+  entry: WinEntry
+  color: string
+  bgImageUrl: string | null
+}) {
   return (
     <>
       <div
@@ -280,7 +295,10 @@ function PosterInner({ entry, color, bgImageUrl }: { entry: WinEntry; color: str
           {entry.name}
         </span>
         {entry.workTitle && (
-          <h4 className="text-[18px] md:text-[21px] leading-[1.15]" style={{ fontFamily: 'var(--font-display)', color: '#ffffff', fontWeight: 700 }}>
+          <h4
+            className="text-[18px] md:text-[21px] leading-[1.15] min-h-[41px] md:min-h-[48px]"
+            style={{ fontFamily: 'var(--font-display)', color: '#ffffff', fontWeight: 700 }}
+          >
             {entry.workTitle}
           </h4>
         )}

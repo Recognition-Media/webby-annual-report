@@ -22,22 +22,29 @@ const quoteComponents: PortableTextComponents = {
 
 // An ad-break-style interstitial — "Choose Your Telly Judge To Hear
 // From", 3 judges to pick from, then the chosen quote displays and
-// auto-dismisses after 10 seconds. Appears once, the first time the
-// viewer actually arrives at (not merely scrolls past, e.g. via a jump
-// from the Table of Contents) the trend section it's attached to —
-// tracked via IntersectionObserver on that section's own DOM id, gated
-// on scroll direction (scrolling back up into it never (re-)triggers it)
-// for organic scrolling, and coordinated with sectionJump.ts for any
-// jump-to-section action (Table of Contents, sticky-bar dropdown, hero
-// nav) so a long jump that lands further down never pops every section
-// it scrolls through on the way — only the jump's actual destination
-// opens, the instant that jump concludes — then never again for the
-// rest of the session, independently per section: visiting sections out
-// of order still shows each one's popup the first time you land on it,
-// whichever order that happens in. Page scroll is locked for as long as
-// the popup is open, so it can't be scrolled past into the next
-// section's own popup while this one is still up — closing
-// it (✕) or letting it auto-dismiss is what gives scroll back.
+// auto-dismisses after 10 seconds. Appears once, after the viewer has
+// naturally scrolled roughly to the MIDDLE of the trend section it's
+// attached to — i.e. once the section's own vertical center has risen to
+// the vertical center of the viewport (so it reads as "you're partway
+// through Shows & Series, here's a judge break" rather than popping up
+// the moment the section starts, or only once you've already finished
+// it) — tracked via a scroll listener checking that section's own DOM
+// id's bounding rect, gated on scroll direction (scrolling back up never
+// (re-)triggers it). This is the only trigger: jumping straight to a
+// section (Table of Contents, sticky-bar dropdown, hero nav, the
+// stream-progress rail) never opens it on arrival, even landing exactly
+// at its midpoint — it only opens once the viewer has actually scrolled
+// there themselves, same as organic scrolling. sectionJump.ts is only
+// used to suspend the scroll check for the duration of a jump, so the
+// browser's own scroll-to animation can't be mistaken for having
+// scrolled to a section's middle it's merely passing on the way to the
+// jump's real destination. Shown at most once per section for the rest
+// of the session, independently per section — once a viewer has seen a
+// section's ad, scrolling back through that same section again never
+// re-triggers it. Page scroll is locked for as long as the popup is
+// open, so it can't be scrolled past into the next section's own popup
+// while this one is still up — closing it (✕) or letting it auto-dismiss
+// is what gives scroll back.
 export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; anchorId: string }) {
   const [phase, setPhase] = useState<'hidden' | 'choosing' | 'revealed' | 'dismissed'>('hidden')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -70,97 +77,92 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
   }, [])
 
   useEffect(() => {
-    const target = document.getElementById(anchorId)
-    if (!target) return
-    // Fires on "arrival" at this section — defined as the section's own
-    // box crossing a thin trigger line 30% down the viewport — rather
-    // than "30% of the section's total area is visible." That area-ratio
-    // version only works while a section is shorter than ~3.3 viewports
-    // tall; as more winner lists/layouts got added to each trend section
-    // over the course of this project, several grew taller than that, at
-    // which point 30%-of-area-visible became mathematically unreachable
-    // (max achievable ratio = viewportHeight / sectionHeight) and the
-    // popup silently stopped firing. A rootMargin-defined trigger line is
-    // independent of the target's total height, so it keeps working no
-    // matter how tall a section gets.
+    const targetEl = document.getElementById(anchorId)
+    if (!targetEl) return
+    const target: HTMLElement = targetEl
+    // Fires once the viewer has scrolled roughly to the MIDDLE of this
+    // section — defined as the section's own vertical center rising to the
+    // vertical center of the viewport — rather than on arrival at its top,
+    // or only once they've reached its end. A plain isIntersecting/
+    // rootMargin band can only ever key off the TARGET's top edge crossing
+    // a fixed line (for a target taller than the viewport, which every
+    // trend section is, that says nothing about how far through it the
+    // viewer actually is), so the actual rect is checked on scroll instead.
     //
-    // A Table of Contents card, the sticky-bar dropdown, or a hero nav
-    // deep link can all jump straight to a section further down, scrolling
-    // straight through several sections on the way. A fixed settle delay
-    // isn't enough to tell that apart from a genuine arrival: once a
-    // section grows tall, the trigger line can stay inside it well past
-    // any reasonable delay purely because of how far the scroll has to
-    // travel — not because the viewer actually stopped there. So while a
-    // jumpToSection() is in flight, this observer ignores every crossing
-    // outright; the jump's real destination is opened directly, the
-    // instant its own jump concludes (see onSectionJump below), using its
-    // actual position at that moment rather than a timing guess.
-    let settleTimer: ReturnType<typeof setTimeout> | null = null
+    // This is the ONLY trigger, regardless of how the viewer got here —
+    // jumping straight to a section (Table of Contents, sticky-bar
+    // dropdown, hero nav, the stream-progress rail) does not open the
+    // popup on arrival even if the jump lands exactly at its midpoint; it
+    // only opens once they've actually scrolled there themselves, same as
+    // organic scrolling. The jump is tracked only to suspend this check
+    // for its duration, so the browser's own scroll-to animation (which
+    // fires a burst of scroll events while animating past intermediate
+    // positions) can't be mistaken for the viewer having scrolled to a
+    // section's middle it's merely passing on the way to the jump's real
+    // destination.
     let jumpActive = false
-    let isJumpDestination = false
     let shown = false
-
-    function clearSettle() {
-      if (settleTimer) {
-        clearTimeout(settleTimer)
-        settleTimer = null
-      }
-    }
+    // True once this section has actually been visible in the viewport
+    // during a real (non-jump) scroll — i.e. the viewer has genuinely
+    // scrolled through it, as opposed to a Table of Contents / rail /
+    // hero jump leaping straight over it to land further down. Gates the
+    // "already scrolled past" branch below: without this, a section that
+    // a jump skipped over sits permanently above the viewport afterward
+    // (its midpoint already above center), so the very next ordinary
+    // downward scroll tick — even a small one, taken once safely inside
+    // the destination section — would otherwise fire its popup too.
+    //
+    // Any jump — not just one that skips over this section — resets this
+    // back to false (see the subscription below). Without that reset, a
+    // viewer who only glanced partway into a section and then jumped
+    // elsewhere via the Table of Contents would keep their "partial
+    // credit": once they landed elsewhere and the glanced-at section's
+    // midpoint was left above the viewport's own center, the very next
+    // scroll tick would satisfy the threshold check and fire its ad —
+    // even though they never actually scrolled there themselves. A
+    // section should only ever fire from one continuous, uninterrupted
+    // downward scroll through it.
+    let hasBeenInView = false
 
     function open() {
       if (shown) return
       shown = true
-      clearSettle()
+      window.removeEventListener('scroll', onScroll)
       setPhase('choosing')
-      observer.disconnect()
       unsubscribeJump()
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (jumpActive) {
-          clearSettle()
-          return
-        }
-        if (entry.isIntersecting && scrollDirection.current === 'down') {
-          clearSettle()
-          settleTimer = setTimeout(open, 500)
-        } else {
-          clearSettle()
-        }
-      },
-      { threshold: 0, rootMargin: '-30% 0px -69% 0px' }
-    )
-    observer.observe(target)
+    function onScroll() {
+      if (jumpActive || scrollDirection.current !== 'down') return
+      const rect = target.getBoundingClientRect()
+      if (rect.top < window.innerHeight && rect.bottom > 0) hasBeenInView = true
+      if (!hasBeenInView) return
+      // Section's own vertical center (in viewport coordinates) has risen
+      // to the viewport's own vertical center — i.e. the viewer is now
+      // looking at roughly the middle of this section, having scrolled
+      // halfway through it — rather than its bottom edge approaching the
+      // end. Deliberately not also requiring the midpoint still be on
+      // screen: once it's crossed, it stays crossed as scrolling
+      // continues, so a single large wheel/trackpad tick that jumps
+      // clean past the trigger line between two scroll events still
+      // fires, same robustness as the old end-of-section check.
+      const sectionMidY = rect.top + rect.height / 2
+      if (sectionMidY <= window.innerHeight / 2) open()
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
 
     const unsubscribeJump = onSectionJump((targetId) => {
-      if (targetId !== null) {
-        jumpActive = true
-        // A jump can target this section's own anchor directly, or
-        // something nested under it — e.g. the stream-progress rail
-        // jumps straight to an individual stream (`trend-04-list-3`),
-        // which still counts as arriving at its section (`trend-04`).
-        isJumpDestination = targetId === anchorId || targetId?.startsWith(`${anchorId}-`) === true
-        return
-      }
-      // The jump just concluded — if it was heading here, open now based
-      // on where the section actually sits, rather than waiting on the
-      // observer (which won't fire again for a crossing it already
-      // ignored while the jump was in flight, since intersection state
-      // hasn't changed since).
-      jumpActive = false
-      if (isJumpDestination) {
-        isJumpDestination = false
-        const r = target.getBoundingClientRect()
-        const bandY = window.innerHeight * 0.3
-        if (r.top <= bandY && r.bottom > bandY) open()
-      }
+      jumpActive = targetId !== null
+      // Starting a jump — to this section, past it, or anywhere else —
+      // discards any partial-viewing credit this section had built up.
+      // Only a single uninterrupted scroll through it, start to finish,
+      // should ever be able to fire its popup.
+      if (jumpActive) hasBeenInView = false
     })
 
     return () => {
-      observer.disconnect()
+      window.removeEventListener('scroll', onScroll)
       unsubscribeJump()
-      clearSettle()
     }
   }, [anchorId])
 

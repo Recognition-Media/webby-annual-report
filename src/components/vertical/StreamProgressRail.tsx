@@ -78,8 +78,22 @@ export function StreamProgressRail({ sections }: { sections: RailSection[] }) {
     <div className="hidden lg:block flex-shrink-0" style={{ width: 272 }}>
       <div className="sticky top-0 h-screen flex items-center" style={{ background: '#110E1F' }}>
         <div className="relative pl-9 pr-6 max-h-[80vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+          {/* Eyebrow for the whole rail — plain "watch next" framing rather
+              than a literal table of contents, since the labels below are
+              deliberately short, standalone call-outs rather than the
+              report's own (much longer) section and list headings. */}
+          <p
+            className="text-[11px] font-bold uppercase mb-4"
+            style={{
+              letterSpacing: '0.14em',
+              color: 'rgba(216,245,255,0.55)',
+              fontFamily: "'Basetica', -apple-system, sans-serif",
+            }}
+          >
+            Watch Next
+          </p>
           <div
-            className="absolute left-[15px] top-1 bottom-1 w-[2px] rounded-full"
+            className="absolute left-[15px] top-9 bottom-1 w-[2px] rounded-full"
             style={{ background: 'rgba(216,245,255,0.10)' }}
           >
             <div
@@ -88,17 +102,19 @@ export function StreamProgressRail({ sections }: { sections: RailSection[] }) {
             />
           </div>
           {sections.map((s) => (
-            <div key={s.anchorId} className="mb-5 last:mb-0">
-              <div
-                className="text-[10px] font-bold uppercase mb-2 transition-colors duration-200"
+            <div key={s.anchorId} className="mb-6 last:mb-0">
+              <button
+                type="button"
+                onClick={() => jumpToSection(s.anchorId)}
+                className="text-[13px] font-bold mb-3 transition-colors duration-200 cursor-pointer text-left w-full"
                 style={{
-                  letterSpacing: '0.1em',
-                  color: s.anchorId === activeSectionId ? '#ffffff' : 'rgba(216,245,255,0.42)',
+                  letterSpacing: '0.01em',
+                  color: s.anchorId === activeSectionId ? '#ffffff' : 'rgba(216,245,255,0.6)',
                   fontFamily: "'Basetica', -apple-system, sans-serif",
                 }}
               >
                 {s.title}
-              </div>
+              </button>
               {s.streams.map((st) => {
                 const active = st.anchorId === activeStreamId
                 return (
@@ -106,7 +122,7 @@ export function StreamProgressRail({ sections }: { sections: RailSection[] }) {
                     key={st.anchorId}
                     type="button"
                     onClick={() => jumpToSection(st.anchorId)}
-                    className="flex items-center gap-3 py-[5px] cursor-pointer w-full text-left"
+                    className="flex items-center gap-3 py-[7px] cursor-pointer w-full text-left"
                   >
                     <span
                       className="rounded-full flex-shrink-0 transition-all duration-200"
@@ -118,10 +134,10 @@ export function StreamProgressRail({ sections }: { sections: RailSection[] }) {
                       }}
                     />
                     <span
-                      className="text-[12px] leading-[1.4] transition-all duration-200"
+                      className="text-[13.5px] leading-[1.4] transition-all duration-200"
                       style={{
-                        color: active ? '#ffffff' : 'rgba(216,245,255,0.42)',
-                        fontWeight: active ? 600 : 400,
+                        color: active ? '#ffffff' : 'rgba(216,245,255,0.5)',
+                        fontWeight: active ? 600 : 500,
                         fontFamily: "'Basetica', -apple-system, sans-serif",
                       }}
                     >

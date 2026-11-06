@@ -10,9 +10,22 @@ export interface JumpSection {
   accentColor: string
 }
 
+function hexToRgb(hex: string) {
+  const n = parseInt(hex.replace('#', ''), 16)
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
+}
+function hexToRgba(hex: string, alpha: number) {
+  const { r, g, b } = hexToRgb(hex)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
 interface SectionStickyBarProps {
   title: string
   accentColor: string
+  /** The next trend section's title, e.g. "Up Next: Branded Content" —
+   * matches the same "On Now / Up Next" pattern as the hero's own ticker.
+   * Omit on the last section (nothing to point to). */
+  nextTitle?: string
   /** Every trend section in the report, in order — when provided (and
    * containing more than one section), the bar becomes clickable and
    * opens a dropdown to jump to any of them, Telly acting as its own
@@ -34,7 +47,7 @@ interface SectionStickyBarProps {
 //
 // Doubles as a scroll-along table of contents: click the bar to drop down
 // every other trend section and jump straight there.
-export function SectionStickyBar({ title, accentColor, sections, currentAnchorId }: SectionStickyBarProps) {
+export function SectionStickyBar({ title, accentColor, nextTitle, sections, currentAnchorId }: SectionStickyBarProps) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const interactive = !!sections && sections.length > 1
@@ -60,53 +73,60 @@ export function SectionStickyBar({ title, accentColor, sections, currentAnchorId
     jumpToSection(anchorId)
   }
 
-  const label = (
-    <p
-      className="text-[17px] md:text-[21px] truncate flex items-center gap-3 flex-1"
-      style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 800, letterSpacing: 0.2 }}
+  // Same "On Now" ticker language as the hero (see TellyHeroArticle.tsx —
+  // dot, eyebrow, bold current label, bullet, dimmer "Up Next") but run
+  // as a long, full-width bar rather than a content-hugging pill, per
+  // Ann's reference (the "What's Inside This Report" bar) — tinted to
+  // this section's own accent color instead of the hero's fixed red.
+  const pill = (
+    <span
+      className="w-full flex items-center gap-3 flex-wrap px-5 md:px-6 py-3.5 md:py-4 rounded-xl"
+      style={{ background: `linear-gradient(90deg, ${hexToRgba(accentColor, 0.1)}, rgba(255,255,255,0.03))`, border: '1px solid rgba(255,255,255,0.1)' }}
     >
-      <span style={{ color: accentColor, fontSize: '1.4em', lineHeight: 0, flexShrink: 0 }}>●</span> {title}
-    </p>
+      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: accentColor }} />
+      <span
+        className="text-[12px] md:text-[13px] font-bold uppercase flex-shrink-0"
+        style={{ fontFamily: "'Basetica', -apple-system, sans-serif", letterSpacing: 1.5, color: accentColor }}
+      >
+        On Now
+      </span>
+      <span className="text-[15px] md:text-[17px] font-semibold truncate" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff' }}>
+        {title}
+      </span>
+      {nextTitle && (
+        <>
+          <span className="text-[14px] flex-shrink-0" style={{ color: 'rgba(255,255,255,0.35)' }}>•</span>
+          <span className="text-[14px] md:text-[15px] truncate" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(255,255,255,0.6)' }}>
+            Up Next: {nextTitle}
+          </span>
+        </>
+      )}
+    </span>
   )
 
   return (
-    <div ref={rootRef} className="sticky top-0 z-20" style={{ background: 'rgba(9,7,18,0.97)' }}>
+    <div ref={rootRef} className="sticky top-0 z-20 px-5 md:px-[60px] pt-4 pb-3" style={{ background: '#110E1F' }}>
       {interactive ? (
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-haspopup="menu"
-          className="w-full text-left px-5 md:px-[60px] py-4 flex items-center cursor-pointer"
-          style={{
-            borderBottom: `2px solid ${accentColor}`,
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 6px 20px rgba(0,0,0,0.4)',
-          }}
+          className="text-left flex items-center cursor-pointer"
+          style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}
         >
-          <span className="flex items-center" style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
-            {label}
-            <motion.span
-              aria-hidden
-              animate={{ rotate: open ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-              style={{ color: 'rgba(255,255,255,0.6)', flexShrink: 0, marginLeft: 12 }}
-            >
-              ▾
-            </motion.span>
-          </span>
+          {pill}
+          <motion.span
+            aria-hidden
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ color: 'rgba(255,255,255,0.6)', flexShrink: 0, marginLeft: 10 }}
+          >
+            ▾
+          </motion.span>
         </button>
       ) : (
-        <div
-          className="px-5 md:px-[60px] py-4"
-          style={{
-            borderBottom: `2px solid ${accentColor}`,
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 6px 20px rgba(0,0,0,0.4)',
-          }}
-        >
-          <span style={{ maxWidth: 1200, margin: '0 auto', display: 'block' }}>{label}</span>
-        </div>
+        <div style={{ maxWidth: 1280, margin: '0 auto' }}>{pill}</div>
       )}
 
       <AnimatePresence>
@@ -117,12 +137,12 @@ export function SectionStickyBar({ title, accentColor, sections, currentAnchorId
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18 }}
-            className="absolute left-0 right-0 px-5 md:px-[60px]"
-            style={{ top: '100%' }}
+            className="absolute left-0 right-0"
+            style={{ top: 'calc(100% - 4px)' }}
           >
             <div
-              className="py-2 rounded-b-xl overflow-hidden"
-              style={{ maxWidth: 1200, margin: '0 auto', background: '#110E1F', border: '1px solid rgba(255,255,255,0.12)', borderTop: 'none' }}
+              className="py-2 rounded-xl overflow-hidden"
+              style={{ maxWidth: 1280, margin: '0 auto', background: '#110E1F', border: '1px solid rgba(255,255,255,0.12)' }}
             >
               {sections!.map((s) => {
                 const isCurrent = s.anchorId === currentAnchorId

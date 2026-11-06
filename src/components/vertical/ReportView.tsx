@@ -424,12 +424,12 @@ export function ReportView({ report }: { report: Report }) {
           const anchorId = `trend-${String(i + 1).padStart(2, '0')}`
           return {
             anchorId,
-            title: t.trendTitle,
+            title: t.railLabel || t.trendTitle,
             accentColor: t.accentColor || TELLY_SECTION_ACCENTS[i % TELLY_SECTION_ACCENTS.length],
             streams: (t.winnerLists ?? [])
               .map((list, j) => ({ list, j }))
               .filter(({ list }) => !list.directoryRow)
-              .map(({ list, j }) => ({ anchorId: `${anchorId}-list-${j}`, title: list.heading })),
+              .map(({ list, j }) => ({ anchorId: `${anchorId}-list-${j}`, title: list.railLabel || list.heading })),
           }
         })
     : []
@@ -688,8 +688,10 @@ export function ReportView({ report }: { report: Report }) {
 
       {/* Bottom progress / section nav (Anthem template) — hidden for
           Shared Influence and Nordics, which use a sticky top nav
-          instead. */}
-      {!isSharedInfluence && !isNordics && (
+          instead, and for Telly, which has its own left-hand
+          StreamProgressRail plus the "On Now" sticky bar for navigation
+          — this bottom bar was a redundant, unwanted leftover. */}
+      {!isSharedInfluence && !isNordics && !isTelly && (
         <AnthemBottomNav
           active={entered}
           property={report.property}
@@ -718,16 +720,21 @@ export function ReportView({ report }: { report: Report }) {
                 thing after the hero, with "What's Inside This Report"
                 following it — every other property keeps the original
                 intro-letter-first order. */}
-            {isTelly && <KeyFindings findings={report.keyFindings} property={report.property} slug={report.slug?.current} />}
+            {isTelly && (
+              <KeyFindings
+                findings={report.keyFindings}
+                property={report.property}
+                slug={report.slug?.current}
+                eyebrow={report.keyFindingsEyebrow}
+                heading={report.keyFindingsHeading}
+                subtitle={report.keyFindingsSubtitle}
+                cta={report.keyFindingsCta}
+              />
+            )}
 
-            {/* Scrolling "Who's Behind the Best Video Work" ticker — moved
-                out of The Facts into its own slim banner here, between the
-                Table of Contents and Shows & Series. Telly-only. */}
-            {isTelly && <TellyTitlesTicker report={report} />}
-
-            {/* Telly's opening letter now lives in the hero carousel's
-                second slide (TellyIntroSlide) instead of its own full
-                section — removed here per Ann's request. Every other
+            {/* Telly skips the standalone opening-letter section entirely —
+                its copy was folded into "Recommended for You"'s own
+                subtitle instead (see KeyFindings below). Every other
                 property keeps it as a standalone section, unchanged. */}
             {!isTelly && <IntroLetter report={report} />}
 
@@ -909,7 +916,7 @@ export function ReportView({ report }: { report: Report }) {
                             simply scoped to its own column's width. No
                             jump-menu here anymore now that the sidebar
                             covers all navigation. */}
-                        <SectionStickyBar title={`You’re in: ${trend.trendTitle}`} accentColor={accent} />
+                        <SectionStickyBar title={trend.trendTitle} accentColor={accent} nextTitle={tellyRailSections[i + 1]?.title} />
                         {cover && (
                           <ReportSectionCover
                             sectionNumber={cover.sectionNumber || num}
@@ -918,7 +925,19 @@ export function ReportView({ report }: { report: Report }) {
                             copy={cover.copy || ''}
                             accentColor={cover.accentColor || accent}
                             property={report.property}
-                            minHeightPx={cover.subtitle || cover.copy ? 530 : 220}
+                            minHeightPx={cover.subtitle || cover.copy ? 530 : undefined}
+                            // Telly's cover here never ships a subtitle/copy
+                            // paragraph of its own (see the Sanity data), so
+                            // this collapses the title's own bottom margin
+                            // and the cover's bottom padding to nothing —
+                            // the trend's own body paragraph right after
+                            // (rendered by TrendContent below) then sits
+                            // immediately under the title, same tight
+                            // spacing as any plain list heading, instead of
+                            // the standalone-divider-style gap this cover
+                            // otherwise wants.
+                            tightBottomSpacing={!(cover.subtitle || cover.copy)}
+                            compact
                             titleFontFamily="'Basetica', -apple-system, sans-serif"
                             titleFontWeight={700}
                             subtitleFontFamily="'Basetica', -apple-system, sans-serif"
@@ -974,6 +993,7 @@ export function ReportView({ report }: { report: Report }) {
                                   id={`trend-${num}-list-${j}`}
                                   heading={list.heading}
                                   intro={list.intro}
+                                  infoTooltip={list.infoTooltip}
                                   statValue={list.statValue}
                                   statCaption={list.statCaption}
                                   entries={list.entries}
@@ -985,9 +1005,16 @@ export function ReportView({ report }: { report: Report }) {
                                   id={`trend-${num}-list-${j}`}
                                   heading={list.heading}
                                   intro={list.intro}
+                                  infoTooltip={list.infoTooltip}
                                   entries={list.entries}
+                                  // Keyed by the list's own stable _key, not
+                                  // its heading — a heading is just
+                                  // editorial text Ann renames often, and a
+                                  // text match here silently stops matching
+                                  // (and this override silently stops
+                                  // applying) the moment it's renamed.
                                   colorOverrides={
-                                    list.heading === 'Top 5 Media and Entertainment Networks'
+                                    list._key === 'k48j5pa' // Network Premieres: Top Media & Entertainment
                                       ? { 0: '#0C75FF', 1: '#F41FC9', 2: '#ef1e40', 4: '#0C75FF' }
                                       : undefined
                                   }
@@ -998,7 +1025,9 @@ export function ReportView({ report }: { report: Report }) {
                                   id={`trend-${num}-list-${j}`}
                                   heading={list.heading}
                                   intro={list.intro}
+                                  infoTooltip={list.infoTooltip}
                                   entries={list.entries}
+                                  accentColor={accent}
                                 />
                               ) : (
                                 <WinnerList
@@ -2419,8 +2448,6 @@ export function ReportView({ report }: { report: Report }) {
             </>
             )}
 
-            <Credits report={report} />
-
             {isTelly && <TellyAbout report={report} />}
 
             {/* "The Facts" moved here from the hero carousel per Ann's
@@ -2428,6 +2455,16 @@ export function ReportView({ report }: { report: Report }) {
                 right after "About The Telly Awards" instead of rotating
                 through the homepage. */}
             {isTelly && <TellyFacts report={report} />}
+
+            {/* Scrolling "Who's Behind the Best Video Work" ticker — moved
+                down here, right alongside Credits, from its old spot
+                between the Table of Contents and Shows & Series. Telly-only. */}
+            {isTelly && <TellyTitlesTicker report={report} />}
+
+            {/* Credits moved below About/The Facts per Ann's request. For
+                every non-Telly property this is a no-op position change
+                (TellyAbout/TellyFacts above render nothing for them). */}
+            <Credits report={report} />
 
             {report.property === 'lovie' ? (
               <LovieFooter report={report} />

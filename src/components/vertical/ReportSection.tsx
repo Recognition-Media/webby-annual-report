@@ -103,6 +103,13 @@ interface ReportSectionCoverProps {
    * not rendered visually. Useful for transition covers (takeaways,
    * etc.) where the number token is unwanted. */
   hideSectionNumber?: boolean
+  /** When true, collapses the title's own bottom margin and the cover's
+   * bottom padding to near nothing — for a cover with no subtitle/copy of
+   * its own, where whatever follows (e.g. Telly's TrendContent body
+   * paragraph) should sit immediately under the title, same tight spacing
+   * as a plain list heading, instead of the generous divider-style gap a
+   * standalone section cover normally wants. */
+  tightBottomSpacing?: boolean
 }
 
 export function ReportSectionCover({
@@ -120,6 +127,7 @@ export function ReportSectionCover({
   subtitleFontFamily = 'var(--font-display)',
   subtitleItalic = false,
   hideSectionNumber = false,
+  tightBottomSpacing = false,
 }: ReportSectionCoverProps) {
   const isLovie = property === 'lovie'
   const isTelly = property === 'telly'
@@ -149,13 +157,15 @@ export function ReportSectionCover({
       style={{
         background: isLovie ? '#f2eeed' : isTelly ? '#110E1F' : '#E3DDCA',
         paddingTop: compact ? (isMobile ? 56 : 80) : 50,
-        paddingBottom: compact ? (isMobile ? 24 : 60) : 50,
+        paddingBottom: tightBottomSpacing ? 0 : compact ? (isMobile ? 24 : 60) : 50,
         ...(hasExplicitMinHeight && !isMobile ? { minHeight: minHeightPx } : {}),
       }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
-        {/* Center-aligned: number, title, rule, subtitle */}
-        <div className="text-center">
+        {/* Center-aligned: number, title, rule, subtitle — Telly reads
+            left-aligned instead, flush with the trend body copy and the
+            winner lists below it rather than centered independently. */}
+        <div className={isTelly ? 'text-left' : 'text-center'}>
           {/* Section number (or SVG token for Lovie). Telly reads the
               number as a small raised mark inline with the title
               instead — rendered below, inside the heading. */}
@@ -194,7 +204,7 @@ export function ReportSectionCover({
 
           {/* Title */}
           <motion.h2
-            className="text-[32px] md:text-[56px] lg:text-[64px] leading-[1.05] mb-6"
+            className={`text-[32px] md:text-[56px] lg:text-[64px] leading-[1.05] ${tightBottomSpacing ? 'mb-0' : 'mb-6'}`}
             style={{ fontFamily: titleFontFamily, color: coverTextColor, fontWeight: titleFontWeight }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -218,14 +228,19 @@ export function ReportSectionCover({
             {title}
           </motion.h2>
 
-          {/* Divider — centered */}
-          <motion.div
-            style={{ width: 48, height: 2, background: accentColor, marginBottom: 28, marginLeft: 'auto', marginRight: 'auto' }}
-            initial={{ opacity: 0, scaleX: 0 }}
-            whileInView={{ opacity: 1, scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          />
+          {/* Divider — centered. Telly drops it: with the heading now
+              left-aligned flush to the body copy and winner lists below,
+              the short accent line read as a stray mark rather than a
+              deliberate rule. */}
+          {!isTelly && (
+            <motion.div
+              style={{ width: 48, height: 2, background: accentColor, marginBottom: 28, marginLeft: 'auto', marginRight: 'auto' }}
+              initial={{ opacity: 0, scaleX: 0 }}
+              whileInView={{ opacity: 1, scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            />
+          )}
 
           {/* Subtitle — Telly folds this straight into the body copy
               paragraph below (same small size, no gap) instead of
@@ -261,7 +276,9 @@ export function ReportSectionCover({
               style={{
                 fontFamily: isLovie
                   ? "'Scto Grotesk A', -apple-system, sans-serif"
-                  : "'roc-grotesk-variable', -apple-system, sans-serif",
+                  : isTelly
+                    ? "'Basetica', -apple-system, sans-serif"
+                    : "'roc-grotesk-variable', -apple-system, sans-serif",
                 color: coverTextColor,
                 opacity: 0.65,
               }}
@@ -368,14 +385,17 @@ export function TrendContent({
   return (
     <section
       className={`relative px-5 md:px-[60px] ${
-        title ? 'py-20 md:py-28' : widenCopy ? 'pt-6 md:pt-8 pb-0' : 'pt-6 md:pt-8 pb-20 md:pb-28'
+        title ? 'py-20 md:py-28' : widenCopy ? 'pt-0 pb-0' : 'pt-0 pb-20 md:pb-28'
       }`}
       style={{ background }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         <div className="flex flex-col md:flex-row gap-12 md:gap-16">
-          {/* Left column: copy stack */}
-          <div className={widenCopy ? 'md:w-full' : 'md:w-[50%]'} style={widenCopy ? { maxWidth: 880 } : undefined}>
+          {/* Left column: copy stack — widenCopy runs the full 1280
+              container width (no readability cap) so the paragraph lines
+              up flush with the cover heading above and the winner lists'
+              own full-width rows below, per Ann's alignment note. */}
+          <div className={widenCopy ? 'md:w-full' : 'md:w-[50%]'}>
             {/* Trend eyebrow — skipped along with the title when a cover
                 right above already shows the section number/name */}
             {title && (
@@ -405,8 +425,9 @@ export function TrendContent({
               </motion.h3>
             )}
 
-            {/* Accent divider */}
-            <div style={{ width: 36, height: 2, background: accentColor, marginBottom: 24 }} />
+            {/* Accent divider — Telly drops it (see the matching note on
+                ReportSectionCover's own divider above). */}
+            {!isTelly && <div style={{ width: 36, height: 2, background: accentColor, marginBottom: 24 }} />}
 
             {/* Body paragraphs */}
             {body.map((paragraph, i) => (
@@ -414,7 +435,7 @@ export function TrendContent({
                 key={i}
                 className="text-[15px] md:text-[18px] leading-[1.6] md:leading-[30px] mb-6"
                 style={{
-                  fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
+                  fontFamily: isTelly ? "'Basetica', -apple-system, sans-serif" : "'roc-grotesk-variable', -apple-system, sans-serif",
                   color: textColor,
                 }}
                 initial={{ opacity: 0, y: 10 }}

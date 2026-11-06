@@ -1,9 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import type { Report } from '@/sanity/types'
-import { TellyIntroSlide } from './TellyIntroSlide'
 
 // Telly hero — "Option 1: Spliced Trophy w/ Icons" from the 48th Annual
 // Telly Awards Figma deck (file KGIUkH0PpkaeX1S5hreOY7, node 2059:13037),
@@ -16,16 +14,13 @@ import { TellyIntroSlide } from './TellyIntroSlide'
 // earlier pass rebuilt the composition from raw Figma layer geometry,
 // but the source trophy asset it used wasn't the right one.
 //
-// Streaming-homepage pass: the hero now rotates between this content and
-// the report's intro letter (<TellyIntroSlide> — heading/body/tagline plus
-// the author photo, same copy IntroLetter renders further down the page
-// for every other property), with an on-air ticker above and dot
-// pagination below. "More Info" advances the carousel to that second
-// slide instead of opening a pop-out modal. "The Facts" used to be this
-// second slide; it now lives as its own section near the bottom of the
-// page, right after "About The Telly Awards" (see ReportView.tsx).
-
-const SLIDE_INTERVAL_MS = 7000
+// Single static slide — this hero used to carousel between this content
+// and the report's intro letter (<TellyIntroSlide>, with "More Info"
+// advancing to it and dot pagination below), but that second slide's
+// copy was folded into the "Recommended for You" section's own subtitle
+// instead, making the carousel redundant. Removed along with it: the
+// autoplay timer, wheel/touch swipe handling, and the dot pagination —
+// none of it has anything left to switch between.
 
 interface TellyHeroArticleProps {
   report: Report
@@ -42,95 +37,18 @@ export function TellyHeroArticle({
   subtitle = "This is what moves us, this is what's moving the needle, this is what's moving the market.",
   onEnter,
 }: TellyHeroArticleProps) {
-  const [activeSlide, setActiveSlide] = useState<0 | 1>(0)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const wheelLockRef = useRef(false)
-  const touchStartXRef = useRef<number | null>(null)
   const trendCount = report.trendSections?.length || 4
-
-  function stopAutoplay() {
-    if (timerRef.current) clearInterval(timerRef.current)
-  }
-  function startAutoplay() {
-    stopAutoplay()
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    timerRef.current = setInterval(() => {
-      setActiveSlide((s) => (s === 0 ? 1 : 0))
-    }, SLIDE_INTERVAL_MS)
-  }
-
-  // Manual navigation (dots, trackpad, touch swipe) all funnel through here
-  // so picking a slide also resets the autoplay clock — otherwise autoplay
-  // could flip it again moments after someone just chose one on purpose.
-  function goToSlide(index: 0 | 1) {
-    setActiveSlide(index)
-    startAutoplay()
-  }
-
-  useEffect(() => {
-    startAutoplay()
-    return stopAutoplay
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Trackpad/mouse-wheel horizontal scroll switches slides — only when the
-  // gesture is clearly horizontal (deltaX dominant), so normal vertical
-  // page scrolling over the hero is never hijacked. A short lock prevents
-  // one swipe's burst of wheel events from flipping through both slides.
-  function handleWheel(e: React.WheelEvent) {
-    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || Math.abs(e.deltaX) < 24) return
-    const next = Math.min(Math.max(activeSlide + (e.deltaX > 0 ? 1 : -1), 0), 1) as 0 | 1
-    if (next === activeSlide || wheelLockRef.current) return
-    e.preventDefault()
-    wheelLockRef.current = true
-    goToSlide(next)
-    setTimeout(() => {
-      wheelLockRef.current = false
-    }, 700)
-  }
-
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartXRef.current = e.touches[0].clientX
-  }
-  function handleTouchEnd(e: React.TouchEvent) {
-    const startX = touchStartXRef.current
-    touchStartXRef.current = null
-    if (startX == null) return
-    const dx = e.changedTouches[0].clientX - startX
-    if (Math.abs(dx) < 40) return
-    const next = Math.min(Math.max(activeSlide + (dx < 0 ? 1 : -1), 0), 1) as 0 | 1
-    if (next !== activeSlide) goToSlide(next)
-  }
-
-  const onNowLabel = activeSlide === 0 ? `${titleLine1} ${titleLine2}` : "What's Inside This Report"
+  const onNowLabel = `${titleLine1} ${titleLine2}`
 
   return (
-    <div
-      className="relative w-full max-w-[1300px] mx-auto pointer-events-auto"
-      onMouseEnter={stopAutoplay}
-      onMouseLeave={startAutoplay}
-      onWheel={handleWheel}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
-      {/* Background wash — crossfades between slides, same red/blue glow
-          at rest and a blue-dominant wash while the intro slide is showing. */}
+    <div className="relative w-full max-w-[1300px] mx-auto pointer-events-auto">
+      {/* Background wash — same red/blue glow used at rest throughout. */}
       <div
-        className="absolute pointer-events-none transition-opacity duration-700"
+        className="absolute pointer-events-none"
         style={{
           inset: '-10% -5%',
-          opacity: activeSlide === 0 ? 1 : 0,
           background:
             'radial-gradient(ellipse 900px 500px at 15% -10%, rgba(239,30,64,0.16), transparent 60%), radial-gradient(ellipse 700px 400px at 95% 0%, rgba(12,117,255,0.14), transparent 60%)',
-        }}
-      />
-      <div
-        className="absolute pointer-events-none transition-opacity duration-700"
-        style={{
-          inset: '-10% -5%',
-          opacity: activeSlide === 1 ? 1 : 0,
-          background:
-            'radial-gradient(ellipse 1100px 650px at 50% -10%, rgba(12,117,255,0.28), transparent 62%), radial-gradient(ellipse 700px 400px at 90% 30%, rgba(244,31,201,0.1), transparent 60%)',
         }}
       />
 
@@ -151,12 +69,11 @@ export function TellyHeroArticle({
         </span>
         <span className="text-[12px]" style={{ color: 'rgba(255,255,255,0.35)' }}>•</span>
         <span className="text-[12px]" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(255,255,255,0.6)' }}>
-          Up Next: Just Released
+          Up Next: Recommended For You
         </span>
       </div>
 
-      {activeSlide === 0 ? (
-        <div className="relative flex flex-col md:flex-row items-center gap-10 md:gap-14 px-6 md:px-10">
+      <div className="relative flex flex-col md:flex-row items-center gap-10 md:gap-14 px-6 md:px-10">
           {/* Left: headline, metadata, subtitle, buttons */}
           <div className="w-full md:w-[42%] flex-shrink-0 text-center md:text-left">
             <motion.h1
@@ -209,15 +126,8 @@ export function TellyHeroArticle({
                 onClick={() => onEnter?.()}
                 className="inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-10 rounded-full cursor-pointer transition-colors bg-[#ef1e40] hover:bg-[#c8152f] text-white"
               >
-                <span>Explore The Report</span>
+                <span>{report.heroButtonText || 'Explore The Report'}</span>
                 <span>↓</span>
-              </button>
-              <button
-                onClick={() => goToSlide(1)}
-                className="inline-flex items-center gap-2 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-7 rounded-full cursor-pointer transition-colors bg-white/15 hover:bg-white/25 text-white"
-              >
-                <span>ⓘ</span>
-                <span>More Info</span>
               </button>
             </motion.div>
           </div>
@@ -247,39 +157,6 @@ export function TellyHeroArticle({
             <RetroTv />
           </motion.div>
         </div>
-      ) : (
-        <div className="relative">
-          <TellyIntroSlide report={report} />
-        </div>
-      )}
-
-      {/* Dot pagination — each button's actual hit area (36x36) is much
-          bigger than the small visual dot it contains, so they're easy to
-          click/tap without needing to land precisely on a few pixels. */}
-      <div className="relative flex items-center justify-center">
-        <button
-          onClick={() => goToSlide(0)}
-          aria-label={`Show ${titleLine1}`}
-          className="flex items-center justify-center cursor-pointer"
-          style={{ width: 36, height: 36 }}
-        >
-          <span
-            className="rounded-full transition-all duration-200"
-            style={{ width: activeSlide === 0 ? 24 : 9, height: 9, background: activeSlide === 0 ? '#ffffff' : 'rgba(255,255,255,0.3)' }}
-          />
-        </button>
-        <button
-          onClick={() => goToSlide(1)}
-          aria-label="Show What's Inside This Report"
-          className="flex items-center justify-center cursor-pointer"
-          style={{ width: 36, height: 36 }}
-        >
-          <span
-            className="rounded-full transition-all duration-200"
-            style={{ width: activeSlide === 1 ? 24 : 9, height: 9, background: activeSlide === 1 ? '#ffffff' : 'rgba(255,255,255,0.3)' }}
-          />
-        </button>
-      </div>
     </div>
   )
 }

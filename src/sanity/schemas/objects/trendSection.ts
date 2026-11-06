@@ -18,6 +18,7 @@ export default defineType({
   fields: [
     { name: 'enabled', title: 'Enabled', type: 'boolean', initialValue: true, description: 'Show or hide this entire trend' },
     { name: 'trendTitle', title: 'Title', type: 'string', validation: (r) => r.required(), fieldset: 'landing' },
+    { name: 'railLabel', title: 'Rail Label (Telly)', type: 'string', description: 'Short label for this trend\'s group header in the left-hand StreamProgressRail — falls back to Title if left blank. Keep it short so it never wraps there (e.g. "Channel Surfing" instead of "Channel Surfing: What\'s Stopping Our Scroll").', fieldset: 'landing' },
     {
       name: 'accentColor',
       title: 'Accent Color',

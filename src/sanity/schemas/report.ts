@@ -122,6 +122,10 @@ export default defineType({
     { name: 'trendIntroCta', title: 'CTA Button Text', type: 'string', group: 'trendIntro', initialValue: 'SEE THE TRENDS', description: 'Button that starts the trend journey' },
 
     // Key Findings (Anthem vertical template — preview grid above section 01)
+    { name: 'keyFindingsEyebrow', title: 'Eyebrow (Telly)', type: 'string', group: 'keyFindings', description: 'Small label above the intro paragraph, which now sits above the Heading instead of below it (Telly only) — e.g. "Inside The Report". Leave blank to hide.' },
+    { name: 'keyFindingsHeading', title: 'Heading', type: 'string', group: 'keyFindings', description: 'Defaults to "Just Released" if left blank.' },
+    { name: 'keyFindingsSubtitle', title: 'Subtitle', type: 'string', group: 'keyFindings', description: 'Telly renders this above the Heading (with the Eyebrow) rather than below it. Defaults to "Fresh off the presses — four trends just added to the 2026 guide. Tap in to start." if left blank.' },
+    { name: 'keyFindingsCta', title: 'Closing CTA (Telly)', type: 'array', of: [{ type: 'block' }], group: 'keyFindings', description: 'Optional short sentence appended after the Subtitle paragraph (Telly only) — e.g. an entry-deadline nudge. Select a word and use the link tool to hyperlink it.' },
     { name: 'keyFindings', title: 'Key Findings', type: 'array', of: [{ type: 'keyFinding' }], group: 'keyFindings', description: 'Top-of-report navigation grid (typically 4 items)' },
 
     // Section Covers — new unlimited-length list. Newer reports (e.g.

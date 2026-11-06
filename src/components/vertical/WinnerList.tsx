@@ -198,10 +198,10 @@ export function WinnerList({ id, heading, intro, entries, accentColor = '#ef1e40
   return (
     <section
       id={id}
-      className="relative px-5 md:px-[60px] py-16 md:py-20"
+      className="relative px-5 md:px-[60px] py-8 md:py-10"
       style={{ background: '#110E1F' }}
     >
-      <div style={{ maxWidth: 1000, margin: '0 auto', width: '100%' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         {/* When this list has a channel-guide preview, the heading/intro
             gets demoted to a small label above — the big headline spot
             is taken over by the active preview's own title/description

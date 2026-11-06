@@ -8,6 +8,7 @@ import { getVideoThumbnail } from '@/lib/videoEmbed'
 import { VideoPopoutModal } from './VideoPopoutModal'
 import { PlayIcon } from './PlayIcon'
 import { iconColorFor, hexToRgb } from '@/lib/channelColors'
+import { InfoTooltip } from './InfoTooltip'
 
 interface PosterRowListProps {
   id?: string
@@ -24,7 +25,12 @@ interface PosterRowListProps {
    * layout for its background/no-numeral styling, not for the video
    * orientation. */
   videoAspectRatio?: '16 / 9' | '9 / 16'
+  /** Optional longer-form context shown in a hover/tap popover off a small
+   * "i" icon next to the heading — for a note too long or too tangential
+   * to put in the regular intro paragraph. Omit for the plain heading. */
+  infoTooltip?: string
 }
+
 
 // Same red/blue/pink/green rotation used for the ToC poster wall and the
 // judge-popup accents elsewhere in the Telly report — cycling it per card
@@ -57,7 +63,7 @@ function colorScrim(hex: string) {
 // work out. The pop-out player defaults to a standard 16:9 shape;
 // `videoAspectRatio="9 / 16"` is only passed in for Vertical Video Series,
 // whose wins are actually vertical/mobile-native video.
-export function PosterRowList({ id, heading, intro, statValue, statCaption, entries, videoAspectRatio = '16 / 9' }: PosterRowListProps) {
+export function PosterRowList({ id, heading, intro, statValue, statCaption, entries, videoAspectRatio = '16 / 9', infoTooltip }: PosterRowListProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -111,21 +117,24 @@ export function PosterRowList({ id, heading, intro, statValue, statCaption, entr
   }
 
   return (
-    <section id={id} className="relative px-5 md:px-[60px] py-16 md:py-20" style={{ background: '#110E1F' }}>
-      <div style={{ maxWidth: 1000, margin: '0 auto', width: '100%' }}>
-        <motion.h3
-          className="text-[22px] md:text-[28px] leading-[1.2] mb-4"
-          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          {heading}
-        </motion.h3>
+    <section id={id} className="relative px-5 md:px-[60px] py-8 md:py-10" style={{ background: '#110E1F' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
+        <div className="flex items-center gap-3 mb-4">
+          <motion.h3
+            className="text-[22px] md:text-[28px] leading-[1.2]"
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            {heading}
+          </motion.h3>
+          {infoTooltip && <InfoTooltip text={infoTooltip} />}
+        </div>
         {intro && (
           <motion.p
-            className="text-[14px] md:text-[16px] leading-[1.6] max-w-[760px] mb-8"
+            className="text-[16px] md:text-[20px] leading-[1.6] mb-8"
             style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(216,245,255,0.65)' }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -261,7 +270,7 @@ export function PosterRowList({ id, heading, intro, statValue, statCaption, entr
                   </span>
                   <h4
                     className="text-[18px] md:text-[21px] leading-[1.15]"
-                    style={{ fontFamily: 'var(--font-display)', color: '#ffffff', fontWeight: 700 }}
+                    style={{ fontFamily: 'var(--font-display)', color: '#ffffff', fontWeight: 700, minHeight: '2.3em' }}
                   >
                     {entry.workTitle || entry.name}
                   </h4>

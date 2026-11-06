@@ -369,14 +369,12 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
   return (
     <section
       id="hero"
-      // Telly's hero rotates in a second, taller carousel slide
-      // (TellyIntroSlide) — a fixed h-screen + overflow-hidden clips that
-      // slide's bottom whenever its content runs taller than the
-      // viewport, hiding the dot pagination used to get back to the first
-      // slide. min-h-screen lets the section grow to fit instead of
-      // clipping; dropping overflow-hidden stops it cutting that overflow
-      // off. Every other property keeps the original fixed-height,
-      // clipped section unchanged.
+      // Telly's hero no longer carousels (its former second slide was
+      // removed — see TellyHeroArticle.tsx), but still uses min-h-screen
+      // rather than the fixed h-screen + overflow-hidden every other
+      // property keeps, so the section grows to fit rather than clipping
+      // if its content ever runs taller than the viewport at some
+      // breakpoint.
       className={`relative w-full ${isTelly ? 'min-h-screen' : 'h-screen overflow-hidden'} ${textTone === 'light' ? 'text-light' : 'text-dark'}`}
       style={{ background: theme.heroBgColor }}
     >
@@ -440,7 +438,13 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           transition={{ duration: 0.8, delay: 0.1 }}
         />
 
-        {/* Menu cluster — absolute on mobile so the logo stays centered. */}
+        {/* Menu cluster — absolute on mobile so the logo stays centered.
+            Telly drops this entirely: the "Explore The Report" pill and
+            hamburger (Table of Contents) dropdown were redundant with the
+            left-hand StreamProgressRail, which covers the same jump-to-
+            section navigation once scrolled into the report, plus the
+            "Surf the Channels" button already in the hero body. */}
+        {!isTelly && (
         <motion.div
           className="absolute right-5 top-1/2 -translate-y-1/2 md:static md:translate-y-0 flex items-center gap-4"
           initial={{ opacity: 0 }}
@@ -541,6 +545,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             </AnimatePresence>
           </div>
         </motion.div>
+        )}
       </div>
       )}
 

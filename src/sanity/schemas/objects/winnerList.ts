@@ -9,7 +9,20 @@ export default defineType({
   type: 'object',
   fields: [
     { name: 'heading', title: 'Heading', type: 'string', description: 'e.g. "Official Win List: Media and Entertainment Networks"', validation: (r) => r.required() },
+    {
+      name: 'railLabel',
+      title: 'Sidebar Rail Label',
+      type: 'string',
+      description: 'Short, plain label shown in the left-hand wayfinding rail (e.g. "Television" for a list headed "Top Media & Entertainment Networks") — deliberately doesn\'t mirror the on-page heading, so the rail reads as a quick clear index rather than a word-for-word table of contents. Falls back to the full heading above if left blank.',
+    },
     { name: 'intro', title: 'Intro Copy', type: 'text', rows: 3, description: 'Explanatory paragraph shown below the heading, above the list.' },
+    {
+      name: 'infoTooltip',
+      title: 'Info Tooltip (Poster Row only)',
+      type: 'text',
+      rows: 4,
+      description: 'Longer-form note shown in a hover/tap popover off a small "i" icon next to the heading — for context too long or tangential for the regular intro. Leave blank for no icon. Only rendered on Poster Row layout lists.',
+    },
     { name: 'entries', title: 'Entries', type: 'array', of: [{ type: 'winEntry' }], validation: (r) => r.required().min(1) },
     {
       name: 'posterRow',

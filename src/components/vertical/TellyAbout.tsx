@@ -6,7 +6,7 @@ import type { PortableTextComponents } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
 
-const ACCENT = '#F41FC9'
+const ACCENT = '#D8F5FF'
 const ENTER_URL = 'https://www.tellyawards.com'
 
 const aboutBodyComponents: PortableTextComponents = {
@@ -25,7 +25,10 @@ const aboutBodyComponents: PortableTextComponents = {
 }
 
 // Sits at the very bottom of the report, right after Credits — a quiet,
-// small-print footer-style blurb rather than its own full title page.
+// small-print footer-style blurb rather than its own full title page. Given
+// its own blue background (distinct from the dark streaming sections above
+// it) so it visually reads as "you've left the stream" the moment it
+// scrolls into view.
 export function TellyAbout({ report }: { report: Report }) {
   const logoUrl = report.aboutLogo ? urlFor(report.aboutLogo).width(240).url() : '/telly/judges/telly-logo-horizontal-white-cropped.png'
   return (
@@ -33,7 +36,7 @@ export function TellyAbout({ report }: { report: Report }) {
       id="about-telly"
       data-snap
       className="relative px-5 md:px-[60px] py-20 md:py-28 text-center"
-      style={{ background: '#110E1F' }}
+      style={{ background: '#0C75FF' }}
     >
       <div style={{ maxWidth: 720, margin: '0 auto', width: '100%' }}>
         <motion.img
@@ -58,7 +61,7 @@ export function TellyAbout({ report }: { report: Report }) {
         {report.aboutBody && report.aboutBody.length > 0 && (
           <motion.div
             className="text-[15px] md:text-[17px] leading-[1.7] mb-8 [&_p]:mb-5"
-            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(216,245,255,0.75)' }}
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(255,255,255,0.9)' }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

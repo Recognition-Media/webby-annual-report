@@ -52,8 +52,11 @@ export interface WinEntry {
 }
 
 export interface WinnerList {
+  _key?: string
   heading: string
+  railLabel?: string
   intro?: string
+  infoTooltip?: string
   posterRow?: boolean
   rankedRow?: boolean
   directoryRow?: boolean
@@ -106,6 +109,7 @@ export interface InsideTheHubs {
 export interface TrendSection {
   enabled?: boolean
   trendTitle: string
+  railLabel?: string
   accentColor?: string
   moduleOrder?: { module: string }[]
   trendBody?: PortableTextBlock[]
@@ -340,6 +344,10 @@ export interface Report {
   trendIntroBody?: PortableTextBlock[]
   trendIntroStats?: DataStat[]
   trendIntroCta?: string
+  keyFindingsEyebrow?: string
+  keyFindingsHeading?: string
+  keyFindingsSubtitle?: string
+  keyFindingsCta?: PortableTextBlock[]
   keyFindings?: KeyFinding[]
   /**
    * Newer reports use `sectionCovers` (unlimited-length array). Legacy

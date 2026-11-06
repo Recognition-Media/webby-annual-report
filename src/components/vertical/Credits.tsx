@@ -89,21 +89,66 @@ const ANTHEM_PALETTE: CreditsPalette = {
   headingWeight: 400,
 }
 
-const TELLY_PALETTE: CreditsPalette = {
-  bg: '#000000',
-  fg: '#ffffff',
-  accent: '#ef1e40',
-  font: "'Basetica', -apple-system, sans-serif",
-  headingWeight: 700,
-}
+// Telly's own "Created By" roster — the actual team behind this report,
+// not a placeholder. Falls back here if the CMS field is ever cleared.
+const TELLY_CREATED_BY: Person[] = [
+  { name: 'Ann Gilmore', title: 'Brand & Content Manager' },
+  { name: 'Camille Kielbasa', title: 'Community & Partnerships Manager' },
+  { name: 'Amanda Needham', title: 'General Manager, The Telly Awards' },
+  { name: 'Nix Shizheng Ni', title: 'Lead Designer' },
+  { name: 'Amy Chen', title: 'Senior Director' },
+  { name: 'Emma Larson', title: 'Managing Director of Production and Experience Operations' },
+]
 
 export function Credits({ report }: { report?: Report } = {}) {
   const isLovie = report?.property === 'lovie'
   const isTelly = report?.property === 'telly'
 
   if (isLovie) return <LovieCredits report={report} />
-  if (isTelly) return <AnthemCredits report={report} palette={TELLY_PALETTE} />
+  if (isTelly) return <TellyCredits report={report} />
   return <AnthemCredits report={report} />
+}
+
+// Telly credits — reuses Lovie's left-rail magazine layout (big left-aligned
+// "Credits" headline, dotted rule, section label on the left rail, names
+// stacked on the right) on Telly's own light-blue ground, rather than
+// Anthem's centered dark-block treatment every other property keeps.
+function TellyCredits({ report }: { report: Report | undefined }) {
+  const createdBy = fromCms(report?.creditsCreatedBy, TELLY_CREATED_BY)
+  const contributors = fromCms(report?.creditsContributors, [])
+
+  return (
+    <section
+      id="credits"
+      className="relative"
+      style={{
+        background: '#D8F5FF',
+        padding: '96px 24px 120px',
+        fontFamily: "'Basetica', -apple-system, sans-serif",
+        color: '#000000',
+      }}
+    >
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <motion.h2
+          style={{ fontSize: 'clamp(48px, 8vw, 96px)', fontWeight: 700, color: '#000000', lineHeight: 1, letterSpacing: '-0.02em', margin: '0 0 80px' }}
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.05 }}
+        >
+          Credits
+        </motion.h2>
+
+        <LoviePeopleGroup label="Created By" people={createdBy} delay={0.1} />
+        {contributors.length > 0 && (
+          <>
+            <div style={{ height: 64 }} />
+            <LoviePeopleGroup label="Contributors" people={contributors} delay={0.2} />
+          </>
+        )}
+      </div>
+    </section>
+  )
 }
 
 // Anthem credits — dark moss block with cream text + lilac accents.

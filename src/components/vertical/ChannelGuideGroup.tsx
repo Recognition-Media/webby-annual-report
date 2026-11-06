@@ -135,7 +135,7 @@ export function ChannelGuideGroup({ id, accentColor = '#ef1e40', stat, statAncho
     <ChannelGuideContext.Provider value={{ activeEntry, setActiveEntry, registerDefault }}>
       <div id={id} className="relative" style={{ background: '#110E1F' }}>
         <div className="relative px-5 md:px-[60px] py-16 md:py-20">
-          <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+          <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
             {/* Mobile: the shared player renders once, inline, above the
                 stacked lists — a sticky sidebar doesn't make sense in a
                 single column. */}
@@ -306,13 +306,20 @@ function PlayerEmbed({ entry }: { entry: ChannelGuideActiveEntry }) {
 
   if (embed?.kind === 'iframe') {
     return (
-      <iframe
-        key={entry.videoUrl}
-        src={embed.src}
-        className="absolute inset-0 w-full h-full"
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-      />
+      <>
+        <iframe
+          key={entry.videoUrl}
+          src={embed.src}
+          className="absolute inset-0 w-full h-full"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+        />
+        {/* Blocks the embedded player's own "open in a new tab" control —
+            every source (Drive, YouTube, Vimeo...) puts one near the top
+            of its chrome — since we never want a pop-out window from a
+            hover preview. See the matching note in VideoPopoutModal.tsx. */}
+        <div className="absolute top-0 inset-x-0 h-12 z-10" />
+      </>
     )
   }
 
@@ -351,11 +358,8 @@ function PlayerEmbed({ entry }: { entry: ChannelGuideActiveEntry }) {
 // mobile, where a horizontal row wouldn't fit.
 export function StatHighlightsRow({ eyebrow, bars, accentColor }: { eyebrow?: string; bars: StatBar[]; accentColor: string }) {
   return (
-    <div
-      className="px-5 md:px-[60px] py-16 md:py-20"
-      style={{ borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}
-    >
-      <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
+    <div className="px-5 md:px-[60px] py-8 md:py-10">
+      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         {eyebrow && (
           <p className="uppercase mb-8" style={{ fontSize: 12, letterSpacing: 3, color: accentColor, fontWeight: 700 }}>
             {eyebrow}
