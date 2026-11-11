@@ -33,12 +33,15 @@ interface TellyHeroArticleProps {
 export function TellyHeroArticle({
   report,
   titleLine1 = 'The Telly Awards',
-  titleLine2 = "What's On Demand",
-  subtitle = "This is what moves us, this is what's moving the needle, this is what's moving the market.",
+  titleLine2,
+  subtitle = 'A curation of the winning companies and shows worth your scroll.',
   onEnter,
 }: TellyHeroArticleProps) {
-  const trendCount = report.trendSections?.length || 4
-  const onNowLabel = `${titleLine1} ${titleLine2}`
+  // The headline is one line unless the CMS copy explicitly breaks it into
+  // two (see HeroSection's `heroHeadline` split), so everything that reads
+  // it has to tolerate a missing second line rather than printing
+  // "undefined" after the title.
+  const onNowLabel = [titleLine1, titleLine2].filter(Boolean).join(' ')
 
   return (
     <div className="relative w-full max-w-[1300px] mx-auto pointer-events-auto">
@@ -83,7 +86,7 @@ export function TellyHeroArticle({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
             >
-              {titleLine1}<br />{titleLine2}
+              {titleLine1}{titleLine2 && <><br />{titleLine2}</>}
             </motion.h1>
 
             <motion.div
@@ -94,9 +97,6 @@ export function TellyHeroArticle({
             >
               <span className="text-[13px] font-bold" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#2EFB5E' }}>
                 2026 Edition
-              </span>
-              <span className="text-[13px] font-bold" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(255,255,255,0.6)' }}>
-                {trendCount} Trends
               </span>
               <span className="text-[11px] font-bold px-[7px] py-[1px] rounded" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", border: '1px solid rgba(255,255,255,0.35)', color: 'rgba(255,255,255,0.6)' }}>
                 HD

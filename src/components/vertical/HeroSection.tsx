@@ -575,8 +575,11 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           <TellyHeroArticle
             report={report}
             titleLine1={report.heroHeadline?.split('\\n')[0] || 'The Telly Awards'}
-            titleLine2={report.heroHeadline?.split('\\n')[1] || "What's On Demand"}
-            subtitle={report.heroSubtitle || "This is what moves us, this is what's moving the needle, this is what's moving the market."}
+            // Only the CMS decides whether there's a second line — a
+            // single-line heroHeadline must stay single-line rather than
+            // falling back to the old hardcoded second line underneath it.
+            titleLine2={report.heroHeadline ? report.heroHeadline.split('\\n')[1] : "What's On Demand"}
+            subtitle={report.heroSubtitle || 'A curation of the winning companies and shows worth your scroll.'}
             onEnter={onSeeReport}
           />
         </div>
