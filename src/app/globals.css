@@ -437,12 +437,20 @@ body.report-shared-influence-creator-partnerships-nonprofit {
 
 /* Telly — horizontal carousel scrollbars, per the production creative
    spec: track #D8F5FF at 20% opacity, thumb solid white. Lives here
-   rather than inline because ::-webkit-scrollbar is a pseudo-element. */
-.telly-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #ffffff rgba(216, 245, 255, 0.2);
+   rather than inline because ::-webkit-scrollbar is a pseudo-element.
+
+   Deliberately NOT setting `scrollbar-width`/`scrollbar-color`: when
+   those standard properties are present, Chrome honours them and
+   ignores ::-webkit-scrollbar entirely, which on macOS yields an
+   overlay scrollbar that fades out when you stop scrolling — so the
+   specified track colour would almost never actually be on screen.
+   The webkit pseudo-elements give a persistent, always-visible bar,
+   which is what specifying a track colour implies. Firefox falls back
+   to its own default scrollbar. */
+.telly-scroll::-webkit-scrollbar {
+  height: 8px;
+  -webkit-appearance: none;
 }
-.telly-scroll::-webkit-scrollbar { height: 8px; }
 .telly-scroll::-webkit-scrollbar-track {
   background: rgba(216, 245, 255, 0.2);
   border-radius: 4px;

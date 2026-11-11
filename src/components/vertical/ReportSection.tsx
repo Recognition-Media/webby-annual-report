@@ -204,7 +204,9 @@ export function ReportSectionCover({
 
           {/* Title */}
           <motion.h2
-            className={`text-[32px] md:text-[56px] lg:text-[64px] leading-[1.05] ${tightBottomSpacing ? 'mb-0' : 'mb-6'}`}
+            // Telly's section titles read in all caps per the production
+            // creative spec; every other property keeps its CMS casing.
+            className={`text-[32px] md:text-[56px] lg:text-[64px] leading-[1.05] ${isTelly ? 'uppercase' : ''} ${tightBottomSpacing ? 'mb-0' : 'mb-6'}`}
             style={{ fontFamily: titleFontFamily, color: coverTextColor, fontWeight: titleFontWeight }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
