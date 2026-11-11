@@ -5,6 +5,7 @@ import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
 import type { Report } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
+import { assetPath } from '@/lib/assetPath'
 
 const ACCENT = '#D8F5FF'
 const ENTER_URL = 'https://www.tellyawards.com'
@@ -30,7 +31,7 @@ const aboutBodyComponents: PortableTextComponents = {
 // it) so it visually reads as "you've left the stream" the moment it
 // scrolls into view.
 export function TellyAbout({ report }: { report: Report }) {
-  const logoUrl = report.aboutLogo ? urlFor(report.aboutLogo).width(240).url() : '/telly/judges/telly-logo-horizontal-white-cropped.png'
+  const logoUrl = report.aboutLogo ? urlFor(report.aboutLogo).width(240).url() : assetPath('/telly/judges/telly-logo-horizontal-white-cropped.png')
   return (
     <section
       id="about-telly"

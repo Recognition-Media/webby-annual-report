@@ -434,3 +434,20 @@ body.telly-template {
 body.report-shared-influence-creator-partnerships-nonprofit {
   background: #E3DDCA;
 }
+
+/* Telly — horizontal carousel scrollbars, per the production creative
+   spec: track #D8F5FF at 20% opacity, thumb solid white. Lives here
+   rather than inline because ::-webkit-scrollbar is a pseudo-element. */
+.telly-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff rgba(216, 245, 255, 0.2);
+}
+.telly-scroll::-webkit-scrollbar { height: 8px; }
+.telly-scroll::-webkit-scrollbar-track {
+  background: rgba(216, 245, 255, 0.2);
+  border-radius: 4px;
+}
+.telly-scroll::-webkit-scrollbar-thumb {
+  background: #ffffff;
+  border-radius: 4px;
+}

@@ -129,7 +129,7 @@ export function PartnerDirectoryList({ id, heading, intro, entries, accentColor 
               </button>
             )}
 
-            <div ref={scrollRef} className="flex items-stretch gap-5 overflow-x-auto overflow-y-hidden pb-2" style={{ scrollbarWidth: 'thin' }}>
+            <div ref={scrollRef} className="flex items-stretch gap-5 overflow-x-auto overflow-y-hidden pb-2 telly-scroll">
               {entries.map((entry, i) => {
                 const logoUrl = entry.logo ? urlFor(entry.logo).width(320).url() : null
                 return (

@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import type { WinEntry } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
-import { hexToRgb, iconColorFor } from '@/lib/channelColors'
+import { iconColorFor, IMAGE_SCRIM } from '@/lib/channelColors'
+import { assetPath } from '@/lib/assetPath'
 import { VideoPopoutModal } from './VideoPopoutModal'
 import { PlayIcon } from './PlayIcon'
 import { InfoTooltip } from './InfoTooltip'
@@ -21,38 +22,25 @@ interface RankedThumbnailRowProps {
   /** Optional longer-form context shown in a hover/tap popover off a small
    * "i" icon next to the heading — see PosterRowList's InfoTooltip. */
   infoTooltip?: string
+  /** This trend section's own color. Tints the list heading so sections
+   * still read as colour-grouped now that every card image shares one
+   * neutral scrim instead of a per-card tinted one. */
+  accentColor?: string
 }
 
 // Same red/blue/pink/green rotation used elsewhere in the Telly report.
 const ACCENTS = ['#ef1e40', '#0C75FF', '#F41FC9', '#2EFB5E']
 
-// How far to pull each numeral's bottom-right corner past its wrapper's edge
-// (in em, so it scales with the responsive font-size) so the glyph's ink —
-// not just its font-box — sits flush against the poster. Most digits land
-// flush with a modest pull; digits whose rightmost stroke is a diagonal or
-// otherwise doesn't reach the box edge (4, 7) need a bigger pull or a visible
-// gap remains. Keeping this per-digit (rather than one value tuned to the
-// worst case) avoids over-hiding every other digit behind its poster.
-const NUMERAL_RIGHT_PULL_EM: Record<number, number> = { 4: -0.17, 7: -0.22 }
-const DEFAULT_NUMERAL_RIGHT_PULL_EM = -0.145
-
-function colorScrim(hex: string) {
-  const { r, g, b } = hexToRgb(hex)
-  return [
-    'linear-gradient(to top,',
-    'rgba(0,0,0,0.85) 0%,',
-    `rgba(${r},${g},${b},0.6) 32%,`,
-    `rgba(${r},${g},${b},0.2) 62%,`,
-    `rgba(${r},${g},${b},0) 85%)`,
-  ].join(' ')
-}
+// Rank tiles supplied by the production team (a solid colored square with
+// the digit knocked out), 1 through 7 only.
+const RANK_TILE_COUNT = 7
 
 // Netflix "Top 10"-style ranked row — a single winning work per org, shown
-// as a poster with a giant outline numeral tucked behind it. Entries with a
+// as a poster with the supplied rank tile in its top-left corner. Entries with a
 // `videoUrl` play right in the report via the same pop-out player used
 // elsewhere; entries with only a `workUrl` (no embeddable video) fall back
 // to linking out to that page.
-export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides, infoTooltip }: RankedThumbnailRowProps) {
+export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides, infoTooltip, accentColor = '#ffffff' }: RankedThumbnailRowProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -111,7 +99,7 @@ export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides
         <div className="flex items-center gap-3 mb-4">
           <motion.h3
             className="text-[22px] md:text-[28px] leading-[1.2]"
-            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: accentColor, fontWeight: 700 }}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -161,7 +149,7 @@ export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides
               </svg>
             </button>
           )}
-          <div ref={scrollRef} className="flex items-stretch gap-6 md:gap-8 overflow-x-auto overflow-y-hidden pb-2" style={{ scrollbarWidth: 'thin' }}>
+          <div ref={scrollRef} className="flex items-stretch gap-5 overflow-x-auto overflow-y-hidden pb-2 telly-scroll">
           {entries.map((entry, i) => {
             const hasVideo = !!entry.videoUrl
             const isInteractive = hasVideo || !!entry.workUrl
@@ -172,44 +160,12 @@ export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides
             return (
               <motion.div
                 key={i}
-                className="flex items-stretch flex-shrink-0"
+                className="flex-shrink-0"
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: 0.05 + i * 0.06 }}
               >
-                {/* Giant outline numeral — its own slot before the poster,
-                    never overlapping it, so every poster shows its full
-                    frame and every numeral (including the first) is fully
-                    visible rather than clipped. The wrapper stretches (via
-                    items-stretch on this row/unit) to the poster's own
-                    height and clips with overflow-hidden, so the numeral
-                    can never be taller than the poster — no unwanted
-                    vertical overflow/scroll. The span itself is absolutely
-                    positioned bottom-right, pulled further right per-digit
-                    (see NUMERAL_RIGHT_PULL_EM) so its glyph ink — not just
-                    its font-box — sits flush against the poster regardless
-                    of per-digit font metrics. The wrapper is kept wide
-                    enough (170/220px) that the glyph's ink isn't clipped on
-                    its left edge — a narrower box here was what previously
-                    fragmented the glyph into stray line fragments. */}
-                <div className="relative overflow-hidden flex-shrink-0 w-[170px] md:w-[220px]">
-                  <span
-                    className="absolute bottom-0 select-none text-[380px] md:text-[500px]"
-                    style={{
-                      right: `${NUMERAL_RIGHT_PULL_EM[i + 1] ?? DEFAULT_NUMERAL_RIGHT_PULL_EM}em`,
-                      lineHeight: 1,
-                      fontFamily: 'var(--font-display)',
-                      fontWeight: 800,
-                      fontVariantNumeric: 'tabular-nums',
-                      color: 'rgba(255,255,255,0.22)',
-                      WebkitTextStroke: '2.5px rgba(255,255,255,0.55)',
-                    }}
-                  >
-                    {i + 1}
-                  </span>
-                </div>
-
                 <div
                   role={isInteractive ? 'button' : undefined}
                   tabIndex={isInteractive ? 0 : undefined}
@@ -228,6 +184,19 @@ export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides
                   style={{ aspectRatio: '2 / 3', cursor: isInteractive ? 'pointer' : 'default' }}
                 >
                   <PosterInner entry={entry} color={color} bgImageUrl={bgImageUrl} />
+                  {/* Rank tile, tucked into the card's top-left corner —
+                      replaces the giant outline numeral that used to sit
+                      in its own slot beside the poster. */}
+                  {i < RANK_TILE_COUNT && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={assetPath(`/telly/creative/numerals/${i + 1}.png`)}
+                      alt={`Rank ${i + 1}`}
+                      className="absolute top-0 left-0 select-none"
+                      style={{ width: 46, height: 'auto' }}
+                      draggable={false}
+                    />
+                  )}
                   {hasVideo && (
                     <span
                       className="absolute flex items-center justify-center rounded-full"
@@ -277,7 +246,7 @@ function PosterInner({
           backgroundPosition: 'center',
         }}
       />
-      <div className="absolute inset-0" style={{ background: colorScrim(color) }} />
+      <div className="absolute inset-0" style={{ background: IMAGE_SCRIM }} />
       <div className="absolute left-0 right-0 bottom-0 p-4 md:p-5">
         <span
           className="inline-block uppercase mb-2 truncate max-w-full"

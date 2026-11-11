@@ -998,6 +998,7 @@ export function ReportView({ report }: { report: Report }) {
                                   statCaption={list.statCaption}
                                   entries={list.entries}
                                   videoAspectRatio={list.verticalVideo ? '9 / 16' : '16 / 9'}
+                                  accentColor={accent}
                                 />
                               ) : list.rankedRow ? (
                                 <RankedThumbnailRow
@@ -1018,6 +1019,7 @@ export function ReportView({ report }: { report: Report }) {
                                       ? { 0: '#0C75FF', 1: '#F41FC9', 2: '#ef1e40', 4: '#0C75FF' }
                                       : undefined
                                   }
+                                  accentColor={accent}
                                 />
                               ) : list.directoryRow ? (
                                 <PartnerDirectoryList

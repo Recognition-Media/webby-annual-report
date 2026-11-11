@@ -106,9 +106,10 @@ export function StreamProgressRail({ sections }: { sections: RailSection[] }) {
               <button
                 type="button"
                 onClick={() => jumpToSection(s.anchorId)}
-                className="text-[13px] font-bold mb-3 transition-colors duration-200 cursor-pointer text-left w-full"
+                className="text-[18px] font-bold mb-3 uppercase transition-colors duration-200 cursor-pointer text-left w-full"
                 style={{
                   letterSpacing: '0.01em',
+                  lineHeight: 1.2,
                   color: s.anchorId === activeSectionId ? '#ffffff' : 'rgba(216,245,255,0.6)',
                   fontFamily: "'Basetica', -apple-system, sans-serif",
                 }}
@@ -134,10 +135,14 @@ export function StreamProgressRail({ sections }: { sections: RailSection[] }) {
                       }}
                     />
                     <span
-                      className="text-[13.5px] leading-[1.4] transition-all duration-200"
+                      className="text-[13.5px] leading-[1.4] uppercase transition-all duration-200"
                       style={{
-                        color: active ? '#ffffff' : 'rgba(216,245,255,0.5)',
+                        // Active sub-section reads in its own section's
+                        // color rather than plain white, so the rail stays
+                        // colour-coded to the section you're inside.
+                        color: active ? s.accentColor : 'rgba(216,245,255,0.5)',
                         fontWeight: active ? 600 : 500,
+                        letterSpacing: '1.5px',
                         fontFamily: "'Basetica', -apple-system, sans-serif",
                       }}
                     >

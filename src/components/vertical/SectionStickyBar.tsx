@@ -10,15 +10,6 @@ export interface JumpSection {
   accentColor: string
 }
 
-function hexToRgb(hex: string) {
-  const n = parseInt(hex.replace('#', ''), 16)
-  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
-}
-function hexToRgba(hex: string, alpha: number) {
-  const { r, g, b } = hexToRgb(hex)
-  return `rgba(${r},${g},${b},${alpha})`
-}
-
 interface SectionStickyBarProps {
   title: string
   accentColor: string
@@ -81,7 +72,9 @@ export function SectionStickyBar({ title, accentColor, nextTitle, sections, curr
   const pill = (
     <span
       className="w-full flex items-center gap-3 flex-wrap px-5 md:px-6 py-3.5 md:py-4 rounded-xl"
-      style={{ background: `linear-gradient(90deg, ${hexToRgba(accentColor, 0.1)}, rgba(255,255,255,0.03))`, border: '1px solid rgba(255,255,255,0.1)' }}
+      // Transparent fill with a solid 2px stroke in this section's own
+      // full-strength color — no tinted wash, no translucent border.
+      style={{ background: 'transparent', border: `2px solid ${accentColor}` }}
     >
       <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: accentColor }} />
       <span

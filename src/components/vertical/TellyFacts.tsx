@@ -40,7 +40,7 @@ export function TellyFacts({ report, transparentBg }: { report: Report; transpar
     >
       <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <motion.h2
-          className={`text-[40px] md:text-[64px] leading-[1.05] text-center ${transparentBg ? 'mb-8 md:mb-10' : 'mb-14 md:mb-20'}`}
+          className={`text-[40px] md:text-[64px] leading-[1.05] text-left ${transparentBg ? 'mb-8 md:mb-10' : 'mb-14 md:mb-20'}`}
           style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -54,7 +54,7 @@ export function TellyFacts({ report, transparentBg }: { report: Report; transpar
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 ${transparentBg ? 'mb-8 md:mb-12' : 'mb-16 md:mb-24'}`}>
           {report.factsEntryCount && (
             <motion.div
-              className="text-center"
+              className="text-left"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -63,12 +63,12 @@ export function TellyFacts({ report, transparentBg }: { report: Report; transpar
               <div className="text-[56px] md:text-[88px] leading-none" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ef1e40', fontWeight: 700 }}>
                 {report.factsEntryCount}
               </div>
-              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: 'rgba(216,245,255,0.65)' }}>{report.factsEntryLabel}</p>
+              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: '#ffffff' }}>{report.factsEntryLabel}</p>
             </motion.div>
           )}
           {report.factsJudgeCount && (
             <motion.div
-              className="text-center"
+              className="text-left"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -77,7 +77,7 @@ export function TellyFacts({ report, transparentBg }: { report: Report; transpar
               <div className="text-[56px] md:text-[88px] leading-none" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#c23799', fontWeight: 700 }}>
                 {report.factsJudgeCount}
               </div>
-              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: 'rgba(216,245,255,0.65)' }}>{report.factsJudgeLabel}</p>
+              <p className="text-[14px] md:text-[16px] mt-2" style={{ color: '#ffffff' }}>{report.factsJudgeLabel}</p>
             </motion.div>
           )}
         </div>

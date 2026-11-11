@@ -24,3 +24,12 @@ export function titleColorFor(hasVideo: boolean, isActive: boolean) {
   if (!hasVideo) return null
   return isActive ? CHANNEL_ACTIVE_COLOR : CHANNEL_VIDEO_RESTING_COLOR
 }
+
+// Neutral scrim laid over every card thumbnail, per the production
+// creative spec: a single #0F0C19 wash confined to the lower third of
+// the image (solid at the very bottom so overlaid titles stay legible,
+// fully clear by 33% up). Replaces the old per-card `colorScrim()`
+// tints — section identity now reads from the list heading's color
+// instead of from the image wash.
+export const IMAGE_SCRIM =
+  'linear-gradient(to top, #0F0C19 0%, rgba(15,12,25,0.85) 12%, rgba(15,12,25,0) 33%)'

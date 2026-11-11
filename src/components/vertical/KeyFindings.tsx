@@ -11,7 +11,7 @@ import { CountryItaly, CountryPortugal, CountrySpain } from '../lovie/CountrySti
 import { SignalWaves } from './SignalWaves'
 import { jumpToSection } from '@/lib/sectionJump'
 import { PlayIcon } from './PlayIcon'
-import { iconColorFor } from '@/lib/channelColors'
+import { iconColorFor, IMAGE_SCRIM } from '@/lib/channelColors'
 
 const ctaComponents: PortableTextComponents = {
   block: {
@@ -736,7 +736,7 @@ export function KeyFindings({ findings, property, slug, eyebrow, heading, subtit
                 </svg>
               </button>
             )}
-            <div ref={tocScrollRef} className="flex items-stretch gap-4 overflow-x-auto overflow-y-hidden pb-2" style={{ scrollbarWidth: 'thin' }}>
+            <div ref={tocScrollRef} className="flex items-stretch gap-4 overflow-x-auto overflow-y-hidden pb-2 telly-scroll">
             {sections.map((section, i) => {
               const badgeTextColor = iconColorFor(section.hoverBg)
               // Trend-level cards (01-04) keep the plain accent gradient —
@@ -780,7 +780,7 @@ export function KeyFindings({ findings, property, slug, eyebrow, heading, subtit
                   />
                   <div
                     className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to top, rgba(8,6,18,0.96) 0%, rgba(8,6,18,0.5) 45%, rgba(8,6,18,0) 70%)' }}
+                    style={{ background: IMAGE_SCRIM }}
                   />
                   <div className="absolute left-0 right-0 bottom-0 p-4 md:p-5">
                     <h3

@@ -377,8 +377,8 @@ export function StatHighlightsRow({ eyebrow, bars, accentColor }: { eyebrow?: st
               key={i}
               className="flex-1 min-w-0 flex items-center gap-5 px-6 py-5 md:px-6 md:py-6 rounded-xl"
               style={{
-                background: `linear-gradient(135deg, ${hexToRgba(bar.color, 0.14)}, ${hexToRgba(bar.color, 0.03)})`,
-                border: `1px solid ${hexToRgba(bar.color, 0.3)}`,
+                background: 'transparent',
+                border: `2px solid ${bar.color}`,
               }}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -391,7 +391,7 @@ export function StatHighlightsRow({ eyebrow, bars, accentColor }: { eyebrow?: st
               >
                 {bar.displayValue}
               </span>
-              <span className="w-[2px] self-stretch flex-shrink-0" style={{ background: hexToRgba(bar.color, 0.35) }} />
+              <span className="w-[2px] self-stretch flex-shrink-0" style={{ background: bar.color }} />
               <span
                 className={solo ? 'text-[20px] md:text-[23px] leading-[1.35] max-w-[720px]' : 'text-[13.5px] md:text-[14.5px] leading-[1.5]'}
                 style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 600 }}

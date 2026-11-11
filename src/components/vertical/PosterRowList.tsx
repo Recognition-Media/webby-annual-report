@@ -7,7 +7,7 @@ import { urlFor } from '@/sanity/image'
 import { getVideoThumbnail } from '@/lib/videoEmbed'
 import { VideoPopoutModal } from './VideoPopoutModal'
 import { PlayIcon } from './PlayIcon'
-import { iconColorFor, hexToRgb } from '@/lib/channelColors'
+import { iconColorFor, IMAGE_SCRIM } from '@/lib/channelColors'
 import { InfoTooltip } from './InfoTooltip'
 
 interface PosterRowListProps {
@@ -29,6 +29,10 @@ interface PosterRowListProps {
    * "i" icon next to the heading — for a note too long or too tangential
    * to put in the regular intro paragraph. Omit for the plain heading. */
   infoTooltip?: string
+  /** This trend section's own color. Tints the list heading so sections
+   * still read as colour-grouped now that the card images all share one
+   * neutral scrim instead of per-section tinted ones. */
+  accentColor?: string
 }
 
 
@@ -41,29 +45,13 @@ const ACCENTS = ['#ef1e40', '#0C75FF', '#F41FC9', '#2EFB5E']
 // solid black at the very bottom (for the title/eyebrow text to stay
 // legible over any photo), warming into the accent hue through the middle,
 // and fully clear by the top so the thumbnail reads on its own up there.
-function hexToRgba(hex: string, alpha: number) {
-  const { r, g, b } = hexToRgb(hex)
-  return `rgba(${r},${g},${b},${alpha})`
-}
-
-function colorScrim(hex: string) {
-  const { r, g, b } = hexToRgb(hex)
-  return [
-    'linear-gradient(to top,',
-    'rgba(0,0,0,0.85) 0%,',
-    `rgba(${r},${g},${b},0.65) 30%,`,
-    `rgba(${r},${g},${b},0.22) 60%,`,
-    `rgba(${r},${g},${b},0) 85%)`,
-  ].join(' ')
-}
-
 // Experimental alternate to the ranked-table WinnerList — a horizontal row
 // of poster/thumbnail cards (streaming-guide style). Opt in per winnerList
 // via the CMS `posterRow` toggle, so it's a one-line revert if it doesn't
 // work out. The pop-out player defaults to a standard 16:9 shape;
 // `videoAspectRatio="9 / 16"` is only passed in for Vertical Video Series,
 // whose wins are actually vertical/mobile-native video.
-export function PosterRowList({ id, heading, intro, statValue, statCaption, entries, videoAspectRatio = '16 / 9', infoTooltip }: PosterRowListProps) {
+export function PosterRowList({ id, heading, intro, statValue, statCaption, entries, videoAspectRatio = '16 / 9', infoTooltip, accentColor = '#ffffff' }: PosterRowListProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -122,7 +110,7 @@ export function PosterRowList({ id, heading, intro, statValue, statCaption, entr
         <div className="flex items-center gap-3 mb-4">
           <motion.h3
             className="text-[22px] md:text-[28px] leading-[1.2]"
-            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: accentColor, fontWeight: 700 }}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -149,8 +137,8 @@ export function PosterRowList({ id, heading, intro, statValue, statCaption, entr
           <motion.div
             className="flex items-center gap-6 md:gap-7 mb-8 px-6 py-5 md:px-7 md:py-6 rounded-xl"
             style={{
-              background: `linear-gradient(135deg, ${hexToRgba(ACCENTS[0], 0.14)}, ${hexToRgba(ACCENTS[0], 0.03)})`,
-              border: `1px solid ${hexToRgba(ACCENTS[0], 0.3)}`,
+              background: 'transparent',
+              border: `2px solid ${ACCENTS[0]}`,
             }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -163,7 +151,7 @@ export function PosterRowList({ id, heading, intro, statValue, statCaption, entr
             >
               {statValue}
             </span>
-            <span className="w-[2px] self-stretch flex-shrink-0" style={{ background: hexToRgba(ACCENTS[0], 0.35) }} />
+            <span className="w-[2px] self-stretch flex-shrink-0" style={{ background: ACCENTS[0] }} />
             {statCaption && (
               <span
                 className="text-[14px] md:text-[16px] leading-[1.5] max-w-[420px]"
@@ -202,7 +190,7 @@ export function PosterRowList({ id, heading, intro, statValue, statCaption, entr
               </svg>
             </button>
           )}
-          <div ref={scrollRef} className="flex items-stretch gap-5 overflow-x-auto overflow-y-hidden pb-2" style={{ scrollbarWidth: 'thin' }}>
+          <div ref={scrollRef} className="flex items-stretch gap-5 overflow-x-auto overflow-y-hidden pb-2 telly-scroll">
           {entries.map((entry, i) => {
             const hasVideo = !!entry.videoUrl
             const isInteractive = hasVideo || !!entry.workUrl
@@ -250,7 +238,7 @@ export function PosterRowList({ id, heading, intro, statValue, statCaption, entr
                 />
                 <div
                   className="absolute inset-0"
-                  style={{ background: colorScrim(color) }}
+                  style={{ background: IMAGE_SCRIM }}
                 />
                 <div className="absolute left-0 right-0 bottom-0 p-4 md:p-5">
                   <span

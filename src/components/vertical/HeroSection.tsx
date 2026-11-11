@@ -9,6 +9,7 @@ import { urlFor } from '@/sanity/image'
 import { useImageBrightness, type Tone } from '@/lib/useImageBrightness'
 import { trackCtaClick } from '@/lib/analytics'
 import { TellyHeroArticle } from './TellyHeroArticle'
+import { assetPath } from '@/lib/assetPath'
 
 const LOCAL_HERO_IMAGES = [
   '/anthem/hero-1.jpg',
@@ -303,7 +304,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         // Telly — brand gradient ground (purple → red), white Screens
         // lockup, red CTA pill, Basetica bold title. Headline/subtitle
         // come from the CMS hero fields with generic fallbacks.
-        logoSrc: '/telly/judges/telly-logo-horizontal-white-cropped.png',
+        logoSrc: assetPath('/telly/judges/telly-logo-horizontal-white-cropped.png'),
         logoAlt: 'The Telly Awards',
         logoClassName: 'h-10 md:h-14 lg:h-16 w-auto',
         ctaUrl: 'https://www.tellyawards.com/',
