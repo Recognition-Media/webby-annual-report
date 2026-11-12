@@ -671,12 +671,20 @@ export function ReportView({ report }: { report: Report }) {
       <AnimatePresence>
         {showGate && (
           <motion.div
+            // The fade wrapper must carry the overlay's own positioning and
+            // z-index. Animating opacity to anything below 1 creates a
+            // stacking context, and an unpositioned wrapper would trap the
+            // gate's `z-50` inside it — so for the 300ms of the fade the hero's
+            // TV animation painted over the gate, then snapped behind it the
+            // instant opacity hit 1. Positioning the wrapper keeps the gate
+            // above the hero for the whole transition.
+            className="fixed inset-0 z-[150]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <SignupGate report={report} onComplete={handleSignupComplete} />
+            <SignupGate report={report} onComplete={handleSignupComplete} onClose={() => setShowGate(false)} />
           </motion.div>
         )}
       </AnimatePresence>

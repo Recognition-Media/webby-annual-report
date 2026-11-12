@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Report, FormField } from '@/sanity/types'
 import { trackSignupConversion } from '@/lib/analytics'
 import { buildCioIdentity } from '@/lib/cioIdentity'
+import { assetPath } from '@/lib/assetPath'
 
 // Per-property theming for the vertical-template signup gate. The vertical
 // layout serves both Anthem and Lovie, so the gate must brand itself from
@@ -88,10 +89,10 @@ const GATE_THEMES: Record<string, GateTheme> = {
     rounded: true,
   },
   telly: {
-    overlay: 'rgba(0, 0, 0, 0.8)',
+    overlay: 'rgba(0, 0, 0, 0.9)',
     frame: '#ef1e40',
     card: '#110E1F',
-    logo: '/telly/telly-logo-horizontal-white.png',
+    logo: '/telly/judges/telly-logo-horizontal-white-cropped.png',
     logoAlt: 'The Telly Awards',
     font: "'Basetica', -apple-system, sans-serif",
     text: '#ffffff',
@@ -133,7 +134,7 @@ function FieldInput({ field, value, onChange }: { field: FormField; value: strin
   )
 }
 
-export function SignupGate({ report, onComplete }: { report: Report; onComplete: () => void }) {
+export function SignupGate({ report, onComplete, onClose }: { report: Report; onComplete: () => void; onClose?: () => void }) {
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [consented, setConsented] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -166,6 +167,15 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
   function updateField(label: string, value: string) {
     setFormData((prev) => ({ ...prev, [label]: value }))
   }
+
+  useEffect(() => {
+    if (!onClose) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -210,9 +220,18 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
 
   return (
     <div
-      className="signup-gate-scope fixed inset-0 z-50 flex items-center justify-center px-3 md:px-4 overflow-y-auto"
+      className="signup-gate-scope fixed inset-0 z-50 flex items-center justify-center px-3 md:px-4 py-4"
       style={{
+        // Pin to the *dynamic* viewport height. 100vh ignores mobile browser
+        // chrome (the collapsing URL bar), which is what pushed the submit
+        // button below the fold on phones; 100dvh tracks the usable area.
+        height: '100dvh',
         background: theme.overlay,
+        // Telly's hero is a bright looping TV collage that still read through
+        // the scrim and pulled focus from the form. Blurring the backdrop
+        // settles it into a soft wash behind the card.
+        backdropFilter: isTelly ? 'blur(8px)' : undefined,
+        WebkitBackdropFilter: isTelly ? 'blur(8px)' : undefined,
         // CSS vars consumed by the .signup-gate-scope rules in globals.css
         // for input border / focus / placeholder colors + font.
         ['--gate-text' as string]: theme.text,
@@ -221,103 +240,128 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
       }}
     >
       <div
-        className={`w-full max-w-[575px] p-[3px] md:p-[4px] text-center my-4 ${theme.rounded ? 'rounded-3xl' : ''}`}
+        className={`w-full max-w-[575px] p-[3px] md:p-[4px] text-center flex flex-col max-h-full ${theme.rounded ? 'rounded-3xl' : ''}`}
         style={{ background: theme.frame }}
       >
+        {/* The card is a flex column capped at the viewport height: the header
+            and fields scroll internally while the consent line and submit
+            button stay pinned to the bottom, so the CTA is reachable at any
+            screen size instead of bleeding past the fold. */}
         <div
-          className={`p-5 md:p-10 ${theme.rounded ? 'rounded-[21px]' : ''}`}
+          className={`relative flex flex-col min-h-0 overflow-hidden ${theme.rounded ? 'rounded-[21px]' : ''}`}
           style={{
             background: theme.card,
             fontFamily: theme.font,
           }}
         >
-          <div className="mb-4 md:mb-6">
-            <img
-              src={theme.logo}
-              alt={theme.logoAlt}
-              className="mx-auto h-[50px] md:h-[70px] w-auto"
-            />
-          </div>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute top-2 right-2 md:top-3 md:right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full text-lg leading-none transition-opacity cursor-pointer opacity-60 hover:opacity-100"
+              style={{ color: theme.text }}
+            >
+              &#215;
+            </button>
+          )}
 
-          <h3
-            className="uppercase font-bold text-xs md:text-sm tracking-wider pb-3 md:pb-4 whitespace-pre-line"
-            style={{ color: theme.text }}
-          >
-            {report.signupTitle || defaultTitle}
-          </h3>
-          <p
-            className="text-xs md:text-sm mb-5 md:mb-8 leading-relaxed whitespace-pre-line"
-            style={{ color: theme.text, opacity: 0.7 }}
-          >
-            {report.signupSubhead || defaultSubhead}
-          </p>
+          <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
+            <div className="gate-scroll min-h-0 overflow-y-auto px-5 md:px-10 pt-4 md:pt-6">
+              <div className="mb-2 md:mb-4">
+                <img
+                  src={assetPath(theme.logo)}
+                  alt={theme.logoAlt}
+                  // Telly uses the tightly-cropped wordmark (712x140). The
+                  // uncropped PNG was a 792x612 canvas holding a 692x120 mark,
+                  // so ~80% of its height was transparent padding: it ate
+                  // vertical space and still looked tiny. Cropped, a much
+                  // smaller height renders a visibly larger logo.
+                  className={`mx-auto w-auto ${isTelly ? 'h-[34px] md:h-[42px]' : 'h-[50px] md:h-[70px]'}`}
+                />
+              </div>
 
-          <form onSubmit={handleSubmit}>
-            {/* Mobile: compact stacked inputs */}
-            <div className="md:hidden flex flex-col gap-3 text-left">
-              {fields.map((field) => (
-                <div key={field.label} className="w-full">
-                  <FieldInput
-                    field={field}
-                    value={formData[field.label] || ''}
-                    onChange={(v) => updateField(field.label, v)}
-                  />
-                </div>
-              ))}
-            </div>
+              <h3
+                className="uppercase font-bold text-xs md:text-sm tracking-wider pb-2 whitespace-pre-line"
+                style={{ color: theme.text }}
+              >
+                {report.signupTitle || defaultTitle}
+              </h3>
+              <p
+                className="text-xs md:text-sm mb-4 leading-relaxed whitespace-pre-line"
+                style={{ color: theme.text, opacity: 0.7 }}
+              >
+                {report.signupSubhead || defaultSubhead}
+              </p>
 
-            {/* Desktop: side-by-side label + input */}
-            <div className="hidden md:block">
-              {fields.map((field) => (
-                <div key={field.label} className="flex flex-row items-center mb-5 text-left">
-                  <label
-                    className="w-[30%] text-sm font-bold text-right pr-4"
-                    style={{ color: theme.text }}
-                  >
-                    {field.label}{field.required ? <span className="ml-0.5" style={{ color: theme.accent }}>*</span> : ''}
-                  </label>
-                  <div className="w-[70%]">
+              {/* Mobile: compact stacked inputs */}
+              <div className="md:hidden flex flex-col gap-2.5 text-left">
+                {fields.map((field) => (
+                  <div key={field.label} className="w-full">
                     <FieldInput
                       field={field}
                       value={formData[field.label] || ''}
                       onChange={(v) => updateField(field.label, v)}
                     />
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              {/* Desktop: side-by-side label + input */}
+              <div className="hidden md:block">
+                {fields.map((field) => (
+                  <div key={field.label} className="flex flex-row items-center mb-3 text-left">
+                    <label
+                      className="w-[30%] text-sm font-bold text-right pr-4"
+                      style={{ color: theme.text }}
+                    >
+                      {field.label}{field.required ? <span className="ml-0.5" style={{ color: theme.accent }}>*</span> : ''}
+                    </label>
+                    <div className="w-[70%]">
+                      <FieldInput
+                        field={field}
+                        value={formData[field.label] || ''}
+                        onChange={(v) => updateField(field.label, v)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {error && <p className="text-xs md:text-sm" style={{ color: theme.accent }}>{error}</p>}
+            <div className="shrink-0 px-5 md:px-10 pb-4 md:pb-6 pt-2">
+              {error && <p className="text-xs md:text-sm" style={{ color: theme.accent }}>{error}</p>}
 
-            <label
-              className="flex items-start gap-2 text-left text-[10px] md:text-xs mt-3 md:mt-4 cursor-pointer"
-              style={{ color: theme.text, opacity: 0.7 }}
-            >
-              <input
-                type="checkbox"
-                checked={consented}
-                onChange={(e) => setConsented(e.target.checked)}
-                required
-                className="mt-0.5"
-              />
-              <span>
-                I agree to the{' '}
-                <a href={theme.privacyUrl} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: theme.text }}>
-                  Privacy Policy
-                </a>{' '}
-                and consent to receive communications from {theme.privacyName}.
-              </span>
-            </label>
+              <label
+                className="flex items-start gap-2 text-left text-[10px] md:text-xs mt-2 md:mt-3 cursor-pointer"
+                style={{ color: theme.text, opacity: 0.7 }}
+              >
+                <input
+                  type="checkbox"
+                  checked={consented}
+                  onChange={(e) => setConsented(e.target.checked)}
+                  required
+                  className="mt-0.5"
+                />
+                <span>
+                  I agree to the{' '}
+                  <a href={theme.privacyUrl} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: theme.text }}>
+                    Privacy Policy
+                  </a>{' '}
+                  and consent to receive communications from {theme.privacyName}.
+                </span>
+              </label>
 
-            <button
-              type="submit"
-              disabled={submitting || !consented}
-              className="flex items-center justify-between w-full max-w-[280px] mx-auto uppercase font-medium py-3 md:py-4 px-5 md:px-6 mt-4 md:mt-6 text-xs md:text-sm tracking-wider transition-colors disabled:opacity-50 cursor-pointer rounded-full"
-              style={{ background: theme.accent, color: theme.buttonText }}
-            >
-              <span>{submitting ? 'Submitting...' : (report.submitButtonText || 'Explore The Report')}</span>
-              <span className="text-base md:text-lg">→</span>
-            </button>
+              <button
+                type="submit"
+                disabled={submitting || !consented}
+                className="flex items-center justify-between w-full max-w-[280px] mx-auto uppercase font-medium py-3 md:py-[14px] px-5 md:px-6 mt-3 md:mt-4 text-xs md:text-sm tracking-wider transition-colors disabled:opacity-50 cursor-pointer rounded-full"
+                style={{ background: theme.accent, color: theme.buttonText }}
+              >
+                <span>{submitting ? 'Submitting...' : (report.submitButtonText || 'Explore The Report')}</span>
+                <span className="text-base md:text-lg">→</span>
+              </button>
+            </div>
           </form>
         </div>
       </div>

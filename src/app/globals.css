@@ -459,3 +459,21 @@ body.report-shared-influence-creator-partnerships-nonprofit {
   background: #ffffff;
   border-radius: 4px;
 }
+
+/* Signup gate: the card caps at the viewport height and scrolls its header +
+   fields internally (the consent line and CTA stay pinned below). Give that
+   internal scroll a slim, theme-neutral bar so it reads as part of the card
+   rather than a raw browser scrollbar sitting inside the modal.
+   Note: declaring `scrollbar-width`/`scrollbar-color` here would make Chrome
+   ignore these ::-webkit- rules entirely, so they're deliberately omitted. */
+.gate-scroll::-webkit-scrollbar {
+  width: 6px;
+  -webkit-appearance: none;
+}
+.gate-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.gate-scroll::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--gate-text, #ffffff) 35%, transparent);
+  border-radius: 3px;
+}
