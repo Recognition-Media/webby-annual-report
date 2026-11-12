@@ -69,6 +69,15 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
     try {
       const cioIdentity = buildCioIdentity(fields, formData)
 
+      // Links for Customer.io's triggered emails — same contract as the
+      // vertical gate. shareLink is the plain URL so a forwarded copy still
+      // meets the gate and becomes a new lead; privateLink carries the
+      // ?access=direct bypass this template also honours, so the recipient
+      // lands straight in without filling the form again.
+      const reportUrl = `${window.location.origin}${window.location.pathname}`
+      const shareLink = reportUrl
+      const privateLink = `${reportUrl}?access=direct`
+
       await fetch(`${process.env.NEXT_PUBLIC_SIGNUP_API_URL}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,6 +90,8 @@ export function SignupGate({ report, onComplete }: { report: Report; onComplete:
           consented,
           consentedAt: new Date().toISOString(),
           specifier: report.specifier,
+          privateLink,
+          shareLink,
         }),
       }).catch(() => {})
 

@@ -185,6 +185,16 @@ export function SignupGate({ report, onComplete, onClose }: { report: Report; on
     try {
       const cioIdentity = buildCioIdentity(fields, formData)
 
+      // Links for Customer.io's triggered emails, built from where the
+      // visitor actually signed up so the domain is right (these reports are
+      // served from several). shareLink is the plain URL, so anyone it's
+      // forwarded to still meets the gate and becomes a new lead;
+      // privateLink carries the ?access=direct bypass so the recipient lands
+      // straight in without filling the form again.
+      const reportUrl = `${window.location.origin}${window.location.pathname}`
+      const shareLink = reportUrl
+      const privateLink = `${reportUrl}?access=direct`
+
       await fetch(`${process.env.NEXT_PUBLIC_SIGNUP_API_URL}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -197,6 +207,8 @@ export function SignupGate({ report, onComplete, onClose }: { report: Report; on
           consented,
           consentedAt: new Date().toISOString(),
           specifier: report.specifier,
+          privateLink,
+          shareLink,
         }),
       }).catch(() => {})
 

@@ -60,8 +60,28 @@ test('buildEventPayload names the event form_submitted with propertyName, source
       propertyName: 'Lovie Awards',
       source: 'The Lovie Awards Creative Hubs Series',
       specifier: 'Trend Report 2026',
+      privateLink: '',
+      shareLink: '',
     },
   })
+})
+
+test('buildEventPayload carries privateLink and shareLink through to the event', () => {
+  const payload = buildEventPayload({
+    cioIdentity: { email: 'jane@example.com' },
+    property: 'telly',
+    reportSlug: '2026-telly-watchlist',
+    reportTitle: '2026 Telly Watchlist',
+    specifier: '2026 Telly Watchlist',
+    privateLink: 'https://reports.tellyawards.com/2026-telly-watchlist/?access=direct',
+    shareLink: 'https://reports.tellyawards.com/2026-telly-watchlist/',
+  })
+
+  assert.equal(payload.attributes.privateLink, 'https://reports.tellyawards.com/2026-telly-watchlist/?access=direct')
+  assert.equal(payload.attributes.shareLink, 'https://reports.tellyawards.com/2026-telly-watchlist/')
+  // The private link is the one that skips the gate; the share link must not.
+  assert.ok(payload.attributes.privateLink.includes('access=direct'))
+  assert.ok(!payload.attributes.shareLink.includes('access=direct'))
 })
 
 test('buildEventPayload falls back to an empty propertyName for an unrecognized property', () => {

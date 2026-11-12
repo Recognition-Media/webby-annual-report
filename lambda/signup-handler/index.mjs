@@ -60,7 +60,7 @@ export function buildIdentifyPayload({ cioIdentity, property, consented, consent
   }
 }
 
-export function buildEventPayload({ cioIdentity, property, reportSlug, reportTitle, specifier }) {
+export function buildEventPayload({ cioIdentity, property, reportSlug, reportTitle, specifier, privateLink, shareLink }) {
   return {
     type: 'person',
     identifiers: { email: cioIdentity.email },
@@ -72,11 +72,17 @@ export function buildEventPayload({ cioIdentity, property, reportSlug, reportTit
       propertyName: PROPERTY_DISPLAY_NAMES[property] || '',
       source: reportTitle || '',
       specifier: specifier || '',
+      // Links for the triggered emails: privateLink carries the gate
+      // bypass so the recipient lands straight in the report without
+      // filling the form again, shareLink is the plain URL so anyone they
+      // forward it to still hits the gate and becomes a new lead.
+      privateLink: privateLink || '',
+      shareLink: shareLink || '',
     },
   }
 }
 
-export async function syncToCustomerIo({ cioIdentity, property, reportSlug, reportTitle, consented, consentedAt, specifier }) {
+export async function syncToCustomerIo({ cioIdentity, property, reportSlug, reportTitle, consented, consentedAt, specifier, privateLink, shareLink }) {
   if (!cioIdentity?.email) return
 
   if (!CIO_SITE_ID || !CIO_API_KEY) {
@@ -87,7 +93,7 @@ export async function syncToCustomerIo({ cioIdentity, property, reportSlug, repo
   const authHeader = 'Basic ' + Buffer.from(`${CIO_SITE_ID}:${CIO_API_KEY}`).toString('base64')
   const payloads = [
     buildIdentifyPayload({ cioIdentity, property, consented, consentedAt }),
-    buildEventPayload({ cioIdentity, property, reportSlug, reportTitle, specifier }),
+    buildEventPayload({ cioIdentity, property, reportSlug, reportTitle, specifier, privateLink, shareLink }),
   ]
 
   for (const payload of payloads) {
@@ -118,7 +124,7 @@ export async function handler(event) {
   try {
     if (method === 'POST' && path.endsWith('/signup')) {
       const body = JSON.parse(event.body || '{}')
-      const { reportSlug, reportTitle, property, formData, cioIdentity, consented, consentedAt, specifier } = body
+      const { reportSlug, reportTitle, property, formData, cioIdentity, consented, consentedAt, specifier, privateLink, shareLink } = body
 
       if (!reportSlug || !formData) {
         return response(400, { error: 'Missing required fields' }, origin)
@@ -138,7 +144,7 @@ export async function handler(event) {
         },
       }))
 
-      await syncToCustomerIo({ cioIdentity, property, reportSlug, reportTitle, consented, consentedAt, specifier })
+      await syncToCustomerIo({ cioIdentity, property, reportSlug, reportTitle, consented, consentedAt, specifier, privateLink, shareLink })
 
       return response(200, { success: true }, origin)
     }
