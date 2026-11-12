@@ -14,6 +14,15 @@ const QUOTE_DISPLAY_MS = 10000
 const CHOOSER_DISPLAY_MS = 14000
 const ACCENTS = ['#ef1e40', '#0C75FF', '#F41FC9', '#2EFB5E']
 
+// Each trend section renders its own TellyJudgePopup, each with its own
+// state, and an open one previously only closed on its own timer. A reader
+// moving briskly could therefore trigger two or three before the first had
+// timed out, and because they all sit at the same fixed corner they piled up
+// on top of each other. These module-level handles keep exactly one on
+// screen: whichever opens most recently closes whoever was there.
+let activeBreakId: symbol | null = null
+let closeActiveBreak: (() => void) | null = null
+
 const quoteComponents: PortableTextComponents = {
   block: {
     normal: ({ children }) => <>{children}</>,
@@ -49,12 +58,33 @@ const quoteComponents: PortableTextComponents = {
 // page scroll — being trapped behind a full-screen interstitial was the
 // specific complaint from the production team's creative review. Both
 // phases close themselves on a timer, so it never waits on the reader.
+//
+// At most one break is ever on screen. Each trend section renders its own
+// instance, so a reader moving briskly could trigger several inside one
+// card's timer and — since they all sit at the same fixed corner — stack
+// them on top of each other. Two rules prevent that: a newly opened break
+// closes whichever one is currently showing (so the reader always sees the
+// break for the section they're actually in), and a break the reader never
+// answered dismisses itself once they've scrolled clean past its section,
+// rather than lingering over the next one's content. A break they did
+// answer keeps its quote for the usual timer — they engaged with it, so it
+// isn't pulled away mid-read, though a later section's break can still
+// replace it.
 export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; anchorId: string }) {
   const [phase, setPhase] = useState<'hidden' | 'choosing' | 'revealed' | 'dismissed'>('hidden')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scrollDirection = useRef<'down' | 'up'>('down')
   const lastScrollY = useRef(0)
+  // Identifies this instance in the single-open-break handles above.
+  const breakId = useRef<symbol>(Symbol('judge-break'))
+  // Held in a ref so scroll listeners registered once still call the current
+  // version rather than a stale closure.
+  const dismissRef = useRef<() => void>(() => {})
+  dismissRef.current = () => {
+    if (dismissTimer.current) clearTimeout(dismissTimer.current)
+    setPhase('dismissed')
+  }
 
   useEffect(() => {
     lastScrollY.current = window.scrollY
@@ -119,6 +149,11 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
       if (shown) return
       shown = true
       window.removeEventListener('scroll', onScroll)
+      // Close whichever break is already on screen — the reader has moved on
+      // to this section, so this one replaces it rather than landing on top.
+      if (closeActiveBreak && activeBreakId !== breakId.current) closeActiveBreak()
+      activeBreakId = breakId.current
+      closeActiveBreak = () => dismissRef.current()
       setPhase('choosing')
       unsubscribeJump()
     }
@@ -160,8 +195,39 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
   useEffect(() => {
     return () => {
       if (dismissTimer.current) clearTimeout(dismissTimer.current)
+      if (activeBreakId === breakId.current) {
+        activeBreakId = null
+        closeActiveBreak = null
+      }
     }
   }, [])
+
+  // Give up the slot as soon as this break is gone, so a later one isn't
+  // closing something that already left the screen.
+  useEffect(() => {
+    if (phase !== 'dismissed') return
+    if (activeBreakId === breakId.current) {
+      activeBreakId = null
+      closeActiveBreak = null
+    }
+  }, [phase])
+
+  // An un-answered break belongs to the section the reader is in. Once
+  // they've scrolled clean past that section without picking a judge, it has
+  // missed its moment — drop it rather than leaving it parked in the corner
+  // over the next section's content. A break they *did* answer keeps its
+  // quote for the usual timer: they engaged with it, so it isn't yanked away
+  // mid-read.
+  useEffect(() => {
+    if (phase !== 'choosing') return
+    const el = document.getElementById(anchorId)
+    if (!el) return
+    function onScroll() {
+      if (el!.getBoundingClientRect().bottom <= 0) dismissRef.current()
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [phase, anchorId])
 
   // Both phases close themselves. The chooser gets a longer window than
   // the quote because it has to be noticed before it can be acted on,
