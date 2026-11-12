@@ -385,7 +385,12 @@ body.lovie-template {
 }
 
 body.telly-template {
-  background: var(--telly-white);
+  /* The report's own ground, not white. Sections paint their own
+     backgrounds, so this only shows where nothing else does — the sliver
+     past the content edge on a horizontal nudge, and the rubber-band
+     overscroll at top and bottom. White there read as a bright trim down
+     the side of a dark report. */
+  background: #110E1F;
   color: var(--telly-black);
   font-family: 'Basetica', -apple-system, sans-serif;
   --font-sans: 'Basetica', -apple-system, sans-serif;

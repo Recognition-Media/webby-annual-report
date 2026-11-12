@@ -46,7 +46,13 @@ export function TellyHeroArticle({
   const onNowLabel = [titleLine1, titleLine2].filter(Boolean).join(' ')
 
   return (
-    <div className="relative w-full max-w-[1300px] mx-auto pointer-events-auto">
+    // overflow-x-clip contains the decorative glows below, which deliberately
+    // bleed past this container (inset -5%, width 130%) and were widening the
+    // document by ~64px — enough to let the page nudge sideways and expose a
+    // strip of body background down the right edge. `clip` rather than
+    // `hidden` because clip doesn't create a scroll container, so it leaves
+    // sticky/fixed descendants and vertical overflow alone.
+    <div className="relative w-full max-w-[1300px] mx-auto pointer-events-auto overflow-x-clip">
       {/* Background wash — same red/blue glow used at rest throughout. */}
       <div
         className="absolute pointer-events-none"
