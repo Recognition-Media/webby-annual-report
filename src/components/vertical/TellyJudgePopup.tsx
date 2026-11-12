@@ -9,6 +9,9 @@ import { urlFor } from '@/sanity/image'
 import { onSectionJump } from '@/lib/sectionJump'
 
 const QUOTE_DISPLAY_MS = 10000
+// Longer than the quote's: the chooser has to be noticed before it can be
+// acted on, while the quote is already being read when its timer starts.
+const CHOOSER_DISPLAY_MS = 14000
 const ACCENTS = ['#ef1e40', '#0C75FF', '#F41FC9', '#2EFB5E']
 
 const quoteComponents: PortableTextComponents = {
@@ -41,29 +44,17 @@ const quoteComponents: PortableTextComponents = {
 // jump's real destination. Shown at most once per section for the rest
 // of the session, independently per section — once a viewer has seen a
 // section's ad, scrolling back through that same section again never
-// re-triggers it. Page scroll is locked for as long as the popup is
-// open, so it can't be scrolled past into the next section's own popup
-// while this one is still up — closing it (✕) or letting it auto-dismiss
-// is what gives scroll back.
+// re-triggers it. It docks to the right edge rather than taking over the
+// screen, and deliberately does NOT lock page scroll — being trapped
+// behind a full-screen interstitial was the specific complaint from the
+// production team's creative review. Both phases close themselves on a
+// timer, so it never waits on the reader.
 export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; anchorId: string }) {
   const [phase, setPhase] = useState<'hidden' | 'choosing' | 'revealed' | 'dismissed'>('hidden')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
-  const [revealCountdown, setRevealCountdown] = useState(QUOTE_DISPLAY_MS / 1000)
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scrollDirection = useRef<'down' | 'up'>('down')
   const lastScrollY = useRef(0)
-
-  // Ticks the countdown ring down in step with the real auto-dismiss timer
-  // below, so it isn't just a frozen "10" — purely atmospheric, doesn't
-  // itself trigger anything (the dismiss timer already does).
-  useEffect(() => {
-    if (phase !== 'revealed') return
-    setRevealCountdown(QUOTE_DISPLAY_MS / 1000)
-    const interval = setInterval(() => {
-      setRevealCountdown((c) => (c > 0 ? c - 1 : 0))
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [phase, selectedIndex])
 
   useEffect(() => {
     lastScrollY.current = window.scrollY
@@ -172,23 +163,22 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
     }
   }, [])
 
-  // Lock page scroll while the popup is up — otherwise the viewer can
-  // keep scrolling behind it, straight into the next section's own
-  // popup, stacking interstitials. Only released once this one is fully
-  // dismissed (auto-timeout, choosing a different judge, or the ✕).
+  // Both phases close themselves. The chooser gets a longer window than
+  // the quote because it has to be noticed before it can be acted on,
+  // whereas the quote is already being read by the time its timer starts.
+  // Picking a judge, or going back to pick again, restarts the clock.
   useEffect(() => {
     if (phase !== 'choosing' && phase !== 'revealed') return
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const ms = phase === 'choosing' ? CHOOSER_DISPLAY_MS : QUOTE_DISPLAY_MS
+    dismissTimer.current = setTimeout(() => setPhase('dismissed'), ms)
     return () => {
-      document.body.style.overflow = previousOverflow
+      if (dismissTimer.current) clearTimeout(dismissTimer.current)
     }
-  }, [phase])
+  }, [phase, selectedIndex])
 
   function choose(i: number) {
     setSelectedIndex(i)
     setPhase('revealed')
-    dismissTimer.current = setTimeout(() => setPhase('dismissed'), QUOTE_DISPLAY_MS)
   }
 
   function dismissNow() {
@@ -197,7 +187,6 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
   }
 
   function pickAgain() {
-    if (dismissTimer.current) clearTimeout(dismissTimer.current)
     setSelectedIndex(null)
     setPhase('choosing')
   }
@@ -208,81 +197,84 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
 
   return (
     <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-[200] flex items-center justify-center px-5"
-        style={{ background: 'rgba(0,0,0,0.8)' }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        onClick={dismissNow}
+      {/* Docked to the right edge rather than covering the page. No
+          backdrop and no scroll lock — the reader can keep going and the
+          panel times itself out, which is the whole point of the change. */}
+      <motion.aside
+        key="judge-panel"
+        aria-label="A word from a Telly judge"
+        className="fixed z-[200] overflow-hidden rounded-2xl
+                   left-4 right-4 bottom-4
+                   md:left-auto md:right-6 md:top-6 md:bottom-6 md:w-[340px]"
+        style={{ background: '#1A1530', border: '1px solid rgba(216,245,255,0.14)', boxShadow: '0 24px 60px rgba(0,0,0,0.5)' }}
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: 40 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       >
-        <motion.div
-          className="relative w-full rounded-2xl p-6 md:p-10"
-          style={{ maxWidth: 880, background: '#110E1F', border: '1px solid rgba(255,255,255,0.12)' }}
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.97 }}
-          transition={{ duration: 0.3 }}
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="p-5 md:p-6 md:h-full md:overflow-y-auto">
           <button
             onClick={dismissNow}
             aria-label="Close"
-            className="absolute top-4 right-4 md:top-5 md:right-5 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
-            style={{ color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.2)' }}
+            className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer text-[13px] leading-none transition-colors"
+            style={{ color: 'rgba(216,245,255,0.45)', border: '1px solid rgba(216,245,255,0.14)', background: 'transparent' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(216,245,255,0.45)' }}
           >
             ✕
           </button>
 
+          <p
+            className="text-[10px] font-bold uppercase mb-1"
+            style={{ letterSpacing: '0.16em', color: '#2EFB5E', fontFamily: "'Basetica', -apple-system, sans-serif" }}
+          >
+            Ad Break
+          </p>
+
           {phase === 'choosing' && (
             <>
-              <p className="text-[13px] md:text-[14px] mb-6 md:mb-8" style={{ color: 'rgba(216,245,255,0.5)' }}>
-                Your report will resume after this message
+              <p className="text-[11.5px] mb-4" style={{ color: 'rgba(216,245,255,0.45)' }}>
+                Your report keeps playing.
               </p>
               <p
-                className="text-[20px] md:text-[26px] font-bold text-center mb-10 md:mb-12"
-                style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff' }}
+                className="text-[17px] font-bold mb-4 pr-8"
+                style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', lineHeight: 1.2 }}
               >
-                Choose a Telly Judge To Hear From
+                Hear from a Telly judge
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 md:gap-6">
+              <div className="flex flex-col gap-1">
                 {quotes.map((q, i) => {
-                  const headshotUrl = q.headshot ? urlFor(q.headshot).width(240).height(240).fit('crop').url() : q.headshotUrl
+                  const headshotUrl = q.headshot ? urlFor(q.headshot).width(120).height(120).fit('crop').url() : q.headshotUrl
                   return (
-                    <div
+                    <button
                       key={i}
-                      role="button"
-                      tabIndex={0}
+                      type="button"
                       onClick={() => choose(i)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          choose(i)
-                        }
-                      }}
-                      className="group flex flex-col items-center text-center cursor-pointer"
+                      className="group flex items-center gap-3 w-full text-left rounded-[10px] p-2 cursor-pointer transition-colors"
+                      style={{ background: 'transparent', border: '1px solid transparent' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#221B3C'; e.currentTarget.style.borderColor = 'rgba(216,245,255,0.14)' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent' }}
                     >
-                      <div className="relative w-[110px] h-[110px] md:w-[128px] md:h-[128px] rounded-2xl overflow-hidden mb-4">
-                        {headshotUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element -- CMS-driven headshot
-                          <img
-                            src={headshotUrl}
-                            alt={q.name}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                          />
-                        ) : (
-                          <div className="w-full h-full" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                      {headshotUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- CMS-driven headshot
+                        <img src={headshotUrl} alt="" className="w-[42px] h-[42px] rounded-[9px] object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-[42px] h-[42px] rounded-[9px] flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                      )}
+                      <span className="min-w-0">
+                        <span
+                          className="block text-[13.5px] truncate"
+                          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700, lineHeight: 1.25 }}
+                        >
+                          {q.name}
+                        </span>
+                        {q.title && (
+                          <span className="block text-[11.5px] truncate" style={{ color: 'rgba(216,245,255,0.45)' }}>
+                            {q.title}
+                          </span>
                         )}
-                        <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/30" />
-                      </div>
-                      <p className="text-[15px] md:text-[16px] mb-1" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700 }}>
-                        {q.name}
-                      </p>
-                      <p className="text-[13px]" style={{ color: 'rgba(216,245,255,0.6)' }}>
-                        {q.title}
-                      </p>
-                    </div>
+                      </span>
+                    </button>
                   )
                 })}
               </div>
@@ -291,58 +283,64 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
 
           {phase === 'revealed' && selected && (() => {
             const selectedAccent = ACCENTS[(selectedIndex ?? 0) % ACCENTS.length]
-            const headshotUrl = selected.headshot ? urlFor(selected.headshot).width(240).height(240).fit('crop').url() : selected.headshotUrl
+            const headshotUrl = selected.headshot ? urlFor(selected.headshot).width(160).height(160).fit('crop').url() : selected.headshotUrl
             return (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-                <div className="flex items-center justify-between mb-6 md:mb-8 pr-10">
-                  <p className="text-[13px] md:text-[14px]" style={{ color: 'rgba(216,245,255,0.5)' }}>
-                    Your report will resume after this message
-                  </p>
-                  <span
-                    className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-[15px] font-bold ml-3"
-                    style={{ border: '2px solid #2EFB5E', color: '#2EFB5E', fontFamily: 'monospace' }}
-                  >
-                    {revealCountdown}
-                  </span>
-                </div>
-                <div className="flex gap-5 items-start mb-8">
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                <p className="text-[11.5px] mb-4" style={{ color: 'rgba(216,245,255,0.45)' }}>
+                  Your report keeps playing.
+                </p>
+                <div className="flex gap-3 items-start">
                   {headshotUrl ? (
-                    <div className="w-[88px] h-[88px] md:w-[104px] md:h-[104px] rounded-full overflow-hidden flex-shrink-0" style={{ border: `2px solid ${selectedAccent}` }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element -- CMS-driven headshot */}
-                      <img src={headshotUrl} alt={selected.name} className="w-full h-full object-cover" />
-                    </div>
+                    // eslint-disable-next-line @next/next/no-img-element -- CMS-driven headshot
+                    <img
+                      src={headshotUrl}
+                      alt=""
+                      className="w-[54px] h-[54px] rounded-full object-cover flex-shrink-0"
+                      style={{ border: `2px solid ${selectedAccent}` }}
+                    />
                   ) : (
-                    <div className="w-[88px] h-[88px] md:w-[104px] md:h-[104px] rounded-full flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)', border: `2px solid ${selectedAccent}` }} />
+                    <div className="w-[54px] h-[54px] rounded-full flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)', border: `2px solid ${selectedAccent}` }} />
                   )}
-                  <div className="pl-4" style={{ borderLeft: `3px solid ${selectedAccent}` }}>
+                  <div className="pl-3 min-w-0" style={{ borderLeft: `3px solid ${selectedAccent}` }}>
                     <div
-                      className="text-[16px] md:text-[18px] leading-[1.6] mb-3"
+                      className="text-[13.5px] leading-[1.55]"
                       style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontStyle: 'italic' }}
                     >
                       "<PortableText value={selected.quoteText} components={quoteComponents} />"
                     </div>
-                    <p className="text-[13px]" style={{ color: 'rgba(216,245,255,0.6)' }}>
-                      <strong style={{ fontWeight: 600, color: '#ffffff' }}>{selected.name}</strong>
-                      {selected.title && <><br />{selected.title}</>}
+                    <p className="text-[11.5px] mt-2" style={{ color: 'rgba(216,245,255,0.45)' }}>
+                      <strong style={{ fontWeight: 700, color: '#ffffff' }}>{selected.name}</strong>
+                      {selected.title && <> · {selected.title}</>}
                     </p>
                   </div>
                 </div>
-                <div className="text-center">
-                  <button
-                    onClick={pickAgain}
-                    className="inline-flex items-center justify-center py-3 px-8 rounded-full uppercase transition-colors duration-200 bg-white border cursor-pointer"
-                    style={{ color: selectedAccent, borderColor: selectedAccent, fontSize: 12, letterSpacing: 2, fontWeight: 700, fontFamily: "'Basetica', -apple-system, sans-serif" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = selectedAccent; e.currentTarget.style.color = '#ffffff' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = selectedAccent }}
-                  >
-                    Select a Different Judge
-                  </button>
-                </div>
+                <button
+                  onClick={pickAgain}
+                  className="mt-4 text-[11.5px] font-bold rounded-full py-1.5 px-3.5 cursor-pointer transition-colors"
+                  style={{ background: 'transparent', border: '1.5px solid rgba(216,245,255,0.14)', color: 'rgba(216,245,255,0.72)', fontFamily: "'Basetica', -apple-system, sans-serif" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = selectedAccent; e.currentTarget.style.color = selectedAccent }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(216,245,255,0.14)'; e.currentTarget.style.color = 'rgba(216,245,255,0.72)' }}
+                >
+                  ← Choose someone else
+                </button>
               </motion.div>
             )
           })()}
-        </motion.div>
-      </motion.div>
+        </div>
+
+        {/* Auto-close timer. Keyed on the phase so it restarts whenever the
+            panel switches between choosing and reading a quote. */}
+        <div className="absolute left-0 right-0 bottom-0 h-[3px]" style={{ background: 'rgba(216,245,255,0.12)' }}>
+          <motion.div
+            key={`${phase}-${selectedIndex ?? 'none'}`}
+            className="h-full origin-left"
+            style={{ background: '#2EFB5E' }}
+            initial={{ scaleX: 1 }}
+            animate={{ scaleX: 0 }}
+            transition={{ duration: (phase === 'choosing' ? CHOOSER_DISPLAY_MS : QUOTE_DISPLAY_MS) / 1000, ease: 'linear' }}
+          />
+        </div>
+      </motion.aside>
     </AnimatePresence>
   )
 }
