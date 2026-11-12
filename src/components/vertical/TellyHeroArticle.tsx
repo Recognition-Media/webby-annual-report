@@ -9,11 +9,12 @@ import { assetPath } from '@/lib/assetPath'
 // adapted onto the site's dark #110E1F background per Ann's direction
 // instead of the white card shown in the original mockup.
 //
-// The right-column visual ("MADE TO MOVE" + the spliced gold-trophy row
-// + pop-art icon badges) is Ann's finished flattened graphic
-// (trophy-row-final.jpg) rather than a hand-coded recreation — an
-// earlier pass rebuilt the composition from raw Figma layer geometry,
-// but the source trophy asset it used wasn't the right one.
+// The right-column visual is Ann's finished animated graphic
+// (hero-v2/hero-collage.gif — a three-frame collage of Social Impact,
+// Shows & Series and Branded Content work) rather than a hand-coded
+// recreation. It replaced an earlier "MADE TO MOVE" spliced-trophy
+// GIF, which is still in the repo at hero-v2/trophy-row-final.gif if
+// it's ever needed back.
 //
 // Single static slide — this hero used to carousel between this content
 // and the report's intro letter (<TellyIntroSlide>, with "More Info"
@@ -141,9 +142,9 @@ export function TellyHeroArticle({
             </motion.div>
           </div>
 
-          {/* Right: "Made To Move" + spliced trophy composition, framed as a
-              retro CRT television — the "old cable guide" concept from the
-              Figma deck carried through to the hero itself. */}
+          {/* Right: the hero collage, framed as a retro CRT television —
+              the "old cable guide" concept from the Figma deck carried
+              through to the hero itself. */}
           <motion.div
             className="relative w-full md:w-[58%] flex justify-center"
             initial={{ opacity: 0, y: 20 }}
@@ -178,7 +179,7 @@ export function TellyHeroArticle({
 // The hero television. The cabinet is the production team's supplied
 // photograph (public/telly/creative/retro-tv.png) rather than the CSS
 // construction it replaced — that PNG has a genuinely transparent screen
-// cutout, so the "Made to Move" GIF is simply positioned behind it at the
+// cutout, so the hero GIF is simply positioned behind it at the
 // cutout's own measured rect and shows through. Those percentages come
 // from flood-filling the PNG's alpha channel, so re-measure them if the
 // artwork is ever swapped.
@@ -202,13 +203,13 @@ function RetroTv() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- hero visual sized to its own container, not a next/image fit */}
           <img
-            src={assetPath('/telly/hero-v2/trophy-row-final.gif')}
-            alt="Made to Move — The Telly Awards"
-            // Contain, not cover: this cutout is slightly narrower than the
-            // old CSS screen, and cover clipped the "MADE TO MOVE" lockup
-            // at the right edge. Letterboxing against the black screen
-            // reads like widescreen content on a 4:3 set.
-            className="absolute inset-0 w-full h-full object-contain"
+            src={assetPath('/telly/hero-v2/hero-collage.gif')}
+            alt="Winning work across Social Impact, Shows & Series and Branded Content"
+            // Cover is safe here: this artwork is 460x370 (1.243) against a
+            // 1.248 screen cutout, so it fills the tube with no meaningful
+            // crop. The previous hero GIF was much wider and needed
+            // `contain` to avoid clipping its lockup.
+            className="absolute inset-0 w-full h-full object-cover"
           />
         </motion.div>
 
