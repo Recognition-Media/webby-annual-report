@@ -10,7 +10,7 @@ import { NordicsFlagStripes } from './NordicsFlagStripes'
 // Custom renderers so Lovie's CMS-driven letter body matches the
 // styling of the hardcoded fallback: paragraphs fade in on scroll,
 // bold marks render at 700, links stay editorial.
-const loviePortableTextComponents: PortableTextComponents = {
+export const loviePortableTextComponents: PortableTextComponents = {
   block: {
     normal: ({ children }) => (
       <motion.p
@@ -93,15 +93,15 @@ export function IntroLetter({ report }: { report: Report }) {
       }
     : isTelly
     ? {
-        sectionBg: '#ffffff',
+        sectionBg: '#110E1F',
         eyebrowColor: '#ef1e40',
-        textColor: '#000000',
-        textColorMuted: 'rgba(0,0,0,0.55)',
+        textColor: '#ffffff',
+        textColorMuted: 'rgba(216,245,255,0.55)',
         accentColor: '#ef1e40',
         authorPhoto: '/telly/author-placeholder.svg',
         authorPhotoImgClass: 'object-cover object-center',
         bodyTextClasses:
-          '[&_p]:mb-5 [&_p]:text-[15px] md:[&_p]:text-[16px] [&_p]:text-black [&_p]:leading-[28px] [&_strong]:text-black [&_strong]:font-bold [&_blockquote]:border-none [&_blockquote]:pl-0',
+          '[&_p]:mb-5 [&_p]:text-[15px] md:[&_p]:text-[16px] [&_p]:text-white [&_p]:leading-[28px] [&_strong]:text-white [&_strong]:font-bold [&_blockquote]:border-none [&_blockquote]:pl-0',
       }
     : {
         sectionBg: '#21261A',
@@ -136,7 +136,7 @@ export function IntroLetter({ report }: { report: Report }) {
               color: theme.eyebrowColor,
             }}
           >
-            Introduction
+            {isTelly ? "What's Inside This Report" : 'Introduction'}
           </p>
 
           <div className="w-[200px] h-[250px] md:w-[300px] md:h-[390px] relative rounded-lg overflow-hidden mb-4">

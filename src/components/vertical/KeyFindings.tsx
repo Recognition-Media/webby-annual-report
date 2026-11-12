@@ -1,10 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import type { KeyFinding } from '@/sanity/types'
+import { PortableText } from '@portabletext/react'
+import type { PortableTextComponents } from '@portabletext/react'
+import type { PortableTextBlock } from '@portabletext/types'
+import type { KeyFinding, SanityImage } from '@/sanity/types'
+import { urlFor } from '@/sanity/image'
 import { CountryItaly, CountryPortugal, CountrySpain } from '../lovie/CountryStickers'
 import { SignalWaves } from './SignalWaves'
+import { jumpToSection } from '@/lib/sectionJump'
+import { PlayIcon } from './PlayIcon'
+import { iconColorFor, IMAGE_SCRIM } from '@/lib/channelColors'
+
+const ctaComponents: PortableTextComponents = {
+  block: {
+    normal: ({ children }) => <>{children}</>,
+  },
+  marks: {
+    link: ({ value, children }) => (
+      <a
+        href={value?.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        // Pink so the one actionable word in the intro actually reads as
+        // a link against the white copy around it.
+        style={{ color: '#F41FC9', fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: 2, opacity: 1 }}
+      >
+        {children}
+      </a>
+    ),
+  },
+}
 
 const FALLBACK_SECTIONS = [
   {
@@ -167,7 +194,7 @@ function scrollToAnchor(anchor: string) {
   for (const id of candidates) {
     const el = document.getElementById(id)
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      jumpToSection(id, el)
       return
     }
   }
@@ -185,12 +212,24 @@ type ResolvedSection = {
   color: string
   hoverBg: string
   anchor: string
+  image?: SanityImage
+  subItems?: { title: string; anchor?: string }[]
 }
 
 interface KeyFindingsProps {
   findings?: KeyFinding[]
   property?: 'webby' | 'anthem' | 'telly' | 'lovie'
   slug?: string
+  /** CMS-driven small label above the subtitle paragraph — Telly only. */
+  eyebrow?: string
+  /** CMS-driven, falls back to "Just Released" — Telly only today. */
+  heading?: string
+  /** CMS-driven, falls back to the default Telly subtitle copy. */
+  subtitle?: string
+  /** CMS-driven, optional short rich-text sentence appended after the
+   * subtitle (e.g. an entry-deadline nudge with a hyperlinked word) —
+   * Telly only. */
+  cta?: PortableTextBlock[]
 }
 
 // Telly placeholder findings — shown only until the CMS keyFindings
@@ -202,10 +241,38 @@ const TELLY_FALLBACK_SECTIONS: ResolvedSection[] = [
   { number: '03', title: 'Craft Still Wins', description: 'Audiences reward work that is made with care, no matter the runtime or platform.', color: '#000000', hoverBg: '#ef1e40', anchor: 'trend-03' },
 ]
 
-export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {}) {
+export function KeyFindings({ findings, property, slug, eyebrow, heading, subtitle, cta }: KeyFindingsProps = {}) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const isLovie = property === 'lovie'
   const isTelly = property === 'telly'
+
+  // Telly's poster-wall cards (now 8: the 4 trend-level cards plus the 4
+  // Channel Surfing streams tacked on after it) scroll horizontally in one
+  // row — same scroll-row mechanics as PosterRowList's video carousels —
+  // instead of wrapping onto a second grid row.
+  const tocScrollRef = useRef<HTMLDivElement>(null)
+  const [tocCanScrollLeft, setTocCanScrollLeft] = useState(false)
+  const [tocCanScrollRight, setTocCanScrollRight] = useState(false)
+  useEffect(() => {
+    const el = tocScrollRef.current
+    if (!el) return
+    function update() {
+      setTocCanScrollLeft(el!.scrollLeft > 2)
+      setTocCanScrollRight(el!.scrollLeft < el!.scrollWidth - el!.clientWidth - 2)
+    }
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      el.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [])
+  function scrollTocBy(direction: 1 | -1) {
+    const el = tocScrollRef.current
+    if (!el) return
+    el.scrollBy({ left: direction * el.clientWidth * 0.8, behavior: 'smooth' })
+  }
   const isNordics = isLovie && slug === 'lovie-creative-hubs-nordics'
   const isSharedInfluence =
     property === 'anthem' && slug === 'shared-influence-creator-partnerships-nonprofit'
@@ -238,11 +305,11 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
       }
     : isTelly
     ? {
-        sectionBg: '#ffffff',
-        cardDefaultBg: '#f3f3f3',
-        headingIcon: '/telly/telly-logo-black.svg',
+        sectionBg: '#110E1F',
+        cardDefaultBg: 'rgba(255,255,255,0.08)',
+        headingIcon: '/telly/telly-logo-horizontal-white.png',
         headingIconRotation: '0deg',
-        subtitle: 'A look at what is shaping video and television across every screen in 2026.',
+        subtitle: 'Fresh off the presses — four trends just added to the 2026 guide. Tap in to start.',
       }
     : {
         sectionBg: '#E3DDCA',
@@ -272,6 +339,8 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
           color: defaultTextColor,
           hoverBg: f.hoverColor || fallback[i % fallback.length].hoverBg,
           anchor: f.anchor || fallback[i % fallback.length].anchor,
+          image: f.image,
+          subItems: f.subItems,
         }))
       : fallback
 
@@ -588,6 +657,167 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
     )
   }
 
+  // Telly — Table of Contents reads as a "Poster Wall": one full-bleed
+  // card per section (image if set in the CMS, otherwise a dark-to-accent
+  // gradient fallback), with the section's eyebrow/title and a numbered
+  // badge. Clicking anywhere on a card scrolls to that section, same
+  // scrollToAnchor mechanism as every other property's ToC.
+  if (isTelly) {
+    return (
+      <section
+        id="key-findings"
+        data-snap
+        className="relative overflow-hidden px-5 md:px-[60px] pt-10 md:pt-14 pb-16 md:pb-24"
+        style={{ background: theme.sectionBg }}
+      >
+        <SignalWaves opacity={0.2} />
+        <div className="relative" style={{ maxWidth: 1180, margin: '0 auto', width: '100%' }}>
+          {eyebrow && (
+            <motion.p
+              className="uppercase mb-4"
+              style={{ fontSize: 12, letterSpacing: 3, color: '#ffffff', opacity: 0.6, fontWeight: 700, fontFamily: "'Basetica', -apple-system, sans-serif" }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 0.6, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              {eyebrow}
+            </motion.p>
+          )}
+          <motion.p
+            className="text-[16px] md:text-[19px] leading-[1.6] mb-8 md:mb-10"
+            style={{ color: '#ffffff', opacity: 0.75, fontFamily: "'Basetica', -apple-system, sans-serif" }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            {subtitle || theme.subtitle}
+            {cta && cta.length > 0 && (
+              <>
+                {' '}
+                <PortableText value={cta} components={ctaComponents} />
+              </>
+            )}
+          </motion.p>
+          <motion.h2
+            className="mb-10 md:mb-14 text-[40px] md:text-[64px] leading-[1.1]"
+            style={{ fontFamily: 'var(--font-display)', color: '#ffffff', fontWeight: 700 }}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {heading || 'Just Released'}
+          </motion.h2>
+
+          <div className="relative group/toc">
+            {tocCanScrollLeft && (
+              <button
+                type="button"
+                aria-label="Scroll left"
+                onClick={() => scrollTocBy(-1)}
+                className="hidden md:flex absolute top-1/2 -translate-y-1/2 -left-4 z-10 w-9 h-9 rounded-full items-center justify-center text-white opacity-0 group-hover/toc:opacity-100 transition-opacity duration-200 cursor-pointer"
+                style={{ background: 'rgba(17,14,31,0.75)', border: '1px solid rgba(255,255,255,0.18)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+            )}
+            {tocCanScrollRight && (
+              <button
+                type="button"
+                aria-label="Scroll right"
+                onClick={() => scrollTocBy(1)}
+                className="hidden md:flex absolute top-1/2 -translate-y-1/2 -right-4 z-10 w-9 h-9 rounded-full items-center justify-center text-white opacity-0 group-hover/toc:opacity-100 transition-opacity duration-200 cursor-pointer"
+                style={{ background: 'rgba(17,14,31,0.75)', border: '1px solid rgba(255,255,255,0.18)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            )}
+            <div ref={tocScrollRef} className="flex items-stretch gap-4 overflow-x-auto overflow-y-hidden pb-2 telly-scroll">
+            {sections.map((section, i) => {
+              const badgeTextColor = iconColorFor(section.hoverBg)
+              // Every card uses its CMS image when one is set, falling back
+              // to the accent gradient otherwise. The trend-level cards
+              // (01-04) used to be forced onto the gradient because their
+              // images were flattened graphics with the old blocky title
+              // baked in as pixels; they now point at real winner
+              // thumbnails like the stream-level cards do.
+              const bgImageUrl = section.image
+                ? urlFor(section.image).width(640).height(960).fit('crop').url()
+                : null
+              return (
+                <motion.div
+                  key={section.number}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => scrollToAnchor(section.anchor)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      scrollToAnchor(section.anchor)
+                    }
+                  }}
+                  className="group relative block flex-shrink-0 cursor-pointer rounded-[10px] overflow-hidden isolate w-[220px] md:w-[260px]"
+                  style={{ aspectRatio: '2 / 3', containerType: 'inline-size' }}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.05 + i * 0.08 }}
+                >
+                  <div
+                    className="absolute inset-0 transition-transform duration-300 group-hover:scale-105"
+                    style={{
+                      backgroundImage: bgImageUrl
+                        ? `url(${bgImageUrl})`
+                        : `linear-gradient(165deg, rgba(5,4,10,0.95), ${section.hoverBg})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{ background: IMAGE_SCRIM }}
+                  />
+                  <div className="absolute left-0 right-0 bottom-0 p-4 md:p-5">
+                    <h3
+                      className="leading-[1.1]"
+                      style={{
+                        fontFamily: 'var(--font-display)',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        fontSize: 'clamp(20px, 7.5cqi, 32px)',
+                      }}
+                    >
+                      {section.title}
+                    </h3>
+                  </div>
+                  <span
+                    className="absolute flex items-center justify-center rounded-full"
+                    style={{ top: 14, right: 14, width: 36, height: 36, background: section.hoverBg }}
+                  >
+                    <PlayIcon size={13} color={badgeTextColor} />
+                  </span>
+                  <span
+                    className="absolute flex items-center justify-center rounded-full"
+                    style={{ right: 18, bottom: 18, width: 26, height: 26, background: '#ffffff', color: '#110E1F', fontFamily: "'Basetica', -apple-system, sans-serif", fontWeight: 700, fontSize: 11 }}
+                  >
+                    {section.number}
+                  </span>
+                </motion.div>
+              )
+            })}
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section
       id="key-findings"
@@ -595,41 +825,22 @@ export function KeyFindings({ findings, property, slug }: KeyFindingsProps = {})
       className="relative overflow-hidden px-5 md:px-[60px] pt-20 md:pt-28 pb-10 md:pb-14"
       style={{ background: theme.sectionBg }}
     >
-      {/* Telly — slow wavy signal lines behind the section, a quiet nod
-          to the video subject matter. Faint so the cards stay legible. */}
-      {isTelly && <SignalWaves opacity={0.2} />}
       <div className="relative" style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
-        {/* Telly — the Screens wordmark sits centered above the title
-            (in flow) rather than as the Anthem-style floating sticker,
-            whose absolute offsets are tuned to Anthem's round icon. */}
-        {isTelly && (
-          <motion.img
-            src={theme.headingIcon}
-            alt=""
-            className="block mx-auto mb-6 md:mb-8 w-[56px] md:w-[76px] h-auto"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          />
-        )}
         {/* Heading */}
         <motion.h2
           className="mb-10 md:mb-14 text-[48px] md:text-[80px] leading-[1.1] text-center relative inline-flex items-start justify-center w-full"
-          style={{ fontFamily: 'var(--font-display)', color: isTelly ? '#000000' : '#21261A', fontWeight: isTelly ? 700 : 400 }}
+          style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          {!isTelly && (
-            <img
-              src={theme.headingIcon}
-              alt=""
-              className="w-[60px] h-[60px] md:w-[100px] md:h-[100px] absolute left-[8%] md:left-[calc(50%_-_5.2em_+_10px)]"
-              style={{ transform: `rotate(${theme.headingIconRotation})`, top: '-0.15em' }}
-            />
-          )}
+          <img
+            src={theme.headingIcon}
+            alt=""
+            className="w-[60px] h-[60px] md:w-[100px] md:h-[100px] absolute left-[8%] md:left-[calc(50%_-_5.2em_+_10px)]"
+            style={{ transform: `rotate(${theme.headingIconRotation})`, top: '-0.15em' }}
+          />
           Inside The Report
         </motion.h2>
 

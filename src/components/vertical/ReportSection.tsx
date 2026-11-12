@@ -103,6 +103,13 @@ interface ReportSectionCoverProps {
    * not rendered visually. Useful for transition covers (takeaways,
    * etc.) where the number token is unwanted. */
   hideSectionNumber?: boolean
+  /** When true, collapses the title's own bottom margin and the cover's
+   * bottom padding to near nothing — for a cover with no subtitle/copy of
+   * its own, where whatever follows (e.g. Telly's TrendContent body
+   * paragraph) should sit immediately under the title, same tight spacing
+   * as a plain list heading, instead of the generous divider-style gap a
+   * standalone section cover normally wants. */
+  tightBottomSpacing?: boolean
 }
 
 export function ReportSectionCover({
@@ -120,8 +127,11 @@ export function ReportSectionCover({
   subtitleFontFamily = 'var(--font-display)',
   subtitleItalic = false,
   hideSectionNumber = false,
+  tightBottomSpacing = false,
 }: ReportSectionCoverProps) {
   const isLovie = property === 'lovie'
+  const isTelly = property === 'telly'
+  const coverTextColor = isTelly ? '#ffffff' : '#21261A'
   const hasExplicitMinHeight = typeof minHeightPx === 'number'
   // Skip the explicit min-height on mobile — it forces a large gap
   // between the cover and the first content block when the cover's
@@ -145,17 +155,21 @@ export function ReportSectionCover({
             : 'md:min-h-screen md:flex md:flex-col md:items-center md:justify-center'
       }`}
       style={{
-        background: isLovie ? '#f2eeed' : '#E3DDCA',
+        background: isLovie ? '#f2eeed' : isTelly ? '#110E1F' : '#E3DDCA',
         paddingTop: compact ? (isMobile ? 56 : 80) : 50,
-        paddingBottom: compact ? (isMobile ? 24 : 60) : 50,
+        paddingBottom: tightBottomSpacing ? 0 : compact ? (isMobile ? 24 : 60) : 50,
         ...(hasExplicitMinHeight && !isMobile ? { minHeight: minHeightPx } : {}),
       }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
-        {/* Center-aligned: number, title, rule, subtitle */}
-        <div className="text-center">
-          {/* Section number (or SVG token for Lovie) */}
-          {hideSectionNumber ? null : sectionNumberSvg ? (
+        {/* Center-aligned: number, title, rule, subtitle — Telly reads
+            left-aligned instead, flush with the trend body copy and the
+            winner lists below it rather than centered independently. */}
+        <div className={isTelly ? 'text-left' : 'text-center'}>
+          {/* Section number (or SVG token for Lovie). Telly reads the
+              number as a small raised mark inline with the title
+              instead — rendered below, inside the heading. */}
+          {hideSectionNumber || isTelly ? null : sectionNumberSvg ? (
             <motion.img
               src={sectionNumberSvg}
               alt={`Section ${sectionNumber}`}
@@ -190,55 +204,84 @@ export function ReportSectionCover({
 
           {/* Title */}
           <motion.h2
-            className="text-[32px] md:text-[56px] lg:text-[64px] leading-[1.05] mb-6"
-            style={{ fontFamily: titleFontFamily, color: '#21261A', fontWeight: titleFontWeight }}
+            // Telly's section titles read in all caps per the production
+            // creative spec; every other property keeps its CMS casing.
+            className={`text-[32px] md:text-[56px] lg:text-[64px] leading-[1.05] ${isTelly ? 'uppercase' : ''} ${tightBottomSpacing ? 'mb-0' : 'mb-6'}`}
+            style={{ fontFamily: titleFontFamily, color: coverTextColor, fontWeight: titleFontWeight }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
+            {isTelly && !hideSectionNumber && (
+              <span
+                style={{
+                  fontSize: '0.3em',
+                  fontWeight: 700,
+                  color: accentColor,
+                  position: 'relative',
+                  top: '-0.5em',
+                  marginRight: '0.12em',
+                }}
+              >
+                {sectionNumber}
+              </span>
+            )}
             {title}
           </motion.h2>
 
-          {/* Divider — centered */}
-          <motion.div
-            style={{ width: 48, height: 2, background: accentColor, marginBottom: 28, marginLeft: 'auto', marginRight: 'auto' }}
-            initial={{ opacity: 0, scaleX: 0 }}
-            whileInView={{ opacity: 1, scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          />
+          {/* Divider — centered. Telly drops it: with the heading now
+              left-aligned flush to the body copy and winner lists below,
+              the short accent line read as a stray mark rather than a
+              deliberate rule. */}
+          {!isTelly && (
+            <motion.div
+              style={{ width: 48, height: 2, background: accentColor, marginBottom: 28, marginLeft: 'auto', marginRight: 'auto' }}
+              initial={{ opacity: 0, scaleX: 0 }}
+              whileInView={{ opacity: 1, scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            />
+          )}
 
-          {/* Subtitle */}
-          <motion.p
-            className="text-[18px] md:text-[22px] leading-[1.4] mb-8 max-w-[800px] mx-auto"
-            style={{
-              fontFamily: subtitleFontFamily,
-              color: '#21261A',
-              fontStyle: subtitleItalic ? 'italic' : 'normal',
-              fontWeight: 400,
-            }}
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-          >
-            {subtitle}
-          </motion.p>
+          {/* Subtitle — Telly folds this straight into the body copy
+              paragraph below (same small size, no gap) instead of
+              rendering it as its own larger headline line. */}
+          {!isTelly && (
+            <motion.p
+              className="text-[18px] md:text-[22px] leading-[1.4] mb-8 max-w-[800px] mx-auto"
+              style={{
+                fontFamily: subtitleFontFamily,
+                color: coverTextColor,
+                fontStyle: subtitleItalic ? 'italic' : 'normal',
+                fontWeight: 400,
+              }}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+            >
+              {subtitle}
+            </motion.p>
+          )}
         </div>
 
-        {/* Left-aligned: body copy, centered on page axis. Skipped when
-            the cover doesn't ship a paragraph (e.g. Nordics Ones to
-            Watch, where the subtitle alone tells the whole story). */}
-        {copy && (
+        {/* Left-aligned: body copy, centered on page axis. Telly merges
+            the subtitle sentence in here too so the whole description
+            reads as one continuous paragraph at a single size. Skipped
+            when the cover doesn't ship a paragraph (e.g. Nordics Ones
+            to Watch, where the subtitle alone tells the whole story). */}
+        {(isTelly ? subtitle || copy : copy) && (
           <div className="max-w-[588px] mx-auto">
             <motion.p
               className="text-[16px] md:text-[18px] leading-[30px] text-center"
               style={{
                 fontFamily: isLovie
                   ? "'Scto Grotesk A', -apple-system, sans-serif"
-                  : "'roc-grotesk-variable', -apple-system, sans-serif",
-                color: '#21261A',
+                  : isTelly
+                    ? "'Basetica', -apple-system, sans-serif"
+                    : "'roc-grotesk-variable', -apple-system, sans-serif",
+                color: coverTextColor,
                 opacity: 0.65,
               }}
               initial={{ opacity: 0, y: 10 }}
@@ -246,7 +289,7 @@ export function ReportSectionCover({
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.35 }}
             >
-              {copy}
+              {isTelly ? [subtitle, copy].filter(Boolean).join(' ') : copy}
             </motion.p>
           </div>
         )}
@@ -293,7 +336,9 @@ interface SentimentGauge {
 
 interface TrendContentProps {
   trendNumber: string
-  title: string
+  /** Omit when a section cover right above already shows this title —
+   * avoids repeating the same heading twice in a row. */
+  title?: string
   body: React.ReactNode[]
   accentColor?: string
   stats?: { label: string; value: string; change?: string }[]
@@ -304,6 +349,9 @@ interface TrendContentProps {
   quotesEyebrow?: string
   video?: TrendVideo
   background?: string
+  /** Drives text-color theming (Telly reads white instead of the
+   * default Anthem near-black). Other properties are unaffected. */
+  property?: 'webby' | 'anthem' | 'telly' | 'lovie'
 }
 
 export function TrendContent({
@@ -319,43 +367,69 @@ export function TrendContent({
   quotesEyebrow = 'What Our Community Is Saying',
   video,
   background = '#E3DDCA',
+  property,
 }: TrendContentProps) {
   const defaultBorderColors = ['#8C001C', '#D17DD0', '#066DBA', '#00B469']
+  const isTelly = property === 'telly'
+  const textColor = isTelly ? '#ffffff' : '#21261A'
+  const dividerColor = isTelly ? 'rgba(255,255,255,0.15)' : 'rgba(33,38,26,0.15)'
+  const trackColor = isTelly ? 'rgba(255,255,255,0.1)' : 'rgba(33,38,26,0.1)'
+  // With no right column (a Telly trend whose stat is placed inline
+  // elsewhere, or has none at all), the copy stack used to stay pinned to
+  // a 50%-wide column anyway, wrapping onto far more lines than it needed
+  // to and leaving the whole right half of the section empty — the gap
+  // that pushed the first winner list well below the fold. Telly-only:
+  // let the copy run the full container width instead (capped for
+  // readability), closing that gap. Every other property keeps the
+  // original 50/50 split regardless of whether a right column renders.
+  const hasRightColumn = !!(dataModule || sentimentGauge || customRightColumn)
+  const widenCopy = isTelly && !hasRightColumn
   return (
     <section
-      className="relative px-5 md:px-[60px] py-20 md:py-28"
+      className={`relative px-5 md:px-[60px] ${
+        title ? 'py-20 md:py-28' : widenCopy ? 'pt-0 pb-0' : 'pt-0 pb-20 md:pb-28'
+      }`}
       style={{ background }}
     >
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         <div className="flex flex-col md:flex-row gap-12 md:gap-16">
-          {/* Left column: copy stack */}
-          <div className="md:w-[50%]">
-            {/* Trend eyebrow */}
-            <motion.p
-              className="uppercase font-medium mb-6"
-              style={{ fontSize: 14, letterSpacing: 4, color: accentColor }}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              Trend {trendNumber}
-            </motion.p>
+          {/* Left column: copy stack — widenCopy runs the full 1280
+              container width (no readability cap) so the paragraph lines
+              up flush with the cover heading above and the winner lists'
+              own full-width rows below, per Ann's alignment note. */}
+          <div className={widenCopy ? 'md:w-full' : 'md:w-[50%]'}>
+            {/* Trend eyebrow — skipped along with the title when a cover
+                right above already shows the section number/name */}
+            {title && (
+              <motion.p
+                className="uppercase font-medium mb-6"
+                style={{ fontSize: 14, letterSpacing: 4, color: accentColor }}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                Trend {trendNumber}
+              </motion.p>
+            )}
 
-            {/* Trend title */}
-            <motion.h3
-              className="text-[24px] md:text-[36px] leading-[1.15] mb-6"
-              style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              {title}
-            </motion.h3>
+            {/* Trend title — skipped when a cover right above already shows it */}
+            {title && (
+              <motion.h3
+                className="text-[24px] md:text-[36px] leading-[1.15] mb-6"
+                style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 400 }}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+              >
+                {title}
+              </motion.h3>
+            )}
 
-            {/* Accent divider */}
-            <div style={{ width: 36, height: 2, background: accentColor, marginBottom: 24 }} />
+            {/* Accent divider — Telly drops it (see the matching note on
+                ReportSectionCover's own divider above). */}
+            {!isTelly && <div style={{ width: 36, height: 2, background: accentColor, marginBottom: 24 }} />}
 
             {/* Body paragraphs */}
             {body.map((paragraph, i) => (
@@ -363,8 +437,8 @@ export function TrendContent({
                 key={i}
                 className="text-[15px] md:text-[18px] leading-[1.6] md:leading-[30px] mb-6"
                 style={{
-                  fontFamily: "'roc-grotesk-variable', -apple-system, sans-serif",
-                  color: '#21261A',
+                  fontFamily: isTelly ? "'Basetica', -apple-system, sans-serif" : "'roc-grotesk-variable', -apple-system, sans-serif",
+                  color: textColor,
                 }}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -382,7 +456,7 @@ export function TrendContent({
                   <motion.div
                     key={i}
                     className="py-5 border-t"
-                    style={{ borderColor: 'rgba(33,38,26,0.15)' }}
+                    style={{ borderColor: dividerColor }}
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -396,7 +470,7 @@ export function TrendContent({
                     </div>
                     <div
                       className="text-[12px] md:text-[13px] leading-[1.4]"
-                      style={{ color: '#21261A', opacity: 0.6 }}
+                      style={{ color: textColor, opacity: 0.6 }}
                     >
                       {stat.label}
                     </div>
@@ -440,42 +514,113 @@ export function TrendContent({
                 )}
                 <h4
                   className="leading-[1.4] mb-8 w-full"
-                  style={{ fontSize: 16, fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 400 }}
+                  style={{ fontSize: 16, fontFamily: 'var(--font-display)', color: textColor, fontWeight: 400 }}
                 >
                   {dataModule.question}
                 </h4>
 
-                <div className="flex flex-col gap-6 w-full">
-                  {dataModule.bars.map((bar, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
-                    >
-                      <div className="flex justify-between items-baseline mb-2">
-                        <span className="text-[13px] md:text-[14px]" style={{ color: '#21261A' }}>{bar.label}</span>
-                        <span className="text-[18px] md:text-[22px]" style={{ fontFamily: 'var(--font-display)', color: '#21261A', fontWeight: 700 }}>{bar.displayValue}</span>
-                      </div>
-                      <div className="h-[8px] rounded-full" style={{ background: 'rgba(33,38,26,0.1)' }}>
+                {/* Telly reads each stat as a donut ring with the
+                    percentage front and center, since leading with a
+                    label ("agree that...") before the number it refers
+                    to reads backwards. Other properties keep the
+                    horizontal fill bar below. */}
+                {isTelly ? (
+                  <div className="flex flex-col gap-8 w-full">
+                    {dataModule.bars.map((bar, i) => {
+                      const size = 112
+                      const strokeWidth = 10
+                      const radius = (size - strokeWidth) / 2
+                      const circumference = 2 * Math.PI * radius
+                      return (
                         <motion.div
-                          className="h-full rounded-full"
-                          style={{ background: bar.color }}
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${bar.value}%` }}
+                          key={i}
+                          className="flex items-center gap-6"
+                          initial={{ opacity: 0, x: -10 }}
+                          whileInView={{ opacity: 1, x: 0 }}
                           viewport={{ once: true }}
-                          transition={{ duration: 0.8, delay: 0.2 + i * 0.1, ease: 'easeOut' }}
-                        />
-                      </div>
-                      {bar.change && (
-                        <p className="text-[11px] mt-1.5 font-medium" style={{ color: bar.color }}>
-                          {bar.change}
-                        </p>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
+                          transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
+                        >
+                          <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+                            <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+                              <circle
+                                cx={size / 2}
+                                cy={size / 2}
+                                r={radius}
+                                fill="none"
+                                stroke={trackColor}
+                                strokeWidth={strokeWidth}
+                              />
+                              <motion.circle
+                                cx={size / 2}
+                                cy={size / 2}
+                                r={radius}
+                                fill="none"
+                                stroke={bar.color}
+                                strokeWidth={strokeWidth}
+                                strokeLinecap="round"
+                                strokeDasharray={circumference}
+                                initial={{ strokeDashoffset: circumference }}
+                                whileInView={{ strokeDashoffset: circumference * (1 - bar.value / 100) }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 1, delay: 0.2 + i * 0.1, ease: 'easeOut' }}
+                              />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span
+                                className="text-[20px] md:text-[22px]"
+                                style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 700 }}
+                              >
+                                {bar.displayValue}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] md:text-[14px] leading-[1.5]" style={{ color: textColor }}>
+                              {bar.label}
+                            </p>
+                            {bar.change && (
+                              <p className="text-[11px] mt-1.5 font-medium" style={{ color: bar.color }}>
+                                {bar.change}
+                              </p>
+                            )}
+                          </div>
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-6 w-full">
+                    {dataModule.bars.map((bar, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
+                      >
+                        <div className="flex justify-between items-baseline mb-2">
+                          <span className="text-[13px] md:text-[14px]" style={{ color: textColor }}>{bar.label}</span>
+                          <span className="text-[18px] md:text-[22px]" style={{ fontFamily: 'var(--font-display)', color: textColor, fontWeight: 700 }}>{bar.displayValue}</span>
+                        </div>
+                        <div className="h-[8px] rounded-full" style={{ background: trackColor }}>
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{ background: bar.color }}
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${bar.value}%` }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: 0.2 + i * 0.1, ease: 'easeOut' }}
+                          />
+                        </div>
+                        {bar.change && (
+                          <p className="text-[11px] mt-1.5 font-medium" style={{ color: bar.color }}>
+                            {bar.change}
+                          </p>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
               )}
 

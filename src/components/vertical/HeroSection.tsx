@@ -8,6 +8,8 @@ import { ImageCarousel } from '../ImageCarousel'
 import { urlFor } from '@/sanity/image'
 import { useImageBrightness, type Tone } from '@/lib/useImageBrightness'
 import { trackCtaClick } from '@/lib/analytics'
+import { TellyHeroArticle } from './TellyHeroArticle'
+import { assetPath } from '@/lib/assetPath'
 
 const LOCAL_HERO_IMAGES = [
   '/anthem/hero-1.jpg',
@@ -100,14 +102,13 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
     report.property === 'anthem' &&
     report.slug?.current === 'shared-influence-creator-partnerships-nonprofit'
   const isTelly = report.property === 'telly'
-  // Telly nav is built from the CMS trend list (ids match the trend-NN
-  // wrappers the Telly ReportView branch renders) plus the About footer.
-  const tellyNavSections = [
-    ...(report.trendSections ?? [])
-      .filter((t) => t.enabled !== false)
-      .map((t, i) => ({ id: `trend-${String(i + 1).padStart(2, '0')}`, label: t.trendTitle })),
-    { id: 'about-telly', label: 'About The Telly Awards' },
-  ]
+  // Telly nav mirrors the Table of Contents (CMS keyFindings) exactly,
+  // same order, same labels and anchors — so the hamburger menu never
+  // drifts out of sync with what the ToC itself lists.
+  const tellyNavSections = (report.keyFindings ?? []).map((f) => ({
+    id: f.anchor || '',
+    label: f.title,
+  }))
   // Hover state for the Shared Influence pills. We track this in React
   // and apply the base + hover colours via inline style so nothing in
   // the Tailwind cascade can override it (CSS-only approach lost the
@@ -303,18 +304,21 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         // Telly — brand gradient ground (purple → red), white Screens
         // lockup, red CTA pill, Basetica bold title. Headline/subtitle
         // come from the CMS hero fields with generic fallbacks.
-        logoSrc: '/telly/telly-logo-white.svg',
+        logoSrc: assetPath('/telly/judges/telly-logo-horizontal-white-cropped.png'),
         logoAlt: 'The Telly Awards',
-        logoClassName: 'w-[64px] h-auto md:w-[84px] lg:w-[96px]',
+        logoClassName: 'h-10 md:h-14 lg:h-16 w-auto',
         ctaUrl: 'https://www.tellyawards.com/',
         ctaBgClass: 'bg-[#ef1e40] hover:bg-[#c8152f]',
         ctaTextColorClass: 'text-white',
-        brandLabel: 'By The Telly Awards',
+        brandLabel: '',
         brandLabelColor: '#ffffff',
         heroImages: ['/telly/hero-gradient.svg'],
         heroImagesMobile: undefined as string[] | undefined,
         heroCaptions: [] as string[],
-        heroBgColor: '#000000',
+        // "Warm Marquee" — lifts the hero/homepage carousel off the rest
+        // of the report (which stays #110E1F everywhere else) with a
+        // plum-to-near-black gradient, picking up the red CTA/on-air dot.
+        heroBgColor: 'linear-gradient(160deg, #2B1220 0%, #190D1B 60%, #120A17 100%)',
         gradientOverlay: 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.55) 100%)',
         titleColor: '#ffffff',
         subtitleColor: '#ffffff',
@@ -366,10 +370,19 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
   return (
     <section
       id="hero"
-      className={`relative w-full h-screen overflow-hidden ${textTone === 'light' ? 'text-light' : 'text-dark'}`}
+      // Telly's hero no longer carousels (its former second slide was
+      // removed — see TellyHeroArticle.tsx), but still uses min-h-screen
+      // rather than the fixed h-screen + overflow-hidden every other
+      // property keeps, so the section grows to fit rather than clipping
+      // if its content ever runs taller than the viewport at some
+      // breakpoint.
+      className={`relative w-full ${isTelly ? 'min-h-screen' : 'h-screen overflow-hidden'} ${textTone === 'light' ? 'text-light' : 'text-dark'}`}
       style={{ background: theme.heroBgColor }}
     >
-      {/* Full-bleed background carousel */}
+      {/* Full-bleed background carousel — Telly's "Spliced Trophy" hero
+          (Figma 48th Annual Telly Awards, node 2059:13037) sits on a flat
+          dark ground instead, so it skips this entirely. */}
+      {!isTelly && (
       <div className="absolute inset-0">
         {/* CMS carousel images override the local fallback */}
         <LocalHeroCarousel
@@ -408,6 +421,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           />
         )}
       </div>
+      )}
 
       {/* Minimal top bar. Hidden for Shared Influence and Nordics —
           both use dedicated sticky top nav components mounted in
@@ -425,7 +439,13 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           transition={{ duration: 0.8, delay: 0.1 }}
         />
 
-        {/* Menu cluster — absolute on mobile so the logo stays centered. */}
+        {/* Menu cluster — absolute on mobile so the logo stays centered.
+            Telly drops this entirely: the "Explore The Report" pill and
+            hamburger (Table of Contents) dropdown were redundant with the
+            left-hand StreamProgressRail, which covers the same jump-to-
+            section navigation once scrolled into the report, plus the
+            "Surf the Channels" button already in the hero body. */}
+        {!isTelly && (
         <motion.div
           className="absolute right-5 top-1/2 -translate-y-1/2 md:static md:translate-y-0 flex items-center gap-4"
           initial={{ opacity: 0 }}
@@ -444,7 +464,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             className={`hidden md:block text-[10px] tracking-[2px] uppercase rounded-full py-2.5 px-6 ${isSharedInfluence ? '' : 'transition-colors ' + theme.ctaBgClass + ' ' + theme.ctaTextColorClass}`}
             style={isSharedInfluence ? siCtaStyle(hoverEnter) : undefined}
           >
-            Enter Now
+            {isTelly ? 'Explore The Report' : 'Enter Now'}
           </a>
           <div className="relative">
             <button
@@ -517,7 +537,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
                     className={`md:hidden w-full text-left px-5 py-4 flex items-center justify-between gap-3 transition-colors hover:brightness-110 ${theme.ctaBgClass}`}
                   >
                     <span className={`text-[13px] tracking-[1px] uppercase font-medium ${theme.ctaTextColorClass}`}>
-                      Enter Now
+                      {isTelly ? 'Explore The Report' : 'Enter Now'}
                     </span>
                     <span className={`text-base ${theme.ctaTextColorClass}`}>→</span>
                   </a>
@@ -526,6 +546,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
             </AnimatePresence>
           </div>
         </motion.div>
+        )}
       </div>
       )}
 
@@ -538,10 +559,38 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
         <DraggableIcon key={i} icon={icon} index={i} />
       ))}
 
+      {/* Telly — "Spliced Trophy w/ Icons" two-column article layout
+          (Figma 48th Annual Telly Awards, node 2059:13037), vertically
+          centered instead of bottom-anchored since it's a card-shaped
+          composition rather than text over a full-bleed photo. */}
+      {/* pt-[140px] used to drop to 0 on desktop (md:), relying on flex
+          centering alone to clear the absolutely-positioned logo bar
+          above. That only works while the viewport is tall enough
+          relative to the hero content — browser zoom shrinks the
+          effective viewport height without changing its width, so at
+          in-between zoom levels the centered content could ride up into
+          the fixed logo bar. Keeping a constant top clearance regardless
+          of breakpoint fixes that at every zoom level. */}
+      {isTelly && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none pt-[140px]">
+          <TellyHeroArticle
+            report={report}
+            titleLine1={report.heroHeadline?.split('\\n')[0] || 'The Telly Awards'}
+            // Only the CMS decides whether there's a second line — a
+            // single-line heroHeadline must stay single-line rather than
+            // falling back to the old hardcoded second line underneath it.
+            titleLine2={report.heroHeadline ? report.heroHeadline.split('\\n')[1] : "What's On Demand"}
+            subtitle={report.heroSubtitle || 'A curation of the winning companies and shows worth your scroll.'}
+            onEnter={onSeeReport}
+          />
+        </div>
+      )}
+
       {/* Center-aligned content — shifted down 40%.
           pointer-events-none on the wrapper so the empty space lets click+drag
           pass through to the cause icons underneath; the button below opts
           back in via pointer-events-auto. */}
+      {!isTelly && (
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-end text-center px-6 md:px-10 pointer-events-none pb-[23vh] md:pb-[10vh]">
         <motion.h1
           className={theme.titleClassName}
@@ -608,6 +657,7 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           <span>↓</span>
         </motion.button>
       </div>
+      )}
 
     </section>
   )

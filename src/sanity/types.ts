@@ -38,6 +38,35 @@ export interface FeaturedProject {
   image?: SanityImage
 }
 
+export interface WinEntry {
+  name: string
+  workTitle?: string
+  workUrl?: string
+  highlight?: boolean
+  videoUrl?: string
+  videoThumbnail?: SanityImage
+  videoDescription?: string
+  orgDescription?: string
+  orgLinkText?: string
+  logo?: SanityImage
+}
+
+export interface WinnerList {
+  _key?: string
+  heading: string
+  railLabel?: string
+  intro?: string
+  infoTooltip?: string
+  posterRow?: boolean
+  rankedRow?: boolean
+  hideRankNumbers?: boolean
+  directoryRow?: boolean
+  verticalVideo?: boolean
+  statValue?: string
+  statCaption?: string
+  entries: WinEntry[]
+}
+
 export interface ExpertQuote {
   name: string
   title?: string
@@ -81,6 +110,7 @@ export interface InsideTheHubs {
 export interface TrendSection {
   enabled?: boolean
   trendTitle: string
+  railLabel?: string
   accentColor?: string
   moduleOrder?: { module: string }[]
   trendBody?: PortableTextBlock[]
@@ -107,6 +137,19 @@ export interface TrendSection {
   videoUrl?: string
   sectionImages?: (SanityImage & { alt?: string })[]
   contentSlabs?: SIContentSlab[]
+  showWinnerLists?: boolean
+  winnerLists?: WinnerList[]
+  quoteInsertAfterListIndex?: number
+  showSharedVideoGuide?: boolean
+  statDisplay?: 'donut' | 'highlights'
+  statPersistOnceShown?: boolean
+  statPlacement?: 'sidebar' | 'inline'
+  statInsertAfterListIndex?: number
+  sectionStatHeading?: string
+  sectionStatValue?: number
+  sectionStatCaption?: string
+  showJudgePopup?: boolean
+  judgePopupQuotes?: ExpertQuote[]
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -226,12 +269,19 @@ export interface FooterLink {
   url: string
 }
 
+export interface KeyFindingSubItem {
+  title: string
+  anchor?: string
+}
+
 export interface KeyFinding {
   number: string
   title: string
   description?: string
   hoverColor?: string
   anchor?: string
+  image?: SanityImage
+  subItems?: KeyFindingSubItem[]
 }
 
 export interface LovieTakeaway {
@@ -295,6 +345,10 @@ export interface Report {
   trendIntroBody?: PortableTextBlock[]
   trendIntroStats?: DataStat[]
   trendIntroCta?: string
+  keyFindingsEyebrow?: string
+  keyFindingsHeading?: string
+  keyFindingsSubtitle?: string
+  keyFindingsCta?: PortableTextBlock[]
   keyFindings?: KeyFinding[]
   /**
    * Newer reports use `sectionCovers` (unlimited-length array). Legacy
@@ -338,4 +392,21 @@ export interface Report {
   footerBody?: PortableTextBlock[]
   creditsCreatedBy?: CreditPerson[]
   creditsContributors?: CreditPerson[]
+  aboutEyebrow?: string
+  aboutHeading?: string
+  aboutBody?: PortableTextBlock[]
+  aboutLogo?: SanityImage
+  factsEntryCount?: string
+  factsEntryLabel?: string
+  factsJudgeCount?: string
+  factsJudgeLabel?: string
+  factsTopTitlesHeading?: string
+  factsTopTitles?: string[]
+  factsTopCitiesNationalHeading?: string
+  factsTopCitiesNational?: string[]
+  factsTopCitiesInternationalHeading?: string
+  factsTopCitiesInternational?: string[]
+  judgeInsightsEyebrow?: string
+  judgeInsightsHeading?: string
+  judgeQuotes?: ExpertQuote[]
 }

@@ -27,6 +27,20 @@ export default defineType({
       },
     },
     { name: 'anchor', title: 'Anchor (DOM id of target section)', type: 'string', description: 'e.g. "section-01" or "thank-you"' },
+    {
+      name: 'image',
+      title: 'Background Image',
+      type: 'image',
+      options: { hotspot: true },
+      description: 'Telly only — full-bleed background photo for this entry\'s Table of Contents poster card (e.g. a still from one of the section\'s winning pieces). Falls back to a color gradient when left empty.',
+    },
+    {
+      name: 'subItems',
+      title: 'Sub-Pages',
+      type: 'array',
+      of: [{ type: 'keyFindingSubItem' }],
+      description: 'Telly only — lettered sub-pages shown nested under this entry (e.g. the winner lists inside a section).',
+    },
   ],
   preview: {
     select: { number: 'number', title: 'title' },

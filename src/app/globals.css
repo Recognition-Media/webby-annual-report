@@ -187,6 +187,27 @@ body {
   to { transform: rotate(90deg); }
 }
 
+/* Telly-only — scrolling titles ticker (TellyTitlesTicker.tsx). Scoped by
+   the telly- prefix so no other property is affected. */
+@keyframes tellyTickerScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.telly-ticker-track {
+  animation: tellyTickerScroll 28s linear infinite;
+}
+
+.telly-ticker:hover .telly-ticker-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .telly-ticker-track {
+    animation: none;
+  }
+}
+
 /* Scroll snap for report sections */
 html.snap-active {
   scroll-snap-type: y mandatory;
@@ -412,4 +433,29 @@ body.telly-template {
    negative space between them. */
 body.report-shared-influence-creator-partnerships-nonprofit {
   background: #E3DDCA;
+}
+
+/* Telly — horizontal carousel scrollbars, per the production creative
+   spec: track #D8F5FF at 20% opacity, thumb solid white. Lives here
+   rather than inline because ::-webkit-scrollbar is a pseudo-element.
+
+   Deliberately NOT setting `scrollbar-width`/`scrollbar-color`: when
+   those standard properties are present, Chrome honours them and
+   ignores ::-webkit-scrollbar entirely, which on macOS yields an
+   overlay scrollbar that fades out when you stop scrolling — so the
+   specified track colour would almost never actually be on screen.
+   The webkit pseudo-elements give a persistent, always-visible bar,
+   which is what specifying a track colour implies. Firefox falls back
+   to its own default scrollbar. */
+.telly-scroll::-webkit-scrollbar {
+  height: 8px;
+  -webkit-appearance: none;
+}
+.telly-scroll::-webkit-scrollbar-track {
+  background: rgba(216, 245, 255, 0.2);
+  border-radius: 4px;
+}
+.telly-scroll::-webkit-scrollbar-thumb {
+  background: #ffffff;
+  border-radius: 4px;
 }
