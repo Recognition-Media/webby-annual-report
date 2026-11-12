@@ -1020,6 +1020,7 @@ export function ReportView({ report }: { report: Report }) {
                                       : undefined
                                   }
                                   accentColor={accent}
+                                  hideRankNumbers={list.hideRankNumbers}
                                 />
                               ) : list.directoryRow ? (
                                 <PartnerDirectoryList

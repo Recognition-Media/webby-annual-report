@@ -120,6 +120,7 @@ export const reportBySlugQuery = groq`
         infoTooltip,
         posterRow,
         rankedRow,
+        hideRankNumbers,
         directoryRow,
         verticalVideo,
         statValue,

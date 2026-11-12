@@ -26,6 +26,9 @@ interface RankedThumbnailRowProps {
    * still read as colour-grouped now that every card image shares one
    * neutral scrim instead of a per-card tinted one. */
   accentColor?: string
+  /** Keeps this layout but drops the numbered tiles — for a list that
+   * reads as a curated set rather than a ranking. */
+  hideRankNumbers?: boolean
 }
 
 // Same red/blue/pink/green rotation used elsewhere in the Telly report.
@@ -40,7 +43,7 @@ const RANK_TILE_COUNT = 7
 // `videoUrl` play right in the report via the same pop-out player used
 // elsewhere; entries with only a `workUrl` (no embeddable video) fall back
 // to linking out to that page.
-export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides, infoTooltip, accentColor = '#ffffff' }: RankedThumbnailRowProps) {
+export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides, infoTooltip, accentColor = '#ffffff', hideRankNumbers = false }: RankedThumbnailRowProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -187,7 +190,7 @@ export function RankedThumbnailRow({ id, heading, intro, entries, colorOverrides
                   {/* Rank tile, tucked into the card's top-left corner —
                       replaces the giant outline numeral that used to sit
                       in its own slot beside the poster. */}
-                  {i < RANK_TILE_COUNT && (
+                  {!hideRankNumbers && i < RANK_TILE_COUNT && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={assetPath(`/telly/creative/numerals/${i + 1}.png`)}

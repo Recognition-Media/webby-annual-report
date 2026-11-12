@@ -59,6 +59,7 @@ export interface WinnerList {
   infoTooltip?: string
   posterRow?: boolean
   rankedRow?: boolean
+  hideRankNumbers?: boolean
   directoryRow?: boolean
   verticalVideo?: boolean
   statValue?: string

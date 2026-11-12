@@ -44,7 +44,15 @@ export default defineType({
       title: 'Ranked Thumbnail Row Layout (experimental)',
       type: 'boolean',
       initialValue: false,
-      description: 'Telly only — renders this list Netflix "Top 10"-style: a horizontal row of posters, each with a giant outline rank number tucked behind it. No video player (one work per entry) — a card just links out to its Work URL. Easy to toggle off to revert to the table.',
+      description: 'Telly only — renders this list Netflix "Top 10"-style: a horizontal row of posters, each with a numbered rank tile in its top-left corner. No video player (one work per entry) — a card just links out to its Work URL. Easy to toggle off to revert to the table.',
+    },
+    {
+      name: 'hideRankNumbers',
+      title: 'Hide Rank Numbers',
+      type: 'boolean',
+      initialValue: false,
+      hidden: ({ parent }) => !parent?.rankedRow,
+      description: 'Keeps the ranked-row layout but drops the numbered tiles — for a list that is a curated set rather than a ranking. Toggle back off to bring the numbers back.',
     },
     {
       name: 'directoryRow',
