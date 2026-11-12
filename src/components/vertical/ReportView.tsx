@@ -542,6 +542,12 @@ export function ReportView({ report }: { report: Report }) {
   // instead of the report top.
   const [scrollTarget, setScrollTarget] = useState<string | null>(null)
 
+  // True once the signup form has been completed in this session. The
+  // hasAccess effect above exists for *returning* visitors who arrive with
+  // the cookie already set; after a fresh signup we drive entry ourselves so
+  // the hero-then-scroll ordering matches an "Explore" click.
+  const enteredViaSignupRef = useRef(false)
+
   function scrollToTargetOrReport() {
     if (scrollTarget) {
       const el = document.getElementById(scrollTarget)
@@ -567,6 +573,10 @@ export function ReportView({ report }: { report: Report }) {
     // visitor and let them click through themselves — don't auto-scroll past
     // the cover the way a returning (cookie-present) visitor does.
     if (new URLSearchParams(window.location.search).get('access') === 'direct') return
+    // A visitor who just completed the signup form is taken into the report
+    // by handleSignupComplete, which uses the same ordering as an "Explore"
+    // click. Bail out here so this effect doesn't also fire and fight it.
+    if (enteredViaSignupRef.current) return
     // Small delay to let report content render
     setTimeout(() => {
       scrollToTargetOrReport()
@@ -589,11 +599,17 @@ export function ReportView({ report }: { report: Report }) {
       return
     }
 
-    // Hide the hero FIRST so ReportScroll's "active" effect can fire
-    // its window.scrollTo(0, 0) before any smooth scroll begins. If
-    // we scrolled first, that scrollTo would stomp the page back to
-    // the top of the report ~800ms later — the bug we hit for trend-*
-    // anchors before.
+    enterAndScroll(effectiveAnchor)
+  }
+
+  // Take the visitor into the report and land them on `anchor`.
+  //
+  // Order matters: hide the hero FIRST so ReportScroll's "active" effect can
+  // fire its window.scrollTo(0, 0) before any smooth scroll begins. If we
+  // scrolled first, that scrollTo would stomp the page back to the top ~800ms
+  // later — on Telly, whose hero stays mounted, that reads as the page
+  // flipping back up to the hero right after it scrolled down.
+  function enterAndScroll(effectiveAnchor?: string) {
     setEntered(true)
 
     // No anchor → user just clicked "Explore the Report". ReportScroll's
@@ -628,8 +644,15 @@ export function ReportView({ report }: { report: Report }) {
 
   function handleSignupComplete() {
     setCookie(cookieKey, 'true', 365)
+    // Set synchronously, before setHasAccess, so the hasAccess effect sees it
+    // on the very render it would otherwise fire on.
+    enteredViaSignupRef.current = true
     setShowGate(false)
     setHasAccess(true)
+    // Land them where they were headed when they hit the gate — for the main
+    // Telly CTA that's the Table of Contents ("Recommended For You"), which is
+    // where a new reader should start.
+    enterAndScroll(scrollTarget || (isTelly ? 'key-findings' : undefined))
   }
 
   return (
