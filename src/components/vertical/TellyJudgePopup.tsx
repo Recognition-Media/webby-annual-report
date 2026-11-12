@@ -8,10 +8,35 @@ import type { ExpertQuote } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
 import { onSectionJump } from '@/lib/sectionJump'
 
-const QUOTE_DISPLAY_MS = 10000
-// Longer than the quote's: the chooser has to be noticed before it can be
-// acted on, while the quote is already being read when its timer starts.
+// The chooser's window is fixed — it only has to be noticed and acted on,
+// and that takes the same beat whoever the three judges are.
 const CHOOSER_DISPLAY_MS = 14000
+
+// The quote's window scales with the quote itself. These run from about 18
+// to 60 words, so any single duration either rushes the long ones or leaves
+// the short ones parked on screen long after they've been read. 140wpm is
+// deliberately unhurried: this is a pull-quote in a corner card, read by
+// someone who may also still be scrolling, not prose they've sat down with.
+const QUOTE_READ_WPM = 140
+// Added on top of the reading time: the reader has to look over at the card
+// and find the start of the quote before any of it is actually being read.
+const QUOTE_SETTLE_MS = 4000
+const QUOTE_MIN_MS = 15000
+const QUOTE_MAX_MS = 32000
+
+function wordCount(blocks?: ExpertQuote['quoteText']): number {
+  if (!Array.isArray(blocks)) return 0
+  const text = blocks
+    .map((b) => (Array.isArray(b?.children) ? b.children.map((c) => c?.text ?? '').join('') : ''))
+    .join(' ')
+  return text.trim().split(/\s+/).filter(Boolean).length
+}
+
+function quoteDisplayMs(quote?: ExpertQuote | null): number {
+  const words = wordCount(quote?.quoteText)
+  const ms = QUOTE_SETTLE_MS + (words / QUOTE_READ_WPM) * 60000
+  return Math.round(Math.min(QUOTE_MAX_MS, Math.max(QUOTE_MIN_MS, ms)))
+}
 const ACCENTS = ['#ef1e40', '#0C75FF', '#F41FC9', '#2EFB5E']
 
 // Each trend section renders its own TellyJudgePopup, each with its own
@@ -233,14 +258,21 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
   // the quote because it has to be noticed before it can be acted on,
   // whereas the quote is already being read by the time its timer starts.
   // Picking a judge, or going back to pick again, restarts the clock.
+  // One value drives both the dismiss timer and the draining progress bar —
+  // if they disagree the bar empties before or after the card actually
+  // closes.
+  const displayMs =
+    phase === 'choosing'
+      ? CHOOSER_DISPLAY_MS
+      : quoteDisplayMs(selectedIndex !== null ? quotes[selectedIndex] : null)
+
   useEffect(() => {
     if (phase !== 'choosing' && phase !== 'revealed') return
-    const ms = phase === 'choosing' ? CHOOSER_DISPLAY_MS : QUOTE_DISPLAY_MS
-    dismissTimer.current = setTimeout(() => setPhase('dismissed'), ms)
+    dismissTimer.current = setTimeout(() => setPhase('dismissed'), displayMs)
     return () => {
       if (dismissTimer.current) clearTimeout(dismissTimer.current)
     }
-  }, [phase, selectedIndex])
+  }, [phase, selectedIndex, displayMs])
 
   function choose(i: number) {
     setSelectedIndex(i)
@@ -405,7 +437,7 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
             style={{ background: '#2EFB5E' }}
             initial={{ scaleX: 1 }}
             animate={{ scaleX: 0 }}
-            transition={{ duration: (phase === 'choosing' ? CHOOSER_DISPLAY_MS : QUOTE_DISPLAY_MS) / 1000, ease: 'linear' }}
+            transition={{ duration: displayMs / 1000, ease: 'linear' }}
           />
         </div>
       </motion.aside>
