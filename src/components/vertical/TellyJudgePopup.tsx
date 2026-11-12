@@ -44,11 +44,11 @@ const quoteComponents: PortableTextComponents = {
 // jump's real destination. Shown at most once per section for the rest
 // of the session, independently per section — once a viewer has seen a
 // section's ad, scrolling back through that same section again never
-// re-triggers it. It docks to the right edge rather than taking over the
-// screen, and deliberately does NOT lock page scroll — being trapped
-// behind a full-screen interstitial was the specific complaint from the
-// production team's creative review. Both phases close themselves on a
-// timer, so it never waits on the reader.
+// re-triggers it. It sits as a small card in the bottom-right corner
+// rather than taking over the screen, and deliberately does NOT lock
+// page scroll — being trapped behind a full-screen interstitial was the
+// specific complaint from the production team's creative review. Both
+// phases close themselves on a timer, so it never waits on the reader.
 export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; anchorId: string }) {
   const [phase, setPhase] = useState<'hidden' | 'choosing' | 'revealed' | 'dismissed'>('hidden')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -197,22 +197,23 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
 
   return (
     <AnimatePresence>
-      {/* Docked to the right edge rather than covering the page. No
-          backdrop and no scroll lock — the reader can keep going and the
-          panel times itself out, which is the whole point of the change. */}
+      {/* A corner card, not a full-height dock — it sits low on the right
+          like a notification so it covers as little of the section behind
+          it as possible. No backdrop and no scroll lock: the reader keeps
+          going and the card times itself out. */}
       <motion.aside
         key="judge-panel"
         aria-label="A word from a Telly judge"
         className="fixed z-[200] overflow-hidden rounded-2xl
                    left-4 right-4 bottom-4
-                   md:left-auto md:right-6 md:top-6 md:bottom-6 md:w-[340px]"
+                   md:left-auto md:right-6 md:bottom-6 md:w-[340px]"
         style={{ background: '#1A1530', border: '1px solid rgba(216,245,255,0.14)', boxShadow: '0 24px 60px rgba(0,0,0,0.5)' }}
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 40 }}
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 24 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="p-5 md:p-6 md:h-full md:overflow-y-auto">
+        <div className="p-5">
           <button
             onClick={dismissNow}
             aria-label="Close"
@@ -242,7 +243,7 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
               >
                 Hear from a Telly judge
               </p>
-              <div className="flex flex-col gap-1">
+              <div className="flex gap-2">
                 {quotes.map((q, i) => {
                   const headshotUrl = q.headshot ? urlFor(q.headshot).width(120).height(120).fit('crop').url() : q.headshotUrl
                   return (
@@ -250,26 +251,27 @@ export function TellyJudgePopup({ quotes, anchorId }: { quotes: ExpertQuote[]; a
                       key={i}
                       type="button"
                       onClick={() => choose(i)}
-                      className="group flex items-center gap-3 w-full text-left rounded-[10px] p-2 cursor-pointer transition-colors"
+                      className="group flex flex-1 min-w-0 flex-col items-start gap-2 text-left rounded-[10px] p-2 cursor-pointer transition-colors"
                       style={{ background: 'transparent', border: '1px solid transparent' }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = '#221B3C'; e.currentTarget.style.borderColor = 'rgba(216,245,255,0.14)' }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent' }}
+                      title={q.name}
                     >
                       {headshotUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element -- CMS-driven headshot
-                        <img src={headshotUrl} alt="" className="w-[42px] h-[42px] rounded-[9px] object-cover flex-shrink-0" />
+                        <img src={headshotUrl} alt="" className="w-full aspect-square rounded-[8px] object-cover" />
                       ) : (
-                        <div className="w-[42px] h-[42px] rounded-[9px] flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                        <div className="w-full aspect-square rounded-[8px]" style={{ background: 'rgba(255,255,255,0.08)' }} />
                       )}
-                      <span className="min-w-0">
+                      <span className="min-w-0 w-full">
                         <span
-                          className="block text-[13.5px] truncate"
+                          className="block text-[11.5px] truncate"
                           style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff', fontWeight: 700, lineHeight: 1.25 }}
                         >
-                          {q.name}
+                            {q.name.split(' ')[0]}
                         </span>
                         {q.title && (
-                          <span className="block text-[11.5px] truncate" style={{ color: 'rgba(216,245,255,0.45)' }}>
+                          <span className="block text-[10px] truncate" style={{ color: 'rgba(216,245,255,0.45)' }}>
                             {q.title}
                           </span>
                         )}
