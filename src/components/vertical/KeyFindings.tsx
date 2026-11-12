@@ -739,16 +739,15 @@ export function KeyFindings({ findings, property, slug, eyebrow, heading, subtit
             <div ref={tocScrollRef} className="flex items-stretch gap-4 overflow-x-auto overflow-y-hidden pb-2 telly-scroll">
             {sections.map((section, i) => {
               const badgeTextColor = iconColorFor(section.hoverBg)
-              // Trend-level cards (01-04) keep the plain accent gradient —
-              // their CMS cover images are flattened graphics with the old
-              // blocky title treatment baked in as pixels, which would
-              // clash with this card style. Stream-level cards (05+,
-              // Channel Surfing's own lists) use a real winner thumbnail
-              // instead, same as any other video-row card.
-              const bgImageUrl =
-                section.image && Number(section.number) >= 5
-                  ? urlFor(section.image).width(640).height(960).fit('crop').url()
-                  : null
+              // Every card uses its CMS image when one is set, falling back
+              // to the accent gradient otherwise. The trend-level cards
+              // (01-04) used to be forced onto the gradient because their
+              // images were flattened graphics with the old blocky title
+              // baked in as pixels; they now point at real winner
+              // thumbnails like the stream-level cards do.
+              const bgImageUrl = section.image
+                ? urlFor(section.image).width(640).height(960).fit('crop').url()
+                : null
               return (
                 <motion.div
                   key={section.number}
