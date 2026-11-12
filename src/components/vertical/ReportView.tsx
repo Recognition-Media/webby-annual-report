@@ -29,6 +29,7 @@ import { StreamProgressRail } from './StreamProgressRail'
 import { SectionStatDonut } from './SectionStatDonut'
 import { ChannelGuideGroup, StatHighlightsRow } from './ChannelGuideGroup'
 import { TellyJudgePopup } from './TellyJudgePopup'
+import { BackToTopButton } from './BackToTopButton'
 import {
   TwoColumnSlab,
   SectionHeader,
@@ -711,6 +712,12 @@ export function ReportView({ report }: { report: Report }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mobile wayfinding — below `lg` the StreamProgressRail is hidden, so
+          this is the only way back to the Table of Contents without a long
+          manual scroll. Telly only; the other vertical reports keep their
+          own navigation at every breakpoint. */}
+      {isTelly && <BackToTopButton />}
 
       {/* Custom cursor arrow — disabled for Anthem redesign */}
       {/* <CursorArrow active={entered} trendCount={report.trendSections?.length ?? 0} /> */}
