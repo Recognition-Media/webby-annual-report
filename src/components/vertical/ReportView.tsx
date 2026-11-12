@@ -17,6 +17,7 @@ import { AnthemFooter } from './AnthemFooter'
 import { LovieFooter } from './LovieFooter'
 import { TellyFooter } from './TellyFooter'
 import { TellyAbout } from './TellyAbout'
+import { FloatingIcons } from './FloatingIcons'
 import { TellyFacts } from './TellyFacts'
 import { TellyTitlesTicker } from './TellyTitlesTicker'
 import { WinnerList } from './WinnerList'
@@ -904,7 +905,11 @@ export function ReportView({ report }: { report: Report }) {
                     // this trend also uses the shared-video-guide sidebar.
                     const statInline = trend.statPlacement === 'inline' && !!dataModule
                     return (
-                      <div key={i} id={`trend-${num}`}>
+                      <div key={i} id={`trend-${num}`} className="relative">
+                        {/* Decorative drifting icons in this section's own
+                            side gutters — purely atmospheric, never over
+                            the copy, and inert to pointer events. */}
+                        <FloatingIcons sectionIndex={i} />
                         {trend.showJudgePopup && trend.judgePopupQuotes && trend.judgePopupQuotes.length > 0 && (
                           <TellyJudgePopup quotes={trend.judgePopupQuotes} anchorId={`trend-${num}`} />
                         )}

@@ -23,7 +23,9 @@ const ctaComponents: PortableTextComponents = {
         href={value?.href}
         target="_blank"
         rel="noopener noreferrer"
-        style={{ color: '#ffffff', textDecoration: 'underline', textUnderlineOffset: 2, opacity: 1 }}
+        // Pink so the one actionable word in the intro actually reads as
+        // a link against the white copy around it.
+        style={{ color: '#F41FC9', fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: 2, opacity: 1 }}
       >
         {children}
       </a>
