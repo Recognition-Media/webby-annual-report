@@ -76,7 +76,19 @@ export function StreamProgressRail({ sections }: { sections: RailSection[] }) {
 
   return (
     <div className="hidden lg:block flex-shrink-0" style={{ width: 272 }}>
-      <div className="sticky top-0 h-screen flex items-center" style={{ background: '#110E1F' }}>
+      {/* Starts below the full-width "On Now" bar rather than at the very
+          top of the viewport, so the bar can span the whole width and clear
+          the "Watch Next" heading instead of sitting beside it. The bar
+          publishes its measured height as --telly-onnow-h; the fallback of
+          0px keeps this correct if the bar isn't mounted. */}
+      <div
+        className="sticky flex items-center"
+        style={{
+          background: '#110E1F',
+          top: 'var(--telly-onnow-h, 0px)',
+          height: 'calc(100vh - var(--telly-onnow-h, 0px))',
+        }}
+      >
         <div className="relative pl-9 pr-6 max-h-[80vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
           {/* Eyebrow for the whole rail — plain "watch next" framing rather
               than a literal table of contents, since the labels below are

@@ -24,8 +24,9 @@ import { WinnerList } from './WinnerList'
 import { PosterRowList } from './PosterRowList'
 import { RankedThumbnailRow } from './RankedThumbnailRow'
 import { PartnerDirectoryList } from './PartnerDirectoryList'
-import { SectionStickyBar, StickySectionGroup } from './SectionStickyBar'
+import { StickySectionGroup } from './SectionStickyBar'
 import { StreamProgressRail } from './StreamProgressRail'
+import { TellyOnNowBar } from './TellyOnNowBar'
 import { SectionStatDonut } from './SectionStatDonut'
 import { ChannelGuideGroup, StatHighlightsRow } from './ChannelGuideGroup'
 import { TellyJudgePopup } from './TellyJudgePopup'
@@ -434,6 +435,13 @@ export function ReportView({ report }: { report: Report }) {
               .map(({ list, j }) => ({ anchorId: `${anchorId}-list-${j}`, title: list.railLabel || list.heading })),
           }
         })
+    : []
+
+  // Full section titles for the "On Now" bar. The rail deliberately uses
+  // shorter `railLabel` call-outs, but the bar reads as a channel name and
+  // wants the real heading — same split the per-section bars used.
+  const tellyTrendTitles = isTelly
+    ? (report.trendSections ?? []).filter((t) => t.enabled !== false).map((t) => t.trendTitle)
     : []
 
   // Apply vertical-template theme (background, fonts, palette) only while this
@@ -905,7 +913,22 @@ export function ReportView({ report }: { report: Report }) {
               // the fixed-width first column; trend content is the second,
               // flexible column, so the two never overlap and the rail
               // never needs to know anything about hero/ToC scroll state.
-              <div className="lg:flex">
+              <div>
+                {/* One "On Now" bar for the whole trend run, above BOTH
+                    columns so it spans the full width and clears the rail's
+                    "Watch Next" heading rather than starting beside it. It
+                    replaces the per-section bars that used to render inside
+                    the content column, and flips as each section's top edge
+                    passes under it. */}
+                <TellyOnNowBar
+                  sections={tellyRailSections.map((s, i) => ({
+                    anchorId: s.anchorId,
+                    title: tellyTrendTitles[i] ?? s.title,
+                    nextTitle: tellyRailSections[i + 1]?.title,
+                    accentColor: s.accentColor,
+                  }))}
+                />
+                <div className="lg:flex">
                 <StreamProgressRail sections={tellyRailSections} />
                 <div className="lg:flex-1 lg:min-w-0">
                 {/* Telly — fully CMS-driven. One block per enabled
@@ -951,15 +974,6 @@ export function ReportView({ report }: { report: Report }) {
                         {trend.showJudgePopup && trend.judgePopupQuotes && trend.judgePopupQuotes.length > 0 && (
                           <TellyJudgePopup quotes={trend.judgePopupQuotes} anchorId={`trend-${num}`} />
                         )}
-                        {/* Sticky "You're in: X" status bar, pinned above
-                            this section from the moment it begins. Lives
-                            in the trend-content flex column (to the right
-                            of StreamProgressRail), so it never overlaps
-                            the sidebar — no left-offset math needed, it's
-                            simply scoped to its own column's width. No
-                            jump-menu here anymore now that the sidebar
-                            covers all navigation. */}
-                        <SectionStickyBar title={trend.trendTitle} accentColor={accent} nextTitle={tellyRailSections[i + 1]?.title} />
                         {cover && (
                           <ReportSectionCover
                             sectionNumber={cover.sectionNumber || num}
@@ -1123,6 +1137,7 @@ export function ReportView({ report }: { report: Report }) {
                     )
                   })}
                 </div>
+              </div>
               </div>
             ) : report.property === 'lovie' ? (
               <>

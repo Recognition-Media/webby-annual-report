@@ -235,9 +235,17 @@ html.snap-active section[data-snap] {
 
   /* Prevent horizontal scroll — content overflowing the viewport on mobile
      is almost always a layout bug we want to clip rather than enable
-     side-scrolling for. */
+     side-scrolling for.
+
+     `clip`, NOT `hidden`: overflow-x: hidden forces the other axis to
+     `auto`, which turns html/body into a scroll container and silently
+     breaks `position: sticky` for everything inside it (the "On Now" bar
+     and the section bars before it simply never stuck on mobile).
+     `overflow-x: clip` is the one value that may pair with
+     `overflow-y: visible`, so it clips exactly the same without creating
+     that scroll box. */
   html, body {
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
   }
 }

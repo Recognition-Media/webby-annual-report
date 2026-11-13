@@ -139,11 +139,11 @@ function TellyCredits({ report }: { report: Report | undefined }) {
           Credits
         </motion.h2>
 
-        <LoviePeopleGroup label="Created By" people={createdBy} delay={0.1} />
+        <LoviePeopleGroup label="Created By" people={createdBy} delay={0.1} showRule={false} />
         {contributors.length > 0 && (
           <>
             <div style={{ height: 64 }} />
-            <LoviePeopleGroup label="Contributors" people={contributors} delay={0.2} />
+            <LoviePeopleGroup label="Contributors" people={contributors} delay={0.2} showRule={false} />
           </>
         )}
       </div>
@@ -322,7 +322,7 @@ function DottedRule() {
   )
 }
 
-function LoviePeopleGroup({ label, people, delay }: { label: string; people: Person[]; delay: number }) {
+function LoviePeopleGroup({ label, people, delay, showRule = true }: { label: string; people: Person[]; delay: number; showRule?: boolean }) {
   return (
     <motion.div
       className="grid grid-cols-1 md:grid-cols-[1fr_2fr]"
@@ -334,7 +334,7 @@ function LoviePeopleGroup({ label, people, delay }: { label: string; people: Per
     >
       {/* Left rail — dotted rule + display-sized section label */}
       <div>
-        <DottedRule />
+        {showRule && <DottedRule />}
         <h3 style={{ fontSize: 'clamp(28px, 3.5vw, 44px)', fontWeight: 700, color: '#000000', lineHeight: 1.05, letterSpacing: '-0.01em', margin: 0 }}>
           {label}
         </h3>
