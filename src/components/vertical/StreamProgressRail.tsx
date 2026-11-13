@@ -74,8 +74,12 @@ export function StreamProgressRail({ sections }: { sections: RailSection[] }) {
 
   const activeSection = sections.find((s) => s.anchorId === activeSectionId)
 
+  // Shown from `md` up, not `lg` — at `lg` the rail simply vanished as the
+  // window narrowed, taking all the wayfinding with it. Narrower between md
+  // and lg so the content column keeps a usable width; full 272px from lg
+  // up. Below md the BackToTopButton stands in.
   return (
-    <div className="hidden lg:block flex-shrink-0" style={{ width: 272 }}>
+    <div className="hidden md:block flex-shrink-0 w-[208px] lg:w-[272px]">
       {/* Starts below the full-width "On Now" bar rather than at the very
           top of the viewport, so the bar can span the whole width and clear
           the "Watch Next" heading instead of sitting beside it. The bar
@@ -89,7 +93,7 @@ export function StreamProgressRail({ sections }: { sections: RailSection[] }) {
           height: 'calc(100vh - var(--telly-onnow-h, 0px))',
         }}
       >
-        <div className="relative pl-9 pr-6 max-h-[80vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+        <div className="relative pl-5 pr-4 lg:pl-9 lg:pr-6 max-h-[80vh] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
           {/* Eyebrow for the whole rail — plain "watch next" framing rather
               than a literal table of contents, since the labels below are
               deliberately short, standalone call-outs rather than the

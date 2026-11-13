@@ -14,7 +14,7 @@ const TARGET_ID = 'key-findings'
 // appears on every small upward nudge near the top is just noise.
 const PAST_TARGET_PX = 240
 
-// Below `lg` the StreamProgressRail (the left-hand chapter list) is hidden,
+// Below `md` the StreamProgressRail (the left-hand chapter list) is hidden,
 // so there's no wayfinding at all on phones and tablets — this is the
 // stand-in. It only appears once the reader starts scrolling back UP, on the
 // assumption that going up is the "I want to get out of here" gesture;
@@ -76,12 +76,13 @@ export function BackToTopButton() {
           type="button"
           onClick={handleClick}
           aria-label="Back to the top — Recommended For You"
-          // lg:hidden — shown only where the progress rail isn't.
+          // md:hidden — shown only where the progress rail isn't (the rail now
+          // appears from md up, so this hands over at the same breakpoint).
           // z-[150] sits under the judge break (z-[200]) so the two can
           // never fight for the same corner; in practice they rarely
           // coincide, since breaks only fire while scrolling down and this
           // only appears while scrolling up.
-          className="lg:hidden fixed z-[150] bottom-5 right-5 flex items-center gap-2
+          className="md:hidden fixed z-[150] bottom-5 right-5 flex items-center gap-2
                      rounded-full pl-4 pr-5 py-3 cursor-pointer"
           style={{
             // Telly red rather than a dark chip: on this report's near-black

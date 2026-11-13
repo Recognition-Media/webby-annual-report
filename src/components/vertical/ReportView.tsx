@@ -928,9 +928,9 @@ export function ReportView({ report }: { report: Report }) {
                     accentColor: s.accentColor,
                   }))}
                 />
-                <div className="lg:flex">
+                <div className="md:flex">
                 <StreamProgressRail sections={tellyRailSections} />
-                <div className="lg:flex-1 lg:min-w-0">
+                <div className="md:flex-1 md:min-w-0">
                 {/* Telly — fully CMS-driven. One block per enabled
                     trendSection: optional cover from sectionCovers[i],
                     then the trend copy + data bars + quotes. Each block
