@@ -90,13 +90,18 @@ const GATE_THEMES: Record<string, GateTheme> = {
   },
   telly: {
     overlay: 'rgba(0, 0, 0, 0.9)',
-    frame: '#ef1e40',
+    // Pink rather than the Telly red: the gate reads as its own moment
+    // rather than a continuation of the red hero behind it.
+    frame: '#F41FC9',
     card: '#110E1F',
     logo: '/telly/judges/telly-logo-horizontal-white-cropped.png',
     logoAlt: 'The Telly Awards',
     font: "'Basetica', -apple-system, sans-serif",
     text: '#ffffff',
-    accent: '#ef1e40',
+    // Drives the submit button and the required-field asterisks — kept in
+    // step with the frame so the whole gate reads pink, not pink-framed
+    // with a red button inside it.
+    accent: '#F41FC9',
     buttonText: '#ffffff',
     privacyUrl: 'https://www.tellyawards.com/privacy-policy/',
     privacyName: 'Telly Awards',

@@ -140,7 +140,7 @@ export function TellyHeroArticle({
             >
               <button
                 onClick={() => onEnter?.()}
-                className="inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-10 rounded-full cursor-pointer transition-colors bg-[#ef1e40] hover:bg-[#c8152f] text-white"
+                className="inline-flex items-center gap-3 uppercase text-[13px] md:text-[14px] tracking-[2px] py-5 px-10 rounded-full cursor-pointer transition-colors bg-[#F41FC9] hover:bg-[#cb1aa7] text-white"
               >
                 <span>{report.heroButtonText || 'Explore The Report'}</span>
                 <span>↓</span>
