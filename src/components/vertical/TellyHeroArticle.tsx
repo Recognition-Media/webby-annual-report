@@ -59,29 +59,31 @@ export function TellyHeroArticle({
         style={{
           inset: '-10% -5%',
           background:
-            'radial-gradient(ellipse 900px 500px at 15% -10%, rgba(239,30,64,0.16), transparent 60%), radial-gradient(ellipse 700px 400px at 95% 0%, rgba(12,117,255,0.14), transparent 60%)',
+            'radial-gradient(ellipse 900px 500px at 15% -10%, rgba(244,31,201,0.16), transparent 60%), radial-gradient(ellipse 700px 400px at 95% 0%, rgba(12,117,255,0.14), transparent 60%)',
         }}
       />
 
       {/* On-air ticker */}
+      {/* Deliberately identical to TellyOnNowBar below — same padding,
+          radius, dot, type sizes and truncation — so the hero's bar and the
+          section bars read as one component in two colours rather than two
+          sizes. Pink here; each section below takes its own accent. */}
       <div
-        className="relative mx-6 md:mx-10 mb-6 flex items-center gap-2.5 flex-wrap px-3.5 py-2 rounded-lg"
-        // Transparent fill, solid 2px stroke in the hero's own red — same
-        // treatment as every per-section On Now bar below.
-        style={{ background: 'transparent', border: '2px solid #ef1e40' }}
+        className="relative mx-6 md:mx-10 mb-6 flex items-center gap-3 px-5 md:px-6 py-3.5 md:py-4 rounded-xl"
+        style={{ background: 'transparent', border: '2px solid #F41FC9' }}
       >
-        <span className="w-[7px] h-[7px] rounded-full flex-shrink-0" style={{ background: '#ef1e40' }} />
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#F41FC9' }} />
         <span
-          className="text-[10.5px] font-bold uppercase"
-          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", letterSpacing: 1.5, color: '#ef1e40' }}
+          className="text-[12px] md:text-[13px] font-bold uppercase flex-shrink-0"
+          style={{ fontFamily: "'Basetica', -apple-system, sans-serif", letterSpacing: 1.5, color: '#F41FC9' }}
         >
           On Now
         </span>
-        <span className="text-[12px] font-semibold" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff' }}>
+        <span className="text-[15px] md:text-[17px] font-semibold truncate" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: '#ffffff' }}>
           {onNowLabel}
         </span>
-        <span className="text-[12px]" style={{ color: 'rgba(255,255,255,0.35)' }}>•</span>
-        <span className="text-[12px]" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(255,255,255,0.6)' }}>
+        <span className="text-[14px] flex-shrink-0" style={{ color: 'rgba(255,255,255,0.35)' }}>•</span>
+        <span className="text-[14px] md:text-[15px] truncate" style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(255,255,255,0.6)' }}>
           Up Next: Recommended For You
         </span>
       </div>

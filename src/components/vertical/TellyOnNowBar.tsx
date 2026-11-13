@@ -82,9 +82,14 @@ export function TellyOnNowBar({ sections }: { sections: OnNowSection[] }) {
   return (
     <div
       ref={ref}
-      className="sticky top-0 z-30 px-5 md:px-[60px] pt-4 pb-3"
+      className="sticky top-0 z-30 pt-4 pb-3"
       style={{ background: '#110E1F' }}
     >
+      {/* Same container geometry as the hero's own On Now bar
+          (max-w-[1300px] centred, then mx-6/mx-10), so the two line up on
+          the left edge at every width instead of the section bars starting
+          further in than the hero's. */}
+      <div className="max-w-[1300px] mx-auto px-6 md:px-10">
       <span
         className="w-full flex items-center gap-3 px-5 md:px-6 py-3.5 md:py-4 rounded-xl"
         // Transparent fill with a solid stroke in the live section's own
@@ -146,6 +151,7 @@ export function TellyOnNowBar({ sections }: { sections: OnNowSection[] }) {
           </motion.span>
         </AnimatePresence>
       </span>
+      </div>
     </div>
   )
 }
