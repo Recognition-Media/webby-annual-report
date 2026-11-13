@@ -722,22 +722,48 @@ export function KeyFindings({ findings, property, slug, eyebrow, heading, subtit
               {eyebrow}
             </motion.p>
           )}
-          <motion.p
-            className="text-[16px] md:text-[19px] leading-[1.6] mb-8 md:mb-10"
-            style={{ color: '#ffffff', opacity: 0.75, fontFamily: "'Basetica', -apple-system, sans-serif" }}
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            {subtitle || theme.subtitle}
-            {cta && cta.length > 0 && (
+          {/* The intro runs as however many paragraphs the CMS copy is
+              written in — a blank line in the Subtitle field starts a new
+              one — with the closing CTA as its own final paragraph rather
+              than tacked onto the end of the last sentence. */}
+          {(() => {
+            const paras = (subtitle || theme.subtitle)
+              .split(/\n\s*\n/)
+              .map((t) => t.trim())
+              .filter(Boolean)
+            const hasCta = !!cta && cta.length > 0
+            return (
               <>
-                {' '}
-                <PortableText value={cta} components={ctaComponents} />
+                {paras.map((para, i) => (
+                  <motion.p
+                    key={i}
+                    className={`text-[16px] md:text-[19px] leading-[1.6] ${
+                      i === paras.length - 1 && !hasCta ? 'mb-8 md:mb-10' : 'mb-5 md:mb-6'
+                    }`}
+                    style={{ color: '#ffffff', opacity: 0.75, fontFamily: "'Basetica', -apple-system, sans-serif" }}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.1 + i * 0.05 }}
+                  >
+                    {para}
+                  </motion.p>
+                ))}
+                {hasCta && (
+                  <motion.p
+                    className="text-[16px] md:text-[19px] leading-[1.6] mb-8 md:mb-10"
+                    style={{ color: '#ffffff', opacity: 0.75, fontFamily: "'Basetica', -apple-system, sans-serif" }}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.1 + paras.length * 0.05 }}
+                  >
+                    <PortableText value={cta!} components={ctaComponents} />
+                  </motion.p>
+                )}
               </>
-            )}
-          </motion.p>
+            )
+          })()}
           <motion.h2
             className="mb-10 md:mb-14 text-[40px] md:text-[64px] leading-[1.1]"
             style={{ fontFamily: 'var(--font-display)', color: '#ffffff', fontWeight: 700 }}

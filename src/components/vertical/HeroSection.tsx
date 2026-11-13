@@ -572,7 +572,16 @@ export function HeroSection({ report, carouselImages, onSeeReport }: HeroSection
           the fixed logo bar. Keeping a constant top clearance regardless
           of breakpoint fixes that at every zoom level. */}
       {isTelly && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none pt-[140px]">
+        // In flow, not `absolute inset-0`. Absolute took the article out of
+        // the flow entirely, so the section's own min-h-screen had nothing
+        // to grow around and stayed pinned at exactly 100vh — while the
+        // television inside is sized by WIDTH. On a short or zoomed-out
+        // window the set was therefore taller than the hero and spilled
+        // past it, and the `z-10` painted it over the section below rather
+        // than behind it. min-h-screen here keeps the centred,
+        // full-viewport look when the content is short, and lets the hero
+        // grow instead of overflowing when it isn't.
+        <div className="relative z-10 min-h-screen flex items-center justify-center pointer-events-none pt-[140px]">
           <TellyHeroArticle
             report={report}
             titleLine1={report.heroHeadline?.split('\\n')[0] || 'The Telly Awards'}
