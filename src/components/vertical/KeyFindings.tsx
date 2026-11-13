@@ -7,6 +7,7 @@ import type { PortableTextComponents } from '@portabletext/react'
 import type { PortableTextBlock } from '@portabletext/types'
 import type { KeyFinding, SanityImage } from '@/sanity/types'
 import { urlFor } from '@/sanity/image'
+import { assetPath } from '@/lib/assetPath'
 import { CountryItaly, CountryPortugal, CountrySpain } from '../lovie/CountryStickers'
 import { SignalWaves } from './SignalWaves'
 import { jumpToSection } from '@/lib/sectionJump'
@@ -240,6 +241,43 @@ const TELLY_FALLBACK_SECTIONS: ResolvedSection[] = [
   { number: '02', title: 'Smaller Teams, Bigger Output', description: 'Lean crews and new tools are closing the gap between idea and finished work.', color: '#000000', hoverBg: '#c23799', anchor: 'trend-02' },
   { number: '03', title: 'Craft Still Wins', description: 'Audiences reward work that is made with care, no matter the runtime or platform.', color: '#000000', hoverBg: '#ef1e40', anchor: 'trend-03' },
 ]
+
+// The production team's numeral tiles are a solid coloured square with the
+// digit knocked out in the report's ground colour. Their colours are baked
+// in (red, blue, pink, green in that order), which doesn't match the
+// Recommended For You cards — those take their colour from each card's own
+// play button. So rather than ship recoloured copies (which would go stale
+// the moment a hoverColor changes in Sanity), the tiles are used as alpha
+// masks: a dark base, with the card's colour painted through the mask. Any
+// colour the CMS supplies works, and the digits keep the supplied artwork.
+const NUMERAL_TILES: Record<number, { w: number; h: number }> = {
+  1: { w: 74, h: 95 }, 2: { w: 93, h: 95 }, 3: { w: 97, h: 95 }, 4: { w: 100, h: 95 },
+  5: { w: 94, h: 95 }, 6: { w: 94, h: 95 }, 7: { w: 86, h: 95 },
+}
+const NUMERAL_TILE_HEIGHT = 46
+
+function NumeralTile({ n, color }: { n: number; color: string }) {
+  const tile = NUMERAL_TILES[n]
+  if (!tile) return null
+  const height = NUMERAL_TILE_HEIGHT
+  const width = Math.round((tile.w / tile.h) * height)
+  const url = assetPath(`/telly/creative/numerals/mask/${n}.png`)
+  const mask = {
+    WebkitMaskImage: `url(${url})`,
+    maskImage: `url(${url})`,
+    WebkitMaskSize: '100% 100%',
+    maskSize: '100% 100%',
+    WebkitMaskRepeat: 'no-repeat',
+    maskRepeat: 'no-repeat',
+  } as const
+  return (
+    <span className="absolute top-0 left-0 pointer-events-none" style={{ width, height }} aria-hidden>
+      {/* Dark base shows through where the digit is knocked out. */}
+      <span className="absolute inset-0" style={{ background: '#110E1F' }} />
+      <span className="absolute inset-0" style={{ background: color, ...mask }} />
+    </span>
+  )
+}
 
 export function KeyFindings({ findings, property, slug, eyebrow, heading, subtitle, cta }: KeyFindingsProps = {}) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
@@ -802,12 +840,10 @@ export function KeyFindings({ findings, property, slug, eyebrow, heading, subtit
                   >
                     <PlayIcon size={13} color={badgeTextColor} />
                   </span>
-                  <span
-                    className="absolute flex items-center justify-center rounded-full"
-                    style={{ right: 18, bottom: 18, width: 26, height: 26, background: '#ffffff', color: '#110E1F', fontFamily: "'Basetica', -apple-system, sans-serif", fontWeight: 700, fontSize: 11 }}
-                  >
-                    {section.number}
-                  </span>
+                  {/* Rank tile in the card's top-left, tinted to this card's
+                      own play-button colour — replaces the small white
+                      number that used to sit bottom-right. */}
+                  <NumeralTile n={i + 1} color={section.hoverBg} />
                 </motion.div>
               )
             })}
