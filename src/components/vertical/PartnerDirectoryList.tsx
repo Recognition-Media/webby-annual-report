@@ -43,6 +43,15 @@ function hexToRgba(hex: string, alpha: number) {
 // same visual weight as a stat module instead of a full-size section
 // heading.
 export function PartnerDirectoryList({ id, heading, intro, entries, accentColor = '#2EFB5E', infoTooltip }: PartnerDirectoryListProps) {
+  // Which tile is showing its blurb from a tap. Only used on touch, where
+  // there's no hover to reveal it.
+  const [touchedIndex, setTouchedIndex] = useState<number | null>(null)
+  // `any-hover: hover` is false on touch-only devices. Read once on mount so
+  // SSR and the first client render agree.
+  const [canHover, setCanHover] = useState(true)
+  useEffect(() => {
+    setCanHover(window.matchMedia('(any-hover: hover)').matches)
+  }, [])
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const [openIndex, setOpenIndex] = useState<number | null>(null)
@@ -132,12 +141,25 @@ export function PartnerDirectoryList({ id, heading, intro, entries, accentColor 
             <div ref={scrollRef} className="flex items-stretch gap-5 overflow-x-auto overflow-y-hidden pb-2 telly-scroll">
               {entries.map((entry, i) => {
                 const logoUrl = entry.logo ? urlFor(entry.logo).width(320).url() : null
+                const blurb = entry.hoverBlurb
+                const revealed = touchedIndex === i
                 return (
                   <motion.button
                     key={i}
                     type="button"
-                    onClick={() => setOpenIndex(i)}
-                    className="flex-shrink-0 w-[200px] md:w-[220px] flex items-center justify-center rounded-xl cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+                    onClick={() => {
+                      // No hover on touch: the first tap reveals the blurb,
+                      // the second opens the full card, so nothing becomes
+                      // unreachable on a phone. Pointer devices have already
+                      // seen the blurb on hover and open on the first click.
+                      if (blurb && !canHover && !revealed) {
+                        setTouchedIndex(i)
+                        return
+                      }
+                      setOpenIndex(i)
+                    }}
+                    aria-label={blurb ? `${entry.name} — ${blurb}` : entry.name}
+                    className="group relative flex-shrink-0 w-[200px] md:w-[220px] flex items-center justify-center rounded-xl cursor-pointer overflow-hidden transition-transform duration-200 hover:-translate-y-1"
                     style={{ height: 130, background: '#FBF9F4', padding: '20px 24px' }}
                     initial={{ opacity: 0, y: 15 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -146,7 +168,17 @@ export function PartnerDirectoryList({ id, heading, intro, entries, accentColor 
                   >
                     {logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={logoUrl} alt={`${entry.name} logo`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                      <img
+                        src={logoUrl}
+                        alt={`${entry.name} logo`}
+                        className="transition-opacity duration-200"
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          objectFit: 'contain',
+                          opacity: revealed ? 0.05 : undefined,
+                        }}
+                      />
                     ) : (
                       <span
                         className="text-[14px] font-bold text-center"
@@ -154,6 +186,31 @@ export function PartnerDirectoryList({ id, heading, intro, entries, accentColor 
                       >
                         {entry.name}
                       </span>
+                    )}
+                    {blurb && (
+                      <>
+                        {/* Fades the logo back so the copy reads cleanly over it. */}
+                        <span
+                          aria-hidden
+                          className="absolute inset-0 pointer-events-none transition-opacity duration-200 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+                          style={{ background: '#FBF9F4', opacity: revealed ? 1 : undefined }}
+                        />
+                        <span
+                          aria-hidden
+                          className="absolute inset-0 flex items-center justify-center text-center px-4 pointer-events-none transition-opacity duration-200 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+                          style={{
+                            background: '#2A2735',
+                            color: '#ffffff',
+                            fontFamily: "'Basetica', -apple-system, sans-serif",
+                            fontSize: 12.5,
+                            fontWeight: 600,
+                            lineHeight: 1.42,
+                            opacity: revealed ? 1 : undefined,
+                          }}
+                        >
+                          {blurb}
+                        </span>
+                      </>
                     )}
                   </motion.button>
                 )

@@ -47,6 +47,8 @@ export interface WinEntry {
   videoThumbnail?: SanityImage
   videoDescription?: string
   orgDescription?: string
+  /** One-line blurb shown over the logo on hover in the partner directory row. */
+  hoverBlurb?: string
   orgLinkText?: string
   logo?: SanityImage
 }

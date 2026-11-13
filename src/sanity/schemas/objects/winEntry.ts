@@ -40,6 +40,13 @@ export default defineType({
       description: 'Short blurb about the organization/creator itself (not the specific work), shown under the title in the channel-guide player (e.g. "Elastic People is a multi-disciplinary creative studio specializing in identity, brand development, film production and live experiences.").',
     },
     {
+      name: 'hoverBlurb',
+      title: 'Hover Blurb (partner logos)',
+      type: 'text',
+      rows: 2,
+      description: 'One short line shown over the logo on hover in the partner directory row (e.g. "Advocating for women and non-binary film directors."). Deliberately separate from Organization Description, which is longer and stays in the click-through card.',
+    },
+    {
       name: 'logo',
       title: 'Organization Logo',
       type: 'image',

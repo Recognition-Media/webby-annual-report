@@ -134,6 +134,7 @@ export const reportBySlugQuery = groq`
           videoThumbnail { asset->, crop, hotspot },
           videoDescription,
           orgDescription,
+          hoverBlurb,
           orgLinkText,
           logo { asset->, crop, hotspot },
         },
