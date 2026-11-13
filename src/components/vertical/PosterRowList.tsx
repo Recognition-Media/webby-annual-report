@@ -122,8 +122,10 @@ export function PosterRowList({ id, heading, intro, statValue, statCaption, entr
         </div>
         {intro && (
           <motion.p
-            className="text-[16px] md:text-[20px] leading-[1.6] mb-8"
-            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(216,245,255,0.65)' }}
+            // Matched to RankedThumbnailRow's intro (mb-10, 0.7) so a list
+            // heading reads identically whichever row component renders it.
+            className="text-[16px] md:text-[20px] leading-[1.6] mb-10"
+            style={{ fontFamily: "'Basetica', -apple-system, sans-serif", color: 'rgba(216,245,255,0.7)' }}
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
